@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Whetū Digital — Digital tools built for modern businesses in Aotearoa, New Zealand. Finance dashboards, cash flow tools, social media management and more.">
+<meta property="og:title" content="Whetū Digital — Built in Aotearoa">
+<meta property="og:description" content="Digital tools that save time, track money, and grow your business.">
+<meta property="og:type" content="website">
+<title>Whetū Digital — Built in Aotearoa</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --cyan:#10d8ff;--purple:#c040ff;--bg:#05050e;--panel:#0a0a1c;
+  --border:#14143a;--muted:#404080;--text:#d0d0f0;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk','Segoe UI',sans-serif;overflow-x:hidden;}
+
+/* ── BACKGROUND GRID ── */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle,rgba(255,255,255,.018) 1px,transparent 1px);
+  background-size:44px 44px;
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 clamp(20px,5vw,60px);height:64px;
+  background:rgba(5,5,14,.85);backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(20,20,58,.6);
+}
+.nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none;}
+.nav-name{font-size:.8rem;font-weight:700;letter-spacing:.12em;color:#fff;text-transform:uppercase;}
+.nav-links{display:flex;align-items:center;gap:28px;}
+.nav-links a{font-size:.72rem;letter-spacing:.06em;color:var(--muted);text-decoration:none;transition:color .2s;}
+.nav-links a:hover{color:var(--cyan);}
+.nav-cta{
+  padding:8px 20px;border-radius:8px;font-size:.72rem;font-weight:600;
+  background:linear-gradient(135deg,rgba(16,216,255,.15),rgba(192,64,255,.1));
+  border:1px solid rgba(16,216,255,.25);color:var(--cyan);
+  text-decoration:none;letter-spacing:.06em;transition:all .2s;
+}
+.nav-cta:hover{background:linear-gradient(135deg,rgba(16,216,255,.25),rgba(192,64,255,.2));border-color:var(--cyan);}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:120px clamp(20px,5vw,60px) 80px;
+  position:relative;text-align:center;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 60% 50% at 30% 30%,rgba(16,216,255,.06) 0,transparent 65%),
+    radial-gradient(ellipse 60% 50% at 70% 70%,rgba(192,64,255,.06) 0,transparent 65%);
+}
+
+/* ── 3D LOGO STAGE ── */
+.logo-stage{
+  position:relative;display:flex;align-items:center;justify-content:center;
+  width:220px;height:220px;margin:0 auto 36px;
+}
+.pulse-ring{
+  position:absolute;border-radius:50%;
+  border:1px solid rgba(16,216,255,.12);
+  animation:ringPulse 4s ease-in-out infinite;
+}
+.pulse-ring:nth-child(1){width:160px;height:160px;}
+.pulse-ring:nth-child(2){width:195px;height:195px;animation-delay:1.4s;border-color:rgba(192,64,255,.08);}
+.pulse-ring:nth-child(3){width:220px;height:220px;animation-delay:2.8s;border-color:rgba(16,216,255,.05);}
+@keyframes ringPulse{0%,100%{transform:scale(1);opacity:.18;}50%{transform:scale(1.06);opacity:.06;}}
+
+.orbit-dot{
+  position:absolute;width:6px;height:6px;border-radius:50%;
+  top:50%;left:50%;margin:-3px;
+}
+.orbit-dot:nth-child(4){background:#10d8ff;box-shadow:0 0 8px #10d8ff;animation:orb1 9s linear infinite;}
+.orbit-dot:nth-child(5){background:#c040ff;box-shadow:0 0 8px #c040ff;animation:orb2 13s linear infinite;}
+.orbit-dot:nth-child(6){background:#00ff99;box-shadow:0 0 6px #00ff99;animation:orb3 7s linear infinite;}
+@keyframes orb1{0%,100%{transform:rotate(0deg) translateX(100px) scale(1);opacity:.9;}50%{transform:rotate(180deg) translateX(100px) scale(.6);opacity:.4;}}
+@keyframes orb2{0%,100%{transform:rotate(60deg) translateX(84px) scale(.8);opacity:.7;}50%{transform:rotate(240deg) translateX(84px) scale(1.1);opacity:.3;}}
+@keyframes orb3{0%,100%{transform:rotate(130deg) translateX(108px) scale(.7);opacity:.6;}50%{transform:rotate(310deg) translateX(108px) scale(1);opacity:.9;}}
+
+.logo-mark{
+  position:relative;z-index:2;cursor:pointer;
+  animation:swing3D 7s ease-in-out infinite, glowPulse 3.5s ease-in-out infinite;
+  filter:drop-shadow(0 0 12px rgba(16,216,255,.5)) drop-shadow(0 0 30px rgba(192,64,255,.25));
+}
+.logo-mark::after{
+  content:'';position:absolute;left:0;right:0;height:2px;top:0;
+  background:linear-gradient(90deg,transparent,rgba(16,216,255,.75),transparent);
+  animation:scanSwipe 5s ease-in-out infinite;pointer-events:none;
+}
+@keyframes swing3D{
+  0%  {transform:perspective(500px) rotateY(-16deg) rotateX(9deg);}
+  25% {transform:perspective(500px) rotateY(4deg)   rotateX(-5deg) translateY(-6px);}
+  50% {transform:perspective(500px) rotateY(16deg)  rotateX(9deg);}
+  75% {transform:perspective(500px) rotateY(-4deg)  rotateX(-4deg) translateY(6px);}
+  100%{transform:perspective(500px) rotateY(-16deg) rotateX(9deg);}
+}
+@keyframes glowPulse{
+  0%,100%{filter:drop-shadow(0 0 10px rgba(16,216,255,.5)) drop-shadow(0 0 28px rgba(192,64,255,.22));}
+  50%{filter:drop-shadow(0 0 22px rgba(16,216,255,.9)) drop-shadow(0 0 55px rgba(192,64,255,.55));}
+}
+@keyframes scanSwipe{0%{top:-10%;opacity:0;}10%{opacity:.9;}90%{opacity:.6;}100%{top:110%;opacity:0;}}
+@keyframes orbitRing{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.orbit-ring-g{transform-box:fill-box;transform-origin:50% 50%;animation:orbitRing 20s linear infinite;}
+@keyframes coreBreathe{0%,100%{opacity:.75;}50%{opacity:1;}}
+.core-glow{animation:coreBreathe 2.5s ease-in-out infinite;}
+
+/* ── HERO TEXT ── */
+.hero-eyebrow{
+  font-size:.62rem;letter-spacing:.35em;color:var(--cyan);text-transform:uppercase;
+  margin-bottom:20px;opacity:.8;
+  font-family:'JetBrains Mono','Courier New',monospace;
+  animation:fadeUp .8s ease both;
+}
+.hero-title{
+  font-size:clamp(2.4rem,6vw,4.8rem);font-weight:700;
+  letter-spacing:.06em;color:#fff;line-height:1.05;
+  margin-bottom:24px;
+  animation:fadeUp .8s ease .1s both;
+}
+.hero-title .grad{
+  background:linear-gradient(120deg,#10d8ff 0%,#8040ff 45%,#c040ff 100%);
+  background-size:200%;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:shimmer 5s ease-in-out infinite;
+}
+@keyframes shimmer{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}
+.hero-sub{
+  font-size:clamp(.9rem,2vw,1.15rem);color:#5858a0;
+  max-width:520px;margin:0 auto 40px;line-height:1.75;
+  animation:fadeUp .8s ease .2s both;
+}
+.hero-sub strong{color:#8888c0;}
+.hero-actions{
+  display:flex;gap:14px;justify-content:center;flex-wrap:wrap;
+  animation:fadeUp .8s ease .3s both;
+}
+.btn-primary{
+  padding:13px 32px;border-radius:10px;font-size:.82rem;font-weight:700;
+  background:linear-gradient(135deg,rgba(16,216,255,.18),rgba(192,64,255,.12));
+  border:1px solid rgba(16,216,255,.35);color:#fff;
+  text-decoration:none;letter-spacing:.06em;
+  transition:all .25s;display:inline-flex;align-items:center;gap:8px;
+}
+.btn-primary:hover{
+  background:linear-gradient(135deg,rgba(16,216,255,.3),rgba(192,64,255,.22));
+  border-color:var(--cyan);box-shadow:0 0 30px rgba(16,216,255,.15);
+  transform:translateY(-2px);
+}
+.btn-ghost{
+  padding:13px 28px;border-radius:10px;font-size:.82rem;font-weight:600;
+  border:1px solid var(--border);color:var(--muted);text-decoration:none;
+  letter-spacing:.06em;transition:all .25s;
+}
+.btn-ghost:hover{border-color:#2a2a60;color:#9090c0;transform:translateY(-2px);}
+
+/* ── STATUS CHIP ── */
+.status-chip{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'JetBrains Mono','Courier New',monospace;
+  font-size:.6rem;letter-spacing:.18em;color:#00ff99;
+  background:rgba(0,255,153,.07);border:1px solid rgba(0,255,153,.2);
+  border-radius:20px;padding:6px 16px;margin-bottom:28px;
+  animation:fadeUp .8s ease .05s both;
+}
+.status-dot{width:6px;height:6px;border-radius:50%;background:#00ff99;
+  animation:statusPulse 2s ease-in-out infinite;}
+@keyframes statusPulse{0%,100%{opacity:1;box-shadow:0 0 4px #00ff99;}50%{opacity:.5;box-shadow:0 0 10px #00ff99;}}
+
+/* ── SCROLL INDICATOR ── */
+.scroll-hint{
+  position:absolute;bottom:36px;left:50%;transform:translateX(-50%);
+  font-size:.58rem;letter-spacing:.25em;color:var(--muted);text-transform:uppercase;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  animation:fadeUp 1s ease .8s both;
+}
+.scroll-arrow{width:1px;height:28px;background:linear-gradient(var(--cyan),transparent);animation:scrollBob .3s ease-in-out infinite alternate;}
+@keyframes scrollBob{from{transform:scaleY(1);}to{transform:scaleY(0.6);}}
+
+/* ── SECTION COMMON ── */
+section{position:relative;z-index:1;}
+.section-inner{max-width:1100px;margin:0 auto;padding:100px clamp(20px,5vw,60px);}
+.section-label{
+  font-size:.58rem;letter-spacing:.3em;color:var(--cyan);
+  text-transform:uppercase;margin-bottom:16px;
+  font-family:'JetBrains Mono','Courier New',monospace;
+}
+.section-title{font-size:clamp(1.6rem,3.5vw,2.6rem);font-weight:700;color:#fff;margin-bottom:18px;letter-spacing:.04em;}
+.section-body{font-size:.9rem;color:#5050a0;line-height:1.8;max-width:560px;}
+
+/* ── PRODUCTS ── */
+.products-section{background:rgba(10,10,28,.5);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.products-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:52px;}
+.product-card{
+  background:var(--panel);border:1px solid var(--border);border-radius:16px;
+  padding:28px 24px;position:relative;overflow:hidden;
+  transition:border-color .25s,transform .25s;
+}
+.product-card::before{
+  content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(16,216,255,.06) 0,transparent 70%);
+}
+.product-card:hover{border-color:rgba(16,216,255,.25);transform:translateY(-4px);}
+.product-card:hover::before{opacity:1;}
+.product-card.live{border-color:rgba(0,255,153,.2);}
+.product-card.live::before{background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(0,255,153,.05) 0,transparent 70%);opacity:1;}
+.pc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
+.pc-icon{font-size:1.6rem;}
+.pc-badge{
+  font-size:.52rem;font-weight:700;letter-spacing:.14em;
+  padding:3px 9px;border-radius:12px;text-transform:uppercase;
+}
+.badge-live{background:rgba(0,255,153,.12);color:#00ff99;border:1px solid rgba(0,255,153,.25);}
+.badge-next{background:rgba(16,216,255,.1);color:var(--cyan);border:1px solid rgba(16,216,255,.2);}
+.badge-soon{background:rgba(192,64,255,.1);color:var(--purple);border:1px solid rgba(192,64,255,.2);}
+.badge-planned{background:rgba(64,64,128,.12);color:var(--muted);border:1px solid rgba(64,64,128,.2);}
+.pc-name{font-size:1rem;font-weight:700;letter-spacing:.08em;color:#fff;margin-bottom:8px;}
+.pc-desc{font-size:.78rem;color:#4848a0;line-height:1.6;}
+.pc-tag{
+  display:inline-block;margin-top:14px;
+  font-size:.58rem;letter-spacing:.1em;color:var(--muted);
+  font-family:'JetBrains Mono','Courier New',monospace;
+}
+
+/* ── WHY US ── */
+.why-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:52px;}
+.why-card{
+  background:var(--panel);border:1px solid var(--border);border-radius:12px;
+  padding:24px;display:flex;gap:18px;align-items:flex-start;
+}
+.why-icon{font-size:1.4rem;flex-shrink:0;margin-top:2px;}
+.why-label{font-size:.62rem;letter-spacing:.18em;color:var(--cyan);text-transform:uppercase;margin-bottom:6px;}
+.why-text{font-size:.8rem;color:#4848a0;line-height:1.65;}
+.why-text strong{color:#8080b0;}
+
+/* ── CTA ── */
+.cta-section{text-align:center;}
+.cta-section .section-body{margin:0 auto 40px;}
+.cta-email{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:'JetBrains Mono','Courier New',monospace;
+  font-size:.9rem;color:var(--cyan);text-decoration:none;
+  border-bottom:1px solid rgba(16,216,255,.3);padding-bottom:3px;
+  transition:border-color .2s;
+}
+.cta-email:hover{border-color:var(--cyan);}
+.cta-note{margin-top:16px;font-size:.68rem;color:var(--muted);}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--border);
+  padding:28px clamp(20px,5vw,60px);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  position:relative;z-index:1;
+}
+.footer-brand{display:flex;align-items:center;gap:10px;}
+.footer-name{font-size:.72rem;font-weight:600;letter-spacing:.1em;color:#4040a0;text-transform:uppercase;}
+.footer-copy{font-size:.6rem;letter-spacing:.1em;color:var(--muted);}
+.footer-links{display:flex;gap:20px;}
+.footer-links a{font-size:.62rem;color:var(--muted);text-decoration:none;transition:color .2s;}
+.footer-links a:hover{color:var(--cyan);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  .nav-links{display:none;}
+  .hero-title{letter-spacing:.02em;}
+  .hero-actions{flex-direction:column;align-items:center;}
+  .btn-primary,.btn-ghost{width:100%;justify-content:center;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">
+    <svg viewBox="0 0 220 220" width="30" height="30" xmlns="http://www.w3.org/2000/svg"
+      style="filter:drop-shadow(0 0 8px rgba(16,216,255,.5));">
+      <defs>
+        <radialGradient id="gcN" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#fff"/><stop offset="38%" stop-color="#80ecff" stop-opacity=".8"/><stop offset="100%" stop-color="#c040ff" stop-opacity="0"/></radialGradient>
+        <linearGradient id="grN" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#10d8ff"/><stop offset="100%" stop-color="#c040ff"/></linearGradient>
+      </defs>
+      <polygon points="110,16 87,83 110,110" fill="#0888b8"/>
+      <polygon points="110,16 110,110 133,83" fill="#20e8ff"/>
+      <polygon points="204,110 133,83 110,110" fill="#8030e8"/>
+      <polygon points="204,110 110,110 133,137" fill="#5c16b8"/>
+      <polygon points="110,204 133,137 110,110" fill="#c040ff"/>
+      <polygon points="110,204 110,110 87,137" fill="#9828d8"/>
+      <polygon points="16,110 87,137 110,110" fill="#0868a0"/>
+      <polygon points="16,110 110,110 87,83" fill="#10b0e8"/>
+      <ellipse cx="110" cy="110" rx="52" ry="16" fill="none" stroke="url(#grN)" stroke-width="2.2" opacity=".7" transform="rotate(22,110,110)"/>
+      <circle cx="165" cy="110" r="3.5" fill="#c040ff" opacity=".9" transform="rotate(22,110,110)"/>
+      <circle cx="110" cy="110" r="20" fill="url(#gcN)"/>
+      <circle cx="110" cy="110" r="8" fill="white" opacity=".88"/>
+    </svg>
+    <span class="nav-name">Whetū Digital</span>
+  </a>
+  <div class="nav-links">
+    <a href="#products">Products</a>
+    <a href="#why">Why Us</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <a class="nav-cta" href="#contact">Get in Touch →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+
+  <div class="logo-stage">
+    <div class="pulse-ring"></div>
+    <div class="pulse-ring"></div>
+    <div class="pulse-ring"></div>
+    <div class="orbit-dot"></div>
+    <div class="orbit-dot"></div>
+    <div class="orbit-dot"></div>
+
+    <div class="logo-mark">
+      <svg viewBox="0 0 220 220" width="140" height="140" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="gcH" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="35%" stop-color="#80ecff" stop-opacity=".8"/>
+            <stop offset="100%" stop-color="#c040ff" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="grH" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#10d8ff"/>
+            <stop offset="100%" stop-color="#c040ff"/>
+          </linearGradient>
+          <filter id="fG" x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <ellipse cx="110" cy="110" rx="85" ry="85" fill="none" stroke="#6020c0" stroke-width="36" opacity=".06" filter="url(#fG)"/>
+        <g>
+          <polygon points="110,16 87,83 110,110" fill="#0888b8"/>
+          <polygon points="110,16 110,110 133,83" fill="#20e8ff"/>
+          <polygon points="204,110 133,83 110,110" fill="#8030e8"/>
+          <polygon points="204,110 110,110 133,137" fill="#5c16b8"/>
+          <polygon points="110,204 133,137 110,110" fill="#c040ff"/>
+          <polygon points="110,204 110,110 87,137" fill="#9828d8"/>
+          <polygon points="16,110 87,137 110,110" fill="#0868a0"/>
+          <polygon points="16,110 110,110 87,83" fill="#10b0e8"/>
+          <line x1="110" y1="16" x2="133" y2="83" stroke="#60f0ff" stroke-width=".8" opacity=".55"/>
+          <line x1="110" y1="204" x2="133" y2="137" stroke="#e060ff" stroke-width=".8" opacity=".55"/>
+        </g>
+        <g class="orbit-ring-g">
+          <ellipse cx="110" cy="110" rx="54" ry="17" fill="none" stroke="url(#grH)" stroke-width="2.2" opacity=".7" transform="rotate(22,110,110)"/>
+          <circle cx="164" cy="110" r="3.5" fill="#c040ff" opacity=".9" transform="rotate(22,110,110)"/>
+        </g>
+        <circle cx="110" cy="110" r="24" fill="url(#gcH)" class="core-glow"/>
+        <circle cx="110" cy="110" r="9" fill="white" opacity=".9" class="core-glow"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="status-chip">
+    <span class="status-dot"></span>
+    Operational · Aotearoa, New Zealand
+  </div>
+
+  <div class="hero-eyebrow">Digital Tools · Built Different</div>
+
+  <h1 class="hero-title">
+    We build digital tools<br>
+    <span class="grad">that work for you</span>
+  </h1>
+
+  <p class="hero-sub">
+    Whetū Digital creates <strong>finance dashboards, cash flow tools, and business software</strong>
+    for modern businesses across Aotearoa — clean, fast, and yours.
+  </p>
+
+  <div class="hero-actions">
+    <a class="btn-primary" href="#contact">→ Work With Us</a>
+    <a class="btn-ghost" href="#products">See Our Products</a>
+  </div>
+
+  <div class="scroll-hint">
+    <span>Explore</span>
+    <div class="scroll-arrow"></div>
+  </div>
+
+</section>
+
+<!-- PRODUCTS -->
+<section class="products-section" id="products">
+  <div class="section-inner">
+    <div class="section-label">What We Build</div>
+    <h2 class="section-title">A suite of digital tools<br>for every part of your business</h2>
+    <p class="section-body">Each product is purpose-built — no bloated software, no subscriptions to things you don't use. Just the tool you need, working exactly how you'd expect.</p>
+
+    <div class="products-grid">
+
+      <div class="product-card live">
+        <div class="pc-top">
+          <span class="pc-icon">✦</span>
+          <span class="pc-badge badge-live">● Live</span>
+        </div>
+        <div class="pc-name">CLARITY</div>
+        <div class="pc-desc">Personal finance dashboard. Track every bill, income, and expense across any time period. Works on any device — laptop, iPhone, Android.</div>
+        <div class="pc-tag">Finance · Dashboard · Multi-device</div>
+      </div>
+
+      <div class="product-card">
+        <div class="pc-top">
+          <span class="pc-icon">🧭</span>
+          <span class="pc-badge badge-next">Next</span>
+        </div>
+        <div class="pc-name">COMPASS</div>
+        <div class="pc-desc">Cash flow and invoicing tool for small businesses. Know exactly what's coming in and going out. Built-in invoicing, zero subscription fees.</div>
+        <div class="pc-tag">Cash Flow · Invoicing · Business</div>
+      </div>
+
+      <div class="product-card">
+        <div class="pc-top">
+          <span class="pc-icon">📡</span>
+          <span class="pc-badge badge-soon">Q3 2026</span>
+        </div>
+        <div class="pc-name">SIGNAL</div>
+        <div class="pc-desc">Social media management for businesses that don't have time to manage social media. Schedule, publish, and track performance — all in one place.</div>
+        <div class="pc-tag">Social Media · Scheduling · Analytics</div>
+      </div>
+
+      <div class="product-card">
+        <div class="pc-top">
+          <span class="pc-icon">⚓</span>
+          <span class="pc-badge badge-planned">Planned</span>
+        </div>
+        <div class="pc-name">ANCHOR</div>
+        <div class="pc-desc">Property and rental management. Designed for short-term letting and property portfolios. Track tenants, payments, maintenance, and reporting.</div>
+        <div class="pc-tag">Property · Rentals · Management</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- WHY -->
+<section id="why">
+  <div class="section-inner">
+    <div class="section-label">Why Whetū Digital</div>
+    <h2 class="section-title">Software that fits<br>how you actually work</h2>
+
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-icon">🎯</div>
+        <div>
+          <div class="why-label">Purpose-built</div>
+          <div class="why-text">Every tool is designed for <strong>one job done brilliantly</strong> — not a general platform crammed with features you'll never use.</div>
+        </div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">📱</div>
+        <div>
+          <div class="why-label">Works everywhere</div>
+          <div class="why-text"><strong>Laptop, iPhone, Android</strong> — your tools work on any screen, any time. No app store required. Just open and go.</div>
+        </div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">🔒</div>
+        <div>
+          <div class="why-label">Your data is yours</div>
+          <div class="why-text">No third-party tracking. No selling your data. <strong>Your information stays private</strong> and in your control — always.</div>
+        </div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">🌏</div>
+        <div>
+          <div class="why-label">Built in Aotearoa</div>
+          <div class="why-text">Local understanding, local support. <strong>We know the NZ and AU market</strong> — GST, tax thresholds, local banks and platforms.</div>
+        </div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">⚡</div>
+        <div>
+          <div class="why-label">Fast to set up</div>
+          <div class="why-text">No IT department needed. <strong>You're live within hours</strong>, not weeks. We handle setup, you get on with your business.</div>
+        </div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">💬</div>
+        <div>
+          <div class="why-label">Direct support</div>
+          <div class="why-text">You talk to the person who built it — <strong>no call centres, no ticket systems</strong>. Real answers, fast.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="products-section cta-section" id="contact">
+  <div class="section-inner" style="text-align:center;">
+    <div class="section-label">Get Started</div>
+    <h2 class="section-title">Ready to work together?</h2>
+    <p class="section-body">
+      We're currently working with a select group of clients across Aotearoa.
+      If you're looking for a digital tool built around your business — let's talk.
+    </p>
+    <br><br>
+    <a class="cta-email" href="mailto:hello@whetudigital.co.nz">
+      ✉ hello@whetudigital.co.nz
+    </a>
+    <p class="cta-note">We respond within one business day · Aotearoa, New Zealand</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <svg viewBox="0 0 220 220" width="22" height="22" xmlns="http://www.w3.org/2000/svg" style="opacity:.5;">
+      <polygon points="110,16 87,83 110,110" fill="#0888b8"/><polygon points="110,16 110,110 133,83" fill="#20e8ff"/>
+      <polygon points="204,110 133,83 110,110" fill="#8030e8"/><polygon points="204,110 110,110 133,137" fill="#5c16b8"/>
+      <polygon points="110,204 133,137 110,110" fill="#c040ff"/><polygon points="110,204 110,110 87,137" fill="#9828d8"/>
+      <polygon points="16,110 87,137 110,110" fill="#0868a0"/><polygon points="16,110 110,110 87,83" fill="#10b0e8"/>
+      <circle cx="110" cy="110" r="18" fill="rgba(255,255,255,.1)"/><circle cx="110" cy="110" r="7" fill="white" opacity=".5"/>
+    </svg>
+    <span class="footer-name">Whetū Digital</span>
+  </div>
+  <span class="footer-copy">© <span id="yr"></span> Whetū Digital · Aotearoa, New Zealand</span>
+  <div class="footer-links">
+    <a href="#products">Products</a>
+    <a href="mailto:hello@whetudigital.co.nz">Contact</a>
+  </div>
+</footer>
+
+<script>
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+// Subtle parallax on hero logo
+document.addEventListener('mousemove', e => {
+  const mark = document.querySelector('.logo-mark');
+  if (!mark) return;
+  const rx = ((e.clientY / window.innerHeight) - 0.5) * 6;
+  const ry = ((e.clientX / window.innerWidth) - 0.5) * 12;
+  mark.style.filter = `drop-shadow(0 0 12px rgba(16,216,255,.5)) drop-shadow(0 0 30px rgba(192,64,255,.25))`;
+});
+
+// Intersection observer for fade-in
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.style.opacity = '1'; e.target.style.transform = 'translateY(0)'; }});
+}, { threshold: 0.15 });
+document.querySelectorAll('.product-card, .why-card').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(20px)';
+  el.style.transition = 'opacity .5s ease, transform .5s ease';
+  obs.observe(el);
+});
+</script>
+</body>
+</html>
