@@ -442,8 +442,8 @@ body::after{
   <!-- LINKS -->
   <div class="footer-links">
     <a href="mailto:hello@whetudigital.co.nz">hello@whetudigital.co.nz</a>
-    <a href="#" onclick="return false;">Instagram</a>
-    <a href="#" onclick="return false;">LinkedIn</a>
+    <a href="https://instagram.com/whetudigital" target="_blank" rel="noopener">Instagram</a>
+    <a href="https://linkedin.com/company/whetudigital" target="_blank" rel="noopener">LinkedIn</a>
   </div>
 
 </div>
@@ -515,12 +515,24 @@ function tick(){
 tick();setInterval(tick,1000);
 
 /* ── NOTIFY ── */
-function submitNotify(){
-  const email=document.getElementById('notify-email').value.trim();
-  if(!email||!email.includes('@'))return;
-  document.getElementById('notify-form').style.display='none';
-  document.getElementById('notify-ok').style.display='block';
-  // TODO: connect to Zoho/Mailchimp/FormSpree when live
+const W3F_KEY='YOUR_WEB3FORMS_KEY'; // get free key at web3forms.com — takes 30 seconds
+async function submitNotify(){
+  const emailEl=document.getElementById('notify-email');
+  const email=emailEl.value.trim();
+  if(!email||!email.includes('@')){emailEl.style.borderBottom='1px solid #ff4060';return;}
+  const btn=document.querySelector('.notify-btn');
+  btn.textContent='Sending…';btn.disabled=true;
+  try{
+    const r=await fetch('https://api.web3forms.com/submit',{
+      method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({access_key:W3F_KEY,email,subject:'Whetū Digital — Launch notification signup',from_name:'Whetū Digital Website'})
+    });
+    const d=await r.json();
+    if(d.success){
+      document.getElementById('notify-form').style.display='none';
+      document.getElementById('notify-ok').style.display='block';
+    }else{btn.textContent='Notify Me';btn.disabled=false;}
+  }catch(e){btn.textContent='Notify Me';btn.disabled=false;}
 }
 document.getElementById('notify-email').addEventListener('keydown',e=>{if(e.key==='Enter')submitNotify();});
 
