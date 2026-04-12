@@ -348,7 +348,7 @@ body::after{
   <span class="hud-time" id="hud-clock">--:--:--</span>
 </div>
 <div class="hud-bottom">
-  <span>v1.0 · Pre-launch</span>
+  <span>v1.0 · Launching 1 Jul 2026</span>
   <span id="hud-date">--</span>
 </div>
 <div class="cursor-ring" id="cr"></div>
@@ -497,8 +497,8 @@ setTimeout(function type(){
   else setTimeout(()=>tagEl.style.borderRight='none',800);
 },1000);
 
-/* ── COUNTDOWN ── (launch: 1 June 2026) ── */
-const launch=new Date('2026-06-01T09:00:00+12:00');
+/* ── COUNTDOWN ── (launch: 1 July 2026 — NZ/AU new financial year) ── */
+const launch=new Date('2026-07-01T09:00:00+12:00');
 function pad(n){return String(n).padStart(2,'0');}
 function tick(){
   const diff=launch-new Date();
