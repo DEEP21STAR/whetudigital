@@ -101,10 +101,14 @@ body::after{
 /* ── WORDMARK ── */
 .wordmark{margin-top:16px;perspective:800px;}
 .brand-name{
-  font-size:clamp(2.8rem,5.5vw,5rem);font-weight:700;
-  letter-spacing:.2em;color:#fff;text-transform:uppercase;
+  font-size:clamp(3.4rem,6.5vw,6.2rem);font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;
   display:inline-block;position:relative;overflow:hidden;
-  animation:textSwing 8.5s ease-in-out infinite, textGlow 9s ease-in-out infinite;
+  background:linear-gradient(90deg,#fff 0%,#10d8ff 22%,#c040ff 50%,#fff 72%,#10d8ff 100%);
+  background-size:300% 100%;
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:textSwing 8.5s ease-in-out infinite, textGlow 9s ease-in-out infinite, auroraText 7s ease-in-out infinite;
   transform-style:preserve-3d;
 }
 .brand-name::after{
@@ -185,6 +189,21 @@ body::after{
 }
 @keyframes sepBlink{0%,100%{opacity:1;}50%{opacity:.2;}}
 
+/* ── STAR PARTICLES ── */
+.star-particle{
+  position:absolute;font-size:.7rem;pointer-events:none;
+  animation:starFloat linear infinite;opacity:0;
+  color:var(--cyan);text-shadow:0 0 8px var(--cyan);
+}
+.star-particle:nth-child(4n){color:var(--purple);text-shadow:0 0 8px var(--purple);}
+.star-particle:nth-child(4n+2){color:#00ff99;text-shadow:0 0 8px #00ff99;}
+@keyframes starFloat{
+  0%  {transform:translateY(0) scale(1) rotate(0deg);opacity:0;}
+  8%  {opacity:.8;}
+  90% {opacity:.3;}
+  100%{transform:translateY(-130px) scale(.3) rotate(180deg);opacity:0;}
+}
+
 /* ── NOTIFY FORM ── */
 .notify-wrap{
   margin-top:24px;display:flex;gap:0;
@@ -207,6 +226,11 @@ body::after{
   white-space:nowrap;
 }
 .notify-btn:hover{background:linear-gradient(135deg,rgba(16,216,255,.3),rgba(192,64,255,.2));}
+.notify-wrap:focus-within{
+  border-color:rgba(16,216,255,.65);
+  box-shadow:0 0 18px rgba(16,216,255,.28),0 0 42px rgba(16,216,255,.12);
+  transition:border-color .3s,box-shadow .3s;
+}
 .notify-success{
   display:none;padding:12px 20px;
   font-size:.75rem;letter-spacing:.06em;color:#00ff99;font-family:'JetBrains Mono',monospace;
@@ -216,6 +240,12 @@ body::after{
 .footer-links{
   margin-top:24px;display:flex;gap:28px;align-items:center;
   animation:fadeUp .9s ease 1.1s both;
+}
+.footer-bottom{
+  margin-top:14px;font-size:.52rem;letter-spacing:.28em;
+  color:rgba(16,216,255,.22);text-transform:uppercase;
+  font-family:'JetBrains Mono',monospace;
+  animation:fadeUp .9s ease 1.3s both;
 }
 .footer-links a{
   font-size:.68rem;letter-spacing:.18em;text-decoration:none;
@@ -332,6 +362,14 @@ body::after{
 @keyframes scanLine{0%{top:-8%;opacity:0;}8%{opacity:.7;}90%{opacity:.5;}100%{top:108%;opacity:0;}}
 @keyframes statusBlink{0%,100%{opacity:1;}50%{opacity:.3;}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+@keyframes auroraText{0%{background-position:100% 50%;}50%{background-position:0% 50%;}100%{background-position:100% 50%;}}
+@keyframes cdFlip{
+  0%  {transform:translateY(0);opacity:1;}
+  35% {transform:translateY(-10px);opacity:0;}
+  36% {transform:translateY(10px);opacity:0;}
+  100%{transform:translateY(0);opacity:1;}
+}
+.cd-num.flip{animation:cdFlip .32s ease forwards !important;}
 </style>
 </head>
 <body>
@@ -358,6 +396,12 @@ body::after{
 
   <!-- LOGO -->
   <div class="logo-stage">
+    <span class="star-particle" style="left:12%;top:60%;animation-duration:4.2s;animation-delay:0s;">✦</span>
+    <span class="star-particle" style="left:82%;top:55%;animation-duration:5.8s;animation-delay:1.1s;">✦</span>
+    <span class="star-particle" style="left:28%;top:70%;animation-duration:3.9s;animation-delay:2.3s;">✦</span>
+    <span class="star-particle" style="left:68%;top:65%;animation-duration:6.1s;animation-delay:0.7s;">✦</span>
+    <span class="star-particle" style="left:50%;top:75%;animation-duration:4.7s;animation-delay:1.9s;">✦</span>
+    <span class="star-particle" style="left:40%;top:58%;animation-duration:5.3s;animation-delay:3.2s;">✦</span>
     <div class="ring"></div><div class="ring"></div><div class="ring"></div>
     <div class="orbiters">
       <div class="orb"></div><div class="orb"></div><div class="orb"></div>
@@ -407,7 +451,6 @@ body::after{
   <!-- WORDMARK -->
   <div class="wordmark">
     <div class="brand-name">WHET<span class="gradient">Ū</span> DIGITAL</div>
-    <div class="brand-sub">Aotearoa · New Zealand</div>
   </div>
 
   <!-- TAGLINE -->
@@ -445,6 +488,7 @@ body::after{
     <a href="https://instagram.com/whetudigital" target="_blank" rel="noopener">Instagram</a>
     <a href="https://linkedin.com/company/whetudigital" target="_blank" rel="noopener">LinkedIn</a>
   </div>
+  <div class="footer-bottom">© 2026 Whetū Digital · Aotearoa, New Zealand</div>
 
 </div>
 
@@ -500,6 +544,13 @@ setTimeout(function type(){
 /* ── COUNTDOWN ── (launch: 1 July 2026 — NZ/AU new financial year) ── */
 const launch=new Date('2026-07-01T09:00:00+12:00');
 function pad(n){return String(n).padStart(2,'0');}
+function updateNum(id,val){
+  const el=document.getElementById(id); if(!el) return;
+  if(el.textContent!==val){
+    el.classList.remove('flip'); void el.offsetWidth;
+    el.textContent=val; el.classList.add('flip');
+  }
+}
 function tick(){
   const diff=launch-new Date();
   if(diff<=0){document.querySelector('.countdown').innerHTML='<div class="cd-unit"><div class="cd-num" style="color:#00ff99">LIVE</div><div class="cd-label">We\'re live!</div></div>';return;}
@@ -507,10 +558,8 @@ function tick(){
   const h=Math.floor((diff%86400000)/3600000);
   const m=Math.floor((diff%3600000)/60000);
   const s=Math.floor((diff%60000)/1000);
-  document.getElementById('cd-d').textContent=pad(d);
-  document.getElementById('cd-h').textContent=pad(h);
-  document.getElementById('cd-m').textContent=pad(m);
-  document.getElementById('cd-s').textContent=pad(s);
+  updateNum('cd-d',pad(d)); updateNum('cd-h',pad(h));
+  updateNum('cd-m',pad(m)); updateNum('cd-s',pad(s));
 }
 tick();setInterval(tick,1000);
 
