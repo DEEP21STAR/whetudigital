@@ -371,6 +371,52 @@ body::after{
 }
 .cd-num.flip{animation:cdFlip .32s ease forwards !important;}
 </style>
+
+<!-- ══════════════════════════════════════════════════════════════
+     ANALYTICS — 3 layers of visitor intelligence
+     ══════════════════════════════════════════════════════════════
+
+  1. GOOGLE ANALYTICS 4 (GA4)
+     → Who visits, where from, what device, how they found you
+     → Get your ID: analytics.google.com → Admin → Create Property
+     → Replace G-XXXXXXXXXX below with your Measurement ID
+
+  2. MICROSOFT CLARITY
+     → Session recordings, heatmaps, rage clicks, scroll depth
+     → Get your ID: clarity.microsoft.com → New Project → whetudigital.co.nz
+     → Replace CLARITY_ID below with your Project ID (10-char code)
+
+  3. CLOUDFLARE WEB ANALYTICS
+     → Privacy-friendly page views, countries, performance (no cookies)
+     → Get your token: dash.cloudflare.com → Analytics → Web Analytics → Add site
+     → Replace CF_TOKEN below with your beacon token
+══════════════════════════════════════════════════════════════ -->
+
+<!-- 1 · GOOGLE ANALYTICS 4 ─────────────────────────────────── -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX', {
+    page_title: 'Whetū Digital — Coming Soon',
+    send_page_view: true
+  });
+</script>
+
+<!-- 2 · MICROSOFT CLARITY ──────────────────────────────────── -->
+<script type="text/javascript">
+  (function(c,l,a,r,i,t,y){
+    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src='https://www.clarity.ms/tag/'+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+  })(window,document,'clarity','script','CLARITY_ID');
+</script>
+
+<!-- 3 · CLOUDFLARE WEB ANALYTICS ───────────────────────────── -->
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js"
+  data-cf-beacon='{"token":"CF_TOKEN","spa":true}'></script>
+
 </head>
 <body>
 
