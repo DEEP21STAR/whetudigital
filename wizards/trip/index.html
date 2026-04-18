@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Trip Wizard — Whetū Digital</title>
+<meta name="theme-color" content="#06071a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<!--
+  © 2026 Whetū Digital Ltd. All rights reserved.
+  Trip Wizard — Dashboard Wizard Series
+  hello@whetudigital.co.nz | whetudigital.co.nz
+-->
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#06071a;--card:#0a0f2e;--card2:#0d1035;
+  --cyan:#00e6ff;--gold:#ffd700;--green:#00ff88;--red:#ff4466;--purple:#c060ff;
+  --text:#e0f0ff;--muted:#6b8ba0;--border:#1a2a4a;
+  --glow-c:0 0 20px rgba(0,230,255,0.4);
+  --font:'Segoe UI',Arial,sans-serif;
+}
+html,body{height:100%;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px}
+
+/* ── STARS BACKGROUND ── */
+#stars{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d,3s) ease-in-out infinite alternate}
+@keyframes twinkle{0%{opacity:.1;transform:scale(.8)}100%{opacity:var(--o,.8);transform:scale(1)}}
+
+/* ══════════════════════════════════════════
+   SETUP WIZARD
+══════════════════════════════════════════ */
+#setup{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.setup-logo{font-size:13px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:32px}
+.setup-logo span{color:var(--cyan)}
+.setup-card{width:100%;max-width:520px;background:var(--card);border:1px solid var(--border);border-radius:18px;padding:32px;position:relative;overflow:hidden}
+.setup-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--cyan),var(--purple),var(--gold));border-radius:18px 18px 0 0}
+.setup-step-indicator{display:flex;gap:8px;margin-bottom:28px;justify-content:center}
+.ssi{width:36px;height:4px;border-radius:2px;background:var(--border);transition:.4s}
+.ssi.done{background:var(--cyan)}
+.ssi.active{background:linear-gradient(90deg,var(--cyan),var(--purple));box-shadow:0 0 8px rgba(0,230,255,.5)}
+.setup-title{font-size:22px;font-weight:900;letter-spacing:2px;margin-bottom:6px;background:linear-gradient(90deg,var(--cyan),var(--purple));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.setup-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
+.setup-field{margin-bottom:18px}
+.setup-label{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:block}
+.setup-input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-size:15px;font-family:var(--font);transition:.2s;outline:none}
+.setup-input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,230,255,.08)}
+.setup-input::placeholder{color:var(--muted)}
+.setup-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.setup-btn{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;font-size:15px;font-weight:700;letter-spacing:1px;cursor:pointer;margin-top:8px;transition:.2s;text-transform:uppercase}
+.setup-btn:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,230,255,.3)}
+.setup-btn-sec{background:none;border:1px solid var(--border);color:var(--muted);margin-top:8px}
+.setup-btn-sec:hover{border-color:var(--cyan);color:var(--cyan);box-shadow:none}
+
+/* Destinations step */
+.dest-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;max-height:200px;overflow-y:auto}
+.dest-item{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;animation:slideIn .2s ease}
+.dest-item-info{flex:1;min-width:0}
+.dest-item-name{font-weight:700;font-size:14px;color:var(--cyan)}
+.dest-item-dates{font-size:11px;color:var(--muted);margin-top:2px}
+.dest-remove{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:4px;border-radius:6px;transition:.15s}
+.dest-remove:hover{color:var(--red)}
+.add-dest-btn{width:100%;padding:10px;border-radius:10px;border:1px dashed var(--border);background:none;color:var(--muted);font-size:13px;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.add-dest-btn:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(0,230,255,.04)}
+.dest-form{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
+
+/* ── COMPLETE SCREEN ── */
+#setup-complete{position:fixed;inset:0;z-index:300;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px}
+.sc-emoji{font-size:80px;animation:scPop .6s cubic-bezier(.34,1.56,.64,1) forwards}
+@keyframes scPop{from{transform:scale(0) rotate(-20deg)}to{transform:scale(1) rotate(0)}}
+.sc-title{font-size:28px;font-weight:900;letter-spacing:3px;margin:24px 0 10px;background:linear-gradient(90deg,var(--cyan),var(--purple),var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.sc-sub{font-size:15px;color:var(--muted);margin-bottom:32px;line-height:1.6}
+.sc-btn{padding:16px 40px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:1px;text-transform:uppercase;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 20px rgba(0,230,255,.3)}50%{box-shadow:0 0 40px rgba(0,230,255,.6)}}
+
+/* ══════════════════════════════════════════
+   PIN GATE
+══════════════════════════════════════════ */
+#pin-gate{position:fixed;inset:0;z-index:100;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:0}
+.pin-logo{font-size:32px;font-weight:900;letter-spacing:8px;color:var(--cyan);text-shadow:var(--glow-c);margin-bottom:6px}
+.pin-sub{font-size:12px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:36px}
+.pin-trip-name{font-size:14px;color:var(--purple);letter-spacing:2px;text-align:center;margin-bottom:24px;font-weight:600}
+.pin-dots{display:flex;gap:14px;margin-bottom:32px}
+.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--cyan);background:transparent;transition:.2s}
+.pin-dot.filled{background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+.pin-pad{display:grid;grid-template-columns:repeat(3,72px);gap:10px}
+.pin-btn{height:72px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:22px;font-weight:700;cursor:pointer;transition:.15s;touch-action:manipulation}
+.pin-btn:hover{background:rgba(0,230,255,.08);border-color:var(--cyan)}
+.pin-btn:active{transform:scale(.94)}
+.pin-error{color:var(--red);font-size:13px;height:20px;text-align:center;margin-top:12px;letter-spacing:1px}
+
+/* ══════════════════════════════════════════
+   MAIN APP
+══════════════════════════════════════════ */
+#app{position:relative;z-index:1;display:none;min-height:100vh;padding-bottom:80px}
+
+/* ── NAV ── */
+#nav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(6,7,26,.9);backdrop-filter:blur(20px);border-top:1px solid var(--border);padding:8px 0 12px;display:flex;justify-content:space-around}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:10px;letter-spacing:.5px;text-transform:uppercase;padding:4px 8px;border-radius:10px;transition:.2s;min-width:52px}
+.nav-btn .nav-ico{font-size:20px;line-height:1}
+.nav-btn.active{color:var(--cyan)}
+.nav-btn.active .nav-ico{filter:drop-shadow(0 0 6px var(--cyan))}
+
+/* ── HEADER ── */
+.app-header{background:linear-gradient(180deg,rgba(0,230,255,.06) 0%,transparent 100%);border-bottom:1px solid var(--border);padding:16px 20px 14px;display:flex;align-items:center;justify-content:space-between}
+.header-trip{font-size:13px;font-weight:900;letter-spacing:3px;color:var(--cyan);text-transform:uppercase}
+.header-travellers{font-size:11px;color:var(--muted);margin-top:2px}
+.header-actions{display:flex;gap:8px}
+.hdr-btn{background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;padding:5px 10px;cursor:pointer;transition:.2s}
+.hdr-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* ── TAB CONTENT ── */
+.tab-pane{display:none;padding:18px 16px;animation:fadeIn .25s ease}
+.tab-pane.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px}
+.card-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.chip{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:20px;padding:6px 12px;font-size:13px}
+
+/* ── COUNTDOWN ── */
+.countdown-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;padding:18px 0}
+.cd-tile{text-align:center}
+.cd-num{font-size:38px;font-weight:900;color:var(--cyan);text-shadow:var(--glow-c);font-variant-numeric:tabular-nums;min-width:56px;display:block;background:rgba(0,230,255,.07);border:1px solid rgba(0,230,255,.15);border-radius:10px;padding:6px 10px;line-height:1}
+.cd-lbl{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:5px}
+.cd-sep{font-size:28px;color:rgba(0,230,255,.3);font-weight:300;align-self:flex-start;margin-top:14px}
+.trip-status-lbl{width:100%;text-align:center;font-size:11px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+
+/* ── DEST HERO ── */
+.dest-hero{text-align:center;padding:28px 20px;border-radius:14px;background:linear-gradient(135deg,rgba(10,15,46,.95),rgba(13,16,53,.95));border:1px solid var(--border);margin-bottom:14px;position:relative;overflow:hidden}
+.dest-hero-bg{font-size:80px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:.07;pointer-events:none}
+.dest-hero-label{font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+.dest-hero-where{font-size:22px;font-weight:900;color:var(--cyan);text-shadow:var(--glow-c);margin-bottom:4px}
+.dest-hero-sub{font-size:13px;color:var(--muted)}
+.dest-info-row{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.dest-chip{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;display:flex;align-items:center;gap:5px}
+
+/* ── ROUTE BAR ── */
+.route-bar{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:14px;overflow-x:auto}
+.route-inner{display:flex;align-items:center;gap:4px;min-width:max-content}
+.route-stop{display:flex;flex-direction:column;align-items:center;gap:3px;padding:0 6px}
+.route-flag{font-size:22px}
+.route-name{font-size:9px;color:var(--muted);letter-spacing:.5px;text-align:center;max-width:60px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.route-seg{display:flex;align-items:center;padding:0 4px;color:rgba(0,230,255,.4);font-size:16px}
+
+/* ── TZ STRIP ── */
+.tz-strip{display:flex;gap:6px;overflow-x:auto;padding:2px;margin-bottom:14px}
+.tz-clock{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;text-align:center;min-width:90px;flex-shrink:0}
+.tz-flag{font-size:18px;margin-bottom:4px}
+.tz-time{font-size:18px;font-weight:800;color:var(--cyan);font-variant-numeric:tabular-nums}
+.tz-name{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+
+/* ── PROGRESS RING ── */
+.progress-ring-wrap{display:flex;align-items:center;justify-content:center;gap:20px;padding:10px 0 6px}
+.ring-svg{transform:rotate(-90deg)}
+.ring-label{text-align:center}
+.ring-num{font-size:28px;font-weight:900;color:var(--gold)}
+.ring-sub{font-size:11px;color:var(--muted);letter-spacing:1px}
+
+/* ── JOURNEY TIMELINE ── */
+.tl-item{display:flex;gap:14px;margin-bottom:14px;animation:cardIn .3s ease both}
+.tl-dot-col{display:flex;flex-direction:column;align-items:center;gap:0}
+.tl-dot{width:12px;height:12px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);flex-shrink:0;margin-top:4px}
+.tl-dot.past{background:var(--muted);box-shadow:none}
+.tl-dot.today{background:var(--gold);box-shadow:0 0 10px var(--gold);animation:todayPulse 1.5s infinite}
+@keyframes todayPulse{0%,100%{box-shadow:0 0 6px var(--gold)}50%{box-shadow:0 0 18px var(--gold)}}
+.tl-line{width:2px;flex:1;background:var(--border);margin-top:4px}
+.tl-card{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.tl-card.today-card{border-color:rgba(255,215,0,.3);background:rgba(255,215,0,.04)}
+.tl-date{font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px}
+.tl-dest{font-size:15px;font-weight:700;color:var(--text)}
+.tl-note{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4}
+.tl-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:8px;background:rgba(0,230,255,.1);border:1px solid rgba(0,230,255,.2);color:var(--cyan);margin-top:6px}
+
+/* ── CURRENCY ── */
+.fx-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.fx-input{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-size:18px;font-weight:700;outline:none;font-family:var(--font)}
+.fx-input:focus{border-color:var(--cyan)}
+.fx-currency-label{font-size:13px;color:var(--muted);font-weight:600;min-width:36px}
+.fx-result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.fx-result{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center}
+.fx-result-amount{font-size:20px;font-weight:900;color:var(--green)}
+.fx-result-label{font-size:11px;color:var(--muted);margin-top:3px}
+.fx-updated{font-size:10px;color:var(--muted);text-align:right;margin-top:8px}
+
+/* ── EMERGENCY ── */
+.emg-card{background:var(--card2);border:1px solid rgba(255,70,100,.2);border-radius:12px;padding:14px;margin-bottom:10px}
+.emg-name{font-weight:700;font-size:15px;margin-bottom:3px}
+.emg-number{font-size:18px;font-weight:900;color:var(--red);margin-bottom:6px}
+.emg-note{font-size:12px;color:var(--muted);margin-bottom:8px}
+.call-btn{display:inline-block;padding:8px 18px;border-radius:20px;background:rgba(255,70,100,.15);border:1px solid rgba(255,70,100,.3);color:var(--red);font-size:13px;font-weight:700;text-decoration:none;transition:.2s}
+.call-btn:hover{background:rgba(255,70,100,.25)}
+
+/* ── MEMORIES ── */
+.mem-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}
+.mem-item{aspect-ratio:1;border-radius:10px;overflow:hidden;position:relative;cursor:pointer;border:1px solid var(--border)}
+.mem-item img{width:100%;height:100%;object-fit:cover;transition:.3s}
+.mem-item:hover img{transform:scale(1.05)}
+.mem-empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px}
+.mem-upload-zone{border:2px dashed var(--border);border-radius:12px;padding:30px;text-align:center;cursor:pointer;transition:.2s;margin-bottom:14px}
+.mem-upload-zone:hover{border-color:var(--cyan);background:rgba(0,230,255,.03)}
+.mem-upload-zone input{display:none}
+
+/* ── NOTES ── */
+.notes-area{width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:16px;color:var(--text);font-size:15px;font-family:var(--font);resize:none;outline:none;min-height:200px;line-height:1.6}
+.notes-area:focus{border-color:var(--cyan)}
+.notes-saved{font-size:11px;color:var(--green);text-align:right;margin-top:6px;height:16px}
+
+/* ── NIGHT CLOCK ── */
+#night-clock{position:fixed;inset:0;z-index:500;background:#000;display:none;align-items:center;justify-content:center;flex-direction:column;cursor:pointer}
+.nc-time{font-size:clamp(60px,18vw,120px);font-weight:900;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:-2px}
+.nc-date{font-size:16px;color:#444;letter-spacing:3px;text-transform:uppercase;margin-top:8px}
+.nc-dest{font-size:13px;color:#333;letter-spacing:4px;text-transform:uppercase;margin-top:4px}
+.nc-hint{font-size:11px;color:#222;margin-top:40px;letter-spacing:2px}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(0,230,255,.15);border:1px solid var(--cyan);border-radius:20px;padding:8px 20px;font-size:13px;color:var(--cyan);opacity:0;transition:.3s;z-index:9999;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── WHETU FOOTER ── */
+.wiz-footer{text-align:center;padding:24px 16px 8px;font-size:10px;color:rgba(255,255,255,.15);letter-spacing:2px}
+.wiz-footer a{color:rgba(0,230,255,.3);text-decoration:none}
+
+/* ── RECONFIGURE ── */
+.recfg-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:4px;transition:.2s}
+.recfg-btn:hover{color:var(--red)}
+
+/* ── HELP GUIDE ── */
+.help-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.help-tile{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:.2s}
+.help-tile:hover{border-color:var(--cyan);transform:translateY(-2px)}
+.help-tile-icon{font-size:28px;margin-bottom:8px}
+.help-tile-name{font-size:12px;font-weight:700;color:var(--cyan);margin-bottom:4px}
+.help-tile-desc{font-size:10px;color:var(--muted);line-height:1.4}
+
+/* ── SETUP INFO BOX ── */
+.info-box{background:rgba(0,230,255,.04);border:1px solid rgba(0,230,255,.15);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px}
+.info-box b{color:var(--cyan)}
+</style>
+</head>
+<body>
+
+<!-- Stars -->
+<div id="stars"></div>
+
+<!-- ══════════ SETUP WIZARD ══════════ -->
+<div id="setup">
+  <div class="setup-logo">✦ <span>Whetū Digital</span> · Trip Wizard</div>
+  <div class="setup-card">
+    <div class="setup-step-indicator">
+      <div class="ssi active" id="ssi1"></div>
+      <div class="ssi" id="ssi2"></div>
+      <div class="ssi" id="ssi3"></div>
+    </div>
+
+    <!-- Step 1 -->
+    <div id="step1">
+      <div class="setup-title">Your Journey</div>
+      <div class="setup-sub">Tell us about your trip — this personalises your entire dashboard.</div>
+      <div class="setup-field">
+        <label class="setup-label">Trip Name</label>
+        <input class="setup-input" id="s1-tripName" placeholder="e.g. Japan & Pacific Adventure 2026" maxlength="60">
+      </div>
+      <div class="setup-field">
+        <label class="setup-label">Traveller Names</label>
+        <input class="setup-input" id="s1-travellers" placeholder="e.g. John & Jane Smith" maxlength="60">
+      </div>
+      <div class="setup-row">
+        <div class="setup-field">
+          <label class="setup-label">Departure Date</label>
+          <input class="setup-input" id="s1-departure" type="date">
+        </div>
+        <div class="setup-field">
+          <label class="setup-label">Return Date</label>
+          <input class="setup-input" id="s1-return" type="date">
+        </div>
+      </div>
+      <div class="setup-row">
+        <div class="setup-field">
+          <label class="setup-label">Departing From</label>
+          <input class="setup-input" id="s1-homeCity" placeholder="e.g. Auckland" maxlength="40">
+        </div>
+        <div class="setup-field">
+          <label class="setup-label">Home Currency</label>
+          <select class="setup-input" id="s1-currency">
+            <option value="NZD">NZD — New Zealand Dollar</option>
+            <option value="AUD">AUD — Australian Dollar</option>
+            <option value="USD">USD — US Dollar</option>
+            <option value="GBP">GBP — British Pound</option>
+            <option value="EUR">EUR — Euro</option>
+            <option value="CAD">CAD — Canadian Dollar</option>
+            <option value="SGD">SGD — Singapore Dollar</option>
+          </select>
+        </div>
+      </div>
+      <button class="setup-btn" onclick="step1Next()">Next — Add Destinations →</button>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="step2" style="display:none">
+      <div class="setup-title">Destinations</div>
+      <div class="setup-sub">Add each stop in your journey — cities, ports, or regions.</div>
+      <div class="info-box"><b>Tip:</b> Add stops in order. The dashboard will automatically show the right destination based on today's date.</div>
+      <div class="dest-list" id="dest-list"></div>
+      <div class="dest-form" id="dest-form" style="display:none">
+        <div class="setup-row">
+          <div class="setup-field" style="margin-bottom:10px">
+            <label class="setup-label">Destination Name</label>
+            <input class="setup-input" id="df-name" placeholder="e.g. Tokyo, Japan" maxlength="50">
+          </div>
+          <div class="setup-field" style="margin-bottom:10px">
+            <label class="setup-label">Emoji / Flag</label>
+            <input class="setup-input" id="df-emoji" placeholder="🗼" maxlength="4" style="font-size:22px;text-align:center">
+          </div>
+        </div>
+        <div class="setup-row">
+          <div class="setup-field" style="margin-bottom:10px">
+            <label class="setup-label">Arrival Date</label>
+            <input class="setup-input" id="df-arrive" type="date">
+          </div>
+          <div class="setup-field" style="margin-bottom:10px">
+            <label class="setup-label">Departure Date</label>
+            <input class="setup-input" id="df-depart" type="date">
+          </div>
+        </div>
+        <div class="setup-field" style="margin-bottom:10px">
+          <label class="setup-label">Timezone</label>
+          <select class="setup-input" id="df-tz">
+            <option value="Pacific/Auckland">Auckland (NZDT/NZST)</option>
+            <option value="Asia/Tokyo">Tokyo (JST)</option>
+            <option value="Asia/Singapore">Singapore (SGT)</option>
+            <option value="Asia/Bangkok">Bangkok (ICT)</option>
+            <option value="Asia/Dubai">Dubai (GST)</option>
+            <option value="Europe/London">London (GMT/BST)</option>
+            <option value="Europe/Paris">Paris (CET/CEST)</option>
+            <option value="America/New_York">New York (EST/EDT)</option>
+            <option value="America/Los_Angeles">Los Angeles (PST/PDT)</option>
+            <option value="America/Vancouver">Vancouver (PST/PDT)</option>
+            <option value="America/Anchorage">Anchorage (AKST/AKDT)</option>
+            <option value="America/Chicago">Chicago (CST/CDT)</option>
+            <option value="Pacific/Honolulu">Honolulu (HST)</option>
+            <option value="Australia/Sydney">Sydney (AEST/AEDT)</option>
+            <option value="Asia/Kolkata">India (IST)</option>
+            <option value="Asia/Seoul">Seoul (KST)</option>
+            <option value="Asia/Hong_Kong">Hong Kong (HKT)</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="setup-btn" style="flex:1;margin-top:0;padding:10px;font-size:13px" onclick="addDest()">✓ Add Stop</button>
+          <button class="setup-btn setup-btn-sec" style="flex:0 0 auto;margin-top:0;padding:10px 14px;font-size:13px" onclick="cancelDestForm()">✕</button>
+        </div>
+      </div>
+      <button class="add-dest-btn" id="add-dest-btn" onclick="showDestForm()">+ Add a Destination</button>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="setup-btn setup-btn-sec" style="flex:1;margin-top:0" onclick="step2Back()">← Back</button>
+        <button class="setup-btn" style="flex:2;margin-top:0" onclick="step2Next()">Next — Contacts & PIN →</button>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div id="step3" style="display:none">
+      <div class="setup-title">Contacts & Security</div>
+      <div class="setup-sub">Set your PIN, travel agent, and key emergency contacts.</div>
+      <div class="setup-field">
+        <label class="setup-label">Dashboard PIN (4 digits)</label>
+        <input class="setup-input" id="s3-pin" type="password" inputmode="numeric" maxlength="4" placeholder="Choose a 4-digit PIN" style="letter-spacing:8px;font-size:20px;text-align:center">
+      </div>
+      <div class="setup-row">
+        <div class="setup-field">
+          <label class="setup-label">Travel Agent Name</label>
+          <input class="setup-input" id="s3-agentName" placeholder="e.g. Jessica Gardner" maxlength="50">
+        </div>
+        <div class="setup-field">
+          <label class="setup-label">Agent Phone</label>
+          <input class="setup-input" id="s3-agentPhone" type="tel" placeholder="+64 9 123 4567">
+        </div>
+      </div>
+      <div class="setup-field">
+        <label class="setup-label">Agent Email</label>
+        <input class="setup-input" id="s3-agentEmail" type="email" placeholder="agent@flightcentre.co.nz">
+      </div>
+      <div class="setup-field">
+        <label class="setup-label">Emergency Contact 1 (Name — Phone)</label>
+        <input class="setup-input" id="s3-ec1" placeholder="e.g. Family — +64 21 123 456">
+      </div>
+      <div class="setup-field">
+        <label class="setup-label">Emergency Contact 2 (Name — Phone)</label>
+        <input class="setup-input" id="s3-ec2" placeholder="e.g. Travel Insurance — 0800 123 456">
+      </div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button class="setup-btn setup-btn-sec" style="flex:1;margin-top:0" onclick="step3Back()">← Back</button>
+        <button class="setup-btn" style="flex:2;margin-top:0" onclick="finishSetup()">🚀 Launch My Dashboard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SETUP COMPLETE ══════════ -->
+<div id="setup-complete">
+  <div class="sc-emoji" id="sc-emoji">✈️</div>
+  <div class="sc-title" id="sc-title">BON VOYAGE!</div>
+  <div class="sc-sub" id="sc-sub">Your dashboard is ready.<br>Tap to begin your adventure.</div>
+  <button class="sc-btn" onclick="launchDashboard()">Open Dashboard</button>
+</div>
+
+<!-- ══════════ PIN GATE ══════════ -->
+<div id="pin-gate">
+  <div class="pin-logo" id="pin-logo">✈ TRIP</div>
+  <div class="pin-trip-name" id="pin-trip-name"></div>
+  <div class="pin-sub">Enter your dashboard PIN</div>
+  <div class="pin-dots" id="pin-dots">
+    <div class="pin-dot" id="pd0"></div>
+    <div class="pin-dot" id="pd1"></div>
+    <div class="pin-dot" id="pd2"></div>
+    <div class="pin-dot" id="pd3"></div>
+  </div>
+  <div class="pin-pad">
+    <button class="pin-btn" onclick="pinKey('1')">1</button>
+    <button class="pin-btn" onclick="pinKey('2')">2</button>
+    <button class="pin-btn" onclick="pinKey('3')">3</button>
+    <button class="pin-btn" onclick="pinKey('4')">4</button>
+    <button class="pin-btn" onclick="pinKey('5')">5</button>
+    <button class="pin-btn" onclick="pinKey('6')">6</button>
+    <button class="pin-btn" onclick="pinKey('7')">7</button>
+    <button class="pin-btn" onclick="pinKey('8')">8</button>
+    <button class="pin-btn" onclick="pinKey('9')">9</button>
+    <button class="pin-btn" style="font-size:16px" onclick="pinClear()">CLR</button>
+    <button class="pin-btn" onclick="pinKey('0')">0</button>
+    <button class="pin-btn" style="font-size:20px" onclick="pinBack()">⌫</button>
+  </div>
+  <div class="pin-error" id="pin-error"></div>
+</div>
+
+<!-- ══════════ MAIN APP ══════════ -->
+<div id="app">
+  <div class="app-header">
+    <div>
+      <div class="header-trip" id="hdr-trip">TRIP</div>
+      <div class="header-travellers" id="hdr-travellers"></div>
+    </div>
+    <div class="header-actions">
+      <button class="hdr-btn" onclick="openNightClock()">🌙</button>
+      <button class="recfg-btn" onclick="reconfigure()" title="Reconfigure">⚙ Reset</button>
+    </div>
+  </div>
+
+  <!-- ── OVERVIEW ── -->
+  <div class="tab-pane active" id="pane-overview">
+    <div class="card">
+      <div class="trip-status-lbl" id="status-lbl">DEPARTURE IN</div>
+      <div class="countdown-bar">
+        <div class="cd-tile"><span class="cd-num" id="cd-days">0</span><div class="cd-lbl">Days</div></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-tile"><span class="cd-num" id="cd-hrs">00</span><div class="cd-lbl">Hrs</div></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-tile"><span class="cd-num" id="cd-min">00</span><div class="cd-lbl">Min</div></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-tile"><span class="cd-num" id="cd-sec">00</span><div class="cd-lbl">Sec</div></div>
+      </div>
+    </div>
+
+    <div class="dest-hero" id="dest-hero">
+      <div class="dest-hero-bg" id="dest-emoji">✈</div>
+      <div class="dest-hero-label">RIGHT NOW</div>
+      <div class="dest-hero-where" id="dest-where">Loading...</div>
+      <div class="dest-hero-sub" id="dest-sub"></div>
+      <div class="dest-info-row">
+        <div class="dest-chip" id="dest-weather">🌤 Fetching weather...</div>
+        <div class="dest-chip" id="dest-localtime">🕐 Local time...</div>
+      </div>
+    </div>
+
+    <div class="route-bar" id="route-bar"><div class="route-inner" id="route-inner">Loading route...</div></div>
+
+    <div class="tz-strip" id="tz-strip"></div>
+
+    <div class="card" id="progress-card" style="display:none">
+      <div class="card-title">Trip Progress</div>
+      <div class="progress-ring-wrap">
+        <svg class="ring-svg" width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="8"/>
+          <circle cx="40" cy="40" r="34" fill="none" stroke="url(#ringGrad)" stroke-width="8"
+            stroke-linecap="round" id="ring-progress" stroke-dasharray="213.6" stroke-dashoffset="213.6"/>
+          <defs><linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#00e6ff"/><stop offset="100%" stop-color="#c060ff"/>
+          </linearGradient></defs>
+        </svg>
+        <div class="ring-label">
+          <div class="ring-num" id="ring-pct">0%</div>
+          <div class="ring-sub">COMPLETE</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px" id="ring-days-left"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── JOURNEY ── -->
+  <div class="tab-pane" id="pane-journey">
+    <div class="card-title" style="padding:0 0 10px">Your Itinerary</div>
+    <div id="journey-list"></div>
+  </div>
+
+  <!-- ── DISCOVER ── -->
+  <div class="tab-pane" id="pane-discover">
+    <div class="card-title" style="padding:0 0 10px">Currency Converter</div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="fx-row">
+        <input class="fx-input" id="fx-amount" type="number" value="100" oninput="convertFX()" placeholder="Amount">
+        <span class="fx-currency-label" id="fx-from-label">NZD</span>
+      </div>
+      <div class="fx-result-grid" id="fx-results"></div>
+      <div class="fx-updated" id="fx-updated"></div>
+    </div>
+
+    <div class="card-title" style="padding:0 0 10px">Quick Phrases</div>
+    <div class="card">
+      <div class="info-box">Basic universal phrases — shown in English. Tip: screenshot this tab before boarding!</div>
+      <div id="phrases-list"></div>
+    </div>
+  </div>
+
+  <!-- ── MEMORIES ── -->
+  <div class="tab-pane" id="pane-memories">
+    <div class="card-title" style="padding:0 0 10px">Trip Memories</div>
+    <label class="mem-upload-zone" id="mem-upload">
+      <input type="file" accept="image/*" multiple onchange="handleMemUpload(event)">
+      <div style="font-size:32px;margin-bottom:8px">📷</div>
+      <div style="font-size:14px;color:var(--muted)">Tap to add photos</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.2);margin-top:4px">Saved locally on your device</div>
+    </label>
+    <div class="mem-grid" id="mem-grid"></div>
+  </div>
+
+  <!-- ── NOTES & EMERGENCY ── -->
+  <div class="tab-pane" id="pane-more">
+    <div class="card-title" style="padding:0 0 10px">Quick Notes</div>
+    <div class="card" style="margin-bottom:14px">
+      <textarea class="notes-area" id="notes-area" placeholder="Jot down anything — hotel WiFi passwords, local tips, important info..." oninput="saveNotes()"></textarea>
+      <div class="notes-saved" id="notes-saved"></div>
+    </div>
+
+    <div class="card-title" style="padding:0 0 10px">Emergency Contacts</div>
+    <div id="emergency-list"></div>
+
+    <div class="card-title" style="padding:0 0 10px;margin-top:10px">Help Guide</div>
+    <div class="help-grid">
+      <div class="help-tile"><div class="help-tile-icon">⏱</div><div class="help-tile-name">Countdown</div><div class="help-tile-desc">Live countdown to departure or return home</div></div>
+      <div class="help-tile"><div class="help-tile-icon">🌍</div><div class="help-tile-name">Destinations</div><div class="help-tile-desc">Auto-switches to show where you are right now</div></div>
+      <div class="help-tile"><div class="help-tile-icon">💱</div><div class="help-tile-name">Currency</div><div class="help-tile-desc">Live rates — convert home currency to any</div></div>
+      <div class="help-tile"><div class="help-tile-icon">📷</div><div class="help-tile-name">Memories</div><div class="help-tile-desc">Upload trip photos — stored on your device</div></div>
+      <div class="help-tile"><div class="help-tile-icon">🌙</div><div class="help-tile-name">Night Clock</div><div class="help-tile-desc">Tap 🌙 for a large bedside clock</div></div>
+      <div class="help-tile"><div class="help-tile-icon">⚙</div><div class="help-tile-name">Reconfigure</div><div class="help-tile-desc">Tap Reset in the header to redo setup</div></div>
+    </div>
+
+    <div class="wiz-footer">Built with <a href="https://whetudigital.co.nz">Trip Wizard</a> · Whetū Digital · NZ</div>
+  </div>
+
+  <!-- Nav -->
+  <nav id="nav">
+    <button class="nav-btn active" id="nav-overview" onclick="showTab('overview')"><span class="nav-ico">🌏</span>Overview</button>
+    <button class="nav-btn" id="nav-journey" onclick="showTab('journey')"><span class="nav-ico">📅</span>Journey</button>
+    <button class="nav-btn" id="nav-discover" onclick="showTab('discover')"><span class="nav-ico">💱</span>Discover</button>
+    <button class="nav-btn" id="nav-memories" onclick="showTab('memories')"><span class="nav-ico">📷</span>Memories</button>
+    <button class="nav-btn" id="nav-more" onclick="showTab('more')"><span class="nav-ico">⋯</span>More</button>
+  </nav>
+</div>
+
+<!-- Night Clock -->
+<div id="night-clock" onclick="closeNightClock()">
+  <div class="nc-time" id="nc-time">00:00</div>
+  <div class="nc-date" id="nc-date"></div>
+  <div class="nc-dest" id="nc-dest"></div>
+  <div class="nc-hint">Tap anywhere to close</div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════
+const CONFIG_KEY = 'trip_wizard_config';
+const NOTES_KEY  = 'trip_wizard_notes';
+const MEM_KEY    = 'trip_wizard_memories';
+
+let CFG = null;
+let pinEntry = '';
+let fxRates = null;
+let fxLoaded = false;
+
+// ── Stars ─────────────────────────────────
+(function() {
+  const c = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.5 + 0.5;
+    s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${(Math.random()*4+2).toFixed(1)}s;--o:${(Math.random()*.6+.2).toFixed(2)};animation-delay:${(Math.random()*4).toFixed(1)}s`;
+    c.appendChild(s);
+  }
+})();
+
+// ══════════════════════════════════════════
+// SETUP WIZARD
+// ══════════════════════════════════════════
+let setupDests = [];
+let showingDestForm = false;
+
+function step1Next() {
+  const tripName = document.getElementById('s1-tripName').value.trim();
+  const travellers = document.getElementById('s1-travellers').value.trim();
+  const dep = document.getElementById('s1-departure').value;
+  const ret = document.getElementById('s1-return').value;
+  const homeCity = document.getElementById('s1-homeCity').value.trim();
+  if (!tripName || !travellers || !dep || !ret || !homeCity) { showToast('Please fill all fields'); return; }
+  if (dep >= ret) { showToast('Return must be after departure'); return; }
+  document.getElementById('step1').style.display = 'none';
+  document.getElementById('step2').style.display = 'block';
+  document.getElementById('ssi1').classList.remove('active'); document.getElementById('ssi1').classList.add('done');
+  document.getElementById('ssi2').classList.add('active');
+  renderDestList();
+}
+
+function step2Back() {
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step1').style.display = 'block';
+  document.getElementById('ssi2').classList.remove('active');
+  document.getElementById('ssi1').classList.remove('done'); document.getElementById('ssi1').classList.add('active');
+}
+
+function step2Next() {
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step3').style.display = 'block';
+  document.getElementById('ssi2').classList.remove('active'); document.getElementById('ssi2').classList.add('done');
+  document.getElementById('ssi3').classList.add('active');
+}
+
+function step3Back() {
+  document.getElementById('step3').style.display = 'none';
+  document.getElementById('step2').style.display = 'block';
+  document.getElementById('ssi3').classList.remove('active');
+  document.getElementById('ssi2').classList.remove('done'); document.getElementById('ssi2').classList.add('active');
+}
+
+function showDestForm() {
+  document.getElementById('dest-form').style.display = 'block';
+  document.getElementById('add-dest-btn').style.display = 'none';
+}
+
+function cancelDestForm() {
+  document.getElementById('dest-form').style.display = 'none';
+  document.getElementById('add-dest-btn').style.display = 'flex';
+}
+
+function addDest() {
+  const name = document.getElementById('df-name').value.trim();
+  const emoji = document.getElementById('df-emoji').value.trim() || '📍';
+  const arrive = document.getElementById('df-arrive').value;
+  const depart = document.getElementById('df-depart').value;
+  const tz = document.getElementById('df-tz').value;
+  if (!name || !arrive || !depart) { showToast('Fill in all destination fields'); return; }
+  setupDests.push({ name, emoji, arrive, depart, tz });
+  document.getElementById('df-name').value = '';
+  document.getElementById('df-emoji').value = '';
+  document.getElementById('df-arrive').value = '';
+  document.getElementById('df-depart').value = '';
+  cancelDestForm();
+  renderDestList();
+}
+
+function renderDestList() {
+  const list = document.getElementById('dest-list');
+  if (!setupDests.length) { list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:12px">No destinations added yet</div>'; return; }
+  list.innerHTML = setupDests.map((d, i) => `
+    <div class="dest-item">
+      <div style="font-size:24px;flex-shrink:0">${esc(d.emoji)}</div>
+      <div class="dest-item-info">
+        <div class="dest-item-name">${esc(d.name)}</div>
+        <div class="dest-item-dates">${d.arrive} → ${d.depart}</div>
+      </div>
+      <button class="dest-remove" onclick="removeDest(${i})">✕</button>
+    </div>`).join('');
+}
+
+function removeDest(i) { setupDests.splice(i, 1); renderDestList(); }
+
+function finishSetup() {
+  const pin = document.getElementById('s3-pin').value.trim();
+  if (pin.length !== 4 || !/^\d{4}$/.test(pin)) { showToast('Please enter a 4-digit PIN'); return; }
+  const cfg = {
+    tripName:   document.getElementById('s1-tripName').value.trim(),
+    travellers: document.getElementById('s1-travellers').value.trim(),
+    departure:  document.getElementById('s1-departure').value,
+    returnDate: document.getElementById('s1-return').value,
+    homeCity:   document.getElementById('s1-homeCity').value.trim(),
+    currency:   document.getElementById('s1-currency').value,
+    pin,
+    agentName:  document.getElementById('s3-agentName').value.trim(),
+    agentPhone: document.getElementById('s3-agentPhone').value.trim(),
+    agentEmail: document.getElementById('s3-agentEmail').value.trim(),
+    ec1:        document.getElementById('s3-ec1').value.trim(),
+    ec2:        document.getElementById('s3-ec2').value.trim(),
+    destinations: setupDests,
+    setupAt: Date.now()
+  };
+  try { localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg)); } catch(e) {}
+  CFG = cfg;
+  document.getElementById('setup').style.display = 'none';
+  const sc = document.getElementById('setup-complete');
+  sc.style.display = 'flex';
+  document.getElementById('sc-title').textContent = 'BON VOYAGE!';
+  document.getElementById('sc-sub').textContent = cfg.tripName + '\n' + cfg.travellers + '\nYour dashboard is ready.';
+}
+
+function launchDashboard() {
+  document.getElementById('setup-complete').style.display = 'none';
+  showPinGate();
+}
+
+// ══════════════════════════════════════════
+// PIN GATE
+// ══════════════════════════════════════════
+function showPinGate() {
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('pin-gate').style.display = 'flex';
+  document.getElementById('pin-trip-name').textContent = CFG.tripName || '';
+  pinEntry = '';
+  updatePinDots();
+}
+
+function pinKey(k) {
+  if (pinEntry.length >= 4) return;
+  pinEntry += k;
+  updatePinDots();
+  if (pinEntry.length === 4) setTimeout(checkPin, 120);
+}
+
+function pinBack() { if (pinEntry.length) { pinEntry = pinEntry.slice(0,-1); updatePinDots(); } }
+function pinClear() { pinEntry = ''; updatePinDots(); document.getElementById('pin-error').textContent = ''; }
+
+function updatePinDots() {
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('pd'+i).classList.toggle('filled', i < pinEntry.length);
+  }
+}
+
+function checkPin() {
+  if (pinEntry === CFG.pin) {
+    document.getElementById('pin-gate').style.display = 'none';
+    initDashboard();
+    document.getElementById('app').style.display = 'block';
+  } else {
+    document.getElementById('pin-error').textContent = 'Incorrect PIN — try again';
+    pinEntry = ''; updatePinDots();
+    setTimeout(() => document.getElementById('pin-error').textContent = '', 2000);
+  }
+}
+
+// ══════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════
+function initDashboard() {
+  document.getElementById('hdr-trip').textContent = CFG.tripName || 'MY TRIP';
+  document.getElementById('hdr-travellers').textContent = CFG.travellers || '';
+  document.getElementById('fx-from-label').textContent = CFG.currency || 'NZD';
+  buildRoute();
+  buildJourney();
+  buildEmergency();
+  loadNotes();
+  loadMemories();
+  loadFX();
+  buildPhrases();
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+  updateDestHero();
+  updateTZClocks();
+  setInterval(updateTZClocks, 30000);
+  setInterval(updateNightClock, 1000);
+  setTimeout(loadWeather, 1000);
+}
+
+// ── Current Destination ───────────────────
+function getCurrentDest() {
+  if (!CFG) return null;
+  const now = new Date();
+  const dep = new Date(CFG.departure + 'T00:00:00');
+  const ret = new Date(CFG.returnDate + 'T23:59:59');
+  if (now < dep) return { name: CFG.homeCity + ' — Preparing for departure', emoji: '🏡', tz: 'Pacific/Auckland', sub: 'Get ready — the adventure begins soon!' };
+  if (now > ret) return { name: CFG.homeCity + ' — Welcome home!', emoji: '🏡', tz: 'Pacific/Auckland', sub: 'Trip complete. What a journey!' };
+  if (!CFG.destinations || !CFG.destinations.length) return { name: 'On your journey', emoji: '✈', tz: 'UTC', sub: '' };
+  for (const d of CFG.destinations) {
+    const a = new Date(d.arrive + 'T00:00:00');
+    const dp = new Date(d.depart + 'T23:59:59');
+    if (now >= a && now <= dp) return { name: d.name, emoji: d.emoji || '📍', tz: d.tz || 'UTC', sub: '' };
+  }
+  return { name: 'In transit', emoji: '✈', tz: 'UTC', sub: 'Between destinations' };
+}
+
+function updateDestHero() {
+  const d = getCurrentDest();
+  if (!d) return;
+  document.getElementById('dest-emoji').textContent = d.emoji;
+  document.getElementById('dest-where').textContent = d.name;
+  document.getElementById('dest-sub').textContent = d.sub || '';
+  const now = new Date();
+  try {
+    const localTime = now.toLocaleTimeString('en', { timeZone: d.tz, hour:'2-digit', minute:'2-digit', hour12:true });
+    document.getElementById('dest-localtime').textContent = '🕐 ' + localTime;
+  } catch(e) {}
+}
+
+// ── Route Bar ────────────────────────────
+function buildRoute() {
+  if (!CFG || !CFG.destinations || !CFG.destinations.length) return;
+  const stops = [];
+  stops.push({ name: CFG.homeCity, emoji: '🏡' });
+  CFG.destinations.forEach(d => stops.push({ name: d.name.split(',')[0], emoji: d.emoji }));
+  stops.push({ name: CFG.homeCity, emoji: '🏠' });
+  const html = stops.map((s, i) => {
+    const seg = i < stops.length - 1 ? `<div class="route-seg">✈</div>` : '';
+    return `<div class="route-stop"><div class="route-flag">${esc(s.emoji)}</div><div class="route-name">${esc(s.name)}</div></div>${seg}`;
+  }).join('');
+  document.getElementById('route-inner').innerHTML = html;
+}
+
+// ── TZ Clocks ────────────────────────────
+function updateTZClocks() {
+  const d = getCurrentDest();
+  const homeCity = CFG ? CFG.homeCity : 'Home';
+  const zones = [
+    { name: homeCity, tz: 'Pacific/Auckland', emoji: '🏡' }
+  ];
+  if (d && d.tz && d.tz !== 'Pacific/Auckland') zones.push({ name: d.name.split(',')[0], tz: d.tz, emoji: d.emoji || '📍' });
+  const now = new Date();
+  const html = zones.map(z => {
+    let t = '--:--';
+    try { t = now.toLocaleTimeString('en', { timeZone: z.tz, hour:'2-digit', minute:'2-digit', hour12:false }); } catch(e) {}
+    return `<div class="tz-clock"><div class="tz-flag">${esc(z.emoji)}</div><div class="tz-time">${t}</div><div class="tz-name">${esc(z.name)}</div></div>`;
+  }).join('');
+  document.getElementById('tz-strip').innerHTML = html;
+}
+
+// ── Countdown ────────────────────────────
+function updateCountdown() {
+  if (!CFG) return;
+  const now = new Date();
+  const dep = new Date(CFG.departure + 'T00:00:00');
+  const ret = new Date(CFG.returnDate + 'T23:59:59');
+  let target, statusText;
+
+  if (now < dep) { target = dep; statusText = '⏳ DEPARTURE IN'; }
+  else if (now <= ret) {
+    target = ret; statusText = '✈ TRAVELLING — HOME IN';
+    const pct = ((now - dep) / (ret - dep)) * 100;
+    const daysLeft = Math.ceil((ret - now) / 86400000);
+    document.getElementById('progress-card').style.display = 'block';
+    document.getElementById('ring-pct').textContent = Math.round(pct) + '%';
+    document.getElementById('ring-days-left').textContent = daysLeft + ' days left';
+    const circumference = 213.6;
+    document.getElementById('ring-progress').style.strokeDashoffset = circumference - (pct / 100) * circumference;
+    updateDestHero();
+  } else {
+    document.getElementById('cd-days').textContent = '0';
+    document.getElementById('cd-hrs').textContent = '00';
+    document.getElementById('cd-min').textContent = '00';
+    document.getElementById('cd-sec').textContent = '00';
+    document.getElementById('status-lbl').textContent = '🏡 TRIP COMPLETE — WELCOME HOME!';
+    return;
+  }
+
+  document.getElementById('status-lbl').textContent = statusText;
+  const diff = target - now;
+  document.getElementById('cd-days').textContent = Math.floor(diff / 86400000);
+  document.getElementById('cd-hrs').textContent  = String(Math.floor((diff % 86400000) / 3600000)).padStart(2,'0');
+  document.getElementById('cd-min').textContent  = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
+  document.getElementById('cd-sec').textContent  = String(Math.floor((diff % 60000) / 1000)).padStart(2,'0');
+}
+
+// ── Journey Timeline ─────────────────────
+function buildJourney() {
+  if (!CFG) return;
+  const now = new Date();
+  const items = [];
+  items.push({ date: CFG.departure, name: 'Depart ' + CFG.homeCity, note: 'Adventure begins!', emoji: '✈', type:'dep' });
+  (CFG.destinations || []).forEach(d => {
+    items.push({ date: d.arrive, name: d.name, note: d.arrive + ' — ' + d.depart, emoji: d.emoji || '📍', type:'dest' });
+  });
+  items.push({ date: CFG.returnDate, name: 'Return to ' + CFG.homeCity, note: 'Welcome home!', emoji: '🏡', type:'home' });
+
+  const todayStr = now.toISOString().slice(0,10);
+  const html = items.map((item, i) => {
+    const isToday = item.date === todayStr;
+    const isPast = item.date < todayStr;
+    const dotClass = isToday ? 'today' : isPast ? 'past' : '';
+    const cardClass = isToday ? 'today-card' : '';
+    const badge = isToday ? '<div class="tl-badge">TODAY</div>' : '';
+    return `<div class="tl-item" style="animation-delay:${i*40}ms">
+      <div class="tl-dot-col">
+        <div class="tl-dot ${dotClass}"></div>
+        ${i < items.length-1 ? '<div class="tl-line"></div>' : ''}
+      </div>
+      <div class="tl-card ${cardClass}">
+        <div class="tl-date">${item.date}</div>
+        <div class="tl-dest">${esc(item.emoji)} ${esc(item.name)}</div>
+        <div class="tl-note">${esc(item.note)}</div>
+        ${badge}
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('journey-list').innerHTML = html;
+}
+
+// ── Weather ──────────────────────────────
+function loadWeather() {
+  const d = getCurrentDest();
+  if (!d) return;
+  const city = d.name.split(',')[0].split('—')[0].trim();
+  const el = document.getElementById('dest-weather');
+  fetch('https://wttr.in/' + encodeURIComponent(city) + '?format=3')
+    .then(r => r.text())
+    .then(t => {
+      if (!t || t.trim().charAt(0) === '<') { el.textContent = '🌐 Connect for weather'; return; }
+      const clean = t.trim().replace(/^[^:]+:\s*/,'');
+      el.textContent = '🌤 ' + (clean || 'Weather unavailable');
+    })
+    .catch(() => { el.textContent = '🌐 Connect for weather'; });
+}
+
+// ── Currency ─────────────────────────────
+var fxCache = {};
+var fxCacheTs = 0;
+var TARGET_CURRENCIES = ['JPY','USD','CAD','AUD','GBP','EUR','SGD'];
+
+function loadFX() {
+  try {
+    const cached = JSON.parse(localStorage.getItem('twiz_fx') || 'null');
+    if (cached && cached.ts && Date.now() - cached.ts < 86400000) {
+      fxRates = cached.rates; fxLoaded = true; convertFX(); return;
+    }
+  } catch(e) {}
+  const from = (CFG && CFG.currency) || 'NZD';
+  const targets = TARGET_CURRENCIES.filter(c => c !== from).join(',');
+  fetch('https://api.frankfurter.app/latest?from=' + from + '&to=' + targets)
+    .then(r => r.json())
+    .then(d => {
+      fxRates = d.rates; fxLoaded = true;
+      try { localStorage.setItem('twiz_fx', JSON.stringify({ rates: fxRates, ts: Date.now(), date: d.date })); } catch(e) {}
+      document.getElementById('fx-updated').textContent = 'Rates updated: ' + (d.date || '');
+      convertFX();
+    })
+    .catch(() => { if (!fxLoaded) { fxRates = {JPY:88,USD:0.59,CAD:0.83,AUD:0.92,GBP:0.47,EUR:0.55,SGD:0.80}; fxLoaded = true; convertFX(); }});
+}
+
+function convertFX() {
+  const amount = parseFloat(document.getElementById('fx-amount').value) || 0;
+  if (!fxLoaded || !fxRates) return;
+  const from = (CFG && CFG.currency) || 'NZD';
+  const targets = TARGET_CURRENCIES.filter(c => c !== from);
+  const SYMBOLS = {NZD:'$',AUD:'$',USD:'$',CAD:'$',GBP:'£',EUR:'€',JPY:'¥',SGD:'$'};
+  const html = targets.filter(c => fxRates[c]).map(c => {
+    const val = (amount * fxRates[c]).toFixed(c === 'JPY' ? 0 : 2);
+    return `<div class="fx-result"><div class="fx-result-amount">${SYMBOLS[c]||''}${val}</div><div class="fx-result-label">${c}</div></div>`;
+  }).join('');
+  document.getElementById('fx-results').innerHTML = html || '<div style="color:var(--muted);font-size:13px">Rates loading...</div>';
+}
+
+// ── Phrases ──────────────────────────────
+function buildPhrases() {
+  const PHRASES = [
+    {en:'Thank you', note:'Always appreciated anywhere'},
+    {en:'Excuse me / Sorry', note:'Opens doors everywhere'},
+    {en:'How much does this cost?', note:'Essential for shopping'},
+    {en:'Where is the bathroom?', note:'Never go without knowing this'},
+    {en:'Do you speak English?', note:'Start conversations politely'},
+    {en:'I need a doctor', note:'Medical emergency phrase'},
+    {en:'Please call the police', note:'Emergency — say clearly'},
+    {en:'I am lost — can you help?', note:'Navigate with confidence'},
+    {en:'One ticket please', note:'For trains, buses, museums'},
+    {en:'Can I have the bill please?', note:'Restaurant essential'},
+  ];
+  document.getElementById('phrases-list').innerHTML = PHRASES.map(p => `
+    <div style="border-bottom:1px solid var(--border);padding:10px 4px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+      <div>
+        <div style="font-weight:700;font-size:14px;color:var(--cyan)">${esc(p.en)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(p.note)}</div>
+      </div>
+      <button onclick="showToast('Copied: ${esc(p.en)}')" style="background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);padding:4px 8px;cursor:pointer;font-size:11px;flex-shrink:0">📋</button>
+    </div>`).join('');
+}
+
+// ── Emergency Contacts ───────────────────
+function buildEmergency() {
+  if (!CFG) return;
+  const contacts = [];
+  if (CFG.agentName) contacts.push({ name: '✈ ' + CFG.agentName, phone: CFG.agentPhone, note: 'Your travel agent', email: CFG.agentEmail });
+  if (CFG.ec1) { const p = CFG.ec1.split('—'); contacts.push({ name: p[0].trim(), phone: p[1]?.trim() || '', note: 'Emergency contact 1' }); }
+  if (CFG.ec2) { const p = CFG.ec2.split('—'); contacts.push({ name: p[0].trim(), phone: p[1]?.trim() || '', note: 'Emergency contact 2' }); }
+  contacts.push(
+    { name: '🚨 International Emergency', phone: '112', note: 'Works in most countries' },
+    { name: '🏥 Local Emergency (NZ)', phone: '111', note: 'Police / Fire / Ambulance' }
+  );
+  document.getElementById('emergency-list').innerHTML = contacts.map(c => `
+    <div class="emg-card">
+      <div class="emg-name">${esc(c.name)}</div>
+      ${c.phone ? `<div class="emg-number">${esc(c.phone)}</div>` : ''}
+      <div class="emg-note">${esc(c.note || '')}</div>
+      ${c.phone ? `<a href="tel:${esc(c.phone)}" class="call-btn">📞 Call</a>` : ''}
+      ${c.email ? `<a href="mailto:${esc(c.email)}" class="call-btn" style="margin-left:8px;color:var(--cyan);border-color:rgba(0,230,255,.3)">✉ Email</a>` : ''}
+    </div>`).join('');
+}
+
+// ── Notes ────────────────────────────────
+function loadNotes() {
+  const n = localStorage.getItem(NOTES_KEY) || '';
+  document.getElementById('notes-area').value = n;
+}
+let noteTimer;
+function saveNotes() {
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(() => {
+    try { localStorage.setItem(NOTES_KEY, document.getElementById('notes-area').value); } catch(e) {}
+    const s = document.getElementById('notes-saved');
+    s.textContent = '✓ Saved';
+    setTimeout(() => s.textContent = '', 1500);
+  }, 600);
+}
+
+// ── Memories ─────────────────────────────
+function loadMemories() {
+  try {
+    const mems = JSON.parse(localStorage.getItem(MEM_KEY) || '[]');
+    renderMemories(mems);
+  } catch(e) {}
+}
+function handleMemUpload(e) {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+  try {
+    const existing = JSON.parse(localStorage.getItem(MEM_KEY) || '[]');
+    let loaded = 0;
+    files.forEach(f => {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        existing.push({ url: ev.target.result, date: new Date().toISOString().slice(0,10), name: f.name });
+        loaded++;
+        if (loaded === files.length) {
+          try { localStorage.setItem(MEM_KEY, JSON.stringify(existing)); } catch(e) {}
+          renderMemories(existing);
+          showToast('✓ ' + files.length + ' photo' + (files.length>1?'s':'') + ' added');
+        }
+      };
+      reader.readAsDataURL(f);
+    });
+  } catch(e) { showToast('Storage full — clear some photos'); }
+}
+function renderMemories(mems) {
+  const grid = document.getElementById('mem-grid');
+  if (!mems.length) { grid.innerHTML = '<div class="mem-empty">📷 No memories yet<br><span style="font-size:12px">Tap above to add your first photo</span></div>'; return; }
+  grid.innerHTML = mems.map((m,i) => `<div class="mem-item"><img src="${m.url}" loading="lazy" alt="${esc(m.name||'')}"></div>`).join('');
+}
+
+// ── Night Clock ──────────────────────────
+function openNightClock() {
+  document.getElementById('night-clock').style.display = 'flex';
+  try { document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); } catch(e) {}
+  updateNightClock();
+}
+function closeNightClock() { document.getElementById('night-clock').style.display = 'none'; }
+function updateNightClock() {
+  if (document.getElementById('night-clock').style.display === 'none') return;
+  const d = getCurrentDest();
+  const tz = d ? d.tz : 'UTC';
+  const now = new Date();
+  let h='--:--', date='', dest='';
+  try {
+    h = now.toLocaleTimeString('en', { timeZone: tz, hour:'2-digit', minute:'2-digit', hour12:false });
+    date = now.toLocaleDateString('en', { timeZone: tz, weekday:'long', day:'numeric', month:'long' });
+    dest = (d ? d.name.split(',')[0] : '').toUpperCase();
+  } catch(e) {}
+  document.getElementById('nc-time').textContent = h;
+  document.getElementById('nc-date').textContent = date;
+  document.getElementById('nc-dest').textContent = dest;
+}
+
+// ── Tab navigation ───────────────────────
+let currentTab = 'overview';
+function showTab(id) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('pane-' + id).classList.add('active');
+  document.getElementById('nav-' + id).classList.add('active');
+  currentTab = id;
+}
+
+// ── Toast ─────────────────────────────────
+function showToast(msg, dur) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur || 2500);
+}
+
+// ── Utils ─────────────────────────────────
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function reconfigure() {
+  if (!confirm('Reset your dashboard and redo the setup?')) return;
+  try { localStorage.removeItem(CONFIG_KEY); } catch(e) {}
+  location.reload();
+}
+
+// ══════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════
+(function boot() {
+  try { CFG = JSON.parse(localStorage.getItem(CONFIG_KEY) || 'null'); } catch(e) { CFG = null; }
+  if (CFG) {
+    document.getElementById('setup').style.display = 'none';
+    showPinGate();
+  }
+  // else: setup wizard is shown by default
+})();
+</script>
+</body>
+</html>
