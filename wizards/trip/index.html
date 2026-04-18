@@ -170,22 +170,46 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16
 .cd-sep{font-size:28px;color:rgba(0,230,255,.3);font-weight:300;align-self:flex-start;margin-top:14px}
 .trip-status-lbl{width:100%;text-align:center;font-size:11px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
 
-/* ── DEST HERO ── */
-.dest-hero{text-align:center;padding:28px 20px;border-radius:14px;background:linear-gradient(135deg,rgba(10,15,46,.95),rgba(13,16,53,.95));border:1px solid var(--border);margin-bottom:14px;position:relative;overflow:hidden}
-.dest-hero-bg{font-size:80px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:.07;pointer-events:none}
-.dest-hero-label{font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
-.dest-hero-where{font-size:22px;font-weight:900;color:var(--cyan);text-shadow:var(--glow-c);margin-bottom:4px}
-.dest-hero-sub{font-size:13px;color:var(--muted)}
-.dest-info-row{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
-.dest-chip{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;display:flex;align-items:center;gap:5px}
-
-/* ── ROUTE BAR ── */
-.route-bar{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:14px;overflow-x:auto}
-.route-inner{display:flex;align-items:center;gap:4px;min-width:max-content}
-.route-stop{display:flex;flex-direction:column;align-items:center;gap:3px;padding:0 6px}
-.route-flag{font-size:22px}
-.route-name{font-size:9px;color:var(--muted);letter-spacing:.5px;text-align:center;max-width:60px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.route-seg{display:flex;align-items:center;padding:0 4px;color:rgba(0,230,255,.4);font-size:16px}
+/* ── MISSION BRIEF (replaces dest-hero + route-bar) ── */
+#missionBrief{
+  background:linear-gradient(135deg,rgba(0,8,32,.92) 0%,rgba(18,0,42,.88) 100%);
+  border:1px solid rgba(0,230,255,.22);border-radius:14px;
+  padding:14px 16px 12px;margin-bottom:14px;
+  box-shadow:0 0 24px rgba(0,230,255,.07),inset 0 1px 0 rgba(0,230,255,.1);
+  position:relative;overflow:hidden;
+}
+#missionBrief::before{content:'';position:absolute;inset:0;border-radius:14px;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,230,255,.012) 3px,rgba(0,230,255,.012) 4px)}
+.mb-top-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.mb-phase-pill{display:inline-flex;align-items:center;gap:7px;border-radius:20px;padding:3px 12px 3px 8px;
+  font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;transition:.3s}
+.mb-phase-pill.phase-pre    {color:#ffd060;border:1px solid rgba(255,208,96,.45);background:rgba(255,208,96,.09)}
+.mb-phase-pill.phase-transit{color:var(--cyan);border:1px solid rgba(0,230,255,.4);background:rgba(0,230,255,.1)}
+.mb-phase-pill.phase-sea    {color:#60c8ff;border:1px solid rgba(96,200,255,.4);background:rgba(96,200,255,.08)}
+.mb-phase-pill.phase-done   {color:#00ff88;border:1px solid rgba(0,255,136,.4);background:rgba(0,255,136,.08)}
+.mb-pulse-dot{width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 6px currentColor;
+  flex-shrink:0;animation:mbDotPulse 1.6s ease-in-out infinite}
+@keyframes mbDotPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.65)}}
+.mb-route-dots{display:flex;align-items:center;overflow-x:auto;scrollbar-width:none;padding:2px 0}
+.mb-route-dots::-webkit-scrollbar{display:none}
+.mb-rdot-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0}
+.mb-rdot{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.18);transition:.4s}
+.mb-rdot-lbl{font-size:8px;font-weight:700;letter-spacing:.5px;color:rgba(255,255,255,.3);text-transform:uppercase;white-space:nowrap}
+.mb-rdot-wrap.mb-past .mb-rdot{background:#00ff88;border-color:#00ff88;box-shadow:0 0 5px rgba(0,255,136,.5)}
+.mb-rdot-wrap.mb-past .mb-rdot-lbl{color:rgba(0,255,136,.8)}
+.mb-rdot-wrap.mb-current .mb-rdot{width:12px;height:12px;background:var(--cyan);border-color:var(--cyan);
+  box-shadow:0 0 10px rgba(0,230,255,.9),0 0 22px rgba(0,230,255,.4);animation:mbCurPulse 1.8s ease-in-out infinite}
+.mb-rdot-wrap.mb-current .mb-rdot-lbl{color:#fff;font-size:9px}
+@keyframes mbCurPulse{0%,100%{box-shadow:0 0 8px rgba(0,230,255,.8),0 0 18px rgba(0,230,255,.3)}50%{box-shadow:0 0 16px rgba(0,230,255,1),0 0 34px rgba(0,230,255,.6)}}
+.mb-rseg{width:16px;min-width:10px;height:2px;background:rgba(255,255,255,.1);flex-shrink:0;margin-bottom:14px}
+.mb-rseg.seg-past{background:linear-gradient(90deg,#00ff88,rgba(0,255,136,.4))}
+.mb-rseg.seg-cur {background:linear-gradient(90deg,var(--cyan),rgba(255,255,255,.1))}
+#mb-title{font-size:clamp(15px,4vw,19px);font-weight:900;color:#fff;line-height:1.2;margin-bottom:2px}
+#mb-sub{font-size:12px;color:var(--muted);margin-bottom:6px}
+#mb-tip{font-size:11px;color:rgba(255,255,255,.32);font-style:italic}
+#mb-tip.tip-action{color:rgba(255,208,96,.72)}
+.mb-info-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.mb-chip{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:4px 10px;font-size:11px;display:flex;align-items:center;gap:4px;color:var(--muted)}
 
 /* ── TZ STRIP ── */
 .tz-strip{display:flex;gap:6px;overflow-x:auto;padding:2px;margin-bottom:14px}
@@ -503,18 +527,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16
       </div>
     </div>
 
-    <div class="dest-hero" id="dest-hero">
-      <div class="dest-hero-bg" id="dest-emoji">✈</div>
-      <div class="dest-hero-label">RIGHT NOW</div>
-      <div class="dest-hero-where" id="dest-where">Loading...</div>
-      <div class="dest-hero-sub" id="dest-sub"></div>
-      <div class="dest-info-row">
-        <div class="dest-chip" id="dest-weather">🌤 Fetching weather...</div>
-        <div class="dest-chip" id="dest-localtime">🕐 Local time...</div>
+    <div id="missionBrief">
+      <div class="mb-top-row">
+        <div class="mb-phase-pill phase-pre" id="mb-phase-pill">
+          <span class="mb-pulse-dot"></span><span id="mb-phase-lbl">PRE-DEPARTURE</span>
+        </div>
+        <div class="mb-route-dots" id="mb-route-dots"><!-- built by buildMissionBrief() --></div>
+      </div>
+      <div id="mb-title">Loading...</div>
+      <div id="mb-sub"></div>
+      <div id="mb-tip" class="tip-action"></div>
+      <div class="mb-info-row">
+        <div class="mb-chip" id="dest-localtime">🕐 Local time...</div>
+        <div class="mb-chip" id="dest-weather">🌤 Weather...</div>
       </div>
     </div>
-
-    <div class="route-bar" id="route-bar"><div class="route-inner" id="route-inner">Loading route...</div></div>
 
     <div class="tz-strip" id="tz-strip"></div>
 
@@ -808,7 +835,7 @@ function initDashboard() {
   document.getElementById('hdr-trip').textContent = CFG.tripName || 'MY TRIP';
   document.getElementById('hdr-travellers').textContent = CFG.travellers || '';
   document.getElementById('fx-from-label').textContent = CFG.currency || 'NZD';
-  buildRoute();
+  buildMissionBrief();
   buildJourney();
   buildEmergency();
   loadNotes();
@@ -841,32 +868,81 @@ function getCurrentDest() {
   return { name: 'In transit', emoji: '✈', tz: 'UTC', sub: 'Between destinations' };
 }
 
-function updateDestHero() {
-  const d = getCurrentDest();
-  if (!d) return;
-  document.getElementById('dest-emoji').textContent = d.emoji;
-  document.getElementById('dest-where').textContent = d.name;
-  document.getElementById('dest-sub').textContent = d.sub || '';
-  const now = new Date();
-  try {
-    const localTime = now.toLocaleTimeString('en', { timeZone: d.tz, hour:'2-digit', minute:'2-digit', hour12:true });
-    document.getElementById('dest-localtime').textContent = '🕐 ' + localTime;
-  } catch(e) {}
-}
+// ── MISSION BRIEF (replaces updateDestHero + buildRoute) ─────────
+function buildMissionBrief() {
+  if (!CFG) return;
+  const pill  = document.getElementById('mb-phase-pill');
+  const pLbl  = document.getElementById('mb-phase-lbl');
+  const title = document.getElementById('mb-title');
+  const sub   = document.getElementById('mb-sub');
+  const tip   = document.getElementById('mb-tip');
+  const dots  = document.getElementById('mb-route-dots');
+  if (!pill) return;
 
-// ── Route Bar ────────────────────────────
-function buildRoute() {
-  if (!CFG || !CFG.destinations || !CFG.destinations.length) return;
-  const stops = [];
-  stops.push({ name: CFG.homeCity, emoji: '🏡' });
-  CFG.destinations.forEach(d => stops.push({ name: d.name.split(',')[0], emoji: d.emoji }));
-  stops.push({ name: CFG.homeCity, emoji: '🏠' });
-  const html = stops.map((s, i) => {
-    const seg = i < stops.length - 1 ? `<div class="route-seg">✈</div>` : '';
-    return `<div class="route-stop"><div class="route-flag">${esc(s.emoji)}</div><div class="route-name">${esc(s.name)}</div></div>${seg}`;
-  }).join('');
-  document.getElementById('route-inner').innerHTML = html;
+  const now = new Date();
+  const dep = new Date(CFG.departure + 'T00:00:00');
+  const ret = new Date(CFG.returnDate + 'T23:59:59');
+  const d   = getCurrentDest();
+
+  // Build route dots from CFG
+  if (dots && CFG.destinations) {
+    const stops = [{ name: CFG.homeCity || 'Home', emoji: '🏡' }];
+    CFG.destinations.forEach(ds => stops.push({ name: (ds.name||'').split(',')[0], emoji: ds.emoji || '📍' }));
+    stops.push({ name: CFG.homeCity || 'Home', emoji: '🏠' });
+
+    // Determine current stop index
+    let curStop = 0;
+    if (now >= dep && now <= ret && CFG.destinations) {
+      const today = now.toISOString().slice(0,10);
+      CFG.destinations.forEach((ds, i) => {
+        if (today >= ds.arrive) curStop = i + 1;
+      });
+      if (now > ret) curStop = stops.length - 1;
+    } else if (now > ret) { curStop = stops.length - 1; }
+
+    dots.innerHTML = stops.map((s, i) => {
+      const cls = i < curStop ? 'mb-past' : i === curStop ? 'mb-current' : '';
+      const segCls = i < curStop ? 'seg-past' : i === curStop ? 'seg-cur' : '';
+      const seg = i < stops.length - 1 ? `<div class="mb-rseg ${segCls}"></div>` : '';
+      return `<div class="mb-rdot-wrap ${cls}"><div class="mb-rdot"></div><div class="mb-rdot-lbl">${esc(s.name.slice(0,5))}</div></div>${seg}`;
+    }).join('');
+  }
+
+  // Phase + content
+  if (now < dep) {
+    const dLeft = Math.ceil((dep - now) / 86400000);
+    pill.className = 'mb-phase-pill phase-pre'; pLbl.textContent = 'PRE-DEPARTURE';
+    title.textContent = (CFG.homeCity || 'Home') + ' — Ready to go';
+    sub.textContent   = dLeft === 1 ? 'Departing tomorrow! 🎉' : 'Departing in ' + dLeft + ' day' + (dLeft===1?'':'s');
+    tip.textContent   = dLeft <= 7 ? '🎒 Final prep — check your packing list!' : '✅ Review documents & checklist when ready';
+    tip.className = 'tip-action';
+  } else if (now > ret) {
+    pill.className = 'mb-phase-pill phase-done'; pLbl.textContent = 'TRIP COMPLETE';
+    title.textContent = '🏠 Welcome home!';
+    sub.textContent   = 'Trip complete — what a journey!';
+    tip.textContent   = '📸 Add your memories in the Memories tab';
+    tip.className = '';
+  } else {
+    const tripDay = Math.floor((now - dep) / 86400000) + 1;
+    const totalDays = Math.ceil((ret - dep) / 86400000);
+    const phaseTxt = d ? (d.name.includes('transit') ? 'IN TRANSIT' : d.name.toUpperCase().includes('SEA') ? 'AT SEA' : 'ON LOCATION') : 'TRAVELLING';
+    pill.className = 'mb-phase-pill phase-transit'; pLbl.textContent = phaseTxt;
+    title.textContent = d ? d.name : 'On your journey';
+    sub.textContent   = 'Day ' + tripDay + ' of ' + totalDays + ' · ' + now.toLocaleDateString('en',{weekday:'short',day:'numeric',month:'short'});
+    tip.textContent   = d && d.sub ? d.sub : '';
+    tip.className = '';
+  }
+
+  // Local time chip
+  if (d && d.tz) {
+    try {
+      const lt = now.toLocaleTimeString('en',{timeZone:d.tz,hour:'2-digit',minute:'2-digit',hour12:true});
+      const ltEl = document.getElementById('dest-localtime');
+      if (ltEl) ltEl.textContent = '🕐 ' + lt;
+    } catch(e) {}
+  }
 }
+function updateDestHero() { buildMissionBrief(); } // keep compat ref
 
 // ── TZ Clocks ────────────────────────────
 function updateTZClocks() {
