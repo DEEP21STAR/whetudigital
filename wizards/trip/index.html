@@ -168,32 +168,30 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16
 .cd-lbl{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:5px}
 .cd-sep{font-size:28px;color:rgba(0,230,255,.3);font-weight:300;align-self:flex-start;margin-top:14px}
 /* ── SPLIT-FLAP (SOLARI BOARD) ── */
-.sf-group{display:flex;gap:3px;justify-content:center;perspective:220px}
 .sf-card{
-  position:relative;width:42px;height:60px;
-  font-size:36px;font-weight:900;font-variant-numeric:tabular-nums;
-  background:rgba(0,12,40,.92);
+  position:relative;width:70px;height:82px;
+  background:#000e22;
   border:1px solid rgba(0,230,255,.45);
-  border-radius:6px;
-  box-shadow:0 0 12px rgba(0,230,255,.3),inset 0 1px 0 rgba(255,255,255,.06);
-  overflow:hidden;transform-style:preserve-3d;
+  border-radius:10px;
+  box-shadow:0 0 18px rgba(0,230,255,.22),inset 0 1px 0 rgba(255,255,255,.07);
+  overflow:hidden;
+  perspective:600px;
+  margin:0 auto;
 }
-.sf-card::after{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.85);box-shadow:0 0 3px rgba(0,230,255,.2);z-index:10}
-.sf-card::before{content:'';position:absolute;left:0;right:0;top:0;height:30px;background:linear-gradient(180deg,rgba(255,255,255,.06) 0%,transparent 100%);pointer-events:none;z-index:11}
-.sf-top-static{position:absolute;top:0;left:0;right:0;height:30px;overflow:hidden;display:flex;align-items:flex-end;justify-content:center}
-.sf-top-static span{display:block;color:var(--cyan);text-shadow:0 0 14px rgba(0,230,255,.9);line-height:60px;height:60px}
-.sf-bottom-bg{position:absolute;bottom:0;left:0;right:0;height:30px;overflow:hidden;display:flex;align-items:flex-start;justify-content:center;background:rgba(0,6,24,.6)}
-.sf-bottom-bg span{display:block;color:rgba(0,200,230,.75);text-shadow:0 0 10px rgba(0,230,255,.5);line-height:60px;height:60px;margin-top:-30px}
-.sf-flip-top{position:absolute;top:0;left:0;right:0;height:30px;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;transform-origin:bottom center;backface-visibility:hidden;background:rgba(0,12,40,.92);border-radius:6px 6px 0 0;z-index:5}
-.sf-flip-top span{display:block;color:var(--cyan);text-shadow:0 0 14px rgba(0,230,255,.9);line-height:60px;height:60px}
-.sf-flip-bottom{position:absolute;bottom:0;left:0;right:0;height:30px;overflow:hidden;display:flex;align-items:flex-start;justify-content:center;transform-origin:top center;backface-visibility:hidden;background:rgba(0,8,30,.92);border-radius:0 0 6px 6px;transform:rotateX(90deg);z-index:5}
-.sf-flip-bottom span{display:block;color:rgba(0,200,230,.75);text-shadow:0 0 10px rgba(0,230,255,.5);line-height:60px;height:60px;margin-top:-30px}
-@keyframes sfFlipTop{0%{transform:rotateX(0deg)}100%{transform:rotateX(-90deg)}}
-@keyframes sfFlipBottom{0%{transform:rotateX(90deg)}100%{transform:rotateX(0deg)}}
-.sf-card.flipping .sf-flip-top{animation:sfFlipTop .13s ease-in forwards}
-.sf-card.flipping .sf-flip-bottom{animation:sfFlipBottom .13s ease-out .12s forwards}
-#sfMuteBtn{background:rgba(0,230,255,.08);border:1px solid rgba(0,230,255,.25);color:var(--cyan);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;transition:.15s;letter-spacing:1px;align-self:center}
-#sfMuteBtn:hover{background:rgba(0,230,255,.18)}
+.sf-card::after{content:'';position:absolute;left:0;right:0;top:50%;height:2px;background:rgba(0,0,0,.9);box-shadow:0 0 5px rgba(0,230,255,.1);z-index:20;pointer-events:none}
+.sf-card::before{content:'';position:absolute;left:0;right:0;top:0;height:41px;background:linear-gradient(180deg,rgba(255,255,255,.05) 0%,transparent 100%);pointer-events:none;z-index:21}
+.sf-upper{position:absolute;top:0;left:0;right:0;height:41px;overflow:hidden}
+.sf-upper span{display:block;width:100%;height:82px;line-height:82px;text-align:center;font-size:46px;font-weight:900;color:var(--cyan);text-shadow:0 0 18px rgba(0,230,255,.9);font-variant-numeric:tabular-nums}
+.sf-lower{position:absolute;bottom:0;left:0;right:0;height:41px;overflow:hidden;background:rgba(0,6,20,.35)}
+.sf-lower span{display:block;width:100%;height:82px;line-height:82px;text-align:center;margin-top:-41px;font-size:46px;font-weight:900;color:rgba(0,200,230,.8);text-shadow:0 0 12px rgba(0,230,255,.55);font-variant-numeric:tabular-nums}
+.sf-flap-top{position:absolute;top:0;left:0;right:0;height:41px;overflow:hidden;transform-origin:bottom center;backface-visibility:hidden;background:#000e22;border-radius:10px 10px 0 0;z-index:10}
+.sf-flap-top span{display:block;width:100%;height:82px;line-height:82px;text-align:center;font-size:46px;font-weight:900;color:var(--cyan);text-shadow:0 0 18px rgba(0,230,255,.9);font-variant-numeric:tabular-nums}
+.sf-flap-bot{position:absolute;bottom:0;left:0;right:0;height:41px;overflow:hidden;transform-origin:top center;backface-visibility:hidden;background:rgba(0,4,16,.95);border-radius:0 0 10px 10px;z-index:10;transform:rotateX(90deg)}
+.sf-flap-bot span{display:block;width:100%;height:82px;line-height:82px;text-align:center;margin-top:-41px;font-size:46px;font-weight:900;color:rgba(0,200,230,.8);text-shadow:0 0 12px rgba(0,230,255,.55);font-variant-numeric:tabular-nums}
+@keyframes sfFlapOut{0%{transform:rotateX(0deg)}100%{transform:rotateX(-90deg)}}
+@keyframes sfFlapIn {0%{transform:rotateX(90deg)}100%{transform:rotateX(0deg)}}
+.sf-card.flipping .sf-flap-top{animation:sfFlapOut .18s ease-in forwards}
+.sf-card.flipping .sf-flap-bot{animation:sfFlapIn  .18s ease-out .16s forwards}
 .trip-status-lbl{width:100%;text-align:center;font-size:11px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
 
 /* ── MISSION BRIEF (replaces dest-hero + route-bar) ── */
@@ -544,37 +542,24 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16
       <div class="trip-status-lbl" id="status-lbl">DEPARTURE IN</div>
       <div class="countdown-bar">
         <div class="cd-tile">
-          <div class="sf-group" id="sf-days">
-            <div class="sf-card" id="sf-days_d0"><div class="sf-top-static"><span>0</span></div><div class="sf-flip-top"><span>0</span></div><div class="sf-bottom-bg"><span>0</span></div><div class="sf-flip-bottom"><span>0</span></div></div>
-            <div class="sf-card" id="sf-days_d1"><div class="sf-top-static"><span>0</span></div><div class="sf-flip-top"><span>0</span></div><div class="sf-bottom-bg"><span>0</span></div><div class="sf-flip-bottom"><span>0</span></div></div>
-          </div>
+          <div class="sf-card" id="sf-days"><div class="sf-upper"><span>10</span></div><div class="sf-lower"><span>10</span></div><div class="sf-flap-top"><span>10</span></div><div class="sf-flap-bot"><span>10</span></div></div>
           <div class="cd-lbl">Days</div>
         </div>
         <div class="cd-sep">:</div>
         <div class="cd-tile">
-          <div class="sf-group" id="sf-hrs">
-            <div class="sf-card" id="sf-hrs_d0"><div class="sf-top-static"><span>0</span></div><div class="sf-flip-top"><span>0</span></div><div class="sf-bottom-bg"><span>0</span></div><div class="sf-flip-bottom"><span>0</span></div></div>
-            <div class="sf-card" id="sf-hrs_d1"><div class="sf-top-static"><span>0</span></div><div class="sf-flip-top"><span>0</span></div><div class="sf-bottom-bg"><span>0</span></div><div class="sf-flip-bottom"><span>0</span></div></div>
-          </div>
+          <div class="sf-card" id="sf-hrs"><div class="sf-upper"><span>00</span></div><div class="sf-lower"><span>00</span></div><div class="sf-flap-top"><span>00</span></div><div class="sf-flap-bot"><span>00</span></div></div>
           <div class="cd-lbl">Hrs</div>
         </div>
         <div class="cd-sep">:</div>
         <div class="cd-tile">
-          <div class="sf-group" id="sf-min">
-            <div class="sf-card" id="sf-min_d0"><div class="sf-top-static"><span>0</span></div><div class="sf-flip-top"><span>0</span></div><div class="sf-bottom-bg"><span>0</span></div><div class="sf-flip-bottom"><span>0</span></div></div>
-            <div class="sf-card" id="sf-min_d1"><div class="sf-top-static"><span>0</span></div><div class="sf-flip-top"><span>0</span></div><div class="sf-bottom-bg"><span>0</span></div><div class="sf-flip-bottom"><span>0</span></div></div>
-          </div>
+          <div class="sf-card" id="sf-min"><div class="sf-upper"><span>00</span></div><div class="sf-lower"><span>00</span></div><div class="sf-flap-top"><span>00</span></div><div class="sf-flap-bot"><span>00</span></div></div>
           <div class="cd-lbl">Min</div>
         </div>
         <div class="cd-sep">:</div>
         <div class="cd-tile">
-          <div class="sf-group" id="sf-sec">
-            <div class="sf-card" id="sf-sec_d0"><div class="sf-top-static"><span>0</span></div><div class="sf-flip-top"><span>0</span></div><div class="sf-bottom-bg"><span>0</span></div><div class="sf-flip-bottom"><span>0</span></div></div>
-            <div class="sf-card" id="sf-sec_d1"><div class="sf-top-static"><span>0</span></div><div class="sf-flip-top"><span>0</span></div><div class="sf-bottom-bg"><span>0</span></div><div class="sf-flip-bottom"><span>0</span></div></div>
-          </div>
+          <div class="sf-card" id="sf-sec"><div class="sf-upper"><span>00</span></div><div class="sf-lower"><span>00</span></div><div class="sf-flap-top"><span>00</span></div><div class="sf-flap-bot"><span>00</span></div></div>
           <div class="cd-lbl">Sec</div>
         </div>
-        <button id="sfMuteBtn" onclick="sfToggleMute()" title="Toggle flip sound">🔊</button>
       </div>
     </div>
 
@@ -1013,51 +998,29 @@ function updateTZClocks() {
 }
 
 // ── Split-flap engine ────────────────────
-var _sfAudioCtx = null, _sfMuted = false, _sfPrev = {};
-function sfGetCtx() {
-  if (!_sfAudioCtx) { try { _sfAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
-  return _sfAudioCtx;
+var _sfPrev = {};
+function sfFlip(cardId, oldVal, newVal) {
+  const card = document.getElementById(cardId); if (!card) return;
+  const ft = card.querySelector('.sf-flap-top span');
+  const fb = card.querySelector('.sf-flap-bot span');
+  const up = card.querySelector('.sf-upper span');
+  const lo = card.querySelector('.sf-lower span');
+  ft.textContent = oldVal; fb.textContent = newVal;
+  up.textContent = newVal; lo.textContent = newVal;
+  card.classList.remove('flipping');
+  void card.offsetWidth;
+  card.classList.add('flipping');
+  setTimeout(() => card.classList.remove('flipping'), 500);
 }
-function sfTick() {
-  if (_sfMuted) return;
-  var ctx = sfGetCtx(); if (!ctx) return;
-  try {
-    var buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.009), ctx.sampleRate);
-    var d = buf.getChannelData(0);
-    for (var i = 0; i < d.length; i++) d[i] = (Math.random()*2-1)*(1-i/d.length);
-    var src = ctx.createBufferSource(); src.buffer = buf;
-    var g = ctx.createGain(); g.gain.value = 0.1;
-    src.connect(g); g.connect(ctx.destination); src.start();
-  } catch(e) {}
-}
-function sfToggleMute() {
-  _sfMuted = !_sfMuted;
-  var btn = document.getElementById('sfMuteBtn');
-  if (btn) btn.textContent = _sfMuted ? '🔇' : '🔊';
-}
-function sfFlipCell(cellId, oldCh, newCh, delay) {
-  var card = document.getElementById(cellId); if (!card) return;
-  var ts = card.querySelector('.sf-top-static span');
-  var ft = card.querySelector('.sf-flip-top span');
-  var bb = card.querySelector('.sf-bottom-bg span');
-  var fb = card.querySelector('.sf-flip-bottom span');
-  if (!ts) return;
-  setTimeout(function() {
-    sfTick();
-    ft.textContent = oldCh; fb.textContent = newCh;
-    ts.textContent = newCh; bb.textContent = newCh;
-    card.classList.remove('flipping');
-    void card.offsetWidth;
-    card.classList.add('flipping');
-    setTimeout(function() { card.classList.remove('flipping'); }, 350);
-  }, delay);
-}
-function sfSetValue(groupId, newVal) {
-  var padded = (newVal.length < 2 ? '0' + newVal : newVal).slice(-2);
-  var prev = _sfPrev[groupId] || '00';
-  _sfPrev[groupId] = padded;
-  if (padded[1] !== prev[1]) sfFlipCell(groupId + '_d1', prev[1], padded[1], 0);
-  if (padded[0] !== prev[0]) sfFlipCell(groupId + '_d0', prev[0], padded[0], 50);
+function sfSet(cardId, newVal) {
+  const prev = _sfPrev[cardId];
+  if (prev === undefined) {
+    const card = document.getElementById(cardId);
+    if (card) card.querySelectorAll('span').forEach(s => s.textContent = newVal);
+  } else if (prev !== newVal) {
+    sfFlip(cardId, prev, newVal);
+  }
+  _sfPrev[cardId] = newVal;
 }
 
 // ── Countdown ────────────────────────────
@@ -1080,18 +1043,18 @@ function updateCountdown() {
     document.getElementById('ring-progress').style.strokeDashoffset = circumference - (pct / 100) * circumference;
     updateDestHero();
   } else {
-    sfSetValue('sf-days','00'); sfSetValue('sf-hrs','00');
-    sfSetValue('sf-min','00');  sfSetValue('sf-sec','00');
+    sfSet('sf-days','0'); sfSet('sf-hrs','00');
+    sfSet('sf-min','00'); sfSet('sf-sec','00');
     document.getElementById('status-lbl').textContent = '🏡 TRIP COMPLETE — WELCOME HOME!';
     return;
   }
 
   document.getElementById('status-lbl').textContent = statusText;
   const diff = target - now;
-  sfSetValue('sf-days', String(Math.floor(diff / 86400000)).padStart(2,'0'));
-  sfSetValue('sf-hrs',  String(Math.floor((diff % 86400000) / 3600000)).padStart(2,'0'));
-  sfSetValue('sf-min',  String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0'));
-  sfSetValue('sf-sec',  String(Math.floor((diff % 60000) / 1000)).padStart(2,'0'));
+  sfSet('sf-days', String(Math.floor(diff / 86400000)));
+  sfSet('sf-hrs',  String(Math.floor((diff % 86400000) / 3600000)).padStart(2,'0'));
+  sfSet('sf-min',  String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0'));
+  sfSet('sf-sec',  String(Math.floor((diff % 60000) / 1000)).padStart(2,'0'));
 }
 
 // ── Journey Timeline ─────────────────────
