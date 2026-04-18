@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<!--
+  Property Manager Wizard — Whetū Digital
+  Copyright © 2026 Whetū Digital. All rights reserved.
+  Commercial product — not for redistribution.
+  Built by Claude Code for Deep (Whetū Digital).
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Property Manager — Whetū Digital</title>
+<style>
+:root{
+  --bg:#09090f;--card:#111118;--card2:#18181f;--border:#252535;
+  --accent:#22c55e;--accent2:#16a34a;--blue:#3b82f6;--yellow:#f59e0b;
+  --red:#ef4444;--purple:#a855f7;--teal:#14b8a6;--orange:#f97316;
+  --text:#e2e8f0;--sub:#94a3b8;--font:'Segoe UI',system-ui,sans-serif;
+  --r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden}
+
+/* GATE */
+#gate{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
+.gate-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:40px 32px;text-align:center;max-width:340px;width:90%}
+.gate-logo{font-size:2.4rem;margin-bottom:8px}
+.gate-title{font-size:1.1rem;font-weight:700;margin-bottom:4px}
+.gate-sub{font-size:.8rem;color:var(--sub);margin-bottom:28px}
+.pin-dots{display:flex;gap:14px;justify-content:center;margin-bottom:24px}
+.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);transition:.2s;background:transparent}
+.pin-dot.filled{background:var(--accent);border-color:var(--accent)}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:220px;margin:0 auto}
+.pin-btn{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;font-size:1.1rem;font-weight:600;cursor:pointer;transition:.15s;color:var(--text)}
+.pin-btn:hover{background:var(--border);transform:scale(1.05)}
+.pin-btn:active{transform:scale(.95)}
+.pin-err{color:var(--red);font-size:.8rem;margin-top:12px;min-height:18px}
+
+/* SETUP */
+#setup{position:fixed;inset:0;background:var(--bg);z-index:9998;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px}
+.setup-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:40px 32px;max-width:600px;width:100%;margin:auto}
+.setup-logo{text-align:center;font-size:2.4rem;margin-bottom:6px}
+.setup-title{text-align:center;font-size:1.3rem;font-weight:700;margin-bottom:4px}
+.setup-sub{text-align:center;font-size:.85rem;color:var(--sub);margin-bottom:28px}
+.step-bar{display:flex;gap:8px;margin-bottom:28px}
+.step-seg{height:4px;border-radius:2px;flex:1;background:var(--border);transition:.4s}
+.step-seg.done{background:var(--accent)}
+.step-seg.active{background:linear-gradient(90deg,var(--accent),var(--blue))}
+.step-label{text-align:center;font-size:.75rem;color:var(--sub);margin-bottom:20px;letter-spacing:.05em;text-transform:uppercase}
+.s-group{margin-bottom:18px}
+.s-label{font-size:.8rem;color:var(--sub);margin-bottom:6px;display:block}
+.s-input{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:.9rem;outline:none;transition:.2s}
+.s-input:focus{border-color:var(--accent)}
+.s-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.s-hint{font-size:.75rem;color:var(--sub);margin-top:4px}
+.prop-list{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.prop-row{background:var(--card2);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;position:relative}
+.prop-row-head{display:flex;gap:8px;align-items:center}
+.prop-row-head input{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:.85rem;outline:none}
+.prop-row-head input:focus{border-color:var(--accent)}
+.prop-row-head .pn{flex:2}
+.prop-row-head .pa{flex:1}
+.prop-row-details{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.prop-row-details input{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:.8rem;outline:none;width:100%}
+.btn-del-prop{position:absolute;top:10px;right:10px;background:none;border:none;color:var(--sub);cursor:pointer;font-size:1rem}
+.btn-del-prop:hover{color:var(--red)}
+.btn-add-sm{background:rgba(34,197,94,.1);border:1px dashed var(--accent);color:var(--accent);border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.8rem;transition:.2s;width:100%;margin-top:8px}
+.btn-add-sm:hover{background:rgba(34,197,94,.2)}
+.setup-nav{display:flex;gap:12px;margin-top:28px}
+.btn-back{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:12px;font-size:.9rem;cursor:pointer;color:var(--text);transition:.2s}
+.btn-back:hover{background:var(--border)}
+.btn-next{flex:2;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;padding:12px;font-size:.9rem;font-weight:600;cursor:pointer;color:#fff;transition:.2s}
+.btn-next:hover{opacity:.9;transform:translateY(-1px)}
+
+/* APP */
+#app{display:none;min-height:100vh}
+.top-bar{background:var(--card);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.top-logo{font-size:1.2rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.top-sub{font-size:.8rem;color:var(--sub)}
+.top-actions{display:flex;gap:8px}
+.top-btn{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:.8rem;cursor:pointer;color:var(--text);transition:.2s}
+.top-btn:hover{border-color:var(--accent)}
+.tab-bar{background:var(--card);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 12px}
+.tab-btn{padding:12px 16px;font-size:.8rem;font-weight:500;cursor:pointer;border:none;background:none;color:var(--sub);border-bottom:2px solid transparent;white-space:nowrap;transition:.2s}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.page{display:none;padding:20px;max-width:1100px;margin:0 auto}
+.page.active{display:block}
+
+/* PORTFOLIO */
+.sum-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+.sum-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+.sc-label{font-size:.75rem;color:var(--sub);margin-bottom:6px}
+.sc-val{font-size:1.6rem;font-weight:700}
+.sc-sub{font-size:.75rem;color:var(--sub);margin-top:4px}
+.props-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:24px}
+.prop-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:.2s}
+.prop-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.prop-card-top{padding:16px 16px 10px;display:flex;justify-content:space-between;align-items:flex-start}
+.prop-card-name{font-size:1rem;font-weight:700}
+.prop-card-address{font-size:.78rem;color:var(--sub);margin-top:2px}
+.prop-status-badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600}
+.status-leased{background:rgba(34,197,94,.15);color:var(--accent);border:1px solid rgba(34,197,94,.3)}
+.status-vacant{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.status-notice{background:rgba(245,158,11,.12);color:var(--yellow);border:1px solid rgba(245,158,11,.3)}
+.prop-card-stats{display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 16px;border-top:1px solid var(--border);gap:8px}
+.prop-stat{text-align:center}
+.prop-stat-val{font-size:.95rem;font-weight:700}
+.prop-stat-label{font-size:.68rem;color:var(--sub);margin-top:2px}
+.prop-card-footer{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px}
+.prop-action-btn{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px;font-size:.75rem;cursor:pointer;color:var(--text);transition:.2s;text-align:center}
+.prop-action-btn:hover{border-color:var(--accent);color:var(--accent)}
+.prop-action-btn.primary{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.3);color:var(--accent)}
+.add-prop-card{background:var(--card);border:2px dashed var(--border);border-radius:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;min-height:180px;color:var(--sub);font-size:.9rem;flex-direction:column;gap:8px}
+.add-prop-card:hover{border-color:var(--accent);color:var(--accent)}
+
+/* TENANTS */
+.tenant-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.tenant-table th{text-align:left;padding:10px 12px;color:var(--sub);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
+.tenant-table td{padding:10px 12px;border-bottom:1px solid rgba(37,37,53,.5)}
+.tenant-table tr:hover td{background:rgba(255,255,255,.02)}
+.lease-progress{height:6px;border-radius:3px;background:var(--border);overflow:hidden;margin-top:4px;min-width:80px}
+.lease-fill{height:100%;border-radius:3px;transition:width .8s ease}
+.tenant-actions{display:flex;gap:6px}
+.ta-btn{background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:.75rem;cursor:pointer;color:var(--text);transition:.2s}
+.ta-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* RENT TRACKER */
+.rent-month-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:24px}
+.rent-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;transition:.2s}
+.rent-card:hover{border-color:var(--accent)}
+.rent-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.rent-card-name{font-size:.9rem;font-weight:600}
+.rent-card-prop{font-size:.75rem;color:var(--sub)}
+.rent-amount{font-size:1.3rem;font-weight:700;color:var(--accent);margin-bottom:6px}
+.rent-due{font-size:.75rem;color:var(--sub);margin-bottom:10px}
+.rent-status-row{display:flex;gap:8px}
+.pay-btn{flex:1;border:none;border-radius:8px;padding:8px;font-size:.8rem;font-weight:600;cursor:pointer;transition:.2s}
+.pay-btn.paid{background:rgba(34,197,94,.15);color:var(--accent);border:1px solid rgba(34,197,94,.3)}
+.pay-btn.unpaid{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.pay-btn.mark{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none}
+
+/* MAINTENANCE */
+.maint-list{display:flex;flex-direction:column;gap:12px;margin-bottom:24px}
+.maint-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;gap:14px;align-items:flex-start;transition:.2s}
+.maint-card:hover{border-color:var(--accent)}
+.maint-priority{width:8px;min-height:40px;border-radius:4px;flex-shrink:0}
+.p-urgent{background:var(--red)}
+.p-high{background:var(--yellow)}
+.p-normal{background:var(--blue)}
+.p-low{background:var(--sub)}
+.maint-body{flex:1}
+.maint-title{font-size:.9rem;font-weight:600;margin-bottom:4px}
+.maint-meta{font-size:.75rem;color:var(--sub);display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.maint-status{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600}
+.ms-open{background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
+.ms-progress{background:rgba(245,158,11,.12);color:var(--yellow);border:1px solid rgba(245,158,11,.3)}
+.ms-done{background:rgba(34,197,94,.12);color:var(--accent);border:1px solid rgba(34,197,94,.3)}
+.maint-actions{display:flex;gap:6px;margin-top:8px}
+.m-btn{background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:.75rem;cursor:pointer;color:var(--text);transition:.2s}
+.m-btn:hover{border-color:var(--accent);color:var(--accent)}
+.add-maint-form{background:var(--card);border:1px solid var(--accent);border-radius:14px;padding:20px;margin-bottom:20px;display:none}
+
+/* FINANCIALS */
+.fin-period-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.period-chip{padding:6px 14px;border-radius:20px;border:1px solid var(--border);font-size:.8rem;cursor:pointer;transition:.2s;background:none;color:var(--text)}
+.period-chip.active{background:rgba(34,197,94,.15);border-color:var(--accent);color:var(--accent)}
+.fin-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:24px}
+.fin-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+.fin-card .fk{font-size:1.4rem;margin-bottom:6px}
+.fin-card .ft{font-size:.8rem;font-weight:600;margin-bottom:4px}
+.fin-card .fv{font-size:1.4rem;font-weight:700}
+.fin-card .fs{font-size:.75rem;color:var(--sub)}
+.cashflow-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.cashflow-table th{text-align:left;padding:10px 12px;color:var(--sub);font-size:.75rem;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.cashflow-table td{padding:10px 12px;border-bottom:1px solid rgba(37,37,53,.5)}
+.positive{color:var(--accent)}
+.negative{color:var(--red)}
+
+/* HELP */
+.tip-banner{background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(59,130,246,.08));border:1px solid rgba(34,197,94,.25);border-radius:14px;padding:20px;margin-bottom:20px;display:flex;gap:14px}
+.tip-banner .tb-icon{font-size:1.6rem}
+.tip-banner .tb-text{font-size:.85rem;line-height:1.6}
+.help-section{margin-bottom:28px}
+.help-h{font-size:1rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.help-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.help-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
+.hc-icon{font-size:1.6rem;margin-bottom:8px}
+.hc-title{font-size:.85rem;font-weight:600;margin-bottom:4px}
+.hc-desc{font-size:.78rem;color:var(--sub);line-height:1.5}
+.steps-list{display:flex;flex-direction:column;gap:8px}
+.step-item{display:flex;gap:12px;align-items:flex-start}
+.step-num{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0}
+.step-text{font-size:.85rem;line-height:1.5;padding-top:3px}
+
+/* FORM HELPERS */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.f-group{display:flex;flex-direction:column;gap:6px}
+.f-label{font-size:.75rem;color:var(--sub)}
+.f-input{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:var(--text);font-size:.85rem;outline:none;transition:.2s}
+.f-input:focus{border-color:var(--accent)}
+select.f-input option{background:var(--card2)}
+.btn-save{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:10px;padding:10px 24px;color:#fff;font-weight:600;cursor:pointer;font-size:.85rem}
+.btn-save:hover{opacity:.9}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.section-head h2{font-size:1rem;font-weight:700}
+
+/* MODALS */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-bg.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:480px;width:100%;max-height:85vh;overflow-y:auto}
+.modal h3{font-size:1rem;margin-bottom:20px}
+.modal-btns{display:flex;gap:10px;margin-top:20px}
+
+/* FOOTER */
+.whetu-footer{text-align:center;padding:24px 20px;color:var(--sub);font-size:.75rem;border-top:1px solid var(--border);margin-top:40px}
+.whetu-footer a{color:var(--accent);text-decoration:none}
+.wf-brand{font-weight:700;color:var(--accent);font-size:.85rem;margin-bottom:4px}
+
+/* NOTIF */
+.notif{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--accent);border-radius:12px;padding:12px 20px;font-size:.85rem;z-index:9000;transform:translateY(80px);opacity:0;transition:.3s;max-width:280px}
+.notif.show{transform:none;opacity:1}
+.notif.err{border-color:var(--red)}
+
+/* ANIMATIONS */
+@keyframes slideUp{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}
+.slide-up{animation:slideUp .35s ease both}
+@media(max-width:600px){
+  .s-row{grid-template-columns:1fr}
+  .sum-strip{grid-template-columns:1fr 1fr}
+  .prop-row-details{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- PIN GATE -->
+<div id="gate">
+  <div class="gate-box">
+    <div class="gate-logo">🏢</div>
+    <div class="gate-title" id="gate-name">Property Manager</div>
+    <div class="gate-sub">Enter your PIN to access</div>
+    <div class="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-pad">
+      <button class="pin-btn" onclick="pinKey('1')">1</button>
+      <button class="pin-btn" onclick="pinKey('2')">2</button>
+      <button class="pin-btn" onclick="pinKey('3')">3</button>
+      <button class="pin-btn" onclick="pinKey('4')">4</button>
+      <button class="pin-btn" onclick="pinKey('5')">5</button>
+      <button class="pin-btn" onclick="pinKey('6')">6</button>
+      <button class="pin-btn" onclick="pinKey('7')">7</button>
+      <button class="pin-btn" onclick="pinKey('8')">8</button>
+      <button class="pin-btn" onclick="pinKey('9')">9</button>
+      <button class="pin-btn" onclick="pinClear()" style="font-size:.8rem">CLR</button>
+      <button class="pin-btn" onclick="pinKey('0')">0</button>
+      <button class="pin-btn" onclick="pinBack()">⌫</button>
+    </div>
+    <div class="pin-err" id="pin-err"></div>
+  </div>
+</div>
+
+<!-- SETUP -->
+<div id="setup">
+  <div class="setup-box">
+    <div class="setup-logo">🏢</div>
+    <div class="setup-title">Property Manager Setup</div>
+    <div class="setup-sub">Configure your portfolio — takes 3 minutes</div>
+    <div class="step-bar">
+      <div class="step-seg active" id="seg0"></div>
+      <div class="step-seg" id="seg1"></div>
+      <div class="step-seg" id="seg2"></div>
+    </div>
+    <div class="step-label" id="step-label">Step 1 of 3 — Account</div>
+
+    <!-- Step 1 -->
+    <div id="step1">
+      <div class="s-group">
+        <label class="s-label">Your name / company name</label>
+        <input class="s-input" id="cfg-owner" placeholder="e.g. Sachind Lal Properties" maxlength="60">
+      </div>
+      <div class="s-group">
+        <label class="s-label">Dashboard title</label>
+        <input class="s-input" id="cfg-title" placeholder="e.g. Lal Property Portfolio" maxlength="50">
+      </div>
+      <div class="s-row">
+        <div class="s-group">
+          <label class="s-label">Currency</label>
+          <input class="s-input" id="cfg-currency" placeholder="$" maxlength="3" value="$">
+        </div>
+        <div class="s-group">
+          <label class="s-label">GST registered?</label>
+          <select class="s-input" id="cfg-gst">
+            <option value="no">No</option>
+            <option value="yes">Yes (15%)</option>
+          </select>
+        </div>
+      </div>
+      <div class="s-group">
+        <label class="s-label">Financial year start</label>
+        <select class="s-input" id="cfg-fy">
+          <option value="04-01">April (NZ standard)</option>
+          <option value="01-01">January</option>
+          <option value="07-01">July</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="step2" style="display:none">
+      <div class="s-group">
+        <label class="s-label">Add your properties</label>
+        <div class="prop-list" id="prop-setup-list"></div>
+        <button class="btn-add-sm" onclick="addPropSetup()">+ Add property</button>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div id="step3" style="display:none">
+      <div class="s-group">
+        <label class="s-label">Contact email (for reminders)</label>
+        <input class="s-input" id="cfg-email" placeholder="you@email.com" type="email">
+      </div>
+      <div class="s-group">
+        <label class="s-label">4-digit PIN</label>
+        <input class="s-input" id="cfg-pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+        <p class="s-hint">Secures access to your property data</p>
+      </div>
+    </div>
+
+    <div class="setup-nav">
+      <button class="btn-back" id="btn-back" onclick="setupBack()" style="display:none">← Back</button>
+      <button class="btn-next" id="btn-next" onclick="setupNext()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="top-bar">
+    <div>
+      <div class="top-logo" id="app-title">Property Manager</div>
+      <div class="top-sub" id="app-sub">Portfolio overview</div>
+    </div>
+    <div class="top-actions">
+      <button class="top-btn" onclick="openAddTenant()">+ Tenant</button>
+      <button class="top-btn" onclick="openAddMaint()">+ Task</button>
+      <button class="top-btn" onclick="openSettings()">⚙</button>
+      <button class="top-btn" onclick="exportReport()">⬇ Report</button>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('portfolio',this)">🏠 Portfolio</button>
+    <button class="tab-btn" onclick="switchTab('tenants',this)">👥 Tenants</button>
+    <button class="tab-btn" onclick="switchTab('rent',this)">💰 Rent</button>
+    <button class="tab-btn" onclick="switchTab('maintenance',this)">🔧 Maintenance</button>
+    <button class="tab-btn" onclick="switchTab('financials',this)">📊 Financials</button>
+    <button class="tab-btn" onclick="switchTab('help',this)">❓ Help</button>
+  </div>
+
+  <!-- PORTFOLIO -->
+  <div class="page active" id="page-portfolio">
+    <div>
+      <div class="sum-strip" id="portfolio-sum"></div>
+      <div class="section-head">
+        <h2>Your Properties</h2>
+        <button class="top-btn" onclick="openAddProp()">+ Add Property</button>
+      </div>
+      <div class="props-grid" id="props-grid"></div>
+    </div>
+  </div>
+
+  <!-- TENANTS -->
+  <div class="page" id="page-tenants">
+    <div>
+      <div class="section-head">
+        <h2>Tenants</h2>
+        <button class="top-btn" onclick="openAddTenant()">+ Add Tenant</button>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden">
+        <table class="tenant-table" style="width:100%">
+          <thead><tr>
+            <th>Name</th><th>Property</th><th>Rent/wk</th><th>Lease</th><th>Status</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="tenant-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- RENT -->
+  <div class="page" id="page-rent">
+    <div>
+      <div class="section-head">
+        <h2 id="rent-period-title">Rent — This Month</h2>
+        <div style="display:flex;gap:8px">
+          <button class="top-btn" onclick="changeRentMonth(-1)">←</button>
+          <button class="top-btn" onclick="changeRentMonth(1)">→</button>
+        </div>
+      </div>
+      <div class="sum-strip" id="rent-sum" style="margin-bottom:20px"></div>
+      <div class="rent-month-grid" id="rent-grid"></div>
+    </div>
+  </div>
+
+  <!-- MAINTENANCE -->
+  <div class="page" id="page-maintenance">
+    <div>
+      <div class="add-maint-form" id="add-maint-form">
+        <div style="font-size:.9rem;font-weight:600;margin-bottom:14px">+ New Maintenance Task</div>
+        <div class="form-grid">
+          <div class="f-group">
+            <label class="f-label">Property</label>
+            <select class="f-input" id="m-prop"></select>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Title</label>
+            <input class="f-input" id="m-title" placeholder="e.g. Fix leaking tap" maxlength="80">
+          </div>
+          <div class="f-group">
+            <label class="f-label">Priority</label>
+            <select class="f-input" id="m-priority">
+              <option value="urgent">🔴 Urgent</option>
+              <option value="high">🟡 High</option>
+              <option value="normal" selected>🔵 Normal</option>
+              <option value="low">⚪ Low</option>
+            </select>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Cost estimate</label>
+            <input class="f-input" id="m-cost" type="number" placeholder="0" min="0">
+          </div>
+          <div class="f-group">
+            <label class="f-label">Reported date</label>
+            <input class="f-input" id="m-date" type="date">
+          </div>
+          <div class="f-group">
+            <label class="f-label">&nbsp;</label>
+            <button class="btn-save" onclick="saveMaint()">Add Task</button>
+          </div>
+        </div>
+      </div>
+      <div class="section-head">
+        <h2>Maintenance Tasks</h2>
+        <div style="display:flex;gap:8px">
+          <button class="period-chip active" data-mf="open" onclick="setMaintFilter('open',this)">Open</button>
+          <button class="period-chip" data-mf="progress" onclick="setMaintFilter('progress',this)">In Progress</button>
+          <button class="period-chip" data-mf="done" onclick="setMaintFilter('done',this)">Done</button>
+          <button class="period-chip" data-mf="all" onclick="setMaintFilter('all',this)">All</button>
+        </div>
+      </div>
+      <div class="maint-list" id="maint-list"></div>
+    </div>
+  </div>
+
+  <!-- FINANCIALS -->
+  <div class="page" id="page-financials">
+    <div>
+      <div class="fin-period-bar" id="fin-period-bar"></div>
+      <div class="fin-cards" id="fin-cards"></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px">
+        <table class="cashflow-table" style="width:100%">
+          <thead><tr>
+            <th>Month</th><th>Rent Received</th><th>Expenses</th><th>Net Cash Flow</th><th>Occupancy</th>
+          </tr></thead>
+          <tbody id="cashflow-tbody"></tbody>
+        </table>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px">
+        <div class="section-head" style="margin-bottom:16px">
+          <h2>Add Expense</h2>
+        </div>
+        <div class="form-grid">
+          <div class="f-group">
+            <label class="f-label">Property</label>
+            <select class="f-input" id="fin-prop"></select>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Category</label>
+            <select class="f-input" id="fin-cat">
+              <option>Maintenance & Repairs</option>
+              <option>Insurance</option>
+              <option>Rates & Levies</option>
+              <option>Management Fees</option>
+              <option>Mortgage Interest</option>
+              <option>Advertising</option>
+              <option>Legal & Accounting</option>
+              <option>Cleaning</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Amount</label>
+            <input class="f-input" id="fin-amount" type="number" placeholder="0.00" min="0" step="0.01">
+          </div>
+          <div class="f-group">
+            <label class="f-label">Date</label>
+            <input class="f-input" id="fin-date" type="date">
+          </div>
+          <div class="f-group">
+            <label class="f-label">Description</label>
+            <input class="f-input" id="fin-desc" placeholder="e.g. Plumber callout" maxlength="80">
+          </div>
+          <div class="f-group">
+            <label class="f-label">&nbsp;</label>
+            <button class="btn-save" onclick="addFinExpense()">Add Expense</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HELP -->
+  <div class="page" id="page-help">
+    <div>
+      <div class="tip-banner">
+        <div class="tb-icon">🏢</div>
+        <div class="tb-text">Property Manager Wizard helps you track your entire portfolio — tenants, rent, maintenance, and financials — from one clean dashboard. Everything stored locally, accessible anytime.</div>
+      </div>
+      <div class="help-section">
+        <div class="help-h">🚀 Getting started</div>
+        <div class="steps-list">
+          <div class="step-item"><div class="step-num">1</div><div class="step-text">Add each property from the <strong>Portfolio</strong> tab. Include address, bedrooms, and expected rent.</div></div>
+          <div class="step-item"><div class="step-num">2</div><div class="step-text">Add tenants in the <strong>Tenants</strong> tab. Link each tenant to a property with their lease dates.</div></div>
+          <div class="step-item"><div class="step-num">3</div><div class="step-text">Use <strong>Rent</strong> to mark each payment as received month by month.</div></div>
+          <div class="step-item"><div class="step-num">4</div><div class="step-text">Log all maintenance requests with priority — track from open → in progress → done.</div></div>
+          <div class="step-item"><div class="step-num">5</div><div class="step-text">Add expenses in <strong>Financials</strong> and download your IRD-ready report at tax time.</div></div>
+        </div>
+      </div>
+      <div class="help-section">
+        <div class="help-h">📊 Features</div>
+        <div class="help-grid">
+          <div class="help-card"><div class="hc-icon">🏠</div><div class="hc-title">Portfolio Dashboard</div><div class="hc-desc">All properties at a glance — status, occupancy, weekly rent, and quick actions.</div></div>
+          <div class="help-card"><div class="hc-icon">👥</div><div class="hc-title">Tenant Management</div><div class="hc-desc">Lease progress bars, contact details, and lease expiry alerts.</div></div>
+          <div class="help-card"><div class="hc-icon">💰</div><div class="hc-title">Rent Tracker</div><div class="hc-desc">Mark payments received month by month. See arrears instantly.</div></div>
+          <div class="help-card"><div class="hc-icon">🔧</div><div class="hc-title">Maintenance Workflow</div><div class="hc-desc">Prioritised task list from open to done. Cost tracking per job.</div></div>
+          <div class="help-card"><div class="hc-icon">📊</div><div class="hc-title">Financial Reports</div><div class="hc-desc">Month-by-month cash flow, expenses by category, IRD-ready export.</div></div>
+          <div class="help-card"><div class="hc-icon">⬇</div><div class="hc-title">CSV Export</div><div class="hc-desc">Download full income/expense report for accountant or IRD.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="whetu-footer">
+    <div class="wf-brand">⭐ Whetū Digital</div>
+    Property Manager Wizard — <a href="https://whetudigital.co.nz">whetudigital.co.nz</a> · © 2026 Whetū Digital
+  </div>
+</div>
+
+<!-- ADD PROPERTY MODAL -->
+<div class="modal-bg" id="add-prop-modal">
+  <div class="modal">
+    <h3>🏠 Add Property</h3>
+    <div class="f-group" style="margin-bottom:12px">
+      <label class="f-label">Property name / label</label>
+      <input class="f-input" id="ap-name" placeholder="e.g. Unit 2B Hamilton" maxlength="60">
+    </div>
+    <div class="f-group" style="margin-bottom:12px">
+      <label class="f-label">Address</label>
+      <input class="f-input" id="ap-address" placeholder="Street address" maxlength="80">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div class="f-group">
+        <label class="f-label">Bedrooms</label>
+        <input class="f-input" id="ap-beds" type="number" placeholder="3" min="0">
+      </div>
+      <div class="f-group">
+        <label class="f-label">Bathrooms</label>
+        <input class="f-input" id="ap-baths" type="number" placeholder="1" min="0">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div class="f-group">
+        <label class="f-label">Weekly rent target</label>
+        <input class="f-input" id="ap-rent" type="number" placeholder="450" min="0">
+      </div>
+      <div class="f-group">
+        <label class="f-label">Type</label>
+        <select class="f-input" id="ap-type">
+          <option>House</option><option>Unit</option><option>Apartment</option>
+          <option>Townhouse</option><option>Section</option><option>Commercial</option>
+        </select>
+      </div>
+    </div>
+    <div class="f-group" style="margin-bottom:12px">
+      <label class="f-label">Purchase price (optional)</label>
+      <input class="f-input" id="ap-purchase" type="number" placeholder="0" min="0">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-back" onclick="closeModal('add-prop-modal')" style="flex:1">Cancel</button>
+      <button class="btn-next" onclick="saveProp()" style="flex:2">Add Property</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD TENANT MODAL -->
+<div class="modal-bg" id="add-tenant-modal">
+  <div class="modal">
+    <h3>👤 Add Tenant</h3>
+    <div class="f-group" style="margin-bottom:12px">
+      <label class="f-label">Tenant name</label>
+      <input class="f-input" id="at-name" placeholder="Full name" maxlength="60">
+    </div>
+    <div class="f-group" style="margin-bottom:12px">
+      <label class="f-label">Property</label>
+      <select class="f-input" id="at-prop"></select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div class="f-group">
+        <label class="f-label">Weekly rent</label>
+        <input class="f-input" id="at-rent" type="number" placeholder="450" min="0">
+      </div>
+      <div class="f-group">
+        <label class="f-label">Bond held</label>
+        <input class="f-input" id="at-bond" type="number" placeholder="0" min="0">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div class="f-group">
+        <label class="f-label">Lease start</label>
+        <input class="f-input" id="at-start" type="date">
+      </div>
+      <div class="f-group">
+        <label class="f-label">Lease end</label>
+        <input class="f-input" id="at-end" type="date">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div class="f-group">
+        <label class="f-label">Phone</label>
+        <input class="f-input" id="at-phone" placeholder="021 xxx xxxx" maxlength="20">
+      </div>
+      <div class="f-group">
+        <label class="f-label">Email</label>
+        <input class="f-input" id="at-email" type="email" placeholder="tenant@email.com">
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-back" onclick="closeModal('add-tenant-modal')" style="flex:1">Cancel</button>
+      <button class="btn-next" onclick="saveTenant()" style="flex:2">Add Tenant</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-bg" id="settings-modal">
+  <div class="modal">
+    <h3>⚙ Settings</h3>
+    <div class="f-group" style="margin-bottom:12px">
+      <label class="f-label">Dashboard title</label>
+      <input class="f-input" id="set-title">
+    </div>
+    <div class="f-group" style="margin-bottom:12px">
+      <label class="f-label">Change PIN</label>
+      <input class="f-input" id="set-pin" type="password" inputmode="numeric" maxlength="4" placeholder="New 4-digit PIN">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-back" onclick="closeModal('settings-modal')" style="flex:1">Cancel</button>
+      <button class="btn-next" onclick="saveSettings()" style="flex:2">Save</button>
+    </div>
+    <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+      <button onclick="resetAll()" style="background:none;border:none;color:var(--red);font-size:.8rem;cursor:pointer">⚠ Reset all data</button>
+    </div>
+  </div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+// ─── KEYS ──────────────────────────────────────────────────────────────────
+const CFG='pm_wizard_config';
+const PROPS='pm_wizard_props';
+const TENANTS='pm_wizard_tenants';
+const RENT='pm_wizard_rent';
+const MAINT='pm_wizard_maint';
+const FINEXP='pm_wizard_finexp';
+
+// ─── STATE ─────────────────────────────────────────────────────────────────
+let cfg=null, props=[], tenants=[], rentRecords=[], maintenance=[], finExpenses=[];
+let pinEntry='', setupStep=1, setupProps=[];
+let rentViewDate=new Date();
+let maintFilter='open', finYear=null;
+
+// ─── BOOT ──────────────────────────────────────────────────────────────────
+(function boot(){
+  cfg=JSON.parse(localStorage.getItem(CFG)||'null');
+  props=JSON.parse(localStorage.getItem(PROPS)||'[]');
+  tenants=JSON.parse(localStorage.getItem(TENANTS)||'[]');
+  rentRecords=JSON.parse(localStorage.getItem(RENT)||'[]');
+  maintenance=JSON.parse(localStorage.getItem(MAINT)||'[]');
+  finExpenses=JSON.parse(localStorage.getItem(FINEXP)||'[]');
+  if(!cfg){showSetup();}else{showGate();}
+})();
+
+// ─── GATE ──────────────────────────────────────────────────────────────────
+function showGate(){
+  document.getElementById('gate-name').textContent=cfg?.title||'Property Manager';
+  document.getElementById('gate').style.display='flex';
+  document.getElementById('app').style.display='none';
+}
+
+function pinKey(d){if(pinEntry.length>=4)return;pinEntry+=d;updateDots();if(pinEntry.length===4)checkPin();}
+function pinBack(){pinEntry=pinEntry.slice(0,-1);updateDots();}
+function pinClear(){pinEntry='';updateDots();}
+function updateDots(){for(let i=0;i<4;i++)document.getElementById('pd'+i).classList.toggle('filled',i<pinEntry.length);}
+function checkPin(){
+  if(pinEntry===String(cfg.pin)){
+    document.getElementById('gate').style.display='none';
+    launchApp();
+  }else{
+    document.getElementById('pin-err').textContent='Incorrect PIN.';
+    setTimeout(()=>{pinEntry='';updateDots();document.getElementById('pin-err').textContent='';},900);
+  }
+}
+
+// ─── SETUP ─────────────────────────────────────────────────────────────────
+function showSetup(){
+  document.getElementById('gate').style.display='none';
+  document.getElementById('setup').style.display='flex';
+  addPropSetup();
+}
+
+function addPropSetup(){
+  const id='sp'+Date.now();
+  setupProps.push(id);
+  const list=document.getElementById('prop-setup-list');
+  const row=document.createElement('div');
+  row.className='prop-row';row.id=id;
+  row.innerHTML=`
+    <div class="prop-row-head">
+      <input class="pn" placeholder="Property name / address" maxlength="60" id="${id}-name">
+      <input class="pa" type="number" placeholder="Weekly rent $" min="0" id="${id}-rent">
+      <button class="btn-del-prop" onclick="removePropSetup('${id}')">✕</button>
+    </div>
+    <div class="prop-row-details">
+      <input placeholder="Bedrooms" type="number" min="0" id="${id}-beds">
+      <input placeholder="Bathrooms" type="number" min="0" id="${id}-baths">
+      <input placeholder="Type (House/Unit…)" maxlength="20" id="${id}-type">
+    </div>`;
+  list.appendChild(row);
+}
+
+function removePropSetup(id){
+  document.getElementById(id)?.remove();
+  setupProps=setupProps.filter(x=>x!==id);
+}
+
+function setupNext(){
+  if(setupStep===1){
+    const owner=document.getElementById('cfg-owner').value.trim();
+    if(!owner){notify('Enter owner / company name','err');return;}
+    setupStep=2;
+    document.getElementById('step1').style.display='none';
+    document.getElementById('step2').style.display='block';
+    document.getElementById('btn-back').style.display='block';
+    updateStepBar(2);
+  } else if(setupStep===2){
+    if(setupProps.length===0){notify('Add at least one property','err');return;}
+    const hasMissing=setupProps.some(id=>!document.getElementById(id+'-name')?.value.trim());
+    if(hasMissing){notify('All properties need a name','err');return;}
+    setupStep=3;
+    document.getElementById('step2').style.display='none';
+    document.getElementById('step3').style.display='block';
+    document.getElementById('btn-next').textContent='Launch Dashboard →';
+    updateStepBar(3);
+  } else if(setupStep===3){
+    const pin=document.getElementById('cfg-pin').value.trim();
+    if(!/^\d{4}$/.test(pin)){notify('PIN must be 4 digits','err');return;}
+    // Build config
+    cfg={
+      owner:document.getElementById('cfg-owner').value.trim(),
+      title:document.getElementById('cfg-title').value.trim()||document.getElementById('cfg-owner').value.trim()+' Portfolio',
+      currency:document.getElementById('cfg-currency').value||'$',
+      gst:document.getElementById('cfg-gst').value,
+      fyStart:document.getElementById('cfg-fy').value,
+      email:document.getElementById('cfg-email').value.trim(),
+      pin,
+      created:Date.now(),
+    };
+    // Build properties
+    props=setupProps.map(id=>({
+      id:'prop_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      name:document.getElementById(id+'-name')?.value.trim()||'Property',
+      address:'',
+      beds:parseInt(document.getElementById(id+'-beds')?.value)||0,
+      baths:parseInt(document.getElementById(id+'-baths')?.value)||0,
+      type:document.getElementById(id+'-type')?.value||'House',
+      rent:parseFloat(document.getElementById(id+'-rent')?.value)||0,
+      status:'vacant',
+    }));
+    localStorage.setItem(CFG,JSON.stringify(cfg));
+    localStorage.setItem(PROPS,JSON.stringify(props));
+    document.getElementById('setup').style.display='none';
+    launchApp();
+  }
+}
+
+function setupBack(){
+  if(setupStep===2){
+    setupStep=1;
+    document.getElementById('step2').style.display='none';
+    document.getElementById('step1').style.display='block';
+    document.getElementById('btn-back').style.display='none';
+    updateStepBar(1);
+  } else if(setupStep===3){
+    setupStep=2;
+    document.getElementById('step3').style.display='none';
+    document.getElementById('step2').style.display='block';
+    document.getElementById('btn-next').textContent='Next →';
+    updateStepBar(2);
+  }
+}
+
+function updateStepBar(step){
+  document.querySelectorAll('.step-seg').forEach((s,i)=>{
+    s.classList.remove('active','done');
+    if(i<step-1)s.classList.add('done');
+    else if(i===step-1)s.classList.add('active');
+  });
+  const labels=['Step 1 of 3 — Account','Step 2 of 3 — Properties','Step 3 of 3 — Security'];
+  document.getElementById('step-label').textContent=labels[step-1];
+}
+
+// ─── LAUNCH ────────────────────────────────────────────────────────────────
+function launchApp(){
+  document.getElementById('app').style.display='block';
+  document.getElementById('app-title').textContent=cfg.title;
+  document.getElementById('app-sub').textContent=`${props.length} propert${props.length===1?'y':'ies'} · ${cfg.owner}`;
+  document.getElementById('m-date').value=today();
+  document.getElementById('fin-date').value=today();
+  buildPropSelects();
+  renderAll();
+}
+
+function renderAll(){
+  renderPortfolio();
+  renderTenants();
+  renderRent();
+  renderMaintenance();
+  renderFinancials();
+}
+
+// ─── HELPERS ───────────────────────────────────────────────────────────────
+function today(){return new Date().toISOString().slice(0,10);}
+function fmt(n){return (cfg?.currency||'$')+parseFloat(n||0).toFixed(2);}
+function fmtRound(n){return (cfg?.currency||'$')+Math.round(n||0).toLocaleString();}
+function getProp(id){return props.find(p=>p.id===id)||{name:'Unknown'};}
+function getMonthKey(d){return d.toISOString().slice(0,7);}
+function monthLabel(d){const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return m[d.getMonth()]+' '+d.getFullYear();}
+
+function getActiveTenant(propId){
+  const t=today();
+  return tenants.find(ten=>ten.propId===propId&&ten.leaseStart<=t&&(!ten.leaseEnd||ten.leaseEnd>=t));
+}
+
+function buildPropSelects(){
+  const opts=props.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  ['m-prop','at-prop','fin-prop'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.innerHTML=opts;
+  });
+}
+
+// ─── PORTFOLIO ─────────────────────────────────────────────────────────────
+function renderPortfolio(){
+  const leased=props.filter(p=>getActiveTenant(p.id)).length;
+  const weeklyRent=tenants.filter(t=>{const d=today();return t.leaseStart<=d&&(!t.leaseEnd||t.leaseEnd>=d);}).reduce((a,t)=>a+parseFloat(t.weeklyRent||0),0);
+  const vacant=props.length-leased;
+
+  document.getElementById('portfolio-sum').innerHTML=`
+    <div class="sum-card slide-up"><div class="sc-label">Properties</div><div class="sc-val">${props.length}</div><div class="sc-sub">${leased} leased · ${vacant} vacant</div></div>
+    <div class="sum-card slide-up"><div class="sc-label">Weekly Rent Roll</div><div class="sc-val" style="color:var(--accent)">${fmtRound(weeklyRent)}</div><div class="sc-sub">${fmtRound(weeklyRent*52)}/yr</div></div>
+    <div class="sum-card slide-up"><div class="sc-label">Occupancy</div><div class="sc-val">${props.length?Math.round(leased/props.length*100):0}%</div><div class="sc-sub">of portfolio leased</div></div>
+    <div class="sum-card slide-up"><div class="sc-label">Open Maintenance</div><div class="sc-val">${maintenance.filter(m=>m.status==='open').length}</div><div class="sc-sub">tasks need attention</div></div>`;
+
+  const grid=document.getElementById('props-grid');
+  grid.innerHTML=props.map(p=>{
+    const tenant=getActiveTenant(p.id);
+    const status=tenant?'leased':'vacant';
+    const badge=status==='leased'?'<span class="prop-status-badge status-leased">Leased</span>':'<span class="prop-status-badge status-vacant">Vacant</span>';
+    const openMaint=maintenance.filter(m=>m.propId===p.id&&m.status==='open').length;
+    return `<div class="prop-card slide-up">
+      <div class="prop-card-top">
+        <div>
+          <div class="prop-card-name">🏠 ${p.name}</div>
+          <div class="prop-card-address">${p.address||p.type||''} ${p.beds?p.beds+'bd':''} ${p.baths?p.baths+'ba':''}</div>
+        </div>
+        ${badge}
+      </div>
+      <div class="prop-card-stats">
+        <div class="prop-stat"><div class="prop-stat-val" style="color:var(--accent)">${fmt(tenant?.weeklyRent||p.rent)}</div><div class="prop-stat-label">Weekly rent</div></div>
+        <div class="prop-stat"><div class="prop-stat-val">${tenant?tenant.name.split(' ')[0]:'—'}</div><div class="prop-stat-label">Tenant</div></div>
+        <div class="prop-stat"><div class="prop-stat-val" style="color:${openMaint?'var(--yellow)':'var(--accent)'}">${openMaint}</div><div class="prop-stat-label">Open tasks</div></div>
+      </div>
+      <div class="prop-card-footer">
+        <div class="prop-action-btn primary" onclick="switchTab('rent',null)">Rent</div>
+        <div class="prop-action-btn" onclick="switchTab('maintenance',null)">Maintenance</div>
+        <div class="prop-action-btn" onclick="switchTab('tenants',null)">Tenant</div>
+        <div class="prop-action-btn" onclick="deleteProp('${p.id}')" style="color:var(--red)">Del</div>
+      </div>
+    </div>`;
+  }).join('')+`<div class="add-prop-card slide-up" onclick="openAddProp()"><span style="font-size:1.4rem">+</span><span>Add property</span></div>`;
+}
+
+function deleteProp(id){
+  if(!confirm('Remove this property and all its tenant/rent/maintenance data?'))return;
+  props=props.filter(p=>p.id!==id);
+  tenants=tenants.filter(t=>t.propId!==id);
+  maintenance=maintenance.filter(m=>m.propId!==id);
+  saveAll();
+  buildPropSelects();
+  renderAll();
+  notify('Property removed');
+}
+
+// ─── TENANTS ───────────────────────────────────────────────────────────────
+function renderTenants(){
+  const tbody=document.getElementById('tenant-tbody');
+  if(tenants.length===0){
+    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--sub)">No tenants yet. Add your first tenant above.</td></tr>';
+    return;
+  }
+  tbody.innerHTML=tenants.map(t=>{
+    const prop=getProp(t.propId);
+    const start=new Date(t.leaseStart||today());
+    const end=t.leaseEnd?new Date(t.leaseEnd):null;
+    const now=new Date();
+    let pct=0,daysLeft='';
+    if(end){
+      const total=end-start;const elapsed=now-start;
+      pct=Math.min(100,Math.max(0,elapsed/total*100));
+      const days=Math.ceil((end-now)/86400000);
+      daysLeft=days>0?days+' days left':'Expired';
+    }
+    const status=end&&now>end?'Expired':getActiveTenant(t.propId)?.id===t.id?'Active':'Inactive';
+    return `<tr>
+      <td><strong>${t.name}</strong>${t.phone?`<br><small style="color:var(--sub)">${t.phone}</small>`:''}</td>
+      <td>${prop.name}</td>
+      <td>${fmt(t.weeklyRent)}/wk</td>
+      <td>
+        <div style="font-size:.75rem">${t.leaseStart||'—'} → ${t.leaseEnd||'Periodic'}</div>
+        ${end?`<div class="lease-progress"><div class="lease-fill" style="width:${pct}%;background:${pct>85?'var(--red)':'var(--accent)'}"></div></div><div style="font-size:.7rem;color:var(--sub)">${daysLeft}</div>`:''}
+      </td>
+      <td><span class="prop-status-badge ${status==='Active'?'status-leased':status==='Expired'?'status-vacant':'status-notice'}">${status}</span></td>
+      <td><div class="tenant-actions">
+        <button class="ta-btn" onclick="deleteTenant('${t.id}')">Remove</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function deleteTenant(id){
+  if(!confirm('Remove this tenant?'))return;
+  tenants=tenants.filter(t=>t.id!==id);
+  localStorage.setItem(TENANTS,JSON.stringify(tenants));
+  renderTenants();renderPortfolio();renderRent();
+}
+
+// ─── RENT ──────────────────────────────────────────────────────────────────
+function changeRentMonth(dir){
+  rentViewDate=new Date(rentViewDate.getFullYear(),rentViewDate.getMonth()+dir,1);
+  renderRent();
+}
+
+function renderRent(){
+  const mk=getMonthKey(rentViewDate);
+  document.getElementById('rent-period-title').textContent='Rent — '+monthLabel(rentViewDate);
+
+  const activeTenants=tenants.filter(t=>{
+    const start=t.leaseStart||'';
+    const end=t.leaseEnd||'9999-12';
+    return start.slice(0,7)<=mk&&end.slice(0,7)>=mk;
+  });
+
+  const monthRecs=rentRecords.filter(r=>r.month===mk);
+  const paidCount=monthRecs.filter(r=>r.paid).length;
+  const totalDue=activeTenants.reduce((a,t)=>a+parseFloat(t.weeklyRent||0)*4.33,0);
+  const totalPaid=monthRecs.filter(r=>r.paid).reduce((a,r)=>a+parseFloat(r.amount||0),0);
+
+  document.getElementById('rent-sum').innerHTML=`
+    <div class="sum-card"><div class="sc-label">Expected</div><div class="sc-val">${fmtRound(totalDue)}</div><div class="sc-sub">${activeTenants.length} tenants</div></div>
+    <div class="sum-card"><div class="sc-label">Received</div><div class="sc-val" style="color:var(--accent)">${fmtRound(totalPaid)}</div><div class="sc-sub">${paidCount} payments</div></div>
+    <div class="sum-card"><div class="sc-label">Outstanding</div><div class="sc-val" style="color:${totalDue-totalPaid>0?'var(--red)':'var(--accent)'}">${fmtRound(Math.max(0,totalDue-totalPaid))}</div><div class="sc-sub">${activeTenants.length-paidCount} unpaid</div></div>`;
+
+  const grid=document.getElementById('rent-grid');
+  if(activeTenants.length===0){
+    grid.innerHTML='<div style="padding:40px;text-align:center;color:var(--sub)">No active tenants for this month.</div>';
+    return;
+  }
+  grid.innerHTML=activeTenants.map(t=>{
+    const prop=getProp(t.propId);
+    const rec=monthRecs.find(r=>r.tenantId===t.id);
+    const paid=rec?.paid||false;
+    const expected=parseFloat(t.weeklyRent||0)*4.33;
+    return `<div class="rent-card slide-up">
+      <div class="rent-card-head">
+        <div><div class="rent-card-name">${t.name}</div><div class="rent-card-prop">${prop.name}</div></div>
+        <span class="prop-status-badge ${paid?'status-leased':'status-vacant'}">${paid?'Paid':'Unpaid'}</span>
+      </div>
+      <div class="rent-amount">${fmtRound(expected)}</div>
+      <div class="rent-due">Expected for ${monthLabel(rentViewDate)}</div>
+      <div class="rent-status-row">
+        ${paid
+          ?`<button class="pay-btn paid" onclick="toggleRentPaid('${t.id}','${mk}',false)">✓ Mark Unpaid</button>`
+          :`<button class="pay-btn mark" onclick="toggleRentPaid('${t.id}','${mk}',true)">Mark as Paid</button>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleRentPaid(tenantId,month,paid){
+  const existing=rentRecords.find(r=>r.tenantId===tenantId&&r.month===month);
+  const t=tenants.find(x=>x.id===tenantId);
+  const amount=parseFloat(t?.weeklyRent||0)*4.33;
+  if(existing){existing.paid=paid;existing.paidDate=paid?today():null;}
+  else{rentRecords.push({id:'rent_'+Date.now(),tenantId,month,paid,paidDate:paid?today():null,amount});}
+  localStorage.setItem(RENT,JSON.stringify(rentRecords));
+  renderRent();renderPortfolio();
+  notify(paid?'Marked as paid ✓':'Marked as unpaid');
+}
+
+// ─── MAINTENANCE ───────────────────────────────────────────────────────────
+function openAddMaint(){
+  document.getElementById('add-maint-form').style.display='block';
+  document.getElementById('add-maint-form').scrollIntoView({behavior:'smooth'});
+  switchTab('maintenance',document.querySelector('[onclick*="maintenance"]'));
+}
+
+function setMaintFilter(f,el){
+  maintFilter=f;
+  document.querySelectorAll('[data-mf]').forEach(c=>c.classList.remove('active'));
+  if(el)el.classList.add('active');
+  renderMaintenance();
+}
+
+function renderMaintenance(){
+  let list=maintenance;
+  if(maintFilter!=='all')list=list.filter(m=>m.status===maintFilter);
+  list=[...list].sort((a,b)=>{
+    const pri={urgent:0,high:1,normal:2,low:3};
+    return (pri[a.priority]||2)-(pri[b.priority]||2);
+  });
+
+  const cont=document.getElementById('maint-list');
+  if(list.length===0){
+    cont.innerHTML='<div style="padding:40px;text-align:center;color:var(--sub)">No maintenance tasks.</div>';
+    return;
+  }
+  const priColor={urgent:'p-urgent',high:'p-high',normal:'p-normal',low:'p-low'};
+  const stClass={open:'ms-open',progress:'ms-progress',done:'ms-done'};
+  const stLabel={open:'Open',progress:'In Progress',done:'Done'};
+  cont.innerHTML=list.map(m=>{
+    const prop=getProp(m.propId);
+    return `<div class="maint-card slide-up">
+      <div class="maint-priority ${priColor[m.priority]||'p-normal'}"></div>
+      <div class="maint-body">
+        <div class="maint-title">${m.title}</div>
+        <div class="maint-meta">
+          <span>🏠 ${prop.name}</span>
+          ${m.cost?`<span>Est: ${fmt(m.cost)}</span>`:''}
+          <span>📅 ${m.date||'—'}</span>
+          <span class="maint-status ${stClass[m.status]||'ms-open'}">${stLabel[m.status]||m.status}</span>
+        </div>
+        <div class="maint-actions">
+          ${m.status!=='done'?`<button class="m-btn" onclick="advanceMaint('${m.id}')">→ ${m.status==='open'?'In Progress':'Done'}</button>`:''}
+          <button class="m-btn" onclick="deleteMaint('${m.id}')" style="color:var(--red)">Remove</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function saveMaint(){
+  const propId=document.getElementById('m-prop').value;
+  const title=document.getElementById('m-title').value.trim();
+  const priority=document.getElementById('m-priority').value;
+  const cost=parseFloat(document.getElementById('m-cost').value)||0;
+  const date=document.getElementById('m-date').value||today();
+  if(!title){notify('Enter a task title','err');return;}
+  maintenance.push({id:'m_'+Date.now(),propId,title,priority,cost,date,status:'open'});
+  localStorage.setItem(MAINT,JSON.stringify(maintenance));
+  document.getElementById('m-title').value='';
+  document.getElementById('m-cost').value='';
+  renderMaintenance();renderPortfolio();
+  notify('Task added ✓');
+}
+
+function advanceMaint(id){
+  const m=maintenance.find(x=>x.id===id);
+  if(m)m.status=m.status==='open'?'progress':'done';
+  localStorage.setItem(MAINT,JSON.stringify(maintenance));
+  renderMaintenance();renderPortfolio();
+}
+
+function deleteMaint(id){
+  maintenance=maintenance.filter(m=>m.id!==id);
+  localStorage.setItem(MAINT,JSON.stringify(maintenance));
+  renderMaintenance();renderPortfolio();
+}
+
+// ─── FINANCIALS ────────────────────────────────────────────────────────────
+function renderFinancials(){
+  // Build last 12 months
+  const months=[];
+  const now=new Date();
+  for(let i=11;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const mk=getMonthKey(d);
+    const rentIn=rentRecords.filter(r=>r.month===mk&&r.paid).reduce((a,r)=>a+parseFloat(r.amount||0),0);
+    const exp=finExpenses.filter(e=>e.date.startsWith(mk)).reduce((a,e)=>a+parseFloat(e.amount||0),0);
+    months.push({label:monthLabel(d),mk,rentIn,exp,net:rentIn-exp});
+  }
+
+  const totalRent=months.reduce((a,m)=>a+m.rentIn,0);
+  const totalExp=months.reduce((a,m)=>a+m.exp,0);
+  const net=totalRent-totalExp;
+  const maint_cost=maintenance.reduce((a,m)=>a+parseFloat(m.cost||0),0);
+
+  document.getElementById('fin-cards').innerHTML=`
+    <div class="fin-card"><div class="fk">💚</div><div class="ft">12-month Rent</div><div class="fv" style="color:var(--accent)">${fmtRound(totalRent)}</div><div class="fs">Total received</div></div>
+    <div class="fin-card"><div class="fk">📤</div><div class="ft">12-month Expenses</div><div class="fv" style="color:var(--red)">${fmtRound(totalExp)}</div><div class="fs">Total outgoings</div></div>
+    <div class="fin-card"><div class="fk">📊</div><div class="ft">Net Cash Flow</div><div class="fv" style="color:${net>=0?'var(--accent)':'var(--red)'}">${fmtRound(net)}</div><div class="fs">Profit/loss</div></div>
+    <div class="fin-card"><div class="fk">🔧</div><div class="ft">Maintenance Budget</div><div class="fv">${fmtRound(maint_cost)}</div><div class="fs">Estimated costs</div></div>`;
+
+  const tbody=document.getElementById('cashflow-tbody');
+  tbody.innerHTML=months.map(m=>
+    `<tr>
+      <td>${m.label}</td>
+      <td class="positive">${fmt(m.rentIn)}</td>
+      <td class="negative">${fmt(m.exp)}</td>
+      <td class="${m.net>=0?'positive':'negative'}">${fmt(m.net)}</td>
+      <td>${props.length?Math.round(rentRecords.filter(r=>r.month===m.mk&&r.paid).length/Math.max(1,tenants.length)*100)+'%':'—'}</td>
+    </tr>`
+  ).join('');
+}
+
+function addFinExpense(){
+  const propId=document.getElementById('fin-prop').value;
+  const cat=document.getElementById('fin-cat').value;
+  const amount=parseFloat(document.getElementById('fin-amount').value)||0;
+  const date=document.getElementById('fin-date').value||today();
+  const desc=document.getElementById('fin-desc').value.trim();
+  if(!amount){notify('Enter an amount','err');return;}
+  finExpenses.push({id:'fin_'+Date.now(),propId,cat,amount,date,desc});
+  localStorage.setItem(FINEXP,JSON.stringify(finExpenses));
+  document.getElementById('fin-amount').value='';
+  document.getElementById('fin-desc').value='';
+  renderFinancials();
+  notify('Expense added ✓');
+}
+
+// ─── ADD PROP/TENANT MODALS ────────────────────────────────────────────────
+function openAddProp(){document.getElementById('add-prop-modal').classList.add('open');}
+function openAddTenant(){
+  buildPropSelects();
+  document.getElementById('at-start').value=today();
+  document.getElementById('add-tenant-modal').classList.add('open');
+}
+
+function saveProp(){
+  const name=document.getElementById('ap-name').value.trim();
+  if(!name){notify('Enter property name','err');return;}
+  props.push({
+    id:'prop_'+Date.now(),
+    name,
+    address:document.getElementById('ap-address').value.trim(),
+    beds:parseInt(document.getElementById('ap-beds').value)||0,
+    baths:parseInt(document.getElementById('ap-baths').value)||0,
+    type:document.getElementById('ap-type').value,
+    rent:parseFloat(document.getElementById('ap-rent').value)||0,
+    purchase:parseFloat(document.getElementById('ap-purchase').value)||0,
+    status:'vacant',
+  });
+  localStorage.setItem(PROPS,JSON.stringify(props));
+  buildPropSelects();
+  closeModal('add-prop-modal');
+  ['ap-name','ap-address','ap-beds','ap-baths','ap-rent','ap-purchase'].forEach(id=>document.getElementById(id).value='');
+  renderAll();
+  notify('Property added ✓');
+}
+
+function saveTenant(){
+  const name=document.getElementById('at-name').value.trim();
+  const propId=document.getElementById('at-prop').value;
+  const weeklyRent=parseFloat(document.getElementById('at-rent').value)||0;
+  if(!name){notify('Enter tenant name','err');return;}
+  if(!weeklyRent){notify('Enter weekly rent','err');return;}
+  tenants.push({
+    id:'ten_'+Date.now(),
+    name,propId,weeklyRent,
+    bond:parseFloat(document.getElementById('at-bond').value)||0,
+    leaseStart:document.getElementById('at-start').value||today(),
+    leaseEnd:document.getElementById('at-end').value||'',
+    phone:document.getElementById('at-phone').value.trim(),
+    email:document.getElementById('at-email').value.trim(),
+  });
+  localStorage.setItem(TENANTS,JSON.stringify(tenants));
+  closeModal('add-tenant-modal');
+  ['at-name','at-rent','at-bond','at-start','at-end','at-phone','at-email'].forEach(id=>document.getElementById(id).value='');
+  renderAll();
+  notify('Tenant added ✓');
+}
+
+// ─── SETTINGS ──────────────────────────────────────────────────────────────
+function openSettings(){
+  document.getElementById('set-title').value=cfg?.title||'';
+  document.getElementById('settings-modal').classList.add('open');
+}
+
+function saveSettings(){
+  const title=document.getElementById('set-title').value.trim();
+  const pin=document.getElementById('set-pin').value.trim();
+  if(title)cfg.title=title;
+  if(pin){if(!/^\d{4}$/.test(pin)){notify('PIN must be 4 digits','err');return;}cfg.pin=pin;}
+  localStorage.setItem(CFG,JSON.stringify(cfg));
+  document.getElementById('app-title').textContent=cfg.title;
+  closeModal('settings-modal');
+  notify('Settings saved ✓');
+}
+
+function resetAll(){
+  if(!confirm('Delete ALL data and restart? This cannot be undone.'))return;
+  [CFG,PROPS,TENANTS,RENT,MAINT,FINEXP].forEach(k=>localStorage.removeItem(k));
+  location.reload();
+}
+
+// ─── EXPORT ────────────────────────────────────────────────────────────────
+function exportReport(){
+  const rows=[['Date','Property','Category','Description','Income','Expense']];
+  const sorted=[...finExpenses].sort((a,b)=>a.date.localeCompare(b.date));
+  sorted.forEach(e=>{
+    const p=getProp(e.propId);
+    rows.push([e.date,p.name,e.cat,'"'+(e.desc||'').replace(/"/g,'""')+'\"','',e.amount]);
+  });
+  rentRecords.filter(r=>r.paid).forEach(r=>{
+    const t=tenants.find(x=>x.id===r.tenantId)||{name:'Tenant'};
+    const p=getProp(t.propId);
+    rows.push([r.paidDate||r.month,p.name,'Rent',t.name,r.amount,'']);
+  });
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download=`property_report_${today()}.csv`;
+  a.click();
+  notify('Report downloaded ✓');
+}
+
+// ─── HELPERS ───────────────────────────────────────────────────────────────
+function saveAll(){
+  localStorage.setItem(CFG,JSON.stringify(cfg));
+  localStorage.setItem(PROPS,JSON.stringify(props));
+  localStorage.setItem(TENANTS,JSON.stringify(tenants));
+  localStorage.setItem(RENT,JSON.stringify(rentRecords));
+  localStorage.setItem(MAINT,JSON.stringify(maintenance));
+  localStorage.setItem(FINEXP,JSON.stringify(finExpenses));
+}
+
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+function switchTab(tab,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+tab)?.classList.add('active');
+  if(btn)btn.classList.add('active');
+  else document.querySelectorAll('.tab-btn').forEach(b=>{if(b.getAttribute('onclick')?.includes("'"+tab+"'"))b.classList.add('active');});
+}
+
+function notify(msg,type='ok'){
+  const n=document.getElementById('notif');
+  n.textContent=msg;
+  n.className='notif '+(type==='err'?'err':'')+' show';
+  clearTimeout(n._t);
+  n._t=setTimeout(()=>n.classList.remove('show'),2800);
+}
+</script>
+</body>
+</html>

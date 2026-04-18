@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Landlord Wizard — Whetū Digital</title>
+<meta name="theme-color" content="#06070f">
+<!--
+  © 2026 Whetū Digital Ltd. All rights reserved.
+  Landlord Wizard — Dashboard Wizard Series
+  hello@whetudigital.co.nz | whetudigital.co.nz
+-->
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#06070f;--card:#0a0c1e;--card2:#0d1028;
+  --purple:#b347ff;--cyan:#00fff7;--green:#39ff14;--amber:#ffb300;--red:#ff4455;
+  --text:#e0e8ff;--muted:#556;--border:rgba(179,71,255,0.2);
+  --font:'Segoe UI',Arial,sans-serif;
+}
+html,body{height:100%;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(179,71,255,.05) 0%,transparent 60%);pointer-events:none;z-index:0}
+
+/* ══ SETUP ══ */
+#setup{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+.setup-logo{font-size:11px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:24px;text-align:center}
+.setup-logo b{color:var(--purple)}
+.setup-card{width:100%;max-width:520px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;position:relative;overflow:hidden}
+.setup-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--purple),var(--cyan),var(--green))}
+.ssi-row{display:flex;gap:6px;margin-bottom:22px}
+.ssi{height:3px;flex:1;border-radius:2px;background:rgba(255,255,255,.06);transition:.3s}
+.ssi.done{background:var(--purple)}.ssi.active{background:linear-gradient(90deg,var(--purple),var(--cyan))}
+.setup-title{font-size:20px;font-weight:900;letter-spacing:1px;color:var(--purple);margin-bottom:4px}
+.setup-sub{font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.6}
+.sf{margin-bottom:13px}.sl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;display:block}
+.si{width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 13px;color:var(--text);font-size:14px;font-family:var(--font);outline:none;transition:.2s}
+.si:focus{border-color:var(--purple);box-shadow:0 0 0 2px rgba(179,71,255,.07)}
+.si::placeholder{color:var(--muted)}
+.s2r{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sbtn{width:100%;padding:12px;border-radius:9px;border:none;background:linear-gradient(135deg,var(--purple),var(--cyan));color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px;transition:.15s}
+.sbtn:hover{opacity:.9;transform:translateY(-1px)}
+.sbtn.sec{background:none;border:1px solid rgba(255,255,255,.1);color:var(--muted)}
+.sbtn.sec:hover{border-color:var(--purple);color:var(--purple)}
+
+/* Property entry */
+.prop-list{max-height:180px;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:6px}
+.prop-item{background:rgba(179,71,255,.07);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between}
+.prop-name{font-weight:700;font-size:13px;color:var(--purple)}
+.prop-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.prop-remove{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px}
+.prop-remove:hover{color:var(--red)}
+.add-prop-btn{width:100%;padding:9px;border-radius:8px;border:1px dashed rgba(179,71,255,.3);background:none;color:var(--muted);font-size:12px;cursor:pointer;transition:.2s;margin-bottom:10px}
+.add-prop-btn:hover{border-color:var(--purple);color:var(--purple)}
+
+/* ══ SETUP COMPLETE ══ */
+#setup-complete{position:fixed;inset:0;z-index:300;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px}
+.sc-icon{font-size:70px;animation:scPop .5s cubic-bezier(.34,1.56,.64,1);margin-bottom:18px}
+@keyframes scPop{from{transform:scale(0)}to{transform:scale(1)}}
+.sc-title{font-size:22px;font-weight:900;letter-spacing:2px;color:var(--purple);margin-bottom:8px}
+.sc-sub{font-size:13px;color:var(--muted);margin-bottom:26px;line-height:1.6}
+.sc-btn{padding:13px 34px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--purple),var(--cyan));color:#fff;font-size:14px;font-weight:700;cursor:pointer}
+
+/* ══ PIN ══ */
+#pin-gate{position:fixed;inset:0;z-index:100;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center}
+.pin-logo{font-size:22px;font-weight:900;letter-spacing:4px;color:var(--purple);text-shadow:0 0 20px rgba(179,71,255,.5);margin-bottom:4px}
+.pin-name{font-size:11px;color:var(--muted);letter-spacing:2px;margin-bottom:26px;text-align:center}
+.pin-dots{display:flex;gap:12px;margin-bottom:26px}
+.pd{width:14px;height:14px;border-radius:50%;border:2px solid var(--purple);background:transparent;transition:.15s}
+.pd.on{background:var(--purple);box-shadow:0 0 8px var(--purple)}
+.pin-pad{display:grid;grid-template-columns:repeat(3,66px);gap:8px}
+.pp{height:66px;border-radius:12px;border:1px solid rgba(255,255,255,.07);background:var(--card);color:var(--text);font-size:20px;font-weight:700;cursor:pointer;transition:.12s;touch-action:manipulation}
+.pp:hover{border-color:var(--purple)}.pp:active{transform:scale(.93)}
+.pin-err{color:var(--red);font-size:12px;text-align:center;margin-top:10px;height:18px}
+
+/* ══ APP ══ */
+#app{display:none;position:relative;z-index:1;min-height:100vh;padding-bottom:70px}
+.app-header{background:rgba(179,71,255,.04);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.hdr-title{font-size:15px;font-weight:900;letter-spacing:2px;color:var(--purple)}
+.hdr-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.hdr-fy{background:rgba(0,255,247,.06);border:1px solid rgba(0,255,247,.2);border-radius:6px;padding:4px 10px;color:var(--cyan);font-size:12px;font-weight:700;cursor:pointer;outline:none}
+
+/* Nav */
+#nav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(6,7,15,.95);backdrop-filter:blur(20px);border-top:1px solid var(--border);padding:7px 0 11px;display:flex;justify-content:space-around}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:9px;letter-spacing:.5px;text-transform:uppercase;padding:3px 6px;border-radius:8px;min-width:48px}
+.nav-btn .ni{font-size:18px}
+.nav-btn.active{color:var(--purple)}
+.nav-btn.active .ni{filter:drop-shadow(0 0 5px var(--purple))}
+
+/* Tabs */
+.pane{display:none;padding:16px;animation:fadeIn .2s ease}
+.pane.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* Cards */
+.card{background:var(--card2);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:16px;margin-bottom:12px}
+.card-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.sum-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.sum-card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px;text-align:center}
+.sum-val{font-size:22px;font-weight:900;margin-bottom:3px}
+.sum-lbl{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+
+/* Table */
+.exp-table{width:100%;border-collapse:collapse;font-size:13px}
+.exp-table th{padding:7px 10px;text-align:left;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid rgba(255,255,255,.06)}
+.exp-table td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
+.exp-table tr:last-child td{border-bottom:none}
+.exp-table tr:hover td{background:rgba(255,255,255,.015)}
+.cat-badge{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:600}
+.cat-maintenance{background:rgba(255,179,0,.1);color:var(--amber);border:1px solid rgba(255,179,0,.2)}
+.cat-rates{background:rgba(0,255,247,.07);color:var(--cyan);border:1px solid rgba(0,255,247,.15)}
+.cat-insurance{background:rgba(57,255,20,.08);color:var(--green);border:1px solid rgba(57,255,20,.15)}
+.cat-mortgage{background:rgba(179,71,255,.1);color:var(--purple);border:1px solid rgba(179,71,255,.2)}
+.cat-other{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid rgba(255,255,255,.08)}
+
+/* Add expense form */
+.add-form{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.fi{width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;font-family:var(--font);outline:none;transition:.2s}
+.fi:focus{border-color:var(--purple)}
+.fi::placeholder{color:var(--muted)}
+.add-btn{padding:9px 20px;border-radius:8px;border:none;background:var(--purple);color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:.15s}
+.add-btn:hover{opacity:.85}
+
+/* Property cards */
+.prop-overview-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;animation:cardIn .3s ease both}
+.poc-name{font-weight:900;font-size:15px;color:var(--purple);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.poc-stats{display:flex;gap:14px;flex-wrap:wrap}
+.poc-stat{text-align:center}
+.poc-stat-val{font-size:18px;font-weight:800}
+.poc-stat-lbl{font-size:10px;color:var(--muted);letter-spacing:.5px}
+
+/* Reports */
+.report-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;cursor:pointer;transition:.2s}
+.report-card:hover{border-color:var(--purple);transform:translateY(-1px)}
+.report-icon{font-size:28px;margin-bottom:8px}
+.report-name{font-weight:700;font-size:14px;color:var(--purple);margin-bottom:3px}
+.report-desc{font-size:12px;color:var(--muted);line-height:1.4}
+
+/* Toast */
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(12px);background:rgba(179,71,255,.15);border:1px solid var(--purple);border-radius:14px;padding:7px 16px;font-size:12px;color:var(--purple);opacity:0;transition:.25s;z-index:9999;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%)}
+.wiz-footer{text-align:center;padding:20px 16px 4px;font-size:10px;color:rgba(255,255,255,.1);letter-spacing:1.5px}
+.wiz-footer a{color:rgba(179,71,255,.3);text-decoration:none}
+.recfg-btn{background:none;border:none;color:rgba(255,255,255,.15);cursor:pointer;font-size:11px;padding:4px;transition:.15s}
+.recfg-btn:hover{color:var(--red)}
+</style>
+</head>
+<body>
+
+<!-- ══ SETUP ══ -->
+<div id="setup">
+  <div class="setup-logo">🏠 <b>Whetū Digital</b> · Landlord Wizard</div>
+  <div class="setup-card">
+    <div class="ssi-row">
+      <div class="ssi active" id="ssi1"></div>
+      <div class="ssi" id="ssi2"></div>
+      <div class="ssi" id="ssi3"></div>
+    </div>
+
+    <!-- Step 1 -->
+    <div id="step1">
+      <div class="setup-title">Your Portfolio</div>
+      <div class="setup-sub">Set up your property expense tracker in 3 quick steps.</div>
+      <div class="sf">
+        <label class="sl">Your Name / Company</label>
+        <input class="si" id="s1-name" placeholder="e.g. John Smith or Smith Properties Ltd" maxlength="60">
+      </div>
+      <div class="s2r">
+        <div class="sf">
+          <label class="sl">Financial Year Start</label>
+          <select class="si" id="s1-fy">
+            <option value="04-01">1 April (NZ IRD)</option>
+            <option value="01-01">1 January</option>
+            <option value="07-01">1 July</option>
+          </select>
+        </div>
+        <div class="sf">
+          <label class="sl">Currency</label>
+          <select class="si" id="s1-currency">
+            <option value="NZD">NZD — $</option>
+            <option value="AUD">AUD — $</option>
+            <option value="USD">USD — $</option>
+            <option value="GBP">GBP — £</option>
+          </select>
+        </div>
+      </div>
+      <div class="sf">
+        <label class="sl">GST Registered?</label>
+        <select class="si" id="s1-gst">
+          <option value="no">No</option>
+          <option value="yes">Yes — track GST separately</option>
+        </select>
+      </div>
+      <div class="sf">
+        <label class="sl">Dashboard PIN (4 digits)</label>
+        <input class="si" id="s1-pin" type="password" inputmode="numeric" maxlength="4" placeholder="Choose a PIN" style="letter-spacing:6px;font-size:18px;text-align:center">
+      </div>
+      <button class="sbtn" onclick="step1Next()">Next — Add Properties →</button>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="step2" style="display:none">
+      <div class="setup-title">Your Properties</div>
+      <div class="setup-sub">Add each rental property. You can add more later.</div>
+      <div class="prop-list" id="prop-list"></div>
+      <button class="add-prop-btn" onclick="addPropPrompt()">+ Add a Property</button>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="sbtn sec" style="flex:1;margin-top:0" onclick="step2Back()">← Back</button>
+        <button class="sbtn" style="flex:2;margin-top:0" onclick="step2Next()">Next — Categories →</button>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div id="step3" style="display:none">
+      <div class="setup-title">Expense Categories</div>
+      <div class="setup-sub">Select which expense categories apply to your portfolio.</div>
+      <div id="cat-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px"></div>
+      <div style="display:flex;gap:8px">
+        <button class="sbtn sec" style="flex:1;margin-top:0" onclick="step3Back()">← Back</button>
+        <button class="sbtn" style="flex:2;margin-top:0" onclick="finishSetup()">🚀 Launch Dashboard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ COMPLETE ══ -->
+<div id="setup-complete">
+  <div class="sc-icon">🏠</div>
+  <div class="sc-title">LANDLORD DASHBOARD READY</div>
+  <div class="sc-sub" id="sc-sub">Your property expense tracker is configured.</div>
+  <button class="sc-btn" onclick="launchDashboard()">Open Dashboard</button>
+</div>
+
+<!-- ══ PIN ══ -->
+<div id="pin-gate">
+  <div class="pin-logo">🏠 LANDLORD</div>
+  <div class="pin-name" id="pin-name"></div>
+  <div class="pin-dots"><div class="pd" id="pd0"></div><div class="pd" id="pd1"></div><div class="pd" id="pd2"></div><div class="pd" id="pd3"></div></div>
+  <div class="pin-pad">
+    <button class="pp" onclick="pk('1')">1</button><button class="pp" onclick="pk('2')">2</button><button class="pp" onclick="pk('3')">3</button>
+    <button class="pp" onclick="pk('4')">4</button><button class="pp" onclick="pk('5')">5</button><button class="pp" onclick="pk('6')">6</button>
+    <button class="pp" onclick="pk('7')">7</button><button class="pp" onclick="pk('8')">8</button><button class="pp" onclick="pk('9')">9</button>
+    <button class="pp" style="font-size:12px" onclick="pc()">CLR</button><button class="pp" onclick="pk('0')">0</button><button class="pp" style="font-size:18px" onclick="pb()">⌫</button>
+  </div>
+  <div class="pin-err" id="pin-err"></div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <div class="app-header">
+    <div>
+      <div class="hdr-title" id="hdr-name">PORTFOLIO</div>
+      <div class="hdr-sub" id="hdr-sub"></div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <select class="hdr-fy" id="fy-sel" onchange="renderExpenses()"></select>
+      <button class="recfg-btn" onclick="reconfigure()">⚙ Reset</button>
+    </div>
+  </div>
+
+  <!-- Overview -->
+  <div class="pane active" id="pane-overview">
+    <div class="sum-grid" id="sum-grid"></div>
+    <div id="prop-overview-list"></div>
+    <div class="wiz-footer">Built with <a href="https://whetudigital.co.nz">Landlord Wizard</a> · Whetū Digital · NZ</div>
+  </div>
+
+  <!-- Expenses -->
+  <div class="pane" id="pane-expenses">
+    <div class="add-form">
+      <div class="card-title" style="margin-bottom:10px">Log Expense</div>
+      <div class="form-grid">
+        <div class="sf" style="margin:0"><label class="sl">Date</label><input class="fi" type="date" id="e-date"></div>
+        <div class="sf" style="margin:0"><label class="sl">Amount</label><input class="fi" type="number" id="e-amount" placeholder="0.00"></div>
+        <div class="sf" style="margin:0"><label class="sl">Property</label><select class="fi" id="e-property"></select></div>
+        <div class="sf" style="margin:0"><label class="sl">Category</label><select class="fi" id="e-category"></select></div>
+      </div>
+      <div class="sf" style="margin:0 0 10px"><label class="sl">Description</label><input class="fi" id="e-desc" placeholder="e.g. Replace hot water cylinder" style="width:100%"></div>
+      <button class="add-btn" onclick="addExpense()">+ Log Expense</button>
+    </div>
+    <div class="card"><div class="card-title">Expense History</div>
+      <div style="overflow-x:auto"><table class="exp-table" id="exp-table"><thead><tr><th>Date</th><th>Description</th><th>Property</th><th>Category</th><th style="text-align:right">Amount</th></tr></thead><tbody id="exp-tbody"></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- Reports -->
+  <div class="pane" id="pane-reports">
+    <div class="card-title" style="padding:0 0 10px">Export & Reports</div>
+    <div class="report-card" onclick="exportCSV()"><div class="report-icon">📊</div><div class="report-name">Export to CSV</div><div class="report-desc">Download all expenses as a spreadsheet — open in Excel or Google Sheets</div></div>
+    <div class="report-card" onclick="exportTaxSummary()"><div class="report-icon">🧾</div><div class="report-name">Tax Year Summary</div><div class="report-desc">NZ IRD-style expense summary by category — share with your accountant</div></div>
+    <div class="report-card" onclick="exportPropertyReport()"><div class="report-icon">🏠</div><div class="report-name">Property Report</div><div class="report-desc">Expense breakdown per property — total costs, category split, net position</div></div>
+    <div class="wiz-footer" style="margin-top:10px">Built with <a href="https://whetudigital.co.nz">Landlord Wizard</a> · Whetū Digital · NZ</div>
+  </div>
+
+  <nav id="nav">
+    <button class="nav-btn active" id="nav-overview" onclick="showPane('overview')"><span class="ni">📋</span>Overview</button>
+    <button class="nav-btn" id="nav-expenses" onclick="showPane('expenses')"><span class="ni">➕</span>Expenses</button>
+    <button class="nav-btn" id="nav-reports" onclick="showPane('reports')"><span class="ni">📊</span>Reports</button>
+  </nav>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const CFG_KEY='llwiz_config', EXP_KEY='llwiz_expenses';
+let CFG=null, pinEntry='', expenses=[], selCats=[];
+const ALL_CATS=['Maintenance','Rates','Insurance','Mortgage Interest','Property Management','Accounting','Repairs','Utilities','Depreciation','Legal Fees','Travel','Other'];
+let setupProps=[];
+
+function step1Next(){
+  const name=document.getElementById('s1-name').value.trim();
+  const pin=document.getElementById('s1-pin').value.trim();
+  if(!name){showToast('Enter your name');return;}
+  if(pin.length!==4||!/^\d{4}$/.test(pin)){showToast('Enter a 4-digit PIN');return;}
+  document.getElementById('step1').style.display='none'; document.getElementById('step2').style.display='block';
+  document.getElementById('ssi1').className='ssi done'; document.getElementById('ssi2').className='ssi active';
+  renderPropList();
+}
+function step2Back(){document.getElementById('step2').style.display='none';document.getElementById('step1').style.display='block';document.getElementById('ssi2').className='ssi';document.getElementById('ssi1').className='ssi active';}
+function step2Next(){
+  document.getElementById('step2').style.display='none'; document.getElementById('step3').style.display='block';
+  document.getElementById('ssi2').className='ssi done'; document.getElementById('ssi3').className='ssi active';
+  selCats=[...ALL_CATS];
+  document.getElementById('cat-grid').innerHTML=ALL_CATS.map((c,i)=>`
+    <label style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:9px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:12px;transition:.15s" id="cl-${i}" onclick="toggleCat(${i},'${c}',this)">
+      <span style="color:var(--purple)">✓</span>${c}</label>`).join('');
+}
+function step3Back(){document.getElementById('step3').style.display='none';document.getElementById('step2').style.display='block';document.getElementById('ssi3').className='ssi';document.getElementById('ssi2').className='ssi active';}
+function toggleCat(i,c,el){
+  if(selCats.includes(c)){selCats=selCats.filter(x=>x!==c);el.style.opacity='.4';el.style.borderColor='rgba(255,255,255,.04)';}
+  else{selCats.push(c);el.style.opacity='1';el.style.borderColor='';}
+}
+function addPropPrompt(){
+  const n=prompt('Property address:'); if(!n) return;
+  const t=prompt('Rent per week (optional):');
+  setupProps.push({name:n.trim(),rent:t?parseFloat(t):0}); renderPropList();
+}
+function renderPropList(){
+  document.getElementById('prop-list').innerHTML=setupProps.length?setupProps.map((p,i)=>`
+    <div class="prop-item"><div><div class="prop-name">🏠 ${esc(p.name)}</div>${p.rent?`<div class="prop-meta">$${p.rent}/week</div>`:''}</div>
+    <button class="prop-remove" onclick="setupProps.splice(${i},1);renderPropList()">✕</button></div>`).join('') :
+    '<div style="color:var(--muted);font-size:12px;padding:8px 4px;text-align:center">No properties added yet</div>';
+}
+function finishSetup(){
+  const cfg={name:document.getElementById('s1-name').value.trim(),fyStart:document.getElementById('s1-fy').value,currency:document.getElementById('s1-currency').value,gst:document.getElementById('s1-gst').value,pin:document.getElementById('s1-pin').value.trim(),properties:setupProps,categories:selCats,setupAt:Date.now()};
+  try{localStorage.setItem(CFG_KEY,JSON.stringify(cfg));}catch(e){}
+  CFG=cfg;
+  document.getElementById('setup').style.display='none';
+  document.getElementById('sc-sub').textContent=cfg.name+'\n'+(cfg.properties.length)+' propert'+(cfg.properties.length!==1?'ies':'y')+' configured.';
+  document.getElementById('setup-complete').style.display='flex';
+}
+function launchDashboard(){document.getElementById('setup-complete').style.display='none';showPinGate();}
+
+function showPinGate(){document.getElementById('pin-gate').style.display='flex';document.getElementById('pin-name').textContent=CFG.name||'';pinEntry='';updateDots();}
+function pk(k){if(pinEntry.length>=4)return;pinEntry+=k;updateDots();if(pinEntry.length===4)setTimeout(checkPin,100);}
+function pb(){if(pinEntry.length){pinEntry=pinEntry.slice(0,-1);updateDots();}}
+function pc(){pinEntry='';updateDots();document.getElementById('pin-err').textContent='';}
+function updateDots(){for(let i=0;i<4;i++)document.getElementById('pd'+i).classList.toggle('on',i<pinEntry.length);}
+function checkPin(){
+  if(pinEntry===CFG.pin){document.getElementById('pin-gate').style.display='none';initDashboard();document.getElementById('app').style.display='block';}
+  else{document.getElementById('pin-err').textContent='Incorrect PIN';pinEntry='';updateDots();setTimeout(()=>document.getElementById('pin-err').textContent='',2000);}
+}
+
+function initDashboard(){
+  document.getElementById('hdr-name').textContent=(CFG.name||'PORTFOLIO').toUpperCase();
+  document.getElementById('hdr-sub').textContent=(CFG.properties||[]).length+' properties · '+CFG.currency;
+  try{expenses=JSON.parse(localStorage.getItem(EXP_KEY)||'[]');}catch(e){expenses=[];}
+  buildFYSelector();
+  buildPropertySelects();
+  renderOverview();
+  renderExpenses();
+  document.getElementById('e-date').value=new Date().toISOString().slice(0,10);
+}
+
+function buildFYSelector(){
+  const sel=document.getElementById('fy-sel');
+  const now=new Date();
+  const years=[];
+  for(let y=now.getFullYear();y>=now.getFullYear()-3;y--) years.push(y);
+  sel.innerHTML=years.map(y=>`<option value="${y}">FY ${y}/${String(y+1).slice(2)}</option>`).join('');
+}
+
+function buildPropertySelects(){
+  const opts=(CFG.properties||[]).map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('');
+  document.getElementById('e-property').innerHTML=opts||'<option>All Properties</option>';
+  const catOpts=(CFG.categories||ALL_CATS).map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  document.getElementById('e-category').innerHTML=catOpts;
+}
+
+function getFYExpenses(){
+  const fy=parseInt(document.getElementById('fy-sel').value)||new Date().getFullYear();
+  const fyStart=CFG.fyStart||'04-01';
+  const start=new Date(fy+'-'+fyStart);
+  const end=new Date((fy+1)+'-'+fyStart);
+  return expenses.filter(e=>{const d=new Date(e.date);return d>=start&&d<end;});
+}
+
+function renderOverview(){
+  const fyExp=getFYExpenses();
+  const total=fyExp.reduce((s,e)=>s+parseFloat(e.amount||0),0);
+  const sym=CFG.currency==='NZD'?'$':CFG.currency==='GBP'?'£':CFG.currency==='EUR'?'€':'$';
+  const catTotals={};
+  fyExp.forEach(e=>{if(!catTotals[e.category])catTotals[e.category]=0;catTotals[e.category]+=parseFloat(e.amount||0);});
+  const topCat=Object.entries(catTotals).sort((a,b)=>b[1]-a[1])[0];
+
+  document.getElementById('sum-grid').innerHTML=`
+    <div class="sum-card"><div class="sum-val" style="color:var(--purple)">${sym}${total.toLocaleString('en',{minimumFractionDigits:0,maximumFractionDigits:0})}</div><div class="sum-lbl">Total Expenses</div></div>
+    <div class="sum-card"><div class="sum-val" style="color:var(--cyan)">${fyExp.length}</div><div class="sum-lbl">Transactions</div></div>
+    <div class="sum-card"><div class="sum-val" style="color:var(--amber)">${(CFG.properties||[]).length}</div><div class="sum-lbl">Properties</div></div>
+    <div class="sum-card"><div class="sum-val" style="color:var(--green);font-size:14px">${topCat?esc(topCat[0]):'—'}</div><div class="sum-lbl">Top Category</div></div>`;
+
+  document.getElementById('prop-overview-list').innerHTML=(CFG.properties||[]).map((p,i)=>{
+    const pExp=fyExp.filter(e=>e.property===p.name);
+    const pTotal=pExp.reduce((s,e)=>s+parseFloat(e.amount||0),0);
+    return `<div class="prop-overview-card" style="animation-delay:${i*60}ms">
+      <div class="poc-name">🏠 ${esc(p.name)}</div>
+      <div class="poc-stats">
+        <div class="poc-stat"><div class="poc-stat-val" style="color:var(--purple)">${sym}${pTotal.toLocaleString('en',{minimumFractionDigits:0})}</div><div class="poc-stat-lbl">Expenses</div></div>
+        <div class="poc-stat"><div class="poc-stat-val" style="color:var(--cyan)">${pExp.length}</div><div class="poc-stat-lbl">Transactions</div></div>
+        ${p.rent?`<div class="poc-stat"><div class="poc-stat-val" style="color:var(--green)">${sym}${(p.rent*52).toLocaleString('en',{minimumFractionDigits:0})}</div><div class="poc-stat-lbl">Annual Rent</div></div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderExpenses(){
+  renderOverview();
+  const fyExp=getFYExpenses().sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const sym=CFG.currency==='NZD'?'$':CFG.currency==='GBP'?'£':CFG.currency==='EUR'?'€':'$';
+  const catClass={'Maintenance':'cat-maintenance','Rates':'cat-rates','Insurance':'cat-insurance','Mortgage Interest':'cat-mortgage'};
+  document.getElementById('exp-tbody').innerHTML=fyExp.length?fyExp.map((e,i)=>`
+    <tr>
+      <td style="color:var(--muted);white-space:nowrap">${e.date}</td>
+      <td>${esc(e.description||'—')}</td>
+      <td style="font-size:12px;color:var(--muted)">${esc(e.property||'—')}</td>
+      <td><span class="cat-badge ${catClass[e.category]||'cat-other'}">${esc(e.category||'Other')}</span></td>
+      <td style="text-align:right;font-weight:700;color:var(--purple)">${sym}${parseFloat(e.amount||0).toFixed(2)}</td>
+    </tr>`).join('') :
+    '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">No expenses logged yet for this financial year</td></tr>';
+}
+
+function addExpense(){
+  const date=document.getElementById('e-date').value;
+  const amount=parseFloat(document.getElementById('e-amount').value);
+  const property=document.getElementById('e-property').value;
+  const category=document.getElementById('e-category').value;
+  const description=document.getElementById('e-desc').value.trim();
+  if(!date||!amount||!description){showToast('Please fill in all fields');return;}
+  expenses.push({date,amount,property,category,description,id:Date.now()});
+  try{localStorage.setItem(EXP_KEY,JSON.stringify(expenses));}catch(e){}
+  document.getElementById('e-amount').value='';
+  document.getElementById('e-desc').value='';
+  renderExpenses();
+  showToast('✓ Expense logged');
+}
+
+function exportCSV(){
+  const fyExp=getFYExpenses();
+  if(!fyExp.length){showToast('No expenses to export');return;}
+  const rows=[['Date','Description','Property','Category','Amount ('+CFG.currency+')'],...fyExp.map(e=>[e.date,'"'+(e.description||'')+'\"','"'+(e.property||'')+'\"','"'+(e.category||'')+'\"',parseFloat(e.amount||0).toFixed(2)])];
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='landlord_expenses_fy'+document.getElementById('fy-sel').value+'.csv';
+  a.click();
+  showToast('✓ CSV downloaded');
+}
+
+function exportTaxSummary(){
+  const fyExp=getFYExpenses();
+  const sym=CFG.currency==='NZD'?'$':'$';
+  const fy=document.getElementById('fy-sel').value;
+  const catTotals={};
+  fyExp.forEach(e=>{if(!catTotals[e.category])catTotals[e.category]=0;catTotals[e.category]+=parseFloat(e.amount||0);});
+  const total=fyExp.reduce((s,e)=>s+parseFloat(e.amount||0),0);
+  const win=window.open('','_blank','width=600,height=700');
+  if(!win){showToast('Allow pop-ups to export');return;}
+  win.document.write(`<!DOCTYPE html><html><head><title>Tax Summary FY${fy}</title><style>body{font-family:Arial,sans-serif;margin:32px;color:#111}h1{border-bottom:2px solid #000;padding-bottom:8px}table{width:100%;border-collapse:collapse;margin-top:16px}th,td{padding:8px;text-align:left;border-bottom:1px solid #ccc}th{background:#f5f5f5}tfoot td{font-weight:700;border-top:2px solid #000}.footer{margin-top:24px;font-size:11px;color:#888;border-top:1px solid #ccc;padding-top:10px}@media print{button{display:none}}</style></head><body>
+    <h1>🏠 Rental Property Expense Summary</h1>
+    <p><b>Landlord:</b> ${esc(CFG.name)} &nbsp;·&nbsp; <b>Financial Year:</b> FY${fy}/${parseInt(fy)+1}</p>
+    <button onclick="window.print()" style="padding:8px 16px;margin:12px 0;cursor:pointer">🖨 Print / Save PDF</button>
+    <table><thead><tr><th>Category</th><th style="text-align:right">Total (${CFG.currency})</th></tr></thead>
+    <tbody>${Object.entries(catTotals).sort((a,b)=>b[1]-a[1]).map(([cat,amt])=>`<tr><td>${esc(cat)}</td><td style="text-align:right">${sym}${amt.toFixed(2)}</td></tr>`).join('')}</tbody>
+    <tfoot><tr><td><b>TOTAL DEDUCTIONS</b></td><td style="text-align:right"><b>${sym}${total.toFixed(2)}</b></td></tr></tfoot></table>
+    <div class="footer">Generated by Landlord Wizard · Whetū Digital · whetudigital.co.nz<br>Review with your accountant before submitting to IRD.</div>
+    </body></html>`);
+}
+
+function exportPropertyReport(){
+  const fyExp=getFYExpenses();
+  const sym='$';
+  const win=window.open('','_blank','width=640,height=700');
+  if(!win){showToast('Allow pop-ups to export');return;}
+  const propRows=(CFG.properties||[]).map(p=>{
+    const pExp=fyExp.filter(e=>e.property===p.name);
+    const pTotal=pExp.reduce((s,e)=>s+parseFloat(e.amount||0),0);
+    return `<h3 style="margin:20px 0 6px">🏠 ${esc(p.name)}</h3><p>Total expenses: <b>${sym}${pTotal.toFixed(2)}</b>${p.rent?` &nbsp;·&nbsp; Annual rent: <b>${sym}${(p.rent*52).toFixed(2)}</b>`:''}</p>
+      <table><thead><tr><th>Date</th><th>Description</th><th>Category</th><th style="text-align:right">Amount</th></tr></thead>
+      <tbody>${pExp.map(e=>`<tr><td>${e.date}</td><td>${esc(e.description)}</td><td>${esc(e.category)}</td><td style="text-align:right">${sym}${parseFloat(e.amount).toFixed(2)}</td></tr>`).join('')||'<tr><td colspan="4" style="color:#999">No expenses logged</td></tr>'}</tbody></table>`;
+  }).join('');
+  win.document.write(`<!DOCTYPE html><html><head><title>Property Report</title><style>body{font-family:Arial,sans-serif;margin:32px;color:#111}table{width:100%;border-collapse:collapse}th,td{padding:7px;border-bottom:1px solid #ddd;font-size:13px}th{background:#f5f5f5}button{padding:8px 16px;margin:12px 0;cursor:pointer}@media print{button{display:none}}</style></head><body>
+    <h1>Property Expense Report — FY${document.getElementById('fy-sel').value}</h1>
+    <p><b>${esc(CFG.name)}</b></p><button onclick="window.print()">🖨 Print / Save PDF</button>${propRows}</body></html>`);
+}
+
+function showPane(id){
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pane-'+id).classList.add('active');
+  document.getElementById('nav-'+id).classList.add('active');
+}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function reconfigure(){if(!confirm('Reset and redo setup?'))return;try{localStorage.removeItem(CFG_KEY);}catch(e){}location.reload();}
+
+(function(){try{CFG=JSON.parse(localStorage.getItem(CFG_KEY)||'null');}catch(e){CFG=null;}if(CFG){document.getElementById('setup').style.display='none';showPinGate();}})();
+</script>
+</body>
+</html>

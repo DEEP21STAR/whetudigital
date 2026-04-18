@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<!--
+  Budget Wizard — Whetū Digital
+  Copyright © 2026 Whetū Digital. All rights reserved.
+  Commercial product — not for redistribution.
+  Built by Claude Code for Deep (Whetū Digital).
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Budget Wizard — Whetū Digital</title>
+<style>
+:root{
+  --bg:#0a0a12;--card:#12121e;--card2:#1a1a2e;--border:#2a2a4a;
+  --accent:#a855f7;--accent2:#7c3aed;--green:#10b981;--red:#ef4444;
+  --yellow:#f59e0b;--blue:#3b82f6;--pink:#ec4899;--teal:#14b8a6;
+  --text:#e2e8f0;--sub:#94a3b8;--font:'Segoe UI',system-ui,sans-serif;
+  --r:14px;--ring-sz:160px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden}
+
+/* GATE */
+#gate{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
+.gate-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:40px 32px;text-align:center;max-width:340px;width:90%}
+.gate-logo{font-size:2.4rem;margin-bottom:8px}
+.gate-title{font-size:1.1rem;font-weight:700;margin-bottom:4px}
+.gate-sub{font-size:.8rem;color:var(--sub);margin-bottom:28px}
+.pin-dots{display:flex;gap:14px;justify-content:center;margin-bottom:24px}
+.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);transition:.2s;background:transparent}
+.pin-dot.filled{background:var(--accent);border-color:var(--accent)}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:220px;margin:0 auto}
+.pin-btn{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;font-size:1.1rem;font-weight:600;cursor:pointer;transition:.15s;color:var(--text)}
+.pin-btn:hover{background:var(--border);transform:scale(1.05)}
+.pin-btn:active{transform:scale(.95)}
+.pin-err{color:var(--red);font-size:.8rem;margin-top:12px;min-height:18px}
+
+/* SETUP */
+#setup{position:fixed;inset:0;background:var(--bg);z-index:9998;display:flex;align-items:center;justify-content:center;overflow-y:auto;padding:20px}
+.setup-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:40px 32px;max-width:560px;width:100%}
+.setup-logo{text-align:center;font-size:2.4rem;margin-bottom:6px}
+.setup-title{text-align:center;font-size:1.3rem;font-weight:700;margin-bottom:4px}
+.setup-sub{text-align:center;font-size:.85rem;color:var(--sub);margin-bottom:28px}
+.step-bar{display:flex;gap:8px;margin-bottom:28px}
+.step-seg{height:4px;border-radius:2px;flex:1;background:var(--border);transition:.4s}
+.step-seg.done{background:var(--accent)}
+.step-seg.active{background:linear-gradient(90deg,var(--accent),var(--blue))}
+.step-label{text-align:center;font-size:.75rem;color:var(--sub);margin-bottom:20px;letter-spacing:.05em;text-transform:uppercase}
+.s-group{margin-bottom:18px}
+.s-label{font-size:.8rem;color:var(--sub);margin-bottom:6px;display:block}
+.s-input{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:.9rem;outline:none;transition:.2s}
+.s-input:focus{border-color:var(--accent)}
+.s-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.s-hint{font-size:.75rem;color:var(--sub);margin-top:4px}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:8px}
+.cat-chip{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:8px}
+.cat-chip:hover{border-color:var(--accent)}
+.cat-chip.sel{border-color:var(--accent);background:rgba(168,85,247,.12)}
+.cat-chip .ce{font-size:1.1rem}
+.cat-chip .cn{font-size:.8rem;font-weight:500}
+.cat-budgets{margin-top:16px;display:flex;flex-direction:column;gap:10px}
+.cat-row{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:10px 12px}
+.cat-row .ce{font-size:1.1rem;width:24px;text-align:center}
+.cat-row .cn{font-size:.85rem;flex:1}
+.cat-row input{width:100px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:.85rem;text-align:right;outline:none}
+.cat-row input:focus{border-color:var(--accent)}
+.goal-list{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.goal-row{background:var(--card2);border-radius:10px;padding:12px;display:flex;gap:10px;align-items:center}
+.goal-row input{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:.85rem;outline:none}
+.goal-row input:focus{border-color:var(--accent)}
+.goal-row .gi{width:40px;text-align:center;font-size:1.1rem}
+.goal-row .gn{flex:1}
+.goal-row .ga{width:110px;text-align:right}
+.goal-row .gc{width:110px;text-align:right}
+.btn-add-sm{background:rgba(168,85,247,.12);border:1px dashed var(--accent);color:var(--accent);border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.8rem;transition:.2s;width:100%;margin-top:8px}
+.btn-add-sm:hover{background:rgba(168,85,247,.2)}
+.btn-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:1rem;padding:4px}
+.setup-nav{display:flex;gap:12px;margin-top:28px}
+.btn-back{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:12px;font-size:.9rem;cursor:pointer;color:var(--text);transition:.2s}
+.btn-back:hover{background:var(--border)}
+.btn-next{flex:2;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;padding:12px;font-size:.9rem;font-weight:600;cursor:pointer;color:#fff;transition:.2s}
+.btn-next:hover{opacity:.9;transform:translateY(-1px)}
+.sub-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.sub-chip{padding:6px 14px;border-radius:20px;border:1px solid var(--border);font-size:.8rem;cursor:pointer;transition:.2s}
+.sub-chip.sel{background:rgba(168,85,247,.15);border-color:var(--accent);color:var(--accent)}
+
+/* APP SHELL */
+#app{display:none;min-height:100vh;display:none}
+.top-bar{background:var(--card);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.top-logo{font-size:1.2rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.top-month{font-size:.85rem;color:var(--sub)}
+.top-actions{display:flex;gap:8px;align-items:center}
+.top-btn{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:.8rem;cursor:pointer;color:var(--text);transition:.2s}
+.top-btn:hover{border-color:var(--accent)}
+.tab-bar{background:var(--card);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 12px}
+.tab-btn{padding:12px 16px;font-size:.8rem;font-weight:500;cursor:pointer;border:none;background:none;color:var(--sub);border-bottom:2px solid transparent;white-space:nowrap;transition:.2s}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.page{display:none;padding:20px;max-width:1100px;margin:0 auto}
+.page.active{display:block}
+
+/* OVERVIEW */
+.hero-greeting{font-size:1.4rem;font-weight:700;margin-bottom:4px}
+.hero-sub{font-size:.85rem;color:var(--sub);margin-bottom:24px}
+.sum-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+.sum-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+.sum-card .sc-label{font-size:.75rem;color:var(--sub);margin-bottom:6px}
+.sum-card .sc-val{font-size:1.6rem;font-weight:700}
+.sum-card .sc-sub{font-size:.75rem;color:var(--sub);margin-top:4px}
+.sum-card .sc-bar{height:4px;border-radius:2px;background:var(--border);margin-top:10px;overflow:hidden}
+.sum-card .sc-fill{height:100%;border-radius:2px;transition:width .8s ease}
+.rings-section{margin-bottom:24px}
+.rings-title{font-size:.85rem;font-weight:600;color:var(--sub);margin-bottom:16px;text-transform:uppercase;letter-spacing:.05em}
+.rings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:16px}
+.ring-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;cursor:pointer;transition:.2s}
+.ring-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.ring-wrap{position:relative;width:90px;height:90px;margin:0 auto 10px}
+.ring-svg{width:90px;height:90px;transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--border);stroke-width:8}
+.ring-fg{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1s ease}
+.ring-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.ring-pct{font-size:1rem;font-weight:700}
+.ring-emoji{font-size:1rem}
+.ring-name{font-size:.75rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ring-spent{font-size:.7rem;color:var(--sub);margin-top:2px}
+.streak-bar{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:24px;display:flex;align-items:center;gap:16px}
+.streak-icon{font-size:2rem}
+.streak-info{flex:1}
+.streak-label{font-size:.75rem;color:var(--sub)}
+.streak-val{font-size:1.5rem;font-weight:700;color:var(--yellow)}
+.badge-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.badge{background:var(--card2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:.75rem;display:flex;align-items:center;gap:4px}
+.badge.earned{border-color:var(--yellow);color:var(--yellow);background:rgba(245,158,11,.1)}
+.insights-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:24px}
+.insight-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+.insight-card .ik{font-size:1.4rem;margin-bottom:6px}
+.insight-card .it{font-size:.8rem;font-weight:600;margin-bottom:4px}
+.insight-card .iv{font-size:.8rem;color:var(--sub);line-height:1.5}
+
+/* EXPENSES */
+.add-exp-form{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px}
+.form-title{font-size:.9rem;font-weight:600;margin-bottom:16px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.f-group{display:flex;flex-direction:column;gap:6px}
+.f-label{font-size:.75rem;color:var(--sub)}
+.f-input{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:var(--text);font-size:.85rem;outline:none;transition:.2s}
+.f-input:focus{border-color:var(--accent)}
+select.f-input option{background:var(--card2)}
+.btn-add-exp{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:10px;padding:10px 24px;color:#fff;font-weight:600;cursor:pointer;font-size:.85rem;transition:.2s;align-self:flex-end}
+.btn-add-exp:hover{opacity:.9}
+.exp-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.filter-chip{padding:6px 14px;border-radius:20px;border:1px solid var(--border);font-size:.8rem;cursor:pointer;transition:.2s;background:none;color:var(--text)}
+.filter-chip.active{background:rgba(168,85,247,.15);border-color:var(--accent);color:var(--accent)}
+.exp-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.exp-table th{text-align:left;padding:10px 12px;color:var(--sub);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
+.exp-table td{padding:10px 12px;border-bottom:1px solid rgba(42,42,74,.5)}
+.exp-table tr:hover td{background:rgba(255,255,255,.02)}
+.exp-cat-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:500}
+.exp-del{background:none;border:none;color:var(--sub);cursor:pointer;font-size:.9rem;transition:.2s;padding:4px}
+.exp-del:hover{color:var(--red)}
+.total-row{font-weight:700;color:var(--accent)}
+.exp-empty{text-align:center;padding:40px;color:var(--sub);font-size:.9rem}
+
+/* GOALS */
+.goals-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:24px}
+.goal-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;transition:.2s}
+.goal-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.goal-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.goal-icon{font-size:1.6rem}
+.goal-name{font-size:.95rem;font-weight:600}
+.goal-target{font-size:.75rem;color:var(--sub)}
+.goal-bar-wrap{background:var(--border);border-radius:4px;height:8px;margin-bottom:8px;overflow:hidden}
+.goal-bar{height:100%;border-radius:4px;transition:width .8s ease}
+.goal-stats{display:flex;justify-content:space-between;font-size:.75rem;color:var(--sub)}
+.goal-pct{font-size:1.2rem;font-weight:700;margin:6px 0}
+.goal-contribute{display:flex;gap:8px;margin-top:12px}
+.goal-amount-in{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:.85rem;outline:none}
+.btn-contribute{background:var(--accent);border:none;border-radius:8px;padding:7px 14px;color:#fff;font-size:.8rem;font-weight:600;cursor:pointer}
+.add-goal-card{background:var(--card);border:2px dashed var(--border);border-radius:14px;padding:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;min-height:160px;color:var(--sub);font-size:.9rem;flex-direction:column;gap:8px}
+.add-goal-card:hover{border-color:var(--accent);color:var(--accent)}
+.add-goal-form{background:var(--card);border:1px solid var(--accent);border-radius:14px;padding:20px;margin-bottom:16px;display:none}
+
+/* SUBSCRIPTIONS */
+.subs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:24px}
+.sub-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;transition:.2s}
+.sub-card:hover{border-color:var(--accent)}
+.sub-card-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.sub-icon{font-size:1.4rem}
+.sub-name{font-size:.9rem;font-weight:600}
+.sub-cycle{font-size:.7rem;color:var(--sub)}
+.sub-amount{font-size:1.3rem;font-weight:700;color:var(--accent);margin-bottom:4px}
+.sub-next{font-size:.75rem;color:var(--sub)}
+.sub-card-del{float:right;background:none;border:none;color:var(--sub);cursor:pointer;font-size:.85rem}
+.sub-card-del:hover{color:var(--red)}
+.add-sub-btn{background:var(--card);border:2px dashed var(--border);border-radius:14px;padding:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;color:var(--sub);font-size:.85rem;gap:8px;flex-direction:column;min-height:120px}
+.add-sub-btn:hover{border-color:var(--accent);color:var(--accent)}
+.add-sub-form{background:var(--card);border:1px solid var(--accent);border-radius:14px;padding:20px;margin-bottom:16px;display:none}
+.subs-summary{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:24px;display:flex;gap:20px;flex-wrap:wrap}
+.subs-sum-item{flex:1;min-width:120px}
+.subs-sum-label{font-size:.75rem;color:var(--sub);margin-bottom:4px}
+.subs-sum-val{font-size:1.4rem;font-weight:700}
+
+/* INSIGHTS */
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px}
+.chart-title{font-size:.9rem;font-weight:600;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.bar-chart{display:flex;flex-direction:column;gap:10px}
+.bar-row{display:flex;align-items:center;gap:12px}
+.bar-label{font-size:.8rem;min-width:80px;display:flex;align-items:center;gap:6px}
+.bar-track{flex:1;height:20px;background:var(--border);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .8s ease;display:flex;align-items:center;padding-left:8px}
+.bar-fill span{font-size:.7rem;font-weight:600;color:#fff;white-space:nowrap}
+.bar-val{font-size:.8rem;min-width:70px;text-align:right;color:var(--sub)}
+.monthly-compare{display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:8px}
+.month-col{text-align:center}
+.month-bar-wrap{height:100px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:6px}
+.month-bar{width:28px;border-radius:4px 4px 0 0;transition:height .8s ease;background:var(--accent);min-height:4px}
+.month-label{font-size:.7rem;color:var(--sub)}
+.month-val{font-size:.7rem;font-weight:600;margin-top:2px}
+.tips-list{display:flex;flex-direction:column;gap:10px}
+.tip-row{background:var(--card2);border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start}
+.tip-icon{font-size:1rem;min-width:20px}
+.tip-text{font-size:.82rem;line-height:1.5;color:var(--text)}
+.tip-text strong{color:var(--accent)}
+
+/* HELP */
+.help-section{margin-bottom:28px}
+.help-h{font-size:1rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.help-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.help-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
+.help-card .hc-icon{font-size:1.6rem;margin-bottom:8px}
+.help-card .hc-title{font-size:.85rem;font-weight:600;margin-bottom:4px}
+.help-card .hc-desc{font-size:.78rem;color:var(--sub);line-height:1.5}
+.steps-list{display:flex;flex-direction:column;gap:8px}
+.step-item{display:flex;gap:12px;align-items:flex-start}
+.step-num{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0}
+.step-text{font-size:.85rem;line-height:1.5;padding-top:3px}
+.tip-banner{background:linear-gradient(135deg,rgba(168,85,247,.15),rgba(59,130,246,.1));border:1px solid rgba(168,85,247,.3);border-radius:14px;padding:20px;margin-bottom:20px;display:flex;gap:14px;align-items:flex-start}
+.tip-banner .tb-icon{font-size:1.6rem}
+.tip-banner .tb-text{font-size:.85rem;line-height:1.6}
+
+/* MODALS */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-bg.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:420px;width:100%;max-height:80vh;overflow-y:auto}
+.modal h3{font-size:1rem;margin-bottom:20px}
+.modal-btns{display:flex;gap:10px;margin-top:20px}
+
+/* FOOTER */
+.whetu-footer{text-align:center;padding:24px 20px;color:var(--sub);font-size:.75rem;border-top:1px solid var(--border);margin-top:40px}
+.whetu-footer a{color:var(--accent);text-decoration:none}
+.whetu-footer .wf-brand{font-weight:700;color:var(--accent);font-size:.85rem;margin-bottom:4px}
+
+/* NOTIFICATION */
+.notif{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--green);border-radius:12px;padding:12px 20px;font-size:.85rem;z-index:9000;transform:translateY(80px);opacity:0;transition:.3s;max-width:280px}
+.notif.show{transform:none;opacity:1}
+.notif.err{border-color:var(--red)}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  .sum-cards{grid-template-columns:1fr 1fr}
+  .form-grid{grid-template-columns:1fr}
+  .rings-grid{grid-template-columns:repeat(3,1fr)}
+  .ring-wrap{width:72px;height:72px}
+  .ring-svg{width:72px;height:72px}
+  .s-row{grid-template-columns:1fr}
+  .subs-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:400px){
+  .rings-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ANIMATIONS */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.pulse{animation:pulse 2s infinite}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
+.slide-up{animation:slideUp .4s ease both}
+</style>
+</head>
+<body>
+
+<!-- PIN GATE -->
+<div id="gate">
+  <div class="gate-box">
+    <div class="gate-logo">💜</div>
+    <div class="gate-title" id="gate-name">Budget Wizard</div>
+    <div class="gate-sub">Enter your PIN to access</div>
+    <div class="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-pad">
+      <button class="pin-btn" onclick="pinKey('1')">1</button>
+      <button class="pin-btn" onclick="pinKey('2')">2</button>
+      <button class="pin-btn" onclick="pinKey('3')">3</button>
+      <button class="pin-btn" onclick="pinKey('4')">4</button>
+      <button class="pin-btn" onclick="pinKey('5')">5</button>
+      <button class="pin-btn" onclick="pinKey('6')">6</button>
+      <button class="pin-btn" onclick="pinKey('7')">7</button>
+      <button class="pin-btn" onclick="pinKey('8')">8</button>
+      <button class="pin-btn" onclick="pinKey('9')">9</button>
+      <button class="pin-btn" onclick="pinClear()" style="font-size:.8rem">CLR</button>
+      <button class="pin-btn" onclick="pinKey('0')">0</button>
+      <button class="pin-btn" onclick="pinBack()">⌫</button>
+    </div>
+    <div class="pin-err" id="pin-err"></div>
+  </div>
+</div>
+
+<!-- SETUP WIZARD -->
+<div id="setup" style="display:none">
+  <div class="setup-box">
+    <div class="setup-logo">💜</div>
+    <div class="setup-title">Budget Wizard Setup</div>
+    <div class="setup-sub">Configure your personal budget — takes 2 minutes</div>
+    <div class="step-bar">
+      <div class="step-seg active" id="seg0"></div>
+      <div class="step-seg" id="seg1"></div>
+      <div class="step-seg" id="seg2"></div>
+    </div>
+    <div class="step-label" id="step-label">Step 1 of 3 — Profile</div>
+
+    <!-- STEP 1 -->
+    <div id="step1">
+      <div class="s-group">
+        <label class="s-label">Your name</label>
+        <input class="s-input" id="cfg-name" placeholder="e.g. Mia" maxlength="30">
+      </div>
+      <div class="s-group">
+        <label class="s-label">Dashboard title</label>
+        <input class="s-input" id="cfg-title" placeholder="e.g. Mia's Budget" maxlength="40">
+      </div>
+      <div class="s-row">
+        <div class="s-group">
+          <label class="s-label">Currency symbol</label>
+          <input class="s-input" id="cfg-currency" placeholder="$" maxlength="3" value="$">
+        </div>
+        <div class="s-group">
+          <label class="s-label">Monthly income</label>
+          <input class="s-input" id="cfg-income" placeholder="3500" type="number" min="0">
+        </div>
+      </div>
+      <div class="s-group">
+        <label class="s-label">Reset day of month</label>
+        <div class="sub-chips" id="reset-day-chips">
+          <span class="sub-chip sel" data-day="1">1st</span>
+          <span class="sub-chip" data-day="15">15th</span>
+          <span class="sub-chip" data-day="28">28th</span>
+        </div>
+        <p class="s-hint">Budget resets on this day each month</p>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="step2" style="display:none">
+      <div class="s-group">
+        <label class="s-label">Select budget categories</label>
+        <div class="cat-grid" id="cat-picker"></div>
+      </div>
+      <div class="s-group" id="budget-amounts-wrap" style="display:none">
+        <label class="s-label" style="margin-top:12px">Set monthly budget for each</label>
+        <div class="cat-budgets" id="budget-amounts"></div>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div id="step3" style="display:none">
+      <div class="s-group">
+        <label class="s-label">Savings goals (optional)</label>
+        <div class="goal-list" id="goal-setup-list"></div>
+        <button class="btn-add-sm" onclick="addGoalSetup()">+ Add savings goal</button>
+      </div>
+      <div class="s-group" style="margin-top:20px">
+        <label class="s-label">4-digit PIN</label>
+        <input class="s-input" id="cfg-pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+        <p class="s-hint">Protects your budget dashboard</p>
+      </div>
+    </div>
+
+    <div class="setup-nav">
+      <button class="btn-back" id="btn-back" onclick="setupBack()" style="display:none">← Back</button>
+      <button class="btn-next" id="btn-next" onclick="setupNext()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="top-bar">
+    <div>
+      <div class="top-logo" id="app-title">Budget Wizard</div>
+      <div class="top-month" id="app-period"></div>
+    </div>
+    <div class="top-actions">
+      <button class="top-btn" onclick="openSettings()">⚙ Settings</button>
+      <button class="top-btn" onclick="exportCSV()">⬇ Export</button>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('overview',this)">📊 Overview</button>
+    <button class="tab-btn" onclick="switchTab('expenses',this)">💸 Expenses</button>
+    <button class="tab-btn" onclick="switchTab('goals',this)">🎯 Goals</button>
+    <button class="tab-btn" onclick="switchTab('subscriptions',this)">🔄 Subscriptions</button>
+    <button class="tab-btn" onclick="switchTab('insights',this)">📈 Insights</button>
+    <button class="tab-btn" onclick="switchTab('help',this)">❓ Help</button>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="page active" id="page-overview">
+    <div style="padding:20px;max-width:1100px;margin:0 auto">
+      <div class="hero-greeting" id="overview-greeting"></div>
+      <div class="hero-sub" id="overview-sub"></div>
+      <div class="sum-cards" id="sum-cards"></div>
+      <div class="streak-bar" id="streak-bar"></div>
+      <div class="rings-section">
+        <div class="rings-title">Spending rings</div>
+        <div class="rings-grid" id="rings-grid"></div>
+      </div>
+      <div class="insights-grid" id="overview-insights"></div>
+    </div>
+  </div>
+
+  <!-- EXPENSES -->
+  <div class="page" id="page-expenses">
+    <div style="padding:20px;max-width:1100px;margin:0 auto">
+      <div class="add-exp-form">
+        <div class="form-title">+ Add Expense</div>
+        <div class="form-grid">
+          <div class="f-group">
+            <label class="f-label">Amount</label>
+            <input class="f-input" id="exp-amount" type="number" placeholder="0.00" min="0" step="0.01">
+          </div>
+          <div class="f-group">
+            <label class="f-label">Category</label>
+            <select class="f-input" id="exp-cat"></select>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Description</label>
+            <input class="f-input" id="exp-desc" placeholder="e.g. Countdown groceries" maxlength="80">
+          </div>
+          <div class="f-group">
+            <label class="f-label">Date</label>
+            <input class="f-input" id="exp-date" type="date">
+          </div>
+          <div class="f-group" style="justify-content:flex-end">
+            <label class="f-label">&nbsp;</label>
+            <button class="btn-add-exp" onclick="addExpense()">Add Expense</button>
+          </div>
+        </div>
+      </div>
+      <div class="exp-filters" id="exp-filters"></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden">
+        <table class="exp-table" style="width:100%">
+          <thead>
+            <tr>
+              <th>Date</th><th>Description</th><th>Category</th><th>Amount</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="exp-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- GOALS -->
+  <div class="page" id="page-goals">
+    <div style="padding:20px;max-width:1100px;margin:0 auto">
+      <div class="add-goal-form" id="add-goal-form">
+        <div class="form-title">New Savings Goal</div>
+        <div class="form-grid">
+          <div class="f-group">
+            <label class="f-label">Icon</label>
+            <input class="f-input" id="ag-icon" placeholder="🏖" maxlength="2">
+          </div>
+          <div class="f-group">
+            <label class="f-label">Goal name</label>
+            <input class="f-input" id="ag-name" placeholder="e.g. Holiday fund" maxlength="40">
+          </div>
+          <div class="f-group">
+            <label class="f-label">Target amount</label>
+            <input class="f-input" id="ag-target" type="number" placeholder="2000" min="1">
+          </div>
+          <div class="f-group">
+            <label class="f-label">Current saved</label>
+            <input class="f-input" id="ag-current" type="number" placeholder="0" min="0">
+          </div>
+          <div class="f-group">
+            <label class="f-label">&nbsp;</label>
+            <button class="btn-add-exp" onclick="saveGoal()">Save Goal</button>
+          </div>
+        </div>
+      </div>
+      <div class="goals-grid" id="goals-grid"></div>
+    </div>
+  </div>
+
+  <!-- SUBSCRIPTIONS -->
+  <div class="page" id="page-subscriptions">
+    <div style="padding:20px;max-width:1100px;margin:0 auto">
+      <div class="subs-summary" id="subs-summary"></div>
+      <div class="add-sub-form" id="add-sub-form">
+        <div class="form-title">Add Subscription</div>
+        <div class="form-grid">
+          <div class="f-group">
+            <label class="f-label">Icon</label>
+            <input class="f-input" id="as-icon" placeholder="📺" maxlength="2">
+          </div>
+          <div class="f-group">
+            <label class="f-label">Name</label>
+            <input class="f-input" id="as-name" placeholder="e.g. Netflix" maxlength="30">
+          </div>
+          <div class="f-group">
+            <label class="f-label">Amount</label>
+            <input class="f-input" id="as-amount" type="number" placeholder="15.99" min="0" step="0.01">
+          </div>
+          <div class="f-group">
+            <label class="f-label">Cycle</label>
+            <select class="f-input" id="as-cycle">
+              <option value="monthly">Monthly</option>
+              <option value="weekly">Weekly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Next billing date</label>
+            <input class="f-input" id="as-next" type="date">
+          </div>
+          <div class="f-group">
+            <label class="f-label">&nbsp;</label>
+            <button class="btn-add-exp" onclick="saveSub()">Add Subscription</button>
+          </div>
+        </div>
+      </div>
+      <div class="subs-grid" id="subs-grid"></div>
+    </div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="page" id="page-insights">
+    <div style="padding:20px;max-width:1100px;margin:0 auto">
+      <div class="chart-card" id="cat-chart"></div>
+      <div class="chart-card" id="monthly-chart"></div>
+      <div class="chart-card">
+        <div class="chart-title">💡 Smart Tips</div>
+        <div class="tips-list" id="tips-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HELP -->
+  <div class="page" id="page-help">
+    <div style="padding:20px;max-width:1100px;margin:0 auto">
+      <div class="tip-banner">
+        <div class="tb-icon">💜</div>
+        <div class="tb-text">Budget Wizard makes it simple to track spending, hit savings goals, and stay on top of subscriptions — all in one place.</div>
+      </div>
+      <div class="help-section">
+        <div class="help-h">🚀 Getting started</div>
+        <div class="steps-list">
+          <div class="step-item"><div class="step-num">1</div><div class="step-text">Add your expenses as they happen — even quick ones. Small amounts add up!</div></div>
+          <div class="step-item"><div class="step-num">2</div><div class="step-text">Check your <strong>Spending Rings</strong> daily. A ring near full means a category is running low.</div></div>
+          <div class="step-item"><div class="step-num">3</div><div class="step-text">Set up Savings Goals for things you're working towards — holiday, gadget, emergency fund.</div></div>
+          <div class="step-item"><div class="step-num">4</div><div class="step-text">Log all subscriptions so nothing surprises you at month end.</div></div>
+          <div class="step-item"><div class="step-num">5</div><div class="step-text">Check <strong>Insights</strong> weekly — the bar chart and tips help you spot patterns.</div></div>
+        </div>
+      </div>
+      <div class="help-section">
+        <div class="help-h">📊 Features</div>
+        <div class="help-grid">
+          <div class="help-card"><div class="hc-icon">💍</div><div class="hc-title">Spending Rings</div><div class="hc-desc">Apple Watch-style rings show how much of each category budget you've used. Green = good, red = over.</div></div>
+          <div class="help-card"><div class="hc-icon">🎯</div><div class="hc-title">Savings Goals</div><div class="hc-desc">Track progress toward each goal with animated progress bars. Add contributions anytime.</div></div>
+          <div class="help-card"><div class="hc-icon">🔄</div><div class="hc-title">Subscriptions</div><div class="hc-desc">See all recurring costs, total monthly/annual spend, and upcoming billing dates.</div></div>
+          <div class="help-card"><div class="hc-icon">📈</div><div class="hc-title">Insights</div><div class="hc-desc">Category breakdown chart + month-by-month spending history. Smart tips based on your data.</div></div>
+          <div class="help-card"><div class="hc-icon">🏆</div><div class="hc-title">Streaks & Badges</div><div class="hc-desc">Stay under budget 7 days in a row to build a streak. Earn badges for milestones.</div></div>
+          <div class="help-card"><div class="hc-icon">⬇</div><div class="hc-title">CSV Export</div><div class="hc-desc">Download all expenses as a spreadsheet for your records or accountant.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="whetu-footer">
+    <div class="wf-brand">⭐ Whetū Digital</div>
+    Budget Wizard — <a href="https://whetudigital.co.nz">whetudigital.co.nz</a> · © 2026 Whetū Digital
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-bg" id="settings-modal">
+  <div class="modal">
+    <h3>⚙ Settings</h3>
+    <div class="s-group">
+      <label class="s-label">Dashboard title</label>
+      <input class="s-input" id="set-title">
+    </div>
+    <div class="s-group">
+      <label class="s-label">Monthly income</label>
+      <input class="s-input" id="set-income" type="number">
+    </div>
+    <div class="s-group">
+      <label class="s-label">Change PIN</label>
+      <input class="s-input" id="set-pin" type="password" inputmode="numeric" maxlength="4" placeholder="New 4-digit PIN">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-back" onclick="closeModal('settings-modal')" style="flex:1">Cancel</button>
+      <button class="btn-next" onclick="saveSettings()" style="flex:2">Save Changes</button>
+    </div>
+    <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+      <button onclick="resetWizard()" style="background:none;border:none;color:var(--red);font-size:.8rem;cursor:pointer">⚠ Reset all data & reconfigure</button>
+    </div>
+  </div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+// ─── CONFIG ────────────────────────────────────────────────────────────────
+const CFG_KEY='budget_wizard_config';
+const EXP_KEY='budget_wizard_expenses';
+const SUB_KEY='budget_wizard_subscriptions';
+const STREAK_KEY='budget_wizard_streak';
+
+const DEFAULT_CATS=[
+  {id:'food',emoji:'🍔',name:'Food & Dining'},
+  {id:'transport',emoji:'🚗',name:'Transport'},
+  {id:'shopping',emoji:'🛍',name:'Shopping'},
+  {id:'health',emoji:'💊',name:'Health'},
+  {id:'entertainment',emoji:'🎮',name:'Entertainment'},
+  {id:'utilities',emoji:'💡',name:'Utilities'},
+  {id:'rent',emoji:'🏠',name:'Rent / Housing'},
+  {id:'education',emoji:'📚',name:'Education'},
+  {id:'personal',emoji:'💆',name:'Personal Care'},
+  {id:'travel',emoji:'✈',name:'Travel'},
+  {id:'pets',emoji:'🐾',name:'Pets'},
+  {id:'gifts',emoji:'🎁',name:'Gifts'},
+  {id:'other',emoji:'📦',name:'Other'},
+];
+
+const CAT_COLORS=[
+  '#a855f7','#3b82f6','#10b981','#f59e0b','#ef4444',
+  '#ec4899','#14b8a6','#8b5cf6','#06b6d4','#84cc16','#f97316','#6366f1','#94a3b8'
+];
+
+// ─── STATE ─────────────────────────────────────────────────────────────────
+let cfg=null, expenses=[], subscriptions=[], streak=0;
+let pinEntry='', setupStep=1, selectedCats=[], setupGoals=[];
+let activeFilter='all';
+
+// ─── BOOT ──────────────────────────────────────────────────────────────────
+(function boot(){
+  cfg=JSON.parse(localStorage.getItem(CFG_KEY)||'null');
+  expenses=JSON.parse(localStorage.getItem(EXP_KEY)||'[]');
+  subscriptions=JSON.parse(localStorage.getItem(SUB_KEY)||'[]');
+  streak=parseInt(localStorage.getItem(STREAK_KEY)||'0')||0;
+  if(!cfg){showSetup();}
+  else{showGate();}
+})();
+
+// ─── GATE ──────────────────────────────────────────────────────────────────
+function showGate(){
+  document.getElementById('gate-name').textContent=cfg?.title||'Budget Wizard';
+  document.getElementById('gate').style.display='flex';
+  document.getElementById('app').style.display='none';
+}
+
+function pinKey(d){
+  if(pinEntry.length>=4)return;
+  pinEntry+=d;
+  updateDots();
+  if(pinEntry.length===4)checkPin();
+}
+
+function pinBack(){pinEntry=pinEntry.slice(0,-1);updateDots();}
+function pinClear(){pinEntry='';updateDots();}
+
+function updateDots(){
+  for(let i=0;i<4;i++){
+    document.getElementById('pd'+i).classList.toggle('filled',i<pinEntry.length);
+  }
+}
+
+function checkPin(){
+  if(pinEntry===String(cfg.pin)){
+    document.getElementById('gate').style.display='none';
+    launchApp();
+  } else {
+    document.getElementById('pin-err').textContent='Incorrect PIN. Try again.';
+    document.getElementById('gate-box');
+    setTimeout(()=>{pinEntry='';updateDots();document.getElementById('pin-err').textContent='';},1000);
+  }
+}
+
+// ─── SETUP ─────────────────────────────────────────────────────────────────
+function showSetup(){
+  document.getElementById('gate').style.display='none';
+  document.getElementById('setup').style.display='flex';
+  buildCatPicker();
+  // default reset day chips
+  document.querySelectorAll('[data-day]').forEach(c=>{
+    c.addEventListener('click',()=>{
+      document.querySelectorAll('[data-day]').forEach(x=>x.classList.remove('sel'));
+      c.classList.add('sel');
+    });
+  });
+}
+
+function buildCatPicker(){
+  const g=document.getElementById('cat-picker');
+  g.innerHTML=DEFAULT_CATS.map(c=>`
+    <div class="cat-chip" data-id="${c.id}" onclick="toggleCat(this,'${c.id}')">
+      <span class="ce">${c.emoji}</span><span class="cn">${c.name}</span>
+    </div>`).join('');
+}
+
+function toggleCat(el,id){
+  el.classList.toggle('sel');
+  if(el.classList.contains('sel'))selectedCats.push(id);
+  else selectedCats=selectedCats.filter(x=>x!==id);
+  renderBudgetAmounts();
+}
+
+function renderBudgetAmounts(){
+  const wrap=document.getElementById('budget-amounts-wrap');
+  const cont=document.getElementById('budget-amounts');
+  if(selectedCats.length===0){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  cont.innerHTML=selectedCats.map(id=>{
+    const c=DEFAULT_CATS.find(x=>x.id===id);
+    return `<div class="cat-row">
+      <span class="ce">${c.emoji}</span>
+      <span class="cn">${c.name}</span>
+      <input type="number" placeholder="200" min="0" id="budget-${id}">
+    </div>`;
+  }).join('');
+}
+
+function addGoalSetup(){
+  const id='g'+Date.now();
+  setupGoals.push({id});
+  const list=document.getElementById('goal-setup-list');
+  const row=document.createElement('div');
+  row.className='goal-row';
+  row.id=id;
+  row.innerHTML=`
+    <input class="gi" placeholder="🏖" maxlength="2" id="${id}-icon">
+    <input class="gn" placeholder="Goal name" maxlength="40" id="${id}-name">
+    <input class="ga" type="number" placeholder="Target $" min="1" id="${id}-target">
+    <input class="gc" type="number" placeholder="Saved $" min="0" id="${id}-current">
+    <button class="btn-del" onclick="removeGoalSetup('${id}')">✕</button>`;
+  list.appendChild(row);
+}
+
+function removeGoalSetup(id){
+  document.getElementById(id)?.remove();
+  setupGoals=setupGoals.filter(g=>g.id!==id);
+}
+
+function setupNext(){
+  if(setupStep===1){
+    const name=document.getElementById('cfg-name').value.trim();
+    const title=document.getElementById('cfg-title').value.trim();
+    const income=parseFloat(document.getElementById('cfg-income').value)||0;
+    if(!name){notify('Please enter your name','err');return;}
+    if(!income){notify('Please enter your monthly income','err');return;}
+    if(!title) document.getElementById('cfg-title').value=name+"'s Budget";
+    setupStep=2;
+    document.getElementById('step1').style.display='none';
+    document.getElementById('step2').style.display='block';
+    document.getElementById('btn-back').style.display='block';
+    document.getElementById('btn-next').textContent='Next →';
+    updateStepBar(2);
+  } else if(setupStep===2){
+    if(selectedCats.length===0){notify('Select at least one category','err');return;}
+    setupStep=3;
+    document.getElementById('step2').style.display='none';
+    document.getElementById('step3').style.display='block';
+    document.getElementById('btn-next').textContent='Launch Dashboard →';
+    updateStepBar(3);
+  } else if(setupStep===3){
+    const pin=document.getElementById('cfg-pin').value.trim();
+    if(!/^\d{4}$/.test(pin)){notify('PIN must be 4 digits','err');return;}
+    // Build goals from form
+    const goals=setupGoals.map(g=>({
+      id:'goal_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      icon:document.getElementById(g.id+'-icon')?.value||'🎯',
+      name:document.getElementById(g.id+'-name')?.value||'Goal',
+      target:parseFloat(document.getElementById(g.id+'-target')?.value)||100,
+      current:parseFloat(document.getElementById(g.id+'-current')?.value)||0,
+    }));
+    const resetDay=parseInt(document.querySelector('[data-day].sel')?.dataset.day||'1');
+    const cats=selectedCats.map(id=>{
+      const c=DEFAULT_CATS.find(x=>x.id===id);
+      const budget=parseFloat(document.getElementById('budget-'+id)?.value)||200;
+      return {...c,budget};
+    });
+    cfg={
+      name:document.getElementById('cfg-name').value.trim(),
+      title:document.getElementById('cfg-title').value.trim(),
+      currency:document.getElementById('cfg-currency').value||'$',
+      income:parseFloat(document.getElementById('cfg-income').value)||0,
+      resetDay,
+      categories:cats,
+      goals,
+      pin,
+      created:Date.now(),
+    };
+    localStorage.setItem(CFG_KEY,JSON.stringify(cfg));
+    // Prefill subscriptions with example
+    subscriptions=[];
+    localStorage.setItem(SUB_KEY,JSON.stringify(subscriptions));
+    document.getElementById('setup').style.display='none';
+    launchApp();
+  }
+}
+
+function setupBack(){
+  if(setupStep===2){
+    setupStep=1;
+    document.getElementById('step2').style.display='none';
+    document.getElementById('step1').style.display='block';
+    document.getElementById('btn-back').style.display='none';
+    document.getElementById('btn-next').textContent='Next →';
+    updateStepBar(1);
+  } else if(setupStep===3){
+    setupStep=2;
+    document.getElementById('step3').style.display='none';
+    document.getElementById('step2').style.display='block';
+    document.getElementById('btn-next').textContent='Next →';
+    updateStepBar(2);
+  }
+}
+
+function updateStepBar(step){
+  const segs=document.querySelectorAll('.step-seg');
+  segs.forEach((s,i)=>{
+    s.classList.remove('active','done');
+    if(i<step-1)s.classList.add('done');
+    else if(i===step-1)s.classList.add('active');
+  });
+  const labels=['Step 1 of 3 — Profile','Step 2 of 3 — Categories','Step 3 of 3 — Goals & PIN'];
+  document.getElementById('step-label').textContent=labels[step-1];
+}
+
+// ─── APP LAUNCH ────────────────────────────────────────────────────────────
+function launchApp(){
+  document.getElementById('app').style.display='block';
+  document.getElementById('app-title').textContent=cfg.title||'Budget Wizard';
+  document.getElementById('app-period').textContent=getPeriodLabel();
+  document.getElementById('exp-date').value=today();
+  buildExpFilters();
+  buildExpCatSelect();
+  renderAll();
+}
+
+function renderAll(){
+  renderOverview();
+  renderExpenses();
+  renderGoals();
+  renderSubscriptions();
+  renderInsights();
+}
+
+// ─── HELPERS ───────────────────────────────────────────────────────────────
+function today(){return new Date().toISOString().slice(0,10);}
+function fmt(n){return (cfg?.currency||'$')+parseFloat(n||0).toFixed(2);}
+function fmtRound(n){return (cfg?.currency||'$')+Math.round(n||0).toLocaleString();}
+
+function getPeriodStart(){
+  const now=new Date();
+  const day=cfg?.resetDay||1;
+  let start=new Date(now.getFullYear(),now.getMonth(),day);
+  if(start>now)start=new Date(now.getFullYear(),now.getMonth()-1,day);
+  return start.toISOString().slice(0,10);
+}
+
+function getPeriodLabel(){
+  const start=new Date(getPeriodStart());
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[start.getMonth()]} ${start.getDate()} – ${months[new Date().getMonth()]} ${new Date().getDate()}, ${new Date().getFullYear()}`;
+}
+
+function getPeriodExpenses(){
+  const start=getPeriodStart();
+  return expenses.filter(e=>e.date>=start);
+}
+
+function getCatColor(id){
+  const idx=DEFAULT_CATS.findIndex(c=>c.id===id);
+  return CAT_COLORS[idx]||'#94a3b8';
+}
+
+function getCat(id){return cfg?.categories?.find(c=>c.id===id)||DEFAULT_CATS.find(c=>c.id===id)||{emoji:'📦',name:id,budget:200,id};}
+
+// ─── OVERVIEW ──────────────────────────────────────────────────────────────
+function renderOverview(){
+  if(!cfg)return;
+  const hour=new Date().getHours();
+  const greet=hour<12?'Good morning':'hour<17?Good afternoon':'Good evening';
+  const gmap={0:'Good morning',1:'Good afternoon',2:'Good evening'};
+  const gkey=hour<12?0:hour<17?1:2;
+  document.getElementById('overview-greeting').textContent=gmap[gkey]+', '+cfg.name+' 💜';
+
+  const pexp=getPeriodExpenses();
+  const totalSpent=pexp.reduce((a,e)=>a+parseFloat(e.amount||0),0);
+  const income=cfg.income||0;
+  const remaining=income-totalSpent;
+  const pct=income?Math.min(100,totalSpent/income*100):0;
+
+  document.getElementById('overview-sub').textContent=`${getPeriodLabel()} · ${fmt(totalSpent)} spent of ${fmt(income)}`;
+
+  // Sum cards
+  const cards=[
+    {label:'Spent this period',val:fmtRound(totalSpent),sub:`of ${fmtRound(income)} income`,pct,color:pct>90?'#ef4444':pct>70?'#f59e0b':'#10b981'},
+    {label:'Remaining',val:fmtRound(Math.max(0,remaining)),sub:remaining<0?'⚠ Over budget':'looking good',pct:Math.max(0,100-pct),color:'#a855f7'},
+    {label:'Transactions',val:pexp.length,sub:`this period`,pct:null},
+    {label:'Daily average',val:fmt(totalSpent/Math.max(1,(Date.now()-new Date(getPeriodStart()))/86400000)),sub:'per day',pct:null},
+  ];
+  document.getElementById('sum-cards').innerHTML=cards.map(c=>`
+    <div class="sum-card slide-up">
+      <div class="sc-label">${c.label}</div>
+      <div class="sc-val">${c.val}</div>
+      <div class="sc-sub">${c.sub}</div>
+      ${c.pct!==null?`<div class="sc-bar"><div class="sc-fill" style="width:${c.pct}%;background:${c.color}"></div></div>`:''}
+    </div>`).join('');
+
+  // Streak
+  document.getElementById('streak-bar').innerHTML=`
+    <div class="streak-icon">🔥</div>
+    <div class="streak-info">
+      <div class="streak-label">Current streak — days under daily budget</div>
+      <div class="streak-val">${streak} days</div>
+      <div class="badge-row">
+        ${getBadges().map(b=>`<div class="badge ${b.earned?'earned':''}">${b.icon} ${b.name}</div>`).join('')}
+      </div>
+    </div>`;
+
+  // Rings
+  const cats=cfg.categories||[];
+  document.getElementById('rings-grid').innerHTML=cats.map((cat,idx)=>{
+    const spent=pexp.filter(e=>e.category===cat.id).reduce((a,e)=>a+parseFloat(e.amount||0),0);
+    const pctR=cat.budget?Math.min(100,spent/cat.budget*100):0;
+    const r=38,circ=2*Math.PI*r;
+    const dash=circ*(1-pctR/100);
+    const color=pctR>=100?'#ef4444':pctR>=80?'#f59e0b':CAT_COLORS[idx%CAT_COLORS.length];
+    return `<div class="ring-card slide-up" onclick="switchTab('expenses',null,'${cat.id}')">
+      <div class="ring-wrap">
+        <svg class="ring-svg" viewBox="0 0 90 90">
+          <circle class="ring-bg" cx="45" cy="45" r="${r}"/>
+          <circle class="ring-fg" cx="45" cy="45" r="${r}" stroke="${color}"
+            stroke-dasharray="${circ}" stroke-dashoffset="${dash}"/>
+        </svg>
+        <div class="ring-center">
+          <div class="ring-emoji">${cat.emoji}</div>
+          <div class="ring-pct" style="color:${color}">${Math.round(pctR)}%</div>
+        </div>
+      </div>
+      <div class="ring-name">${cat.name}</div>
+      <div class="ring-spent">${fmt(spent)} / ${fmt(cat.budget)}</div>
+    </div>`;
+  }).join('');
+
+  // Insights strip
+  const topCat=cats.map(c=>({...c,spent:pexp.filter(e=>e.category===c.id).reduce((a,e)=>a+parseFloat(e.amount||0),0)})).sort((a,b)=>b.spent-a.spent)[0];
+  const overCats=cats.filter(c=>pexp.filter(e=>e.category===c.id).reduce((a,e)=>a+parseFloat(e.amount||0),0)>c.budget);
+  const monthSubs=subscriptions.reduce((a,s)=>a+monthlyAmount(s),0);
+  document.getElementById('overview-insights').innerHTML=`
+    ${topCat?`<div class="insight-card"><div class="ik">📊</div><div class="it">Top spending</div><div class="iv">${topCat.emoji} ${topCat.name} is your biggest spend this period at ${fmt(topCat.spent)}.</div></div>`:''}
+    ${overCats.length?`<div class="insight-card"><div class="ik">⚠</div><div class="it">${overCats.length} over budget</div><div class="iv">${overCats.map(c=>c.emoji+' '+c.name).join(', ')} exceeded this period.</div></div>`:''}
+    ${monthSubs?`<div class="insight-card"><div class="ik">🔄</div><div class="it">Subscriptions</div><div class="iv">You spend ${fmt(monthSubs)}/mo on recurring subscriptions.</div></div>`:''}
+    <div class="insight-card"><div class="ik">💰</div><div class="it">Savings rate</div><div class="iv">${income?Math.max(0,Math.round((remaining/income)*100)):0}% of income remaining this period.</div></div>`;
+}
+
+function getBadges(){
+  const pexp=getPeriodExpenses();
+  const total=pexp.reduce((a,e)=>a+parseFloat(e.amount||0),0);
+  return [
+    {icon:'🌱',name:'First step',earned:expenses.length>0},
+    {icon:'🔥',name:'7-day streak',earned:streak>=7},
+    {icon:'💜',name:'Under budget',earned:total<(cfg?.income||0)},
+    {icon:'🏆',name:'Month master',earned:streak>=30},
+    {icon:'🎯',name:'Goal setter',earned:(cfg?.goals||[]).length>0},
+  ];
+}
+
+// ─── EXPENSES ──────────────────────────────────────────────────────────────
+function buildExpFilters(){
+  const cats=cfg?.categories||[];
+  document.getElementById('exp-filters').innerHTML=`
+    <button class="filter-chip active" data-filter="all" onclick="setFilter('all',this)">All</button>
+    ${cats.map(c=>`<button class="filter-chip" data-filter="${c.id}" onclick="setFilter('${c.id}',this)">${c.emoji} ${c.name}</button>`).join('')}`;
+}
+
+function buildExpCatSelect(){
+  const sel=document.getElementById('exp-cat');
+  sel.innerHTML=(cfg?.categories||[]).map(c=>`<option value="${c.id}">${c.emoji} ${c.name}</option>`).join('');
+}
+
+function setFilter(filter,el,fromRing){
+  activeFilter=filter;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  if(el)el.classList.add('active');
+  else{
+    const chip=document.querySelector(`[data-filter="${filter}"]`);
+    if(chip)chip.classList.add('active');
+  }
+  renderExpenses();
+  if(fromRing){switchTab('expenses',null);}
+}
+
+function renderExpenses(){
+  const list=activeFilter==='all'?[...expenses]:expenses.filter(e=>e.category===activeFilter);
+  list.sort((a,b)=>b.date.localeCompare(a.date));
+  const tbody=document.getElementById('exp-tbody');
+  if(list.length===0){
+    tbody.innerHTML=`<tr><td colspan="5"><div class="exp-empty">No expenses yet. Add your first one above!</div></td></tr>`;
+    return;
+  }
+  const total=list.reduce((a,e)=>a+parseFloat(e.amount||0),0);
+  tbody.innerHTML=list.map(e=>{
+    const cat=getCat(e.category);
+    const color=getCatColor(e.category);
+    return `<tr>
+      <td>${e.date}</td>
+      <td>${e.desc||'—'}</td>
+      <td><span class="exp-cat-badge" style="background:${color}22;color:${color}">${cat.emoji} ${cat.name}</span></td>
+      <td>${fmt(e.amount)}</td>
+      <td><button class="exp-del" onclick="delExpense('${e.id}')">✕</button></td>
+    </tr>`;
+  }).join('')+`<tr class="total-row"><td colspan="3">Total</td><td colspan="2">${fmt(total)}</td></tr>`;
+}
+
+function addExpense(){
+  const amount=parseFloat(document.getElementById('exp-amount').value);
+  const cat=document.getElementById('exp-cat').value;
+  const desc=document.getElementById('exp-desc').value.trim();
+  const date=document.getElementById('exp-date').value||today();
+  if(!amount||amount<=0){notify('Enter a valid amount','err');return;}
+  expenses.push({id:'e'+Date.now(),amount,category:cat,desc,date});
+  localStorage.setItem(EXP_KEY,JSON.stringify(expenses));
+  document.getElementById('exp-amount').value='';
+  document.getElementById('exp-desc').value='';
+  updateStreak();
+  renderExpenses();
+  renderOverview();
+  renderInsights();
+  notify('Expense added ✓');
+}
+
+function delExpense(id){
+  expenses=expenses.filter(e=>e.id!==id);
+  localStorage.setItem(EXP_KEY,JSON.stringify(expenses));
+  renderExpenses();
+  renderOverview();
+  renderInsights();
+}
+
+function updateStreak(){
+  // simplified: increment streak if today's expenses are under daily budget
+  const dailyBudget=(cfg?.income||0)/30;
+  const todayExp=expenses.filter(e=>e.date===today()).reduce((a,e)=>a+parseFloat(e.amount||0),0);
+  if(todayExp<=dailyBudget)streak=Math.min(streak+1,999);
+  localStorage.setItem(STREAK_KEY,streak);
+}
+
+// ─── GOALS ─────────────────────────────────────────────────────────────────
+function renderGoals(){
+  const goals=cfg?.goals||[];
+  const grid=document.getElementById('goals-grid');
+  grid.innerHTML=goals.map((g,i)=>{
+    const pct=g.target?Math.min(100,g.current/g.target*100):0;
+    const color=CAT_COLORS[i%CAT_COLORS.length];
+    return `<div class="goal-card slide-up">
+      <div class="goal-header">
+        <div class="goal-icon">${g.icon||'🎯'}</div>
+        <div><div class="goal-name">${g.name}</div><div class="goal-target">Target: ${fmt(g.target)}</div></div>
+      </div>
+      <div class="goal-pct" style="color:${color}">${Math.round(pct)}%</div>
+      <div class="goal-bar-wrap"><div class="goal-bar" style="width:${pct}%;background:${color}"></div></div>
+      <div class="goal-stats"><span>${fmt(g.current)} saved</span><span>${fmt(g.target-g.current)} to go</span></div>
+      <div class="goal-contribute">
+        <input class="goal-amount-in" type="number" placeholder="Add amount" id="gc-${g.id}" min="0" step="1">
+        <button class="btn-contribute" onclick="contributeGoal('${g.id}')">+ Add</button>
+      </div>
+    </div>`;
+  }).join('')+`
+  <div class="add-goal-card" onclick="toggleAddGoalForm()">
+    <span style="font-size:1.4rem">+</span>
+    <span>Add savings goal</span>
+  </div>`;
+}
+
+function toggleAddGoalForm(){
+  const f=document.getElementById('add-goal-form');
+  f.style.display=f.style.display==='none'||!f.style.display?'block':'none';
+}
+
+function saveGoal(){
+  const icon=document.getElementById('ag-icon').value||'🎯';
+  const name=document.getElementById('ag-name').value.trim();
+  const target=parseFloat(document.getElementById('ag-target').value)||100;
+  const current=parseFloat(document.getElementById('ag-current').value)||0;
+  if(!name){notify('Enter a goal name','err');return;}
+  cfg.goals=cfg.goals||[];
+  cfg.goals.push({id:'goal_'+Date.now(),icon,name,target,current});
+  localStorage.setItem(CFG_KEY,JSON.stringify(cfg));
+  document.getElementById('add-goal-form').style.display='none';
+  ['ag-icon','ag-name','ag-target','ag-current'].forEach(id=>document.getElementById(id).value='');
+  renderGoals();
+  notify('Goal added ✓');
+}
+
+function contributeGoal(id){
+  const input=document.getElementById('gc-'+id);
+  const amount=parseFloat(input?.value)||0;
+  if(!amount||amount<=0){notify('Enter contribution amount','err');return;}
+  const g=cfg.goals.find(x=>x.id===id);
+  if(g){g.current=Math.min(g.target,g.current+amount);}
+  localStorage.setItem(CFG_KEY,JSON.stringify(cfg));
+  if(input)input.value='';
+  renderGoals();
+  renderOverview();
+  if(g&&g.current>=g.target)notify('🎉 Goal reached! Congrats!');
+  else notify(`+${fmt(amount)} added ✓`);
+}
+
+// ─── SUBSCRIPTIONS ─────────────────────────────────────────────────────────
+function monthlyAmount(s){
+  const a=parseFloat(s.amount||0);
+  if(s.cycle==='yearly')return a/12;
+  if(s.cycle==='weekly')return a*4.33;
+  return a;
+}
+
+function renderSubscriptions(){
+  const monthTotal=subscriptions.reduce((a,s)=>a+monthlyAmount(s),0);
+  const yearTotal=monthTotal*12;
+  document.getElementById('subs-summary').innerHTML=`
+    <div class="subs-sum-item"><div class="subs-sum-label">Monthly cost</div><div class="subs-sum-val" style="color:var(--accent)">${fmt(monthTotal)}</div></div>
+    <div class="subs-sum-item"><div class="subs-sum-label">Annual cost</div><div class="subs-sum-val">${fmtRound(yearTotal)}</div></div>
+    <div class="subs-sum-item"><div class="subs-sum-label">Subscriptions</div><div class="subs-sum-val">${subscriptions.length}</div></div>`;
+
+  const grid=document.getElementById('subs-grid');
+  grid.innerHTML=subscriptions.map(s=>`
+    <div class="sub-card slide-up">
+      <button class="sub-card-del" onclick="delSub('${s.id}')">✕</button>
+      <div class="sub-card-head">
+        <div class="sub-icon">${s.icon||'🔄'}</div>
+        <div><div class="sub-name">${s.name}</div><div class="sub-cycle">${s.cycle}</div></div>
+      </div>
+      <div class="sub-amount">${fmt(s.amount)}</div>
+      <div class="sub-next">Next: ${s.next||'—'}</div>
+    </div>`).join('')+`
+  <div class="add-sub-btn" onclick="toggleAddSubForm()">
+    <span style="font-size:1.4rem">+</span>
+    <span>Add subscription</span>
+  </div>`;
+}
+
+function toggleAddSubForm(){
+  const f=document.getElementById('add-sub-form');
+  f.style.display=f.style.display==='none'||!f.style.display?'block':'none';
+  document.getElementById('as-next').value=today();
+}
+
+function saveSub(){
+  const icon=document.getElementById('as-icon').value||'🔄';
+  const name=document.getElementById('as-name').value.trim();
+  const amount=parseFloat(document.getElementById('as-amount').value)||0;
+  const cycle=document.getElementById('as-cycle').value;
+  const next=document.getElementById('as-next').value||today();
+  if(!name){notify('Enter subscription name','err');return;}
+  if(!amount){notify('Enter amount','err');return;}
+  subscriptions.push({id:'sub_'+Date.now(),icon,name,amount,cycle,next});
+  localStorage.setItem(SUB_KEY,JSON.stringify(subscriptions));
+  document.getElementById('add-sub-form').style.display='none';
+  ['as-icon','as-name','as-amount'].forEach(id=>document.getElementById(id).value='');
+  renderSubscriptions();
+  renderOverview();
+  notify('Subscription added ✓');
+}
+
+function delSub(id){
+  subscriptions=subscriptions.filter(s=>s.id!==id);
+  localStorage.setItem(SUB_KEY,JSON.stringify(subscriptions));
+  renderSubscriptions();
+  renderOverview();
+}
+
+// ─── INSIGHTS ──────────────────────────────────────────────────────────────
+function renderInsights(){
+  const cats=cfg?.categories||[];
+  const pexp=getPeriodExpenses();
+
+  // Category breakdown bar chart
+  const catData=cats.map((c,i)=>({
+    ...c,
+    spent:pexp.filter(e=>e.category===c.id).reduce((a,e)=>a+parseFloat(e.amount||0),0),
+    color:CAT_COLORS[i%CAT_COLORS.length]
+  })).filter(c=>c.spent>0).sort((a,b)=>b.spent-a.spent);
+
+  const maxSpent=catData[0]?.spent||1;
+  document.getElementById('cat-chart').innerHTML=`
+    <div class="chart-title">📊 Category breakdown this period</div>
+    <div class="bar-chart">
+      ${catData.map(c=>`
+        <div class="bar-row">
+          <div class="bar-label">${c.emoji} ${c.name.split(' ')[0]}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(c.spent/maxSpent*100).toFixed(1)}%;background:${c.color}">
+            <span>${fmt(c.spent)}</span>
+          </div></div>
+          <div class="bar-val">${c.budget?Math.round(c.spent/c.budget*100)+'%':''}</div>
+        </div>`).join('')}
+    </div>`;
+
+  // Monthly spending (last 6 months)
+  const months=[];
+  const now=new Date();
+  for(let i=5;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const key=d.toISOString().slice(0,7);
+    const label=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
+    const total=expenses.filter(e=>e.date.startsWith(key)).reduce((a,e)=>a+parseFloat(e.amount||0),0);
+    months.push({label,total});
+  }
+  const maxM=Math.max(...months.map(m=>m.total))||1;
+  document.getElementById('monthly-chart').innerHTML=`
+    <div class="chart-title">📅 6-month spending history</div>
+    <div class="monthly-compare">
+      ${months.map(m=>`
+        <div class="month-col">
+          <div class="month-bar-wrap">
+            <div class="month-bar" style="height:${(m.total/maxM*90).toFixed(0)}px;background:${m.total>(cfg?.income||9999)?'var(--red)':'var(--accent)'}"></div>
+          </div>
+          <div class="month-label">${m.label}</div>
+          <div class="month-val">${fmtRound(m.total)}</div>
+        </div>`).join('')}
+    </div>`;
+
+  // Smart tips
+  const tips=generateTips(cats,pexp);
+  document.getElementById('tips-list').innerHTML=tips.map(t=>`
+    <div class="tip-row"><div class="tip-icon">${t.icon}</div><div class="tip-text">${t.text}</div></div>`).join('');
+}
+
+function generateTips(cats,pexp){
+  const tips=[];
+  const income=cfg?.income||0;
+  const total=pexp.reduce((a,e)=>a+parseFloat(e.amount||0),0);
+  const subTotal=subscriptions.reduce((a,s)=>a+monthlyAmount(s),0);
+
+  cats.forEach(c=>{
+    const spent=pexp.filter(e=>e.category===c.id).reduce((a,e)=>a+parseFloat(e.amount||0),0);
+    if(spent>c.budget)tips.push({icon:'⚠',text:`<strong>${c.emoji} ${c.name}</strong> is ${fmt(spent-c.budget)} over budget this period. Consider reducing until reset.`});
+    else if(spent>c.budget*0.85)tips.push({icon:'👀',text:`<strong>${c.emoji} ${c.name}</strong> is at ${Math.round(spent/c.budget*100)}% — nearly at your limit.`});
+  });
+
+  if(subTotal>income*0.2)tips.push({icon:'🔄',text:`Subscriptions eat <strong>${Math.round(subTotal/income*100)}% of income</strong>. Review which ones you actually use.`});
+  if(total<income*0.5)tips.push({icon:'🌟',text:`Great job! You've spent less than half your income this period — consider adding to a savings goal.`});
+  if((cfg?.goals||[]).length===0)tips.push({icon:'🎯',text:`Set a savings goal to stay motivated. Even a small emergency fund of <strong>${fmtRound(income*3)}</strong> (3 months) is a great start.`});
+  if(tips.length===0)tips.push({icon:'✅',text:`Everything looks great! All categories within budget and spending on track.`});
+  return tips.slice(0,5);
+}
+
+// ─── TABS ──────────────────────────────────────────────────────────────────
+function switchTab(tab,btn,catFilter){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+tab)?.classList.add('active');
+  if(btn)btn.classList.add('active');
+  else{
+    document.querySelectorAll('.tab-btn').forEach(b=>{
+      if(b.getAttribute('onclick')?.includes("'"+tab+"'"))b.classList.add('active');
+    });
+  }
+  if(tab==='expenses'&&catFilter){setFilter(catFilter,null);}
+}
+
+// ─── SETTINGS ──────────────────────────────────────────────────────────────
+function openSettings(){
+  document.getElementById('set-title').value=cfg?.title||'';
+  document.getElementById('set-income').value=cfg?.income||'';
+  document.getElementById('settings-modal').classList.add('open');
+}
+
+function saveSettings(){
+  const title=document.getElementById('set-title').value.trim();
+  const income=parseFloat(document.getElementById('set-income').value)||cfg.income;
+  const pin=document.getElementById('set-pin').value.trim();
+  if(title)cfg.title=title;
+  cfg.income=income;
+  if(pin){if(!/^\d{4}$/.test(pin)){notify('PIN must be 4 digits','err');return;}cfg.pin=pin;}
+  localStorage.setItem(CFG_KEY,JSON.stringify(cfg));
+  document.getElementById('app-title').textContent=cfg.title;
+  closeModal('settings-modal');
+  renderAll();
+  notify('Settings saved ✓');
+}
+
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+function resetWizard(){
+  if(!confirm('This will delete ALL data and restart setup. Are you sure?'))return;
+  [CFG_KEY,EXP_KEY,SUB_KEY,STREAK_KEY].forEach(k=>localStorage.removeItem(k));
+  location.reload();
+}
+
+// ─── EXPORT ────────────────────────────────────────────────────────────────
+function exportCSV(){
+  const rows=[['Date','Description','Category','Amount']];
+  const sorted=[...expenses].sort((a,b)=>a.date.localeCompare(b.date));
+  sorted.forEach(e=>{
+    const c=getCat(e.category);
+    rows.push([e.date,'"'+(e.desc||'').replace(/"/g,'""')+'"',c.name,e.amount]);
+  });
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download=`budget_${today()}.csv`;
+  a.click();
+  notify('CSV downloaded ✓');
+}
+
+// ─── NOTIFY ────────────────────────────────────────────────────────────────
+function notify(msg,type='ok'){
+  const n=document.getElementById('notif');
+  n.textContent=msg;
+  n.className='notif '+(type==='err'?'err':'')+' show';
+  clearTimeout(n._t);
+  n._t=setTimeout(()=>n.classList.remove('show'),2800);
+}
+</script>
+</body>
+</html>

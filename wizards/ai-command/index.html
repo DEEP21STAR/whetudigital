@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Command Wizard — Whetū Digital</title>
+<meta name="theme-color" content="#04050f">
+<!--
+  © 2026 Whetū Digital Ltd. All rights reserved.
+  AI Command Wizard — Dashboard Wizard Series
+  hello@whetudigital.co.nz | whetudigital.co.nz
+-->
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#04050f;--card:#080b20;--card2:#0b0f28;
+  --cyan:#00e6ff;--gold:#ffd700;--green:#00ff88;--red:#ff4466;--purple:#c060ff;--amber:#ffb347;
+  --text:#d0e8ff;--muted:#4a6a80;--border:#111d35;
+  --font:'Segoe UI',Arial,sans-serif;
+}
+html,body{height:100%;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px}
+
+/* Grid BG */
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,230,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,230,255,.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+
+/* ══ SETUP ══ */
+#setup{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow-y:auto}
+.setup-logo{font-size:12px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:28px;text-align:center}
+.setup-logo b{color:var(--cyan)}
+.setup-card{width:100%;max-width:540px;background:var(--card);border:1px solid var(--border);border-radius:18px;padding:30px;position:relative;overflow:hidden}
+.setup-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),var(--purple),var(--gold))}
+.ssi-row{display:flex;gap:6px;margin-bottom:24px}
+.ssi{height:3px;flex:1;border-radius:2px;background:var(--border);transition:.3s}
+.ssi.done{background:var(--cyan)}.ssi.active{background:linear-gradient(90deg,var(--cyan),var(--purple))}
+.setup-title{font-size:20px;font-weight:900;letter-spacing:2px;margin-bottom:4px;color:var(--cyan)}
+.setup-sub{font-size:12px;color:var(--muted);margin-bottom:22px;line-height:1.6}
+.sf{margin-bottom:14px}
+.sl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:block}
+.si{width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-size:14px;font-family:var(--font);outline:none;transition:.2s}
+.si:focus{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(0,230,255,.06)}
+.si::placeholder{color:var(--muted)}
+.s2r{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sbtn{width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px;letter-spacing:.5px;transition:.15s}
+.sbtn:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,230,255,.25)}
+.sbtn.sec{background:none;border:1px solid var(--border);color:var(--muted)}
+.sbtn.sec:hover{border-color:var(--cyan);color:var(--cyan);box-shadow:none}
+.provider-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:14px}
+.provider-check{background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:8px;font-size:13px}
+.provider-check:hover{border-color:var(--cyan)}
+.provider-check.selected{border-color:var(--cyan);background:rgba(0,230,255,.06);color:var(--cyan)}
+.provider-check input{display:none}
+.model-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(0,230,255,.06);border:1px solid rgba(0,230,255,.15);border-radius:20px;padding:4px 10px;font-size:12px;color:var(--cyan);margin:3px;animation:fadeIn .2s ease}
+.model-pill button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0 0 0 2px;line-height:1}
+.model-pill button:hover{color:var(--red)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.info-box{background:rgba(0,230,255,.04);border:1px solid rgba(0,230,255,.1);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:12px}
+.info-box b{color:var(--cyan)}
+
+/* ══ COMPLETE ══ */
+#setup-complete{position:fixed;inset:0;z-index:300;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px}
+.sc-icon{font-size:72px;animation:scPop .5s cubic-bezier(.34,1.56,.64,1) forwards;margin-bottom:20px}
+@keyframes scPop{from{transform:scale(0)}to{transform:scale(1)}}
+.sc-title{font-size:24px;font-weight:900;letter-spacing:3px;color:var(--cyan);margin-bottom:8px}
+.sc-sub{font-size:13px;color:var(--muted);margin-bottom:28px;line-height:1.6}
+.sc-btn{padding:14px 36px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:.5px}
+
+/* ══ PIN ══ */
+#pin-gate{position:fixed;inset:0;z-index:100;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:0}
+.pin-logo{font-size:24px;font-weight:900;letter-spacing:6px;color:var(--cyan);text-shadow:0 0 20px rgba(0,230,255,.5);margin-bottom:4px}
+.pin-name{font-size:12px;color:var(--muted);letter-spacing:2px;margin-bottom:28px;text-align:center}
+.pin-dots{display:flex;gap:12px;margin-bottom:28px}
+.pd{width:14px;height:14px;border-radius:50%;border:2px solid var(--cyan);background:transparent;transition:.15s}
+.pd.on{background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.pin-pad{display:grid;grid-template-columns:repeat(3,68px);gap:8px}
+.pp{height:68px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:20px;font-weight:700;cursor:pointer;transition:.12s;touch-action:manipulation}
+.pp:hover{border-color:var(--cyan);background:rgba(0,230,255,.06)}
+.pp:active{transform:scale(.93)}
+.pin-err{color:var(--red);font-size:12px;text-align:center;margin-top:10px;height:18px;letter-spacing:.5px}
+
+/* ══ APP ══ */
+#app{position:relative;z-index:1;display:none;min-height:100vh}
+.app-shell{display:flex;height:100vh;overflow:hidden}
+
+/* Sidebar */
+.sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-brand{font-size:14px;font-weight:900;letter-spacing:2px;color:var(--cyan)}
+.sb-sub{font-size:10px;color:var(--muted);letter-spacing:1px;margin-top:2px}
+.sb-org{font-size:11px;color:var(--purple);margin-top:6px;font-weight:600}
+.sb-nav{flex:1;padding:12px 8px;overflow-y:auto}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;transition:.15s;color:var(--muted);font-size:13px;font-weight:500;border:none;background:none;width:100%;text-align:left;margin-bottom:2px}
+.sb-item:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.sb-item.active{background:rgba(0,230,255,.08);color:var(--cyan);border:1px solid rgba(0,230,255,.12)}
+.sb-item-ico{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sb-section{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:14px 12px 6px;opacity:.6}
+.sb-footer{padding:14px;border-top:1px solid var(--border)}
+.sb-status{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-bottom:6px}
+.status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot-green{background:var(--green);box-shadow:0 0 6px var(--green)}
+.dot-red{background:var(--red)}.dot-amber{background:var(--amber)}
+.recfg-btn{font-size:10px;color:rgba(255,255,255,.15);background:none;border:none;cursor:pointer;letter-spacing:.5px;padding:0}
+.recfg-btn:hover{color:var(--red)}
+
+/* Main content */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.page-header{padding:18px 22px 14px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.01)}
+.page-title{font-size:16px;font-weight:800;letter-spacing:1px}
+.page-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.page-body{padding:18px 20px;flex:1}
+.pane{display:none;animation:fadeIn .2s ease}
+.pane.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* Cards */
+.card{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px}
+.card-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;text-align:center}
+.stat-val{font-size:26px;font-weight:900;color:var(--cyan);margin-bottom:4px}
+.stat-lbl{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+
+/* Chat */
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 130px)}
+.chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:80%;padding:10px 14px;border-radius:12px;font-size:14px;line-height:1.6;animation:msgIn .2s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.msg.user{background:rgba(0,230,255,.1);border:1px solid rgba(0,230,255,.2);align-self:flex-end;color:var(--text)}
+.msg.ai{background:var(--card);border:1px solid var(--border);align-self:flex-start;color:var(--text)}
+.msg-header{font-size:10px;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.msg-model{color:var(--cyan);font-weight:600}
+.chat-input-row{border-top:1px solid var(--border);padding:12px;display:flex;gap:8px;align-items:flex-end}
+.chat-input{flex:1;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:var(--font);resize:none;outline:none;max-height:120px;line-height:1.5}
+.chat-input:focus{border-color:var(--cyan)}
+.send-btn{padding:10px 18px;border-radius:10px;border:none;background:var(--cyan);color:#000;font-weight:700;cursor:pointer;font-size:13px;flex-shrink:0;transition:.15s}
+.send-btn:hover{background:#00f0ff}
+.model-sel{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--muted);font-size:12px;outline:none;cursor:pointer}
+.model-sel:focus{border-color:var(--cyan)}
+
+/* Providers */
+.prov-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.prov-info{display:flex;align-items:center;gap:10px}
+.prov-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(255,255,255,.06)}
+.prov-name{font-weight:700;font-size:14px}
+.prov-desc{font-size:11px;color:var(--muted);margin-top:2px}
+.badge{font-size:10px;padding:3px 9px;border-radius:8px;font-weight:700}
+.badge-green{background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.2)}
+.badge-amber{background:rgba(255,179,71,.1);color:var(--amber);border:1px solid rgba(255,179,71,.2)}
+.badge-muted{background:rgba(255,255,255,.04);color:var(--muted);border:1px solid var(--border)}
+
+/* Prompt Library */
+.prompt-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:.2s;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.prompt-card:hover{border-color:var(--cyan);background:rgba(0,230,255,.04)}
+.prompt-text{font-size:13px;line-height:1.5;flex:1}
+.prompt-meta{font-size:10px;color:var(--muted);margin-top:4px;display:flex;gap:8px}
+.prompt-tag{background:rgba(0,230,255,.06);border:1px solid rgba(0,230,255,.12);border-radius:6px;padding:2px 7px;color:var(--cyan)}
+.use-btn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);font-size:11px;cursor:pointer;flex-shrink:0;transition:.15s}
+.use-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* Models */
+.model-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.model-name{font-weight:700;font-size:14px;color:var(--text)}
+.model-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.model-actions{display:flex;gap:6px}
+.model-btn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);font-size:11px;cursor:pointer;transition:.15s}
+.model-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* HUD */
+.hud-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.hud-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;position:relative;overflow:hidden}
+.hud-val{font-size:22px;font-weight:900;margin-bottom:2px}
+.hud-lbl{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.hud-bar{position:absolute;bottom:0;left:0;height:3px;border-radius:0 0 10px 10px;transition:width 1s}
+.hud-card.cyan .hud-val{color:var(--cyan)}.hud-card.cyan .hud-bar{background:var(--cyan)}
+.hud-card.green .hud-val{color:var(--green)}.hud-card.green .hud-bar{background:var(--green)}
+.hud-card.amber .hud-val{color:var(--amber)}.hud-card.amber .hud-bar{background:var(--amber)}
+.hud-card.purple .hud-val{color:var(--purple)}.hud-card.purple .hud-bar{background:var(--purple)}
+
+/* Toast */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(16px);background:rgba(0,230,255,.12);border:1px solid var(--cyan);border-radius:16px;padding:7px 18px;font-size:12px;color:var(--cyan);opacity:0;transition:.25s;z-index:9999;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%)}
+
+/* Footer */
+.wiz-footer{padding:12px 20px;border-top:1px solid var(--border);font-size:10px;color:rgba(255,255,255,.12);letter-spacing:1px;text-align:center}
+.wiz-footer a{color:rgba(0,230,255,.25);text-decoration:none}
+
+/* Mobile */
+@media(max-width:640px){
+  .sidebar{display:none}
+  .chat-wrap{height:calc(100vh - 60px)}
+  .mobile-nav{display:flex}
+}
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(4,5,15,.95);backdrop-filter:blur(20px);border-top:1px solid var(--border);padding:6px 0 10px;justify-content:space-around}
+.mn-btn{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:9px;letter-spacing:.5px;text-transform:uppercase;padding:4px 6px}
+.mn-btn-ico{font-size:18px}
+.mn-btn.active{color:var(--cyan)}
+</style>
+</head>
+<body>
+
+<!-- ══ SETUP WIZARD ══ -->
+<div id="setup">
+  <div class="setup-logo">✦ <b>Whetū Digital</b> · AI Command Wizard</div>
+  <div class="setup-card">
+    <div class="ssi-row">
+      <div class="ssi active" id="ssi1"></div>
+      <div class="ssi" id="ssi2"></div>
+      <div class="ssi" id="ssi3"></div>
+    </div>
+
+    <!-- Step 1: Identity -->
+    <div id="step1">
+      <div class="setup-title">Your AI Command Centre</div>
+      <div class="setup-sub">Configure your personal AI dashboard in 3 steps. Your data stays on your device.</div>
+      <div class="sf">
+        <label class="sl">Organisation / Your Name</label>
+        <input class="si" id="s1-org" placeholder="e.g. Acme Ltd or John Smith" maxlength="60">
+      </div>
+      <div class="sf">
+        <label class="sl">Dashboard Title</label>
+        <input class="si" id="s1-title" placeholder="e.g. AI Command Centre" maxlength="50">
+      </div>
+      <div class="s2r">
+        <div class="sf">
+          <label class="sl">Primary Role</label>
+          <select class="si" id="s1-role">
+            <option>Developer</option><option>Business Owner</option><option>Marketer</option>
+            <option>Designer</option><option>Content Creator</option><option>Researcher</option>
+            <option>Student</option><option>Other</option>
+          </select>
+        </div>
+        <div class="sf">
+          <label class="sl">Dashboard PIN (4 digits)</label>
+          <input class="si" id="s1-pin" type="password" inputmode="numeric" maxlength="4" placeholder="e.g. 1234" style="letter-spacing:6px;font-size:18px;text-align:center">
+        </div>
+      </div>
+      <button class="sbtn" onclick="step1Next()">Next — AI Providers →</button>
+    </div>
+
+    <!-- Step 2: Providers -->
+    <div id="step2" style="display:none">
+      <div class="setup-title">Your AI Providers</div>
+      <div class="setup-sub">Select the AI services you have access to. Free tiers are fine to start.</div>
+      <div class="info-box"><b>Tip:</b> You can add API keys later in Settings. Just select which providers you want visible in your dashboard.</div>
+      <div class="provider-grid" id="prov-grid"></div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button class="sbtn sec" style="flex:1;margin-top:0" onclick="step2Back()">← Back</button>
+        <button class="sbtn" style="flex:2;margin-top:0" onclick="step2Next()">Next — Local AI →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Local / Ollama -->
+    <div id="step3" style="display:none">
+      <div class="setup-title">Local AI Setup</div>
+      <div class="setup-sub">Add your Ollama models and any custom endpoints. Skip if cloud-only.</div>
+      <div class="sf">
+        <label class="sl">Ollama Host (default: localhost:11434)</label>
+        <input class="si" id="s3-ollama" placeholder="http://localhost:11434" value="http://localhost:11434">
+      </div>
+      <div class="sf">
+        <label class="sl">Add Ollama Models (comma separated)</label>
+        <input class="si" id="s3-models" placeholder="e.g. llama3.2, mistral, deepseek-r1, phi4">
+      </div>
+      <div class="sf">
+        <label class="sl">Default Model to Use</label>
+        <input class="si" id="s3-default" placeholder="e.g. llama3.2 or gemini-1.5-flash">
+      </div>
+      <div class="sf">
+        <label class="sl">Primary Use Case</label>
+        <select class="si" id="s3-usecase">
+          <option>Coding & Development</option><option>Writing & Content</option>
+          <option>Research & Analysis</option><option>Business Productivity</option>
+          <option>Creative Projects</option><option>General Assistant</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button class="sbtn sec" style="flex:1;margin-top:0" onclick="step3Back()">← Back</button>
+        <button class="sbtn" style="flex:2;margin-top:0" onclick="finishSetup()">🚀 Launch Dashboard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ COMPLETE ══ -->
+<div id="setup-complete">
+  <div class="sc-icon">⚡</div>
+  <div class="sc-title">AI COMMAND ACTIVE</div>
+  <div class="sc-sub" id="sc-sub">Your dashboard is configured and ready.</div>
+  <button class="sc-btn" onclick="launchDashboard()">Open Dashboard</button>
+</div>
+
+<!-- ══ PIN ══ -->
+<div id="pin-gate">
+  <div class="pin-logo" id="pin-logo">⚡ AI</div>
+  <div class="pin-name" id="pin-name"></div>
+  <div class="pin-dots">
+    <div class="pd" id="pd0"></div><div class="pd" id="pd1"></div>
+    <div class="pd" id="pd2"></div><div class="pd" id="pd3"></div>
+  </div>
+  <div class="pin-pad">
+    <button class="pp" onclick="pk('1')">1</button><button class="pp" onclick="pk('2')">2</button><button class="pp" onclick="pk('3')">3</button>
+    <button class="pp" onclick="pk('4')">4</button><button class="pp" onclick="pk('5')">5</button><button class="pp" onclick="pk('6')">6</button>
+    <button class="pp" onclick="pk('7')">7</button><button class="pp" onclick="pk('8')">8</button><button class="pp" onclick="pk('9')">9</button>
+    <button class="pp" style="font-size:13px" onclick="pc()">CLR</button><button class="pp" onclick="pk('0')">0</button><button class="pp" style="font-size:18px" onclick="pb()">⌫</button>
+  </div>
+  <div class="pin-err" id="pin-err"></div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <div class="app-shell">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sb-logo">
+        <div class="sb-brand" id="sb-title">AI COMMAND</div>
+        <div class="sb-sub">Command Centre</div>
+        <div class="sb-org" id="sb-org"></div>
+      </div>
+      <div class="sb-nav">
+        <div class="sb-section">Main</div>
+        <button class="sb-item active" id="nav-chat" onclick="showPane('chat')"><span class="sb-item-ico">💬</span>Chat</button>
+        <button class="sb-item" id="nav-hud" onclick="showPane('hud')"><span class="sb-item-ico">📊</span>HUD</button>
+        <div class="sb-section">Tools</div>
+        <button class="sb-item" id="nav-prompts" onclick="showPane('prompts')"><span class="sb-item-ico">📚</span>Prompt Library</button>
+        <button class="sb-item" id="nav-models" onclick="showPane('models')"><span class="sb-item-ico">🧠</span>Models</button>
+        <button class="sb-item" id="nav-providers" onclick="showPane('providers')"><span class="sb-item-ico">⚡</span>Providers</button>
+        <div class="sb-section">Help</div>
+        <button class="sb-item" id="nav-guide" onclick="showPane('guide')"><span class="sb-item-ico">❓</span>Help Guide</button>
+      </div>
+      <div class="sb-footer">
+        <div class="sb-status"><div class="status-dot dot-green" id="ollama-dot"></div><span id="ollama-status">Checking Ollama...</span></div>
+        <div class="wiz-footer" style="padding:6px 0 0;border:none;text-align:left">Built with <a href="https://whetudigital.co.nz">AI Command Wizard</a></div>
+        <button class="recfg-btn" onclick="reconfigure()" style="margin-top:6px">⚙ Reconfigure</button>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+      <!-- Chat -->
+      <div class="pane active" id="pane-chat">
+        <div class="page-header">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div class="page-title">💬 Chat</div>
+              <div class="page-sub">Ask anything — responses powered by your selected model</div>
+            </div>
+            <select class="model-sel" id="active-model"></select>
+          </div>
+        </div>
+        <div class="chat-wrap">
+          <div class="chat-messages" id="chat-messages">
+            <div class="msg ai">
+              <div class="msg-header"><span class="msg-model" id="welcome-model">AI</span><span>Just now</span></div>
+              <div id="welcome-text">Hello! I'm your AI assistant. How can I help you today?</div>
+            </div>
+          </div>
+          <div class="chat-input-row">
+            <textarea class="chat-input" id="chat-input" placeholder="Type your message..." rows="1" onkeydown="chatKey(event)" oninput="autoResize(this)"></textarea>
+            <button class="send-btn" onclick="sendChat()">Send ↑</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- HUD -->
+      <div class="pane" id="pane-hud">
+        <div class="page-header"><div class="page-title">📊 System HUD</div><div class="page-sub">Live status of your AI stack</div></div>
+        <div class="page-body">
+          <div class="hud-grid">
+            <div class="hud-card cyan"><div class="hud-val" id="hud-models">—</div><div class="hud-lbl">Models Loaded</div><div class="hud-bar" id="hud-bar-m" style="width:0%"></div></div>
+            <div class="hud-card green"><div class="hud-val" id="hud-providers">—</div><div class="hud-lbl">Providers Active</div><div class="hud-bar" id="hud-bar-p" style="width:0%"></div></div>
+            <div class="hud-card amber"><div class="hud-val" id="hud-prompts-count">—</div><div class="hud-lbl">Saved Prompts</div><div class="hud-bar" id="hud-bar-pr" style="width:0%"></div></div>
+            <div class="hud-card purple"><div class="hud-val" id="hud-chats">—</div><div class="hud-lbl">Messages Today</div><div class="hud-bar" id="hud-bar-c" style="width:0%"></div></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Ollama Status</div>
+            <div id="ollama-detail" style="font-size:13px;color:var(--muted)">Checking connection...</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Active Configuration</div>
+            <div id="config-summary" style="font-size:13px;color:var(--muted);line-height:1.8"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prompt Library -->
+      <div class="pane" id="pane-prompts">
+        <div class="page-header">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div><div class="page-title">📚 Prompt Library</div><div class="page-sub">One-click prompts tailored to your role</div></div>
+            <button class="model-btn" onclick="addPromptFlow()" style="font-size:12px;padding:6px 12px">+ Add Prompt</button>
+          </div>
+        </div>
+        <div class="page-body"><div id="prompts-list"></div></div>
+      </div>
+
+      <!-- Models -->
+      <div class="pane" id="pane-models">
+        <div class="page-header"><div class="page-title">🧠 Models</div><div class="page-sub">Your configured Ollama models</div></div>
+        <div class="page-body"><div id="models-list"></div></div>
+      </div>
+
+      <!-- Providers -->
+      <div class="pane" id="pane-providers">
+        <div class="page-header"><div class="page-title">⚡ Providers</div><div class="page-sub">AI services connected to your dashboard</div></div>
+        <div class="page-body"><div id="providers-list"></div></div>
+      </div>
+
+      <!-- Help Guide -->
+      <div class="pane" id="pane-guide">
+        <div class="page-header"><div class="page-title">❓ Help Guide</div><div class="page-sub">Get the most from your AI Command Centre</div></div>
+        <div class="page-body">
+          <div class="card"><div class="card-title">Quick Start</div>
+            <div style="font-size:13px;color:var(--muted);line-height:2">
+              <div>1. <b style="color:var(--cyan)">Chat tab</b> — Select a model and start a conversation</div>
+              <div>2. <b style="color:var(--cyan)">Prompt Library</b> — Save your best prompts for one-click reuse</div>
+              <div>3. <b style="color:var(--cyan)">Models tab</b> — See all your Ollama models and their status</div>
+              <div>4. <b style="color:var(--cyan)">HUD tab</b> — Monitor your AI stack health at a glance</div>
+              <div>5. <b style="color:var(--cyan)">Providers tab</b> — See all connected AI services</div>
+            </div>
+          </div>
+          <div class="card"><div class="card-title">Keyboard Shortcuts</div>
+            <div style="font-size:13px;color:var(--muted);line-height:2">
+              <div><code style="background:rgba(0,230,255,.08);padding:2px 6px;border-radius:4px;color:var(--cyan)">Enter</code> — Send message</div>
+              <div><code style="background:rgba(0,230,255,.08);padding:2px 6px;border-radius:4px;color:var(--cyan)">Shift+Enter</code> — New line</div>
+            </div>
+          </div>
+          <div class="wiz-footer" style="border:none;padding-top:20px">Built with <a href="https://whetudigital.co.nz">AI Command Wizard</a> · Whetū Digital · New Zealand</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile nav -->
+  <nav class="mobile-nav" id="mobile-nav">
+    <button class="mn-btn active" id="mnav-chat" onclick="showPane('chat')"><span class="mn-btn-ico">💬</span>Chat</button>
+    <button class="mn-btn" id="mnav-prompts" onclick="showPane('prompts')"><span class="mn-btn-ico">📚</span>Prompts</button>
+    <button class="mn-btn" id="mnav-models" onclick="showPane('models')"><span class="mn-btn-ico">🧠</span>Models</button>
+    <button class="mn-btn" id="mnav-hud" onclick="showPane('hud')"><span class="mn-btn-ico">📊</span>HUD</button>
+  </nav>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const CFG_KEY = 'aicmd_config';
+let CFG = null;
+let pinEntry = '';
+let chatHistory = [];
+let savedPrompts = [];
+let msgCount = 0;
+
+const ALL_PROVIDERS = [
+  {id:'groq',     name:'Groq',       icon:'⚡',desc:'Ultra-fast inference',   color:'#00e6ff'},
+  {id:'gemini',   name:'Gemini',     icon:'💜',desc:'Long-context, free tier', color:'#c060ff'},
+  {id:'openrouter',name:'OpenRouter',icon:'🌐',desc:'29+ models, free tier',   color:'#ffd700'},
+  {id:'mistral',  name:'Mistral',    icon:'🌊',desc:'EU privacy, fast',        color:'#00bfff'},
+  {id:'cohere',   name:'Cohere',     icon:'🔵',desc:'RAG-tuned models',        color:'#5bc8f5'},
+  {id:'ollama',   name:'Ollama',     icon:'🦙',desc:'100% local, offline',     color:'#00ff88'},
+  {id:'openai',   name:'OpenAI',     icon:'⬛',desc:'GPT-4o, DALL-E',          color:'#74aa9c'},
+  {id:'claude',   name:'Claude API', icon:'🔶',desc:'Anthropic, advanced',     color:'#ff8c42'},
+];
+
+const ROLE_PROMPTS = {
+  'Developer':         [{t:'Debug this code',p:'Review the following code and identify bugs, suggest fixes, and explain your reasoning:\n\n[paste code here]',tag:'debug'},{t:'Write unit tests',p:'Write comprehensive unit tests for the following function:\n\n[paste function here]',tag:'testing'},{t:'Explain this code',p:'Explain this code in plain English, step by step:\n\n[paste code here]',tag:'explain'}],
+  'Business Owner':    [{t:'Write a business email',p:'Write a professional email for the following situation:\n\n[describe situation]',tag:'email'},{t:'Summarise a document',p:'Summarise the following document into key bullet points:\n\n[paste document]',tag:'summary'},{t:'Create a proposal',p:'Write a compelling business proposal for:\n\n[describe project/service]',tag:'proposal'}],
+  'Marketer':          [{t:'Write ad copy',p:'Write 3 variations of ad copy for:\nProduct: [name]\nAudience: [target]\nPlatform: [platform]\nTone: [tone]',tag:'ads'},{t:'Social media post',p:'Write 5 engaging social media posts for:\nTopic: [topic]\nPlatform: [platform]\nTone: [casual/professional]',tag:'social'},{t:'Email subject lines',p:'Write 10 compelling email subject lines for a campaign about:\n[topic]',tag:'email'}],
+  'Content Creator':   [{t:'Blog post outline',p:'Create a detailed blog post outline for:\nTitle: [title]\nAudience: [target reader]\nGoal: [what reader learns]',tag:'blog'},{t:'YouTube script',p:'Write an engaging YouTube video script for:\nTopic: [topic]\nLength: [X] minutes\nStyle: [educational/entertaining/both]',tag:'video'},{t:'Repurpose content',p:'Repurpose the following content into 5 different formats (tweet, LinkedIn, blog snippet, email, Instagram caption):\n\n[paste content]',tag:'repurpose'}],
+  'default':           [{t:'Summarise this',p:'Summarise the following in 5 bullet points:\n\n[paste content here]',tag:'summary'},{t:'Improve my writing',p:'Improve the clarity, tone and professionalism of this text:\n\n[paste your text]',tag:'writing'},{t:'Give me pros & cons',p:'List the pros and cons of:\n\n[topic or decision]',tag:'analysis'}],
+};
+
+// ── SETUP ─────────────────────────────────
+function buildProviderGrid() {
+  document.getElementById('prov-grid').innerHTML = ALL_PROVIDERS.map(p => `
+    <label class="provider-check" id="pc-${p.id}" onclick="toggleProv('${p.id}')">
+      <span style="color:${p.color}">${p.icon}</span>
+      <div><div style="font-weight:700;font-size:12px">${p.name}</div><div style="font-size:10px;color:var(--muted)">${p.desc}</div></div>
+    </label>`).join('');
+}
+
+let selProvs = ['groq','gemini','ollama'];
+function toggleProv(id) {
+  const el = document.getElementById('pc-'+id);
+  if (selProvs.includes(id)) { selProvs = selProvs.filter(p=>p!==id); el.classList.remove('selected'); }
+  else { selProvs.push(id); el.classList.add('selected'); }
+}
+
+function step1Next() {
+  const org = document.getElementById('s1-org').value.trim();
+  const title = document.getElementById('s1-title').value.trim();
+  const pin = document.getElementById('s1-pin').value.trim();
+  if (!org || !title) { showToast('Please fill in organisation and title'); return; }
+  if (pin.length !== 4 || !/^\d{4}$/.test(pin)) { showToast('Please enter a 4-digit PIN'); return; }
+  document.getElementById('step1').style.display='none'; document.getElementById('step2').style.display='block';
+  document.getElementById('ssi1').className='ssi done'; document.getElementById('ssi2').className='ssi active';
+  buildProviderGrid();
+  selProvs.forEach(id => { const el=document.getElementById('pc-'+id); if(el) el.classList.add('selected'); });
+}
+function step2Back() {
+  document.getElementById('step2').style.display='none'; document.getElementById('step1').style.display='block';
+  document.getElementById('ssi2').className='ssi'; document.getElementById('ssi1').className='ssi active';
+}
+function step2Next() {
+  document.getElementById('step2').style.display='none'; document.getElementById('step3').style.display='block';
+  document.getElementById('ssi2').className='ssi done'; document.getElementById('ssi3').className='ssi active';
+}
+function step3Back() {
+  document.getElementById('step3').style.display='none'; document.getElementById('step2').style.display='block';
+  document.getElementById('ssi3').className='ssi'; document.getElementById('ssi2').className='ssi active';
+}
+
+function finishSetup() {
+  const cfg = {
+    org:       document.getElementById('s1-org').value.trim(),
+    title:     document.getElementById('s1-title').value.trim(),
+    role:      document.getElementById('s1-role').value,
+    pin:       document.getElementById('s1-pin').value.trim(),
+    providers: selProvs,
+    ollamaHost:document.getElementById('s3-ollama').value.trim() || 'http://localhost:11434',
+    models:    document.getElementById('s3-models').value.split(',').map(m=>m.trim()).filter(Boolean),
+    defaultModel: document.getElementById('s3-default').value.trim(),
+    usecase:   document.getElementById('s3-usecase').value,
+    setupAt:   Date.now()
+  };
+  try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch(e) {}
+  CFG = cfg;
+  document.getElementById('setup').style.display='none';
+  document.getElementById('sc-sub').textContent = cfg.title + ' · ' + cfg.org + '\nYour AI stack is ready.';
+  document.getElementById('setup-complete').style.display='flex';
+}
+function launchDashboard() { document.getElementById('setup-complete').style.display='none'; showPinGate(); }
+
+// ── PIN ───────────────────────────────────
+function showPinGate() {
+  document.getElementById('pin-gate').style.display='flex';
+  document.getElementById('pin-name').textContent = (CFG.title||'') + ' · ' + (CFG.org||'');
+  pinEntry=''; updateDots();
+}
+function pk(k) { if(pinEntry.length>=4) return; pinEntry+=k; updateDots(); if(pinEntry.length===4) setTimeout(checkPin,100); }
+function pb() { if(pinEntry.length) { pinEntry=pinEntry.slice(0,-1); updateDots(); } }
+function pc() { pinEntry=''; updateDots(); document.getElementById('pin-err').textContent=''; }
+function updateDots() { for(let i=0;i<4;i++) document.getElementById('pd'+i).classList.toggle('on',i<pinEntry.length); }
+function checkPin() {
+  if (pinEntry===CFG.pin) { document.getElementById('pin-gate').style.display='none'; initDashboard(); document.getElementById('app').style.display='block'; }
+  else { document.getElementById('pin-err').textContent='Incorrect PIN'; pinEntry=''; updateDots(); setTimeout(()=>document.getElementById('pin-err').textContent='',2000); }
+}
+
+// ── DASHBOARD ─────────────────────────────
+function initDashboard() {
+  document.getElementById('sb-title').textContent = (CFG.title||'AI COMMAND').toUpperCase();
+  document.getElementById('sb-org').textContent = CFG.org || '';
+  buildModelSelector();
+  buildProvidersList();
+  buildPromptLibrary();
+  buildModelsList();
+  buildHUD();
+  buildConfigSummary();
+  checkOllama();
+  setWelcome();
+}
+
+function setWelcome() {
+  const role = CFG.role || 'user';
+  const model = CFG.defaultModel || (CFG.models&&CFG.models[0]) || 'AI';
+  document.getElementById('welcome-model').textContent = model;
+  document.getElementById('welcome-text').textContent = `Hello! I'm your ${CFG.usecase || 'AI'} assistant. Ask me anything — I'm here to help with ${role.toLowerCase()} tasks and beyond.`;
+}
+
+function buildModelSelector() {
+  const sel = document.getElementById('active-model');
+  const opts = [];
+  (CFG.models||[]).forEach(m => opts.push(m));
+  if (!opts.length) opts.push(CFG.defaultModel||'llama3.2','mistral','gemini-1.5-flash');
+  sel.innerHTML = opts.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('');
+  if (CFG.defaultModel) sel.value = CFG.defaultModel;
+}
+
+function buildProvidersList() {
+  const active = CFG.providers || [];
+  document.getElementById('providers-list').innerHTML = ALL_PROVIDERS.map(p => {
+    const isActive = active.includes(p.id);
+    return `<div class="prov-card">
+      <div class="prov-info">
+        <div class="prov-icon" style="color:${p.color}">${p.icon}</div>
+        <div><div class="prov-name">${p.name}</div><div class="prov-desc">${p.desc}</div></div>
+      </div>
+      <span class="badge ${isActive?'badge-green':'badge-muted'}">${isActive?'Active':'Not Selected'}</span>
+    </div>`;
+  }).join('');
+}
+
+function buildPromptLibrary() {
+  try { savedPrompts = JSON.parse(localStorage.getItem('aicmd_prompts')||'[]'); } catch(e) { savedPrompts=[]; }
+  const rolePrompts = ROLE_PROMPTS[CFG.role] || ROLE_PROMPTS['default'];
+  const all = [...rolePrompts, ...savedPrompts];
+  document.getElementById('prompts-list').innerHTML = all.length ? all.map((p,i)=>`
+    <div class="prompt-card">
+      <div style="flex:1">
+        <div class="prompt-text"><b>${esc(p.t||p.title||'Prompt')}</b></div>
+        <div class="prompt-meta">
+          <span class="prompt-tag">${esc(p.tag||p.category||CFG.role)}</span>
+        </div>
+      </div>
+      <button class="use-btn" onclick="usePrompt(${i})">Use →</button>
+    </div>`).join('') :
+    '<div style="color:var(--muted);font-size:13px;padding:20px;text-align:center">No prompts yet — add your first prompt above</div>';
+  document.getElementById('hud-prompts-count').textContent = all.length;
+}
+
+function usePrompt(i) {
+  const all = [...(ROLE_PROMPTS[CFG.role]||ROLE_PROMPTS['default']), ...savedPrompts];
+  if (!all[i]) return;
+  document.getElementById('chat-input').value = all[i].p || all[i].prompt || '';
+  showPane('chat');
+  document.getElementById('chat-input').focus();
+}
+
+function addPromptFlow() {
+  const t = prompt('Prompt title:'); if (!t) return;
+  const p = prompt('Prompt text:'); if (!p) return;
+  savedPrompts.push({ t, p, tag: CFG.role || 'custom' });
+  try { localStorage.setItem('aicmd_prompts', JSON.stringify(savedPrompts)); } catch(e) {}
+  buildPromptLibrary();
+  showToast('✓ Prompt saved');
+}
+
+function buildModelsList() {
+  const models = CFG.models && CFG.models.length ? CFG.models : ['No models configured'];
+  document.getElementById('models-list').innerHTML = models.map(m=>`
+    <div class="model-card">
+      <div><div class="model-name">🦙 ${esc(m)}</div><div class="model-meta">Ollama · ${esc(CFG.ollamaHost||'localhost:11434')}</div></div>
+      <div class="model-actions">
+        <span class="badge badge-green">Ready</span>
+        <button class="model-btn" onclick="setDefault('${esc(m)}')">Set Default</button>
+      </div>
+    </div>`).join('');
+  document.getElementById('hud-models').textContent = CFG.models && CFG.models.length ? CFG.models.length : '—';
+  document.getElementById('hud-providers').textContent = CFG.providers ? CFG.providers.length : 0;
+  setTimeout(()=>{
+    document.getElementById('hud-bar-m').style.width = Math.min(100,(CFG.models&&CFG.models.length||0)*15)+'%';
+    document.getElementById('hud-bar-p').style.width = Math.min(100,(CFG.providers&&CFG.providers.length||0)*12)+'%';
+    document.getElementById('hud-bar-c').style.width = Math.min(100,msgCount*5)+'%';
+  },300);
+}
+
+function buildHUD() {
+  document.getElementById('hud-chats').textContent = msgCount;
+}
+
+function buildConfigSummary() {
+  const cfg = CFG || {};
+  document.getElementById('config-summary').innerHTML = `
+    <div>Organisation: <b style="color:var(--cyan)">${esc(cfg.org||'—')}</b></div>
+    <div>Role: <b style="color:var(--cyan)">${esc(cfg.role||'—')}</b></div>
+    <div>Default Model: <b style="color:var(--cyan)">${esc(cfg.defaultModel||cfg.models&&cfg.models[0]||'—')}</b></div>
+    <div>Ollama Host: <b style="color:var(--cyan)">${esc(cfg.ollamaHost||'—')}</b></div>
+    <div>Providers: <b style="color:var(--cyan)">${(cfg.providers||[]).join(', ')||'—'}</b></div>
+    <div>Use Case: <b style="color:var(--cyan)">${esc(cfg.usecase||'—')}</b></div>`;
+}
+
+function setDefault(m) {
+  CFG.defaultModel = m; try { localStorage.setItem(CFG_KEY, JSON.stringify(CFG)); } catch(e) {}
+  document.getElementById('active-model').value = m;
+  buildModelsList();
+  showToast('✓ Default model set to ' + m);
+}
+
+async function checkOllama() {
+  const host = (CFG && CFG.ollamaHost) || 'http://localhost:11434';
+  const dot = document.getElementById('ollama-dot');
+  const status = document.getElementById('ollama-status');
+  const detail = document.getElementById('ollama-detail');
+  try {
+    const r = await fetch(host + '/api/tags', { signal: AbortSignal.timeout(3000) });
+    if (r.ok) {
+      const d = await r.json();
+      const count = d.models ? d.models.length : 0;
+      dot.className='status-dot dot-green'; status.textContent='Ollama connected';
+      detail.innerHTML = `<span style="color:var(--green)">✓ Connected</span> · ${count} model${count!==1?'s':''} available at ${esc(host)}`;
+    } else { throw new Error('Not OK'); }
+  } catch(e) {
+    dot.className='status-dot dot-amber'; status.textContent='Ollama offline';
+    detail.innerHTML = `<span style="color:var(--amber)">⚠ Ollama not detected</span> at ${esc(host)}<br><span style="font-size:11px">Run <code style="color:var(--cyan)">ollama serve</code> to connect local models</span>`;
+  }
+}
+
+// ── CHAT ─────────────────────────────────
+function chatKey(e) { if (e.key==='Enter'&&!e.shiftKey) { e.preventDefault(); sendChat(); } }
+function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; }
+
+function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value=''; input.style.height='auto';
+  const model = document.getElementById('active-model').value || 'AI';
+  const now = new Date().toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'});
+  const msgs = document.getElementById('chat-messages');
+  msgs.innerHTML += `<div class="msg user"><div class="msg-header"><span>You</span><span>${now}</span></div>${esc(msg)}</div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+  msgCount++;
+  document.getElementById('hud-chats').textContent = msgCount;
+
+  // Simulated response (in production, wire to Ollama/Groq API)
+  setTimeout(() => {
+    const responses = [
+      `I understand you're asking about "${msg.substring(0,40)}${msg.length>40?'...':''}". To connect this dashboard to a live AI model, configure your Ollama endpoint or API keys in Settings. This demo shows the interface — your actual model will respond here.`,
+      `Great question! Once you connect your Ollama endpoint at ${CFG.ollamaHost||'localhost:11434'}, the ${model} model will respond here with real AI output.`,
+      `This is your AI Command Centre. Connect ${model} via Ollama or your preferred provider to get live responses. The interface, history, and prompt library are all ready to go.`
+    ];
+    const r = responses[Math.floor(Math.random()*responses.length)];
+    msgs.innerHTML += `<div class="msg ai"><div class="msg-header"><span class="msg-model">${esc(model)}</span><span>Just now</span></div>${esc(r)}</div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 800);
+}
+
+// ── NAVIGATION ────────────────────────────
+let currentPane = 'chat';
+function showPane(id) {
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item, .mn-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pane-'+id).classList.add('active');
+  const sb = document.getElementById('nav-'+id); if(sb) sb.classList.add('active');
+  const mn = document.getElementById('mnav-'+id); if(mn) mn.classList.add('active');
+  currentPane = id;
+}
+
+// ── UTILS ─────────────────────────────────
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function reconfigure(){if(!confirm('Reset dashboard and redo setup?'))return;try{localStorage.removeItem(CFG_KEY);}catch(e){}location.reload();}
+
+// ── BOOT ──────────────────────────────────
+(function(){
+  try{ CFG=JSON.parse(localStorage.getItem(CFG_KEY)||'null'); }catch(e){ CFG=null; }
+  if(CFG){ document.getElementById('setup').style.display='none'; showPinGate(); }
+})();
+</script>
+</body>
+</html>
