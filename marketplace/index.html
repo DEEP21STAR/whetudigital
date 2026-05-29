@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<title>Whetū Skills Marketplace</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--bg:#0a0710;--card:#160c20;--ink:#f5edd5;--gold:#d4a520;--purple:#7b5ccc;--mute:#7e6f55}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Geist Mono','Courier New',monospace;background:radial-gradient(ellipse at top,#1a0e2a,#0a0710 70%);color:var(--ink);min-height:100vh;padding:32px 24px}
+h1{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;font-size:clamp(36px,6vw,68px);margin:0 0 8px;background:linear-gradient(135deg,#fff3d6,#f5c557,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 30px rgba(212,165,50,.35))}
+.sub{color:var(--mute);letter-spacing:2px;font-size:11px;margin-bottom:32px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;max-width:1200px;margin:0 auto}
+.card{background:var(--card);border:1px solid rgba(212,165,50,.15);border-radius:16px;padding:20px;transition:transform .2s ease,border-color .2s ease}
+.card:hover{transform:translateY(-2px);border-color:rgba(212,165,50,.5)}
+.cat{font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;font-weight:800;margin-bottom:8px}
+.name{font-family:'Cormorant Garamond',Georgia,serif;font-size:24px;font-weight:700;color:var(--ink);margin:0 0 4px}
+.title{font-size:11px;color:var(--mute);margin:0 0 12px}
+.desc{font-size:13px;line-height:1.5;color:#cfc1a0}
+.trig{margin-top:10px;font-size:11px;color:var(--purple)}
+.foot{margin-top:48px;text-align:center;color:var(--mute);font-size:11px;letter-spacing:2px}
+.foot strong{color:var(--gold)}
+</style>
+</head>
+<body>
+<header style="max-width:1200px;margin:0 auto 24px">
+  <h1>Whetū Skills Marketplace</h1>
+  <div class="sub">AOTEAROA · CLAUDE CODE · AI GURU · MIT</div>
+</header>
+<main>
+  <div class="grid" id="grid"></div>
+</main>
+<footer class="foot">
+  <strong>Whetū Digital</strong> · sole trader, Aotearoa NZ · built with Claude Code Opus 4.8
+</footer>
+<script>
+fetch('index.json').then(r=>r.json()).then(data=>{
+  const grid = document.getElementById('grid');
+  data.skills.forEach(s=>{
+    const c = document.createElement('div'); c.className='card';
+    c.innerHTML = `
+      <div class="cat">${s.category}</div>
+      <h2 class="name">${s.title}</h2>
+      <p class="title">${s.name}</p>
+      <p class="desc">${s.description}</p>
+      ${s.triggers.length ? `<div class="trig">${s.triggers.join(' · ')}</div>` : ''}
+    `;
+    grid.appendChild(c);
+  });
+});
+</script>
+</body>
+</html>

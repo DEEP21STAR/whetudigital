@@ -1,0 +1,21 @@
+{
+  "name": "tradie-recap",
+  "version": "0.1.0",
+  "description": "Whetū Digital — 30s job-recap video template for NZ tradies. Renders locally via Remotion; cloud render disabled until company licence obtained.",
+  "private": true,
+  "scripts": {
+    "dev": "remotion studio",
+    "build": "remotion render TradieRecap out/recap.mp4",
+    "still": "remotion still TradieRecap out/poster.png"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "typescript": "^5.5.0"
+  }
+}

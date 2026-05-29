@@ -1,0 +1,86 @@
+{
+  "name": "Whetū Digital Skills Marketplace",
+  "owner": "Whetū Digital (sole trader, Aotearoa NZ)",
+  "url": "https://marketplace.whetudigital.co.nz",
+  "version": "1.0.0",
+  "updated": "2026-05-29",
+  "philosophy": "NZ-native skills for Claude Code + AI GURU. Free + MIT. Built in Aotearoa.",
+  "skills": [
+    {
+      "name": "whetu",
+      "title": "Whetū Brand Auditor",
+      "description": "Brand auditor, footer generator, product deployer, status tracker.",
+      "triggers": ["/whetu audit", "/whetu footer", "/whetu deploy", "/whetu new"],
+      "path": "skills/whetu",
+      "category": "brand"
+    },
+    {
+      "name": "clarity",
+      "title": "Clarity Dashboard",
+      "description": "Whetū Digital client dashboard. Setup, PIN gate, branding audit, config, deploy.",
+      "triggers": ["/clarity"],
+      "path": "skills/clarity",
+      "category": "product"
+    },
+    {
+      "name": "arcline",
+      "title": "ARCLINE NZ Electrical PM",
+      "description": "CoC / ESC / RoI generation, 7-year vault, EWRB-native. Launches Sept 2026.",
+      "triggers": ["/arcline"],
+      "path": "skills/arcline",
+      "category": "product"
+    },
+    {
+      "name": "onboard",
+      "title": "Whetū Client Onboarder",
+      "description": "Interactive client onboarding for any Whetū Digital product. Generates config JSON.",
+      "triggers": ["/onboard"],
+      "path": "skills/onboard",
+      "category": "ops"
+    },
+    {
+      "name": "wizard",
+      "title": "Dashboard Wizard Scaffolder",
+      "description": "Scaffold a new Whetū Digital Dashboard Wizard — 3-step setup, PIN gate, localStorage.",
+      "triggers": ["/wizard"],
+      "path": "skills/wizard",
+      "category": "scaffolder"
+    },
+    {
+      "name": "stlrentals-code-review",
+      "title": "STLRentals Code Review Checklist",
+      "description": "Code review checklist for stlrentals.py — secrets, NZ dates, Tkinter rules.",
+      "triggers": [],
+      "path": "skills/stlrentals-code-review",
+      "category": "ops"
+    },
+    {
+      "name": "stlrentals-refactor",
+      "title": "STLRentals Refactor Protocol",
+      "description": "Refactor protocol for stlrentals.py — surgical edits, py_compile, Tkinter rules.",
+      "triggers": [],
+      "path": "skills/stlrentals-refactor",
+      "category": "ops"
+    },
+    {
+      "name": "stlrentals-release",
+      "title": "STLRentals Release Checklist",
+      "description": "Release checklist for STLRentals — compile, version bump, backup, git commit.",
+      "triggers": [],
+      "path": "skills/stlrentals-release",
+      "category": "ops"
+    }
+  ],
+  "marketing_pack": {
+    "title": "Whetū Marketing Skills Pack (forked from coreyhaines31/marketingskills)",
+    "skills": [
+      "whetu-marketing-pricing",
+      "whetu-marketing-landing",
+      "whetu-marketing-email",
+      "whetu-marketing-seo",
+      "whetu-marketing-referral"
+    ],
+    "orchestrator": "marketing"
+  },
+  "licence": "MIT for code; outputs are Whetū Digital property."
+}

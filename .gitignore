@@ -1,0 +1,9 @@
+.gitnexus
+
+# ── External clones (not part of this repo) ─────────────────────────────────
+_workspace/
+
+# ── Remotion build artifacts ────────────────────────────────────────────────
+tradie-recap/node_modules/
+tradie-recap/out/
+tradie-recap/.cache/
