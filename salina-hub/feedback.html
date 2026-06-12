@@ -76,8 +76,7 @@ textarea{min-height:120px;font-family:Georgia,serif}
 </div>
 
 <script>
-const TG_TOKEN = "8904643204:AAFYaQHyeHdTFYhf926pufBLLkZO7tVlD54";
-const TG_CHAT  = "2057729109";
+// Feedback delivered via WhatsApp to Deep — no credentials stored in code
 let selectedType = "appreciation";
 
 document.querySelectorAll('.fb-chip').forEach(chip => {
@@ -89,47 +88,33 @@ document.querySelectorAll('.fb-chip').forEach(chip => {
   });
 });
 
-document.getElementById('fbForm').addEventListener('submit', async e => {
+document.getElementById('fbForm').addEventListener('submit', function(e) {
   e.preventDefault();
   const btn = document.getElementById('fbSend');
   const msg = document.getElementById('fbMsg').value.trim();
-  const name = document.getElementById('fbName').value.trim() || 'Anonymous family member';
+  const name = document.getElementById('fbName').value.trim() || 'Family member';
   if (!msg) return;
 
   const ICONS = {appreciation:'💛', suggestion:'💡', memory:'📸', other:'✍'};
-  const LABELS = {appreciation:'APPRECIATION', suggestion:'SUGGESTION', memory:'MEMORY SHARED', other:'MESSAGE'};
-  const text = `🪔 *SALINA Family Hub Feedback*\n\n${ICONS[selectedType]} *${LABELS[selectedType]}*\n\nFrom: ${name}\n\n"${msg}"\n\n_Received with love · ${new Date().toLocaleString('en-NZ')}_`;
+  const LABELS = {appreciation:'Appreciation', suggestion:'Suggestion', memory:'Memory to Share', other:'Message'};
+  const text = '🪔 SALINA Family Hub\n\n'
+    + ICONS[selectedType] + ' ' + LABELS[selectedType] + '\n\n'
+    + 'From: ' + name + '\n\n'
+    + '"' + msg + '"\n\n'
+    + 'Sent with love 🙏';
 
   btn.disabled = true;
-  btn.textContent = 'Sending…';
+  btn.textContent = 'Opening WhatsApp…';
 
-  try {
-    // Try direct Telegram (works if token is real)
-    if (TG_TOKEN && !TG_TOKEN.startsWith('__')) {
-      await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: TG_CHAT, text, parse_mode: 'Markdown' })
-      });
-    } else {
-      // Fallback: post to local relay (if hub server is running)
-      await fetch('/api/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: selectedType, name, message: msg, text })
-      }).catch(() => {
-        // Final fallback: open WhatsApp share to Deep
-        const wa = `https://wa.me/64212935401?text=${encodeURIComponent(text.replace(/\*/g,''))}`;
-        window.open(wa, '_blank');
-      });
-    }
+  // Open WhatsApp with pre-filled message to Deep
+  const wa = 'https://wa.me/64212935401?text=' + encodeURIComponent(text);
+  window.open(wa, '_blank');
+
+  // Show success after brief delay (WhatsApp handles actual send)
+  setTimeout(() => {
     document.getElementById('fbForm').style.display = 'none';
     document.getElementById('fbSuccess').classList.add('show');
-  } catch (err) {
-    btn.disabled = false;
-    btn.textContent = 'Try Again →';
-    alert('Could not send — please try again or call Deep: 021 293 5401');
-  }
+  }, 800);
 });
 </script>
 </body>
