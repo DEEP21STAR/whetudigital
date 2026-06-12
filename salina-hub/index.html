@@ -1,0 +1,3142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1a0e08">
+<title>SALINA Command · Tulawati Lal Mummy · by Whetū Digital</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" href="/salina/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg1:#06030a;--bg2:#0d050c;--bg3:#160a14;
+  --gold:#d4a520;--gold2:#f5c557;--gold3:#fff3d6;--gold-soft:#9c7a1f;
+  --saffron:#f97316;--coral:#e8724a;--rose:#e57373;--ruby:#dc2626;
+  --cream:#f5ede0;--text:#f0e6d3;--text2:#c9b89a;--text3:#a59175;--muted:#7a6754;
+  --ok:#10b981;--ok2:#34d399;--warn:#f59e0b;--err:#ef4444;--info:#60a5fa;
+  --cyan:#10d8ff;--magenta:#c040ff;--neon:#00ff99;
+  --glass:rgba(34,18,8,.62);--glass2:rgba(46,26,12,.78);--glass-edge:rgba(212,165,50,.18);
+  --border:rgba(212,165,50,.22);--border2:rgba(212,165,50,.42);--border3:rgba(212,165,50,.68);
+  --serif:'Cormorant Garamond',serif;--sans:'Inter',sans-serif;--mono:'Geist Mono',monospace;
+  --r:16px;--r-sm:10px;--r-lg:24px;
+  --spring:cubic-bezier(.34,1.56,.64,1);--ease:cubic-bezier(.16,1,.3,1);--ease-out:cubic-bezier(.22,1,.36,1);
+  --shadow-1:0 8px 30px rgba(0,0,0,.4);
+  --shadow-glow:0 0 30px rgba(245,197,87,.18);
+}
+@property --hue { syntax:'<number>'; inherits:false; initial-value:35 }
+@property --spin { syntax:'<angle>'; inherits:false; initial-value:0deg }
+html,body{min-height:100vh;background:var(--bg1);color:var(--text);font-family:var(--sans);font-size:14px;-webkit-tap-highlight-color:transparent;overflow-x:hidden;scroll-behavior:smooth}
+body{background:radial-gradient(ellipse at 20% 0%,#1a0e0d 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,#0d0716 0%,transparent 55%),linear-gradient(170deg,#06030a 0%,#0d050c 45%,#160a14 100%);position:relative;cursor:none;min-height:100vh}
+@media (hover:none){body{cursor:auto}.cursor,.cursor-trail{display:none!important}}
+::selection{background:rgba(245,197,87,.32);color:#fff3d6}
+/* ── VOYAGER-STYLE WHETŪ ANIMATIONS ── */
+@keyframes wfTextSwing{
+  0%  {transform:perspective(700px) rotateY(-22deg) rotateX(8deg)  translateZ(-10px)}
+  18% {transform:perspective(700px) rotateY(6deg)   rotateX(-5deg) translateZ(18px)}
+  38% {transform:perspective(700px) rotateY(24deg)  rotateX(9deg)  translateZ(-8px)}
+  55% {transform:perspective(700px) rotateY(-4deg)  rotateX(-7deg) translateZ(22px)}
+  74% {transform:perspective(700px) rotateY(-20deg) rotateX(5deg)  translateZ(-12px)}
+  100%{transform:perspective(700px) rotateY(-22deg) rotateX(8deg)  translateZ(-10px)}
+}
+@keyframes wfTextGlow{
+  0%,88%,100%{filter:drop-shadow(0 0 10px rgba(245,197,87,.6)) drop-shadow(0 0 24px rgba(249,115,22,.32))}
+  89%{filter:drop-shadow(-4px 0 rgba(245,197,87,.95)) drop-shadow(4px 0 rgba(192,64,255,.85))}
+  91%{filter:drop-shadow(4px 0 rgba(249,115,22,.95)) drop-shadow(-4px 0 rgba(16,216,255,.85))}
+  95%{filter:drop-shadow(0 0 14px rgba(245,197,87,.55)) drop-shadow(0 0 38px rgba(249,115,22,.28))}
+}
+@keyframes wfAuroraText{0%{background-position:100% 50%}50%{background-position:0% 50%}100%{background-position:100% 50%}}
+@keyframes wfShimmerLine{0%{left:-120%;opacity:0}10%{opacity:.6}90%{opacity:.5}100%{left:120%;opacity:0}}
+/* ── 3D mandala backdrop ── */
+.mandala-stage{position:fixed;inset:0;z-index:0;pointer-events:none;display:flex;align-items:center;justify-content:center;perspective:1500px;overflow:hidden}
+.mandala{width:min(820px,90vw);height:min(820px,90vw);position:relative;transform-style:preserve-3d;animation:mandalaDrift 50s linear infinite;opacity:.38}
+@keyframes mandalaDrift{0%{transform:rotateX(58deg) rotateZ(0deg)}100%{transform:rotateX(58deg) rotateZ(360deg)}}
+.mandala-ring{position:absolute;inset:0;border-radius:50%;border:1px solid var(--gold);opacity:.42}
+.mr-1{inset:0;border-width:2px;border-color:rgba(245,197,87,.4)}
+.mr-2{inset:6%;border-color:rgba(249,115,22,.32);transform:rotateX(60deg)}
+.mr-3{inset:14%;border-color:rgba(232,114,74,.3);transform:rotateY(60deg)}
+.mr-4{inset:22%;border-color:rgba(212,165,50,.28);transform:rotateZ(30deg)}
+.mr-5{inset:32%;border-color:rgba(245,197,87,.36)}
+.mr-6{inset:42%;border-style:dashed;border-color:rgba(245,197,87,.42)}
+.mr-7{inset:52%;border-color:rgba(249,115,22,.4)}
+.mr-8{inset:62%;border-style:dotted;border-color:rgba(245,197,87,.46)}
+.mr-petal{position:absolute;width:12px;height:34px;left:50%;top:50%;background:linear-gradient(180deg,rgba(245,197,87,.7),rgba(249,115,22,.3),transparent);border-radius:50% 50% 4px 4px;transform-origin:center top}
+.mandala-petals{position:absolute;inset:18%;border-radius:50%}
+/* ── aurora orbs ── */
+.aurora{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:.55;animation:orbDrift 22s ease-in-out infinite}
+.orb1{width:720px;height:720px;background:radial-gradient(circle,rgba(245,197,87,.42),transparent 70%);top:-220px;left:-180px}
+.orb2{width:560px;height:560px;background:radial-gradient(circle,rgba(249,115,22,.4),transparent 70%);top:28%;right:-160px;animation-delay:-5s}
+.orb3{width:500px;height:500px;background:radial-gradient(circle,rgba(232,114,74,.36),transparent 70%);bottom:-120px;left:22%;animation-delay:-9s}
+.orb4{width:420px;height:420px;background:radial-gradient(circle,rgba(229,115,115,.3),transparent 70%);bottom:14%;right:22%;animation-delay:-13s}
+.orb5{width:340px;height:340px;background:radial-gradient(circle,rgba(192,64,255,.18),transparent 70%);top:55%;left:42%;animation-delay:-15s}
+@keyframes orbDrift{0%,100%{transform:translateY(0) scale(1)}25%{transform:translateY(-60px) scale(1.08)}50%{transform:translate(40px,-30px) scale(.94)}75%{transform:translate(-30px,40px) scale(1.04)}}
+.grain{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:180px 180px;mix-blend-mode:overlay}
+#petals{position:fixed;inset:0;z-index:3;pointer-events:none}
+.cursor{position:fixed;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle,#f5c557,#d4a520);box-shadow:0 0 14px rgba(245,197,87,.6),0 0 28px rgba(249,115,22,.3);pointer-events:none;z-index:10000;transform:translate(-50%,-50%);transition:transform .12s var(--ease),width .2s,height .2s;mix-blend-mode:screen}
+.cursor.hover{width:42px;height:42px;background:radial-gradient(circle,rgba(245,197,87,.42),transparent 65%);box-shadow:0 0 32px rgba(245,197,87,.6)}
+.cursor.click{transform:translate(-50%,-50%) scale(.6)}
+.cursor-trail{position:fixed;pointer-events:none;width:8px;height:8px;border-radius:50%;background:radial-gradient(circle,rgba(255,200,80,.7),transparent);z-index:9999;transform:translate(-50%,-50%);animation:trail .65s linear forwards}
+@keyframes trail{0%{opacity:.75;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(.15)}}/* ── glass morphism cards ── */
+.glass{background:linear-gradient(135deg,var(--glass) 0%,var(--glass2) 100%);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid var(--glass-edge);border-radius:var(--r);position:relative;overflow:hidden;transition:transform .4s var(--ease),border-color .3s,box-shadow .4s}
+.glass::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 35%,transparent 65%,rgba(245,197,87,.06) 100%);pointer-events:none;border-radius:inherit}
+.glass::after{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(245,197,87,.4),rgba(255,255,255,.18),rgba(245,197,87,.4),transparent);opacity:0;transition:opacity .3s}
+.glass:hover{transform:translateY(-3px);border-color:var(--border2);box-shadow:0 18px 50px rgba(0,0,0,.45),0 0 60px rgba(245,197,87,.12),inset 0 1px 0 rgba(255,255,255,.06)}
+.glass:hover::after{opacity:1}
+.tilt{transition:transform .3s var(--ease)}
+/* ── PIN ── */
+#pinGate{position:fixed;inset:0;z-index:9000;background:radial-gradient(ellipse at center,#1a0e08 0%,#000 90%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:20px;transition:opacity .9s var(--ease),visibility .9s}
+#pinGate.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.pg-title{font-family:var(--serif);font-size:clamp(32px,5vw,52px);font-weight:600;text-align:center;background:linear-gradient(135deg,#fff3d6,#f5c557,#f97316);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:.5px;animation:pgPulse 4s ease-in-out infinite}
+@keyframes pgPulse{0%,100%{filter:drop-shadow(0 0 14px rgba(245,197,87,.4))}50%{filter:drop-shadow(0 0 28px rgba(249,115,22,.6))}}
+.pg-title em{font-style:italic;display:block;font-size:.45em;color:var(--text2);font-weight:500;letter-spacing:3px;margin-top:8px;text-transform:uppercase;background:none;-webkit-text-fill-color:var(--text2)}
+.pg-sub{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:4px;text-transform:uppercase}
+.pg-hint{font-family:var(--serif);font-size:14px;font-style:italic;color:var(--gold2);opacity:.7;letter-spacing:.5px}
+.pg-dots{display:flex;gap:14px}
+.pg-dot{width:12px;height:12px;border-radius:50%;background:transparent;border:2px solid var(--border2);transition:all .3s var(--spring)}
+.pg-dot.filled{background:var(--gold2);border-color:var(--gold2);box-shadow:0 0 18px rgba(245,197,87,.7);transform:scale(1.15)}
+.pg-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:min(320px,90vw)}
+.pg-key{padding:20px;background:var(--glass);border:1px solid var(--border);border-radius:14px;color:var(--text);font-family:var(--sans);font-size:22px;font-weight:600;cursor:pointer;transition:transform .15s var(--spring),background .2s,border-color .2s;user-select:none;text-align:center;backdrop-filter:blur(8px)}
+.pg-key:hover{background:rgba(212,165,50,.16);border-color:var(--gold2);transform:scale(1.04)}
+.pg-key:active{transform:scale(.96)}
+.pg-key.del{color:var(--rose);font-size:14px;letter-spacing:1px}
+.pg-err{color:var(--err);font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;height:14px}
+.pg-shake{animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+/* ── cinematic ── */
+#cine{position:fixed;inset:0;z-index:8500;background:radial-gradient(ellipse at center,#1a0e08 0%,#000 90%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px;padding:24px;transition:opacity 1.2s var(--ease),visibility 1.2s;cursor:pointer}
+#cine.fade{opacity:0;visibility:hidden;pointer-events:none}
+#cine.hidden{display:none}
+.cine-sanskrit{font-family:var(--serif);font-size:clamp(20px,3.8vw,36px);color:var(--gold2);letter-spacing:1px;word-spacing:8px;opacity:0;animation:cineUp 2s ease-out .4s forwards;text-shadow:0 0 40px rgba(212,165,50,.6)}
+.cine-om{font-size:1.4em;margin-right:12px;animation:omPulse 3s ease-in-out infinite;color:#ffd700;display:inline-block}
+@keyframes omPulse{0%,100%{transform:scale(1);text-shadow:0 0 30px rgba(255,215,0,.5)}50%{transform:scale(1.1);text-shadow:0 0 60px rgba(255,215,0,.9)}}
+.cine-portrait{width:min(280px,55vw);height:min(280px,55vw);border-radius:50%;overflow:hidden;border:2px solid rgba(245,197,87,.6);box-shadow:0 30px 80px rgba(0,0,0,.7),0 0 80px rgba(249,115,22,.32),inset 0 0 30px rgba(0,0,0,.4);opacity:0;animation:cinePort 1.8s ease-out 1.5s forwards;position:relative}
+.cine-portrait::before{content:"";position:absolute;inset:-20px;border-radius:50%;background:conic-gradient(from 0deg,transparent,rgba(245,197,87,.4),transparent,rgba(249,115,22,.4),transparent);animation:portraitHalo 8s linear infinite;z-index:-1}
+@keyframes portraitHalo{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.cine-portrait img{width:100%;height:100%;object-fit:cover;animation:kenBurns 18s ease-in-out infinite alternate}
+@keyframes kenBurns{0%{transform:scale(1)}100%{transform:scale(1.08)}}
+.cine-name{font-family:var(--serif);font-size:clamp(36px,7vw,72px);font-weight:600;background:linear-gradient(135deg,#fff3d6,#f5c557,#f97316);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1;opacity:0;animation:cineUp 1.8s ease-out 3.2s forwards;text-align:center;letter-spacing:1px}
+.cine-name em{font-style:italic;font-weight:500;font-size:.65em;display:block;margin-top:4px;letter-spacing:3px}
+.cine-dates{font-family:var(--mono);font-size:clamp(11px,1.4vw,14px);color:rgba(245,237,224,.7);letter-spacing:5px;text-transform:uppercase;opacity:0;animation:cineUp 1.4s ease-out 4.5s forwards}
+.cine-skip{position:absolute;bottom:32px;right:32px;padding:10px 18px;background:rgba(212,165,50,.1);border:1px solid rgba(212,165,50,.4);color:var(--gold2);font-family:var(--mono);font-size:11px;letter-spacing:3px;border-radius:8px;cursor:pointer;opacity:0;animation:cineUp .8s ease-out 1.6s forwards;text-transform:uppercase}
+@keyframes cineUp{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes cinePort{0%{opacity:0;transform:scale(.9)}100%{opacity:1;transform:scale(1)}}
+/* ── app shell ── */
+#app{position:relative;z-index:10;max-width:1480px;margin:0 auto;padding:18px 18px 100px;opacity:0;transition:opacity .8s var(--ease)}
+#app.ready{opacity:1}
+.topbar{position:sticky;top:14px;z-index:200;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:14px 18px;background:linear-gradient(135deg,rgba(20,10,5,.78),rgba(34,18,8,.6));backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);border:1px solid var(--border);border-radius:var(--r);box-shadow:0 14px 40px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.06);margin-bottom:24px}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-mark{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#f5c557,#f97316);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:22px;font-weight:700;color:#1a0e08;box-shadow:0 6px 20px rgba(249,115,22,.45),inset 0 1px 0 rgba(255,255,255,.4);animation:markGlow 4s ease-in-out infinite}
+@keyframes markGlow{0%,100%{box-shadow:0 6px 20px rgba(249,115,22,.45),inset 0 1px 0 rgba(255,255,255,.4)}50%{box-shadow:0 8px 28px rgba(249,115,22,.7),inset 0 1px 0 rgba(255,255,255,.5),0 0 30px rgba(245,197,87,.5)}}
+.brand-text{font-family:var(--serif);font-size:19px;font-weight:600;color:var(--gold3);letter-spacing:.3px;line-height:1}
+.brand-text em{font-style:italic;display:block;font-size:.62em;color:var(--text2);font-weight:500;letter-spacing:1.5px;margin-top:2px;text-transform:uppercase}
+.nav{display:flex;gap:6px;flex-wrap:wrap}
+.nav-btn{padding:10px 18px;background:transparent;border:1px solid transparent;color:var(--text2);font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:1.2px;cursor:pointer;border-radius:12px;transition:all .25s var(--ease);text-transform:uppercase;position:relative;overflow:hidden}
+.nav-btn::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(245,197,87,.2),rgba(249,115,22,.1));opacity:0;transition:opacity .3s}
+.nav-btn:hover::before{opacity:1}
+.nav-btn:hover{color:var(--text);border-color:var(--border)}
+.nav-btn.active{background:linear-gradient(135deg,rgba(212,165,50,.28),rgba(249,115,22,.14));border-color:var(--border2);color:var(--gold2);box-shadow:0 0 28px rgba(212,165,50,.22)}
+.nav-btn span{position:relative;z-index:1}
+.topbar-stats{display:flex;gap:14px;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;align-items:center}
+.topbar-stats b{color:var(--gold2);font-weight:600;font-size:13px;font-family:var(--sans);margin-right:4px}
+.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok2);box-shadow:0 0 12px rgba(52,211,153,.7);animation:livePulse 1.6s ease-in-out infinite;margin-right:6px}
+@keyframes livePulse{0%,100%{opacity:.65;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+.countdown-banner{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:24px 26px;background:linear-gradient(135deg,rgba(245,197,87,.18) 0%,rgba(249,115,22,.1) 50%,rgba(232,114,74,.08) 100%);border:1px solid var(--border2);border-radius:var(--r-lg);margin-bottom:22px;flex-wrap:wrap;position:relative;overflow:hidden;backdrop-filter:blur(14px);box-shadow:var(--shadow-1),inset 0 1px 0 rgba(255,255,255,.06)}
+.countdown-banner::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(245,197,87,.18),transparent 60%);pointer-events:none}
+.countdown-banner::after{content:"";position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,243,214,.08),transparent);animation:bannerShimmer 6s ease-in-out infinite}
+@keyframes bannerShimmer{0%,100%{left:-100%}50%{left:100%}}
+.cd-left{position:relative;z-index:1}
+.cd-lbl{font-family:var(--mono);font-size:10px;letter-spacing:3px;color:var(--gold2);text-transform:uppercase;margin-bottom:6px;opacity:.9}
+.cd-title{font-family:var(--serif);font-size:clamp(24px,3vw,34px);font-weight:600;color:var(--gold3);line-height:1.15}
+.cd-title em{font-style:italic;display:block;font-size:.55em;color:var(--text2);font-weight:500;letter-spacing:1.5px;margin-top:4px}
+.cd-right{display:flex;gap:14px;position:relative;z-index:1}
+.cd-unit{text-align:center;min-width:78px;padding:12px 16px;background:rgba(20,10,5,.55);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(6px);position:relative;overflow:hidden}
+.cd-unit::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold2),transparent)}
+.cd-num{font-family:var(--serif);font-size:38px;font-weight:600;color:var(--gold2);line-height:1;letter-spacing:1px;font-feature-settings:"tnum"}
+.cd-unit-lbl{font-family:var(--mono);font-size:9px;letter-spacing:2.5px;color:var(--muted);text-transform:uppercase;margin-top:6px}
+section.section{display:none;animation-fill-mode:both}
+section.section.active{display:block;animation:sectionIn .6s var(--ease)}
+@keyframes sectionIn{0%{opacity:0;transform:translateY(12px)}100%{opacity:1;transform:translateY(0)}}/* ── stats grid (scroll-driven entrance) ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:24px}
+.stat{padding:22px;position:relative;overflow:hidden;opacity:0;transform:translateY(20px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.stat.visible{opacity:1;transform:translateY(0)}
+.stat-lbl{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.stat-lbl::before{content:"";width:3px;height:14px;background:linear-gradient(180deg,var(--gold2),transparent);border-radius:2px}
+.stat-val{font-family:var(--serif);font-size:44px;font-weight:600;color:var(--text);line-height:1;font-feature-settings:"tnum";letter-spacing:.5px}
+.stat-sub{font-size:11.5px;color:var(--text2);margin-top:8px;letter-spacing:.3px;font-family:var(--mono);text-transform:uppercase}
+.stat.gold .stat-val{background:linear-gradient(135deg,#fff3d6,#f5c557,#f97316);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:wfAuroraText 8s ease-in-out infinite;background-size:200% 100%}
+.stat.ok .stat-val{color:var(--ok2)}.stat.warn .stat-val{color:var(--warn)}.stat.err .stat-val{color:var(--err)}
+/* ── chart cards ── */
+.charts-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-bottom:24px}
+.chart-card{padding:22px;opacity:0;transform:translateY(20px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.chart-card.visible{opacity:1;transform:translateY(0)}
+.chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;position:relative}
+.chart-title{font-family:var(--serif);font-size:20px;font-weight:600;color:var(--gold3);letter-spacing:.3px}
+.chart-sub{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.chart-body{height:260px;position:relative}
+/* ── world map ── */
+.world-map{padding:22px;margin-bottom:24px;opacity:0;transform:translateY(20px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.world-map.visible{opacity:1;transform:translateY(0)}
+.wm-wrap{position:relative;width:100%;max-width:1080px;margin:14px auto 0;border-radius:14px;overflow:hidden;background:radial-gradient(ellipse at center,rgba(20,10,5,.6),rgba(8,5,12,.95));border:1px solid var(--border);box-shadow:inset 0 0 60px rgba(0,0,0,.6),0 0 32px rgba(245,197,87,.08)}
+.wm-svg{display:block;width:100%;height:auto}
+.wm-country{fill:rgba(245,197,87,.08);stroke:rgba(245,197,87,.18);stroke-width:.4;transition:fill .3s}
+.wm-country.has-guests{fill:rgba(249,115,22,.16);stroke:rgba(245,197,87,.42);stroke-width:.6}
+.wm-city{cursor:default}
+.wm-city .wm-pulse{fill:var(--c,#f5c557);opacity:.7;animation:cityPulse 2.2s ease-in-out infinite}
+.wm-city .wm-pulse-2{fill:var(--c,#f5c557);opacity:.3;animation:cityPulseOuter 2.2s ease-in-out infinite}
+@keyframes cityPulse{0%,100%{r:4;opacity:.8}50%{r:6;opacity:1}}
+@keyframes cityPulseOuter{0%{r:6;opacity:.4}100%{r:24;opacity:0}}
+.wm-city-label{fill:var(--gold2);font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;text-shadow:0 0 6px rgba(0,0,0,.9);pointer-events:none}
+.wm-city-count{fill:var(--gold3);font-family:'Inter',sans-serif;font-size:11px;font-weight:700;text-shadow:0 0 6px rgba(0,0,0,.9);pointer-events:none}
+.wm-arc{fill:none;stroke:rgba(245,197,87,.32);stroke-width:1.2;stroke-dasharray:4 4;animation:arcDash 12s linear infinite}
+@keyframes arcDash{0%{stroke-dashoffset:0}100%{stroke-dashoffset:-160}}
+.wm-legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:12px;font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
+.wm-leg{display:flex;align-items:center;gap:6px}
+.wm-leg b{color:var(--gold2);font-family:var(--sans);font-size:13px;font-weight:600}
+/* ── heatmap ── */
+.heatmap-card{padding:22px;margin-bottom:24px;opacity:0;transform:translateY(20px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.heatmap-card.visible{opacity:1;transform:translateY(0)}
+.hm-grid{display:grid;grid-template-columns:repeat(14,1fr);gap:6px;margin-top:14px}
+.hm-cell{aspect-ratio:1;background:rgba(255,255,255,.04);border-radius:5px;transition:transform .15s,background .25s;position:relative;cursor:default}
+.hm-cell:hover{transform:scale(1.25);z-index:2;box-shadow:0 0 16px rgba(245,197,87,.5)}
+.hm-cell[data-c="1"]{background:rgba(245,197,87,.25)}
+.hm-cell[data-c="2"]{background:rgba(245,197,87,.5)}
+.hm-cell[data-c="3"]{background:linear-gradient(135deg,rgba(249,115,22,.7),rgba(245,197,87,.5))}
+.hm-cell[data-c="4"]{background:linear-gradient(135deg,#f97316,#f5c557);box-shadow:0 0 10px rgba(249,115,22,.6)}
+/* ── send timeline ── */
+.tl-days{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+.tl-day{padding:18px;background:rgba(20,10,5,.5);border:1px solid var(--border);border-radius:12px;position:relative;overflow:hidden}
+.tl-day-name{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+.tl-day-num{font-family:var(--serif);font-size:28px;font-weight:600;color:var(--gold2);font-feature-settings:"tnum"}
+.tl-day-cap{font-size:11px;color:var(--text2);margin-top:4px;font-family:var(--mono);letter-spacing:1px}
+.tl-bar{height:8px;background:rgba(255,255,255,.06);border-radius:4px;margin-top:14px;overflow:hidden;position:relative}
+.tl-bar-fill{height:100%;background:linear-gradient(90deg,#f97316,#f5c557,#f97316);background-size:200% 100%;border-radius:4px;transition:width 1.2s var(--ease);animation:wfAuroraText 4s linear infinite}
+/* ── filters + guest list ── */
+.filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.search{flex:1;min-width:240px;padding:14px 18px;background:rgba(20,10,5,.7);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:var(--sans);font-size:14px;transition:all .25s}
+.search:focus{outline:none;border-color:var(--gold);background:rgba(20,10,5,.9);box-shadow:0 0 0 3px rgba(212,165,50,.18),0 0 30px rgba(245,197,87,.18)}
+.search::placeholder{color:var(--muted);font-style:italic}
+.chip{padding:9px 16px;background:rgba(20,10,5,.6);border:1px solid var(--border);border-radius:999px;color:var(--text2);font-family:var(--mono);font-size:11px;letter-spacing:1.5px;cursor:pointer;text-transform:uppercase;transition:all .25s;white-space:nowrap;position:relative;overflow:hidden}
+.chip:hover{border-color:var(--gold2);color:var(--text);transform:translateY(-1px)}
+.chip.active{background:linear-gradient(135deg,rgba(212,165,50,.28),rgba(249,115,22,.12));border-color:var(--gold);color:var(--gold2);box-shadow:0 4px 18px rgba(245,197,87,.18)}
+.chip .ct{margin-left:6px;opacity:.75;font-weight:700}
+.guest-list{overflow:hidden;backdrop-filter:blur(10px)}
+.gl-head{display:grid;grid-template-columns:1fr 100px 100px 110px 110px 36px;gap:12px;padding:14px 20px;background:rgba(20,10,5,.95);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;position:sticky;top:0;z-index:5}
+.gl-row{display:grid;grid-template-columns:1fr 100px 100px 110px 110px 36px;gap:12px;padding:14px 20px;border-bottom:1px solid rgba(212,165,50,.08);align-items:center;cursor:pointer;transition:background .2s,padding .2s}
+.gl-row:hover{background:rgba(245,197,87,.06);padding-left:24px}
+.gl-row.expanded{background:rgba(245,197,87,.08)}
+.gl-name{font-weight:600;color:var(--text);font-size:14px;display:flex;align-items:center;gap:8px}
+.gl-region-chip{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);font-family:var(--mono);font-size:9.5px;letter-spacing:1px;color:var(--text2);text-transform:uppercase}
+.gl-id{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.badge{display:inline-block;padding:4px 11px;border-radius:999px;font-family:var(--mono);font-size:10px;letter-spacing:1.2px;font-weight:600;text-transform:uppercase;border:1px solid;white-space:nowrap}
+.b-wa{color:#25d366;border-color:rgba(37,211,102,.45);background:rgba(37,211,102,.08)}
+.b-em{color:#3b82f6;border-color:rgba(59,130,246,.45);background:rgba(59,130,246,.08)}
+.b-no{color:#ef4444;border-color:rgba(239,68,68,.45);background:rgba(239,68,68,.08)}
+.b-sent{color:#10b981;border-color:rgba(16,185,129,.45);background:rgba(16,185,129,.08)}
+.b-pend{color:#f59e0b;border-color:rgba(245,158,11,.45);background:rgba(245,158,11,.08)}
+.b-fail{color:#ef4444;border-color:rgba(239,68,68,.45);background:rgba(239,68,68,.08)}
+.b-rsvp-yes{color:#10b981;border-color:rgba(16,185,129,.6);background:rgba(16,185,129,.14);box-shadow:0 0 12px rgba(16,185,129,.25)}
+.b-rsvp-day{color:#f97316;border-color:rgba(249,115,22,.5);background:rgba(249,115,22,.1)}
+.b-rsvp-no{color:#e57373;border-color:rgba(229,115,115,.5);background:rgba(229,115,115,.1)}
+.b-rsvp-call{color:#f5c557;border-color:rgba(245,197,87,.6);background:rgba(245,197,87,.14)}
+.gl-chev{color:var(--muted);font-size:20px;transition:transform .3s var(--spring);text-align:center}
+.gl-row.expanded .gl-chev{transform:rotate(90deg);color:var(--gold2)}
+.gl-detail{grid-column:1/-1;padding:8px 20px 18px 20px;display:none;color:var(--text2);animation:detailIn .35s var(--ease)}
+@keyframes detailIn{0%{opacity:0;transform:translateY(-6px)}100%{opacity:1;transform:translateY(0)}}
+.gl-row.expanded .gl-detail{display:block}
+.gl-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.gl-action{padding:9px 16px;background:rgba(212,165,50,.1);border:1px solid var(--border2);border-radius:10px;color:var(--gold2);font-family:var(--mono);font-size:11px;letter-spacing:1.5px;cursor:pointer;text-transform:uppercase;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all .2s}
+.gl-action:hover{background:rgba(212,165,50,.22);border-color:var(--gold);transform:translateY(-2px);box-shadow:0 6px 18px rgba(245,197,87,.2)}
+.gl-detail-meta{display:flex;gap:18px;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:1px;margin-top:8px;flex-wrap:wrap}
+.gl-detail-meta b{color:var(--text);font-family:var(--sans);font-size:12px;font-weight:600;margin-right:4px}
+@media(max-width:760px){.gl-head{display:none}.gl-row{grid-template-columns:1fr 24px;gap:8px;padding:14px 16px}.gl-row > div:not(.gl-name):not(.gl-chev):not(.gl-detail){display:none}}/* ── memories with year grouping ── */
+.mem-year-band{display:flex;align-items:center;gap:14px;margin:32px 0 18px;position:relative}
+.mem-year-band:first-child{margin-top:8px}
+.mem-year{font-family:var(--serif);font-size:48px;font-weight:600;background:linear-gradient(135deg,#fff3d6,#f5c557,#f97316);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1;letter-spacing:1px;animation:wfAuroraText 8s ease-in-out infinite;background-size:200% 100%}
+.mem-year-sub{font-family:var(--mono);font-size:11px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;border-left:2px solid var(--border2);padding-left:14px;flex:1}
+.mem-year-sub b{color:var(--gold2);font-weight:700}
+.memories-grid{column-count:4;column-gap:14px;margin-bottom:18px}
+@media(max-width:1100px){.memories-grid{column-count:3}}
+@media(max-width:760px){.memories-grid{column-count:2;column-gap:10px}}
+.mem-card{break-inside:avoid;margin-bottom:14px;border-radius:14px;overflow:hidden;cursor:pointer;position:relative;background:var(--glass);border:1px solid var(--border);transition:transform .35s var(--spring),box-shadow .35s,border-color .25s;opacity:0;transform:translateY(20px)}
+.mem-card.visible{opacity:1;transform:translateY(0);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.mem-card:hover{transform:translateY(-5px) scale(1.012);box-shadow:0 22px 60px rgba(0,0,0,.55),0 0 36px rgba(245,197,87,.2);border-color:var(--border3);z-index:3}
+.mem-card img{display:block;width:100%;height:auto;transition:transform .8s var(--ease)}
+.mem-card:hover img{transform:scale(1.06)}
+.mem-card-meta{position:absolute;bottom:0;left:0;right:0;padding:14px 16px 12px;background:linear-gradient(transparent 0%,rgba(0,0,0,.85) 80%);font-family:var(--mono);font-size:10.5px;letter-spacing:1.5px;color:#fff3d6;text-transform:uppercase;opacity:0;transition:opacity .3s;display:flex;justify-content:space-between;align-items:end;gap:8px}
+.mem-card:hover .mem-card-meta{opacity:1}
+.mem-card-date{color:var(--gold2);font-weight:600}
+/* ── lightbox ── */
+.lightbox{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.96);display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px;padding:24px;backdrop-filter:blur(14px)}
+.lightbox.active{display:flex;animation:lbIn .35s ease-out}
+@keyframes lbIn{0%{opacity:0}100%{opacity:1}}
+.lb-img{max-width:90vw;max-height:80vh;border-radius:14px;box-shadow:0 30px 80px rgba(0,0,0,.8),0 0 100px rgba(245,197,87,.16);object-fit:contain}
+.lb-meta{font-family:var(--mono);font-size:11.5px;letter-spacing:2px;color:var(--text2);text-transform:uppercase}
+.lb-close,.lb-prev,.lb-next{position:absolute;background:rgba(245,197,87,.1);border:1px solid var(--border2);color:var(--gold2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;backdrop-filter:blur(8px)}
+.lb-close{top:24px;right:24px;width:48px;height:48px;border-radius:50%;font-size:22px}
+.lb-prev,.lb-next{top:50%;transform:translateY(-50%);width:60px;height:60px;border-radius:50%;font-size:28px}
+.lb-prev{left:24px}.lb-next{right:24px}
+.lb-prev:hover,.lb-next:hover,.lb-close:hover{background:rgba(245,197,87,.24);border-color:var(--gold)}
+/* ── ceremony ── */
+.ceremony-days{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:18px;margin-bottom:24px}
+.cer-day{padding:26px;position:relative;overflow:hidden}
+.cer-day::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#f97316,#f5c557,#f97316);background-size:200% 100%;animation:wfAuroraText 6s ease-in-out infinite}
+.cer-ribbon{font-family:var(--mono);font-size:10px;letter-spacing:3px;color:var(--gold2);text-transform:uppercase;margin-bottom:10px;display:inline-flex;align-items:center;gap:8px}
+.cer-ribbon::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold2);box-shadow:0 0 8px rgba(245,197,87,.7)}
+.cer-dow{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--text2);text-transform:uppercase;margin-bottom:4px}
+.cer-date{font-family:var(--serif);font-size:54px;font-weight:600;background:linear-gradient(135deg,#fff3d6,#f5c557);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1;letter-spacing:.5px}
+.cer-date em{font-style:normal;font-size:.4em;font-weight:500;background:none;-webkit-text-fill-color:var(--text2);letter-spacing:2px;text-transform:uppercase;margin-left:10px}
+.cer-time{font-family:var(--serif);font-size:18px;color:var(--gold2);margin-top:12px;font-style:italic}
+.cer-prog{margin-top:20px;border-top:1px solid var(--border);padding-top:16px}
+.cer-item{display:flex;gap:14px;padding:10px 0;border-bottom:1px dashed rgba(212,165,50,.12);transition:padding .2s}
+.cer-item:hover{padding-left:8px}
+.cer-item:last-child{border-bottom:none}
+.cer-time-cell{font-family:var(--mono);font-size:11.5px;letter-spacing:1.5px;color:var(--gold2);width:84px;flex-shrink:0;font-weight:600}
+.cer-desc{font-size:13.5px;color:var(--text);line-height:1.45}
+.cer-desc em{font-style:italic;color:var(--text2);font-size:.92em}
+.venue-card{padding:24px;margin-bottom:18px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center}
+@media(max-width:700px){.venue-card{grid-template-columns:1fr;text-align:center;justify-items:center}}
+.venue-info h3{font-family:var(--serif);font-size:26px;font-weight:600;color:var(--gold3);margin-bottom:6px}
+.venue-info p{color:var(--text2);font-style:italic;font-size:14px}
+.venue-qr{padding:14px;background:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 32px rgba(0,0,0,.4);border:2px solid var(--gold2)}
+.venue-qr canvas,.venue-qr img{display:block;border-radius:6px}
+.venue-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.venue-action{padding:11px 18px;background:rgba(212,165,50,.12);border:1px solid var(--border2);border-radius:10px;color:var(--gold2);font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-decoration:none;text-transform:uppercase;transition:all .25s;display:inline-flex;align-items:center;gap:6px}
+.venue-action:hover{background:rgba(212,165,50,.24);border-color:var(--gold);transform:translateY(-2px);box-shadow:0 6px 22px rgba(245,197,87,.22)}
+/* ── Voyager-style Whetū footer ── */
+.whetu-footer{margin-top:64px;padding:42px 30px 32px;background:linear-gradient(180deg,transparent,rgba(8,5,12,.7) 30%,rgba(8,5,12,.95));border-top:1px solid var(--border);text-align:center;border-radius:var(--r-lg);position:relative;overflow:hidden}
+.whetu-footer::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold2),transparent);opacity:.6}
+.wf-logo{font-family:var(--serif);font-size:34px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;display:inline-block;position:relative;overflow:hidden;background:linear-gradient(90deg,#fff3d6 0%,#f5c557 22%,#f97316 50%,#fff3d6 72%,#f5c557 100%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:wfTextSwing 8.5s ease-in-out infinite,wfTextGlow 9s ease-in-out infinite,wfAuroraText 7s ease-in-out infinite;transform-style:preserve-3d}
+.wf-logo::after{content:'';position:absolute;top:0;bottom:0;width:55px;background:linear-gradient(90deg,transparent,rgba(245,197,87,.55),rgba(249,115,22,.28),transparent);animation:wfShimmerLine 6s ease-in-out infinite;pointer-events:none;filter:blur(3px)}
+.wf-tagline{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:3.5px;margin-top:10px;text-transform:uppercase}
+.wf-contact{font-family:var(--serif);font-size:16px;margin-top:18px;color:var(--text2);font-style:italic}
+.wf-contact a{color:var(--gold2);text-decoration:none;font-weight:600;transition:all .25s;border-bottom:1px solid transparent}
+.wf-contact a:hover{color:var(--gold3);border-color:var(--gold2);text-shadow:0 0 14px rgba(245,197,87,.6)}
+.wf-built{font-family:var(--serif);font-size:14px;color:var(--text2);margin-top:22px;font-style:italic;letter-spacing:.3px}
+.wf-built em{color:var(--gold3);font-style:italic}
+.wf-heart{color:var(--saffron);animation:heartBeat 2.4s ease-in-out infinite;display:inline-block;margin-left:4px;font-style:normal}
+@keyframes heartBeat{0%,100%{transform:scale(1)}30%{transform:scale(1.22);color:#f97316}60%{transform:scale(.94)}}
+.wf-license{display:inline-block;margin-top:18px;padding:6px 18px;border-radius:999px;background:rgba(245,197,87,.06);border:1px solid var(--border2);font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:2px;text-transform:uppercase}
+.wf-copy{font-family:var(--mono);font-size:10px;color:rgba(122,103,84,.7);letter-spacing:1.5px;margin-top:14px;line-height:1.8}
+/* ── confetti + skeleton + responsive ── */
+#confetti{position:fixed;inset:0;z-index:9100;pointer-events:none}
+.skeleton{background:linear-gradient(90deg,rgba(212,165,50,.04),rgba(212,165,50,.12),rgba(212,165,50,.04));background-size:200% 100%;animation:skel 1.6s ease-in-out infinite;border-radius:8px}
+@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.toast{position:fixed;bottom:30px;right:30px;z-index:9200;padding:14px 22px;background:linear-gradient(135deg,rgba(20,10,5,.95),rgba(34,18,8,.88));border:1px solid var(--border2);border-radius:14px;color:var(--gold2);font-family:var(--mono);font-size:12px;letter-spacing:1.5px;text-transform:uppercase;backdrop-filter:blur(14px);box-shadow:0 14px 50px rgba(0,0,0,.5),0 0 30px rgba(245,197,87,.18);transform:translateY(140%);transition:transform .5s var(--spring)}
+.toast.show{transform:translateY(0)}
+@media print{.topbar,.aurora,.grain,#confetti,.cursor,.cursor-trail,#cine,#pinGate,.mandala-stage,#petals,.toast{display:none!important}body{background:#fff!important;color:#1a0e08!important;cursor:auto!important}.glass,.stat,.cer-day,.guest-list,.venue-card,.world-map,.heatmap-card,.chart-card{background:#fff!important;border:1px solid #c47a2a!important;color:#1a0e08!important;backdrop-filter:none!important}.mem-year,.cer-date,.wf-logo,.cd-num{background:none!important;-webkit-text-fill-color:#1a0e08!important;color:#1a0e08!important;animation:none!important}}
+</style>
+<style id="mandap-styles">
+/* ── MANDAP — ruby/saffron admin palette ── */
+:root{
+  --ruby:#dc2626;--ruby2:#ef4444;--ruby-soft:#7f1d1d;
+  --saff:#f97316;--saff2:#fb923c;--saff-deep:#9a3412;
+  --mdp-glass:rgba(45,12,12,.66);--mdp-glass2:rgba(60,18,12,.82);
+  --mdp-border:rgba(239,68,68,.32);--mdp-border2:rgba(239,68,68,.6);
+}
+.nav-btn[data-section="mandap"]{
+  background:linear-gradient(135deg,rgba(220,38,38,.18),rgba(249,115,22,.1));
+  border-color:rgba(239,68,68,.3); color:#fca5a5;
+}
+.nav-btn[data-section="mandap"]:hover{ background:linear-gradient(135deg,rgba(220,38,38,.3),rgba(249,115,22,.18)); color:#fff3d6 }
+.nav-btn[data-section="mandap"].active{
+  background:linear-gradient(135deg,rgba(220,38,38,.38),rgba(249,115,22,.22));
+  border-color:var(--ruby2); color:#fff;
+  box-shadow:0 0 32px rgba(220,38,38,.32);
+}
+
+/* Mandap PIN gate modal */
+#mandapPinGate{position:fixed;inset:0;z-index:9300;background:radial-gradient(ellipse at center,#3d0a0a 0%,#0a0204 90%);display:none;align-items:center;justify-content:center;flex-direction:column;gap:20px;padding:24px;backdrop-filter:blur(8px)}
+#mandapPinGate.active{display:flex;animation:mdpIn .5s ease}
+@keyframes mdpIn{0%{opacity:0;transform:scale(.96)}100%{opacity:1;transform:scale(1)}}
+.mdp-gate-title{font-family:var(--serif);font-size:clamp(32px,5vw,52px);font-weight:600;background:linear-gradient(135deg,#fca5a5,#dc2626,#f97316);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:1px;text-align:center;animation:pgPulse 4s ease-in-out infinite}
+.mdp-gate-sub{font-family:var(--mono);font-size:11px;color:#fca5a5;letter-spacing:4px;text-transform:uppercase;opacity:.8}
+.mdp-gate-icon{font-size:54px;text-shadow:0 0 24px rgba(220,38,38,.6);animation:omPulse 3s ease-in-out infinite;display:block;text-align:center}
+#mandapPinGate .mdp-dots{display:flex;gap:14px}
+#mandapPinGate .mdp-pd{width:14px;height:14px;border-radius:50%;background:transparent;border:2px solid var(--mdp-border2);transition:all .25s var(--spring)}
+#mandapPinGate .mdp-pd.filled{background:var(--ruby2);border-color:var(--ruby2);box-shadow:0 0 18px rgba(239,68,68,.7);transform:scale(1.18)}
+.mdp-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:min(320px,92vw)}
+.mdp-pad.shake{animation:shake .4s}
+.mdp-pad-key{padding:20px;background:var(--mdp-glass);border:1px solid var(--mdp-border);border-radius:14px;color:#fff;font-family:var(--sans);font-size:22px;font-weight:600;cursor:pointer;transition:all .15s var(--spring);user-select:none;text-align:center;backdrop-filter:blur(8px)}
+.mdp-pad-key:hover{background:rgba(220,38,38,.22);border-color:var(--ruby2);transform:scale(1.04)}
+.mdp-pad-key:active{transform:scale(.94)}
+.mdp-pad-key.del{color:var(--ruby2);font-size:13px;letter-spacing:1px}
+.mdp-pin-err{color:var(--ruby2);font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;height:14px;text-align:center}
+.mdp-gate-close{position:absolute;top:24px;right:24px;width:44px;height:44px;border-radius:50%;background:transparent;border:1px solid var(--mdp-border2);color:#fca5a5;font-size:20px;cursor:pointer;transition:all .2s}
+.mdp-gate-close:hover{background:rgba(220,38,38,.2);transform:rotate(90deg)}
+
+/* Mandap section */
+#mandap{padding:8px 0 60px}
+.mdp-hero{padding:28px;margin-bottom:24px;position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(220,38,38,.18) 0%,rgba(249,115,22,.1) 50%,rgba(127,29,29,.14) 100%);border:1px solid var(--mdp-border2);border-radius:var(--r-lg);backdrop-filter:blur(14px);box-shadow:0 18px 50px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.06)}
+.mdp-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(220,38,38,.2),transparent 65%);pointer-events:none}
+.mdp-hero::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(252,165,165,.12),transparent);animation:bannerShimmer 5s ease-in-out infinite}
+.mdp-hero-title{font-family:var(--serif);font-size:clamp(32px,4vw,46px);font-weight:600;background:linear-gradient(135deg,#fff3d6,#fca5a5,#f97316);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:1px;position:relative;z-index:1;display:flex;align-items:center;gap:18px}
+.mdp-hero-title em{font-style:italic;font-size:.55em;color:rgba(252,165,165,.85);font-weight:500;letter-spacing:3px;background:none;-webkit-text-fill-color:rgba(252,165,165,.85)}
+.mdp-hero-sub{font-family:var(--mono);font-size:11px;color:#fca5a5;letter-spacing:3px;text-transform:uppercase;margin-top:8px;position:relative;z-index:1;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.mdp-hero-sub .live-dot{background:var(--ruby2);box-shadow:0 0 12px rgba(239,68,68,.7)}
+
+/* Stats banner — 7 mini stats */
+.mdp-stats-banner{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:24px;padding:16px;background:var(--mdp-glass);border:1px solid var(--mdp-border);border-radius:var(--r);backdrop-filter:blur(14px)}
+.mdp-stat{padding:14px 12px;background:rgba(20,8,4,.5);border:1px solid var(--border);border-radius:10px;text-align:center;transition:transform .25s var(--spring),border-color .25s}
+.mdp-stat:hover{transform:translateY(-3px);border-color:var(--mdp-border2)}
+.mdp-stat-num{font-family:var(--serif);font-size:32px;font-weight:600;color:var(--text);line-height:1;font-feature-settings:"tnum"}
+.mdp-stat-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:6px}
+.mdp-stat[data-c="ok"] .mdp-stat-num{color:var(--ok2)}
+.mdp-stat[data-c="warn"] .mdp-stat-num{color:var(--warn)}
+.mdp-stat[data-c="err"] .mdp-stat-num{color:var(--err)}
+.mdp-stat[data-c="gold"] .mdp-stat-num{background:linear-gradient(135deg,#fff3d6,#f5c557,#f97316);-webkit-background-clip:text;background-clip:text;color:transparent}
+.mdp-stat[data-c="muted"] .mdp-stat-num{color:var(--text2)}
+
+/* Grid layout: RSVP tracker + Invite cards + Log + Settings */
+.mdp-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-bottom:22px}
+@media(max-width:1100px){.mdp-grid{grid-template-columns:1fr}}
+.mdp-panel{padding:22px;background:var(--mdp-glass);border:1px solid var(--mdp-border);border-radius:var(--r);backdrop-filter:blur(14px);position:relative;overflow:hidden}
+.mdp-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--ruby2),var(--saff),var(--ruby2),transparent);background-size:200% 100%;animation:wfAuroraText 5s linear infinite}
+.mdp-panel-title{font-family:var(--serif);font-size:22px;font-weight:600;color:#fff3d6;letter-spacing:.5px;margin-bottom:6px;display:flex;align-items:center;gap:10px;justify-content:space-between}
+.mdp-panel-sub{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}
+
+/* RSVP filter chips */
+.mdp-rsvp-filter{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.mdp-rsvp-chip{padding:7px 14px;background:rgba(20,8,4,.5);border:1px solid var(--border);border-radius:999px;color:var(--text2);font-family:var(--mono);font-size:10px;letter-spacing:1.5px;cursor:pointer;text-transform:uppercase;transition:all .2s}
+.mdp-rsvp-chip:hover{border-color:var(--mdp-border2);color:var(--text)}
+.mdp-rsvp-chip.active{background:linear-gradient(135deg,rgba(220,38,38,.32),rgba(249,115,22,.18));border-color:var(--ruby2);color:#fff;box-shadow:0 0 18px rgba(220,38,38,.18)}
+.mdp-rsvp-search{width:100%;padding:11px 16px;margin-bottom:12px;background:rgba(20,8,4,.7);border:1px solid var(--mdp-border);border-radius:10px;color:var(--text);font-family:var(--sans);font-size:13px}
+.mdp-rsvp-search:focus{outline:none;border-color:var(--ruby2);box-shadow:0 0 0 3px rgba(239,68,68,.18)}
+
+/* RSVP rows */
+.mdp-rsvp-list{max-height:520px;overflow-y:auto;border-radius:10px;border:1px solid rgba(220,38,38,.08)}
+.mdp-rsvp-list::-webkit-scrollbar{width:8px}
+.mdp-rsvp-list::-webkit-scrollbar-thumb{background:rgba(220,38,38,.3);border-radius:4px}
+.mdp-rsvp-row{display:grid;grid-template-columns:1.2fr 1fr auto;gap:10px;padding:11px 14px;border-bottom:1px solid rgba(220,38,38,.08);align-items:center;transition:background .15s}
+.mdp-rsvp-row:hover{background:rgba(220,38,38,.06)}
+.mdp-rsvp-name{font-weight:600;color:var(--text);font-size:13px;display:flex;flex-direction:column;gap:3px}
+.mdp-rsvp-region{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}
+.mdp-rsvp-meta{font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:.5px}
+.mdp-rsvp-pill{padding:7px 12px;border-radius:999px;font-family:var(--mono);font-size:10px;letter-spacing:1px;font-weight:600;border:1px solid;cursor:pointer;transition:all .2s;text-transform:uppercase}
+.mdp-rsvp-pill:hover{transform:scale(1.04);box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.mdp-rsvp-pill.b-pend{color:#f59e0b;border-color:rgba(245,158,11,.45);background:rgba(245,158,11,.08)}
+.mdp-rsvp-pill.b-rsvp-yes{color:#10b981;border-color:rgba(16,185,129,.6);background:rgba(16,185,129,.18);box-shadow:0 0 12px rgba(16,185,129,.22)}
+.mdp-rsvp-pill.b-rsvp-day{color:#f97316;border-color:rgba(249,115,22,.5);background:rgba(249,115,22,.1)}
+.mdp-rsvp-pill.b-rsvp-no{color:#e57373;border-color:rgba(229,115,115,.5);background:rgba(229,115,115,.1)}
+.mdp-rsvp-pill.b-rsvp-call{color:#f5c557;border-color:rgba(245,197,87,.6);background:rgba(245,197,87,.14)}
+
+/* Invitation cards */
+.mdp-bulk-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.mdp-invite-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;max-height:520px;overflow-y:auto;padding:4px}
+.mdp-invite-card{padding:14px;background:rgba(20,8,4,.55);border:1px solid var(--border);border-radius:10px;transition:transform .25s,border-color .25s,box-shadow .25s}
+.mdp-invite-card:hover{transform:translateY(-3px);border-color:var(--mdp-border2);box-shadow:0 10px 28px rgba(0,0,0,.45),0 0 22px rgba(239,68,68,.12)}
+.mdp-invite-name{font-weight:600;color:var(--text);font-size:13px;line-height:1.25}
+.mdp-invite-region{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:3px}
+.mdp-invite-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.mdp-btn-mini{padding:6px 10px;font-family:var(--mono);font-size:10px;letter-spacing:1px;background:rgba(220,38,38,.1);border:1px solid var(--mdp-border);border-radius:6px;color:var(--text2);cursor:pointer;transition:all .2s;text-transform:uppercase;display:inline-flex;align-items:center;gap:4px}
+.mdp-btn-mini:hover{background:rgba(220,38,38,.22);border-color:var(--mdp-border2);color:#fff}
+.mdp-tick{color:var(--ok2);font-weight:700}
+
+/* Buttons */
+.mdp-btn{padding:11px 22px;background:linear-gradient(135deg,rgba(220,38,38,.22),rgba(249,115,22,.14));border:1px solid var(--mdp-border2);border-radius:10px;color:#fca5a5;font-family:var(--mono);font-size:11px;letter-spacing:1.5px;cursor:pointer;transition:all .2s;text-transform:uppercase;display:inline-flex;align-items:center;gap:8px}
+.mdp-btn:hover{background:linear-gradient(135deg,rgba(220,38,38,.4),rgba(249,115,22,.22));color:#fff;transform:translateY(-2px);box-shadow:0 8px 22px rgba(220,38,38,.32)}
+.mdp-btn.danger{color:#fca5a5;border-color:rgba(220,38,38,.7);background:rgba(220,38,38,.18)}
+.mdp-btn.danger:hover{background:rgba(220,38,38,.42)}
+
+/* Log */
+.mdp-log{max-height:280px;overflow-y:auto;font-family:var(--mono);font-size:10.5px}
+.mdp-log::-webkit-scrollbar{width:8px}
+.mdp-log::-webkit-scrollbar-thumb{background:rgba(220,38,38,.3);border-radius:4px}
+.mdp-log-row{display:grid;grid-template-columns:120px 56px 110px 1fr;gap:8px;padding:7px 0;border-bottom:1px dashed rgba(220,38,38,.1);align-items:center}
+.mdp-log-time{color:var(--muted);font-size:9.5px;letter-spacing:.5px}
+.mdp-log-who{color:#fca5a5;font-weight:600;font-size:10px;letter-spacing:1px;text-transform:uppercase}
+.mdp-log-act{color:#fff3d6;font-weight:600;font-size:10.5px}
+.mdp-log-det{color:var(--text2);font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mdp-log-empty{color:var(--muted);text-align:center;padding:24px;font-style:italic}
+
+/* Settings */
+.mdp-set-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:16px}
+.mdp-set-grid label{display:flex;flex-direction:column;gap:6px;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}
+.mdp-set-grid input{padding:10px 14px;background:rgba(20,8,4,.7);border:1px solid var(--mdp-border);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:13px}
+.mdp-set-grid input:focus{outline:none;border-color:var(--ruby2);box-shadow:0 0 0 3px rgba(239,68,68,.18)}
+.mdp-set-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* QR Modal */
+#mdpQrModal{position:fixed;inset:0;z-index:9400;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;backdrop-filter:blur(10px);flex-direction:column;gap:18px;padding:24px}
+#mdpQrModal.active{display:flex;animation:lbIn .3s ease-out}
+.mdp-qr-card{padding:30px;background:var(--mdp-glass2);border:1px solid var(--mdp-border2);border-radius:18px;text-align:center;max-width:340px}
+#mdpQrTarget{display:flex;justify-content:center;padding:18px;background:#fff;border-radius:10px;margin-bottom:14px}
+#mdpQrTarget canvas,#mdpQrTarget img{display:block}
+#mdpQrUrl{font-family:var(--mono);font-size:11px;color:#fca5a5;letter-spacing:.5px;word-break:break-all;margin-bottom:14px}
+.mdp-qr-actions{display:flex;gap:8px;justify-content:center}
+.mdp-qr-close{padding:9px 18px;background:transparent;border:1px solid var(--mdp-border2);border-radius:8px;color:#fca5a5;font-family:var(--mono);font-size:11px;letter-spacing:1.5px;cursor:pointer;text-transform:uppercase}
+.mdp-qr-close:hover{background:rgba(220,38,38,.2)}
+</style>
+<style id="salina-pop-fx">
+/* Brand mark — quiet heartbeat (every 5s) */
+.brand-mark{ animation: markGlow 4s ease-in-out infinite, brandHeart 5s ease-in-out infinite }
+@keyframes brandHeart {
+  0%,80%,100%{transform:scale(1)}
+  85%{transform:scale(1.08)}
+  90%{transform:scale(.96)}
+  95%{transform:scale(1.04)}
+}
+
+/* Memory card cinematic hover */
+.mem-card{ box-shadow: 0 6px 22px rgba(0,0,0,.45) }
+.mem-card:hover{
+  transform: translateY(-8px) scale(1.025) !important;
+  box-shadow: 0 28px 70px rgba(0,0,0,.65), 0 0 50px rgba(245,197,87,.32), 0 0 90px rgba(249,115,22,.18) !important;
+  border-color: rgba(245,197,87,.6) !important;
+  z-index: 5
+}
+.mem-card::after{
+  content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background:linear-gradient(135deg, transparent 60%, rgba(245,197,87,.18) 100%);
+  opacity:0; transition:opacity .4s ease
+}
+.mem-card:hover::after{opacity:1}
+
+/* Mandap nav button — gentle pulse to draw attention */
+.nav-btn[data-section="mandap"]{ position:relative }
+.nav-btn[data-section="mandap"]::after{
+  content:""; position:absolute; inset:-2px; border-radius:14px; pointer-events:none;
+  background:radial-gradient(ellipse at center, rgba(220,38,38,.35), transparent 70%);
+  opacity:0; animation: mandapPulse 3.5s ease-in-out infinite
+}
+@keyframes mandapPulse {
+  0%,100%{ opacity:0; transform:scale(.96) }
+  50%{ opacity:.55; transform:scale(1.06) }
+}
+
+/* Force-visible safety — even if IO skips, content appears */
+.stat, .chart-card, .world-map, .heatmap-card{ opacity:1 !important }
+
+/* Cinematic glow on countdown numbers */
+.cd-num{
+  text-shadow: 0 0 24px rgba(245,197,87,.45), 0 0 60px rgba(249,115,22,.22);
+  animation: cdGlow 4s ease-in-out infinite
+}
+@keyframes cdGlow {
+  0%,100%{ text-shadow: 0 0 24px rgba(245,197,87,.45), 0 0 60px rgba(249,115,22,.22) }
+  50%{ text-shadow: 0 0 32px rgba(245,197,87,.7), 0 0 80px rgba(249,115,22,.36) }
+}
+
+/* Section nav buttons — soft sweep on hover */
+.nav-btn{ overflow:hidden; position:relative }
+.nav-btn::before{ z-index:0 }
+.nav-btn span{ position:relative; z-index:1 }
+
+/* Mandap stats — bigger numbers + glow */
+.mdp-stat-num{
+  text-shadow: 0 0 18px rgba(220,38,38,.18);
+  background-clip: text
+}
+
+/* Memory year band parallax-ish slow pulse */
+.mem-year{
+  animation: wfAuroraText 8s ease-in-out infinite, yearFloat 6s ease-in-out infinite
+}
+@keyframes yearFloat {
+  0%,100%{ transform: translateY(0) }
+  50%{ transform: translateY(-3px) }
+}
+
+/* Mandap PIN gate logo pulse */
+.mdp-gate-icon{ animation: omPulse 3s ease-in-out infinite, gateGlow 4s ease-in-out infinite }
+@keyframes gateGlow {
+  0%,100%{ filter: drop-shadow(0 0 24px rgba(220,38,38,.6)) }
+  50%{ filter: drop-shadow(0 0 48px rgba(220,38,38,.95)) drop-shadow(0 0 80px rgba(249,115,22,.4)) }
+}
+
+/* Mandap entering ripple */
+@keyframes mandapEnter {
+  0%{ opacity:0; transform: translateY(40px) scale(.96) }
+  100%{ opacity:1; transform: translateY(0) scale(1) }
+}
+#mandap.active .mdp-hero{ animation: mandapEnter .9s cubic-bezier(.22,1,.36,1) }
+#mandap.active .mdp-stats-banner{ animation: mandapEnter .9s .12s cubic-bezier(.22,1,.36,1) both }
+#mandap.active .mdp-panel{ animation: mandapEnter .9s .25s cubic-bezier(.22,1,.36,1) both }
+
+/* Hover on mandala-stage adds light response (pure visual) */
+.mandala{ filter: drop-shadow(0 0 40px rgba(245,197,87,.12)) }
+
+/* Mum's portrait halo - more intense */
+.cine-portrait{ box-shadow:
+  0 30px 80px rgba(0,0,0,.7),
+  0 0 100px rgba(249,115,22,.42),
+  0 0 200px rgba(245,197,87,.22),
+  inset 0 0 30px rgba(0,0,0,.4) }
+
+/* World map cities — extra glow */
+.wm-pulse{ filter: drop-shadow(0 0 8px currentColor) }
+
+/* Overview empty-state ribbon (visible briefly while loading) */
+#statsGrid:empty::before{
+  content:"Loading family data…";
+  display:block; padding:48px 24px; text-align:center;
+  font-family:var(--mono); font-size:11px; color:var(--muted);
+  letter-spacing:3px; text-transform:uppercase;
+  border:1px dashed var(--border); border-radius:14px;
+  animation: cinePulse 2s ease-in-out infinite
+}
+@keyframes cinePulse {
+  0%,100%{ opacity:.6 }
+  50%{ opacity:1 }
+}
+</style>
+</head><body>
+<div class="mandala-stage" aria-hidden="true"><div class="mandala" id="mandala"></div></div>
+<div class="aurora" aria-hidden="true"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div><div class="orb orb4"></div><div class="orb orb5"></div></div>
+<div class="grain" aria-hidden="true"></div>
+<canvas id="petals" aria-hidden="true"></canvas>
+<div class="cursor" id="cursor" aria-hidden="true"></div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<audio id="bell" src="./bell.wav" preload="auto"></audio>
+<div class="toast" id="toast"></div>
+<div id="pinGate"><div class="pg-title">SALINA Command<em>Family hub</em></div><div class="pg-sub">Enter PIN to continue</div><div class="pg-hint">Hint: Mum&#39;s birthday &middot; DDMMYY</div><div class="pg-dots"><div class="pg-dot" id="pd0"></div><div class="pg-dot" id="pd1"></div><div class="pg-dot" id="pd2"></div><div class="pg-dot" id="pd3"></div><div class="pg-dot" id="pd4"></div><div class="pg-dot" id="pd5"></div></div><div class="pg-err" id="pgErr">&nbsp;</div><div class="pg-pad"><div class="pg-key" data-k="1">1</div><div class="pg-key" data-k="2">2</div><div class="pg-key" data-k="3">3</div><div class="pg-key" data-k="4">4</div><div class="pg-key" data-k="5">5</div><div class="pg-key" data-k="6">6</div><div class="pg-key" data-k="7">7</div><div class="pg-key" data-k="8">8</div><div class="pg-key" data-k="9">9</div><div></div><div class="pg-key" data-k="0">0</div><div class="pg-key del" data-k="del">DEL</div></div></div>
+<div id="cine" onclick="skipCine()"><div class="cine-sanskrit"><span class="cine-om">&#x950;</span>&#x936;&#x93E;&#x928;&#x94D;&#x924;&#x93F;&#x903; &#x936;&#x93E;&#x928;&#x94D;&#x924;&#x93F;&#x903; &#x936;&#x93E;&#x928;&#x94D;&#x924;&#x93F;&#x903;</div><div class="cine-portrait"><img src="./mum-portrait.png" alt="Tulawati Lal Mummy"></div><div class="cine-name">Tulawati Lal<em>&laquo;MUMMY&raquo;</em></div><div class="cine-dates">Salina &middot; 12 Months &middot; 15-16 August 2026</div><button class="cine-skip" onclick="event.stopPropagation();skipCine()">SKIP &#8250;</button></div><main id="app" hidden>
+<div class="topbar">
+  <div class="brand"><div class="brand-mark">&#10047;</div><div class="brand-text">SALINA Command<em>Family Hub &middot; Whet&#363; Digital</em></div></div>
+  <div class="nav">
+    <button class="nav-btn active" data-section="overview"><span>&#9685; Overview</span></button>
+    <button class="nav-btn" data-section="guests"><span>&#128101; Guests</span></button>
+    <button class="nav-btn" data-section="memories"><span>&#128247; Memories</span></button>
+    <button class="nav-btn" data-section="ceremony"><span>&#10047; Ceremony</span></button><button class="nav-btn" data-section="mandap"><span>🔱 Mandap</span></button>
+  </div>
+  <div class="topbar-stats">
+    <span><span class="live-dot"></span>LIVE</span>
+    <span><b id="tbRsvp">0</b>RSVP&#39;d</span>
+    <span id="tbUpd">--</span>
+  </div>
+</div>
+
+<div class="countdown-banner">
+  <div class="cd-left">
+    <div class="cd-lbl">Until Mum&#39;s Salina</div>
+    <div class="cd-title">15 &amp; 16 August 2026<em>14 Beaumont Street &middot; Hamilton East</em></div>
+  </div>
+  <div class="cd-right" id="cdRight"></div>
+</div>
+
+<section id="overview" class="section active">
+  <div class="stats-grid" id="statsGrid"></div>
+  <div class="charts-row">
+    <div class="chart-card glass observe">
+      <div class="chart-head"><div class="chart-title">RSVP breakdown</div><div class="chart-sub"><span class="live-dot"></span>LIVE</div></div>
+      <div class="chart-body" id="donutChart"></div>
+    </div>
+    <div class="chart-card glass observe">
+      <div class="chart-head"><div class="chart-title">Send progress</div><div class="chart-sub">3 day plan</div></div>
+      <div class="tl-days" id="sendTimeline"></div>
+    </div>
+  </div>
+  <div class="world-map glass observe">
+    <div class="chart-head"><div class="chart-title">Family worldwide</div><div class="chart-sub" id="wmSubtitle">141 invitees across the Pacific</div></div>
+    <div class="wm-wrap" id="worldMapWrap"></div>
+    <div class="wm-legend" id="wmLegend"></div>
+  </div>
+  <div class="heatmap-card glass observe">
+    <div class="chart-head"><div class="chart-title">RSVP rhythm</div><div class="chart-sub">When responses land &middot; 14 days</div></div>
+    <div class="hm-grid" id="heatmapGrid"></div>
+  </div>
+</section>
+
+<section id="guests" class="section">
+  <div class="filter-bar">
+    <input class="search" id="guestSearch" placeholder="Search 141 families &middot; name or region...">
+    <div class="chip active" data-filter="all">All <span class="ct" id="cAll">0</span></div>
+    <div class="chip" data-filter="akl">Auckland <span class="ct" id="cAkl">0</span></div>
+    <div class="chip" data-filter="ham">Hamilton <span class="ct" id="cHam">0</span></div>
+    <div class="chip" data-filter="aus">Australia <span class="ct" id="cAus">0</span></div>
+    <div class="chip" data-filter="fji">Fiji <span class="ct" id="cFji">0</span></div>
+    <div class="chip" data-filter="usa">USA/Canada <span class="ct" id="cUsa">0</span></div>
+    <div class="chip" data-filter="oth">Other <span class="ct" id="cOth">0</span></div>
+    <div class="chip" data-filter="rsvp">RSVP&#39;d <span class="ct" id="cRsvp">0</span></div>
+    <div class="chip" data-filter="pending">Pending <span class="ct" id="cPend">0</span></div>
+  </div>
+  <div class="guest-list glass"><div class="gl-head"><div>Name</div><div>ID</div><div>Channel</div><div>Send</div><div>RSVP</div><div></div></div><div id="glRows"></div></div>
+</section>
+
+<section id="memories" class="section">
+  <div class="chart-head" style="margin-bottom:8px"><div><div class="chart-title" style="font-size:26px">Memories of Mum</div><div class="chart-sub" id="memSubtitle">Loading photographs...</div></div></div>
+  <div id="memoriesGroups"></div>
+</section>
+
+<section id="ceremony" class="section">
+  <div class="venue-card glass">
+    <div class="venue-info">
+      <h3>14 Beaumont Street</h3>
+      <p>Hamilton East, Hamilton 3216, Aotearoa</p>
+      <div class="venue-actions">
+        <a class="venue-action" href="https://www.google.com/maps/search/?api=1&amp;query=14+Beaumont+Street+Hamilton+East+Hamilton+3216" target="_blank" rel="noopener">&#128205; Google Maps</a>
+        <a class="venue-action" href="https://maps.apple.com/?q=14+Beaumont+Street+Hamilton+East+Hamilton+3216" target="_blank" rel="noopener">&#127968; Apple Maps</a>
+        <a class="venue-action" href="tel:+64212935401">&#128222; Call Sachind</a>
+        <a class="venue-action" href="#" id="shareBtn">&#128279; Share dashboard</a>
+      </div>
+    </div>
+    <div class="venue-qr" id="venueQR"></div>
+  </div>
+  <div class="ceremony-days">
+    <div class="cer-day glass">
+      <div class="cer-ribbon">Day 1 &middot; Geeta &amp; Kirtan</div>
+      <div class="cer-dow">Saturday</div>
+      <div class="cer-date">15<em>August 2026</em></div>
+      <div class="cer-time">&#9728;&#65039; 6:30 PM &middot; Evening prayer service</div>
+      <div class="cer-prog">
+        <div class="cer-item"><div class="cer-time-cell">6:00 PM</div><div class="cer-desc">Guests arrive <em>Welcome refreshments</em></div></div>
+        <div class="cer-item"><div class="cer-time-cell">6:30 PM</div><div class="cer-desc">Geeta recitation begins</div></div>
+        <div class="cer-item"><div class="cer-time-cell">7:30 PM</div><div class="cer-desc">Kirtan &middot; bhajans &middot; collective prayer</div></div>
+        <div class="cer-item"><div class="cer-time-cell">9:00 PM</div><div class="cer-desc">Aarti</div></div>
+        <div class="cer-item"><div class="cer-time-cell">9:30 PM</div><div class="cer-desc">Light refreshments &amp; remembrance</div></div>
+      </div>
+    </div>
+    <div class="cer-day glass">
+      <div class="cer-ribbon">Day 2 &middot; Pundit Pooja</div>
+      <div class="cer-dow">Sunday</div>
+      <div class="cer-date">16<em>August 2026</em></div>
+      <div class="cer-time">&#9789; 10:30 AM &middot; Pundit-led final prayer</div>
+      <div class="cer-prog">
+        <div class="cer-item"><div class="cer-time-cell">10:00 AM</div><div class="cer-desc">Guests arrive</div></div>
+        <div class="cer-item"><div class="cer-time-cell">10:30 AM</div><div class="cer-desc">Pundit-led ceremony begins</div></div>
+        <div class="cer-item"><div class="cer-time-cell">12:30 PM</div><div class="cer-desc">Aarti</div></div>
+        <div class="cer-item"><div class="cer-time-cell">1:00 PM</div><div class="cer-desc">Final blessings</div></div>
+        <div class="cer-item"><div class="cer-time-cell">1:30 PM</div><div class="cer-desc">Bhandara <em>Community feast in Mum&#39;s memory</em></div></div>
+        <div class="cer-item"><div class="cer-time-cell">3:00 PM</div><div class="cer-desc">Conclude with grace</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="whetu-footer">
+  <div class="wf-logo">Whet&#363; Digital</div>
+  <div class="wf-tagline">Solutions &middot; Aotearoa New Zealand</div>
+  <div class="wf-contact">Crafted by <a href="mailto:hello@whetudigital.co.nz">Whetū Digital Solutions</a></div>
+  <div class="wf-built">Built with care for Tulawati Lal <em>&laquo;Mummy&raquo;</em><span class="wf-heart">&#9829;</span></div>
+  <div class="wf-license">Licensed product &middot; SALINA Family Command v2.0</div>
+  <div class="wf-copy">&copy; 2026 Whetū Digital Ltd. &middot; All rights reserved &middot; hello@whetudigital.co.nz</div>
+</footer>
+
+<section id="mandap" class="section">
+  <div class="mdp-hero">
+    <div class="mdp-hero-title"><span>🔱</span> Mandap <em>Family Sanctum · Bapu + Deep</em></div>
+    <div class="mdp-hero-sub"><span class="live-dot"></span>Logged in as <b id="mdpWhoami">—</b><span>·</span><span>Activity recorded</span></div>
+  </div>
+
+  <div class="mdp-stats-banner" id="mdpStatsBanner"></div>
+
+  <div class="mdp-grid">
+    <div class="mdp-panel">
+      <div class="mdp-panel-title">RSVP Tracker <button class="mdp-btn-mini" onclick="mandapBulkMark('wa')">💬 Bulk WA sent</button></div>
+      <div class="mdp-panel-sub">Click any pill to cycle status · pending → confirmed → maybe → call → declined</div>
+      <input class="mdp-rsvp-search" id="mdpRsvpSearch" placeholder="Search by name or city…">
+      <div class="mdp-rsvp-filter">
+        <div class="mdp-rsvp-chip active" data-f="all">All</div>
+        <div class="mdp-rsvp-chip" data-f="pend">Pending</div>
+        <div class="mdp-rsvp-chip" data-f="yes">Confirmed</div>
+        <div class="mdp-rsvp-chip" data-f="maybe">Maybe / Call</div>
+        <div class="mdp-rsvp-chip" data-f="no">Declined</div>
+      </div>
+      <div class="mdp-rsvp-list" id="mdpRsvpRows"></div>
+    </div>
+
+    <div class="mdp-panel">
+      <div class="mdp-panel-title">Invitation Links</div>
+      <div class="mdp-panel-sub">Per-guest URL · copy / WhatsApp / email / QR</div>
+      <div class="mdp-bulk-actions">
+        <button class="mdp-btn" onclick="mandapBulkMark('wa')">💬 Mark all WA sent</button>
+        <button class="mdp-btn" onclick="mandapBulkMark('em')">✉ Mark all Email sent</button>
+      </div>
+      <div class="mdp-invite-grid" id="mdpInviteGrid"></div>
+    </div>
+  </div>
+
+  <div class="mdp-grid">
+    <div class="mdp-panel">
+      <div class="mdp-panel-title">Activity Log <span class="chart-sub" style="margin-left:auto;color:var(--muted);font-size:10px">Last 50 actions</span></div>
+      <div class="mdp-panel-sub">Who did what when · helps Bapu + Deep stay in sync</div>
+      <div class="mdp-log" id="mdpLog"></div>
+    </div>
+    <div class="mdp-panel">
+      <div class="mdp-panel-title">Settings · Export</div>
+      <div class="mdp-panel-sub">Change PINs, event details, export data</div>
+      <div id="mdpSettings"></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<div class="lightbox" id="lightbox"><button class="lb-close" onclick="closeLB()">&times;</button><button class="lb-prev" onclick="lbStep(-1)">&#8249;</button><button class="lb-next" onclick="lbStep(1)">&#8250;</button><img class="lb-img" id="lbImg" alt=""><div class="lb-meta" id="lbMeta"></div></div>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.min.js"></script>
+<script>
+// Smooth scroll via Lenis
+if (window.Lenis) {
+  const lenis = new Lenis({ duration: 1.1, smoothTouch: false, easing: t => Math.min(1, 1.001 - Math.pow(2, -10*t)) });
+  function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+  requestAnimationFrame(raf);
+}
+</script>
+
+<script id="salina-guests-data" type="application/json">{
+  "guests": [
+    {
+      "id": 1,
+      "name": "Sashi / Vinod",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 2,
+      "name": "Sneh",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 3,
+      "name": "Pramesh",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 4,
+      "name": "Praveen",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 5,
+      "name": "Ashween / Romika",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 6,
+      "name": "Bablu",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 7,
+      "name": "Revichand",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 8,
+      "name": "Ravneel Chand",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 9,
+      "name": "Sanjani / Praveen",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 10,
+      "name": "Salveen",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 11,
+      "name": "Komal",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 12,
+      "name": "Kamini / Serwat",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 13,
+      "name": "Kandhma / Pt Krishneel",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 14,
+      "name": "Vishal Lal",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 15,
+      "name": "Vinesh Lal",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 16,
+      "name": "Savita / Barma",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 17,
+      "name": "Savita",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 18,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 19,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 20,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 21,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 22,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 23,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 24,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 25,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 26,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 27,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 28,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 29,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 30,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 31,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 32,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 33,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 34,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 35,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 36,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 37,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 38,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 39,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 40,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 41,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 42,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 43,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 44,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 45,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 46,
+      "name": ",",
+      "region_id": "akl",
+      "region_name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff"
+    },
+    {
+      "id": 47,
+      "name": "Vipen Kal",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 48,
+      "name": "Nirnay Lal",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 49,
+      "name": "Vandana",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 50,
+      "name": "Satjend",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 51,
+      "name": "Adip",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 52,
+      "name": "Sashi Vartu",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 53,
+      "name": "Mrs Shanti Singh",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 54,
+      "name": "Nisha",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 55,
+      "name": "Hari Sahay",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 56,
+      "name": "Sukh Dea",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 57,
+      "name": "Arun",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 58,
+      "name": "Anup",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 59,
+      "name": "Sushila",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 60,
+      "name": "Mrs BB Singh / Son",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 61,
+      "name": "Inder Narayan Singh",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 62,
+      "name": "Mano / Kala Dir",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 63,
+      "name": "Mrs Hasmakh / Son",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 64,
+      "name": "Sanjana / Sendhiya",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 65,
+      "name": "Sumon Kapoor",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 66,
+      "name": "Ramen Nath",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 67,
+      "name": "Sandhiya Nurse",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 68,
+      "name": "Susesh Mohan",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 69,
+      "name": "Rajeshwar / Laltu",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 70,
+      "name": "Johnny",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 71,
+      "name": "CK Reddy",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 72,
+      "name": "Lalesh / Mohem",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 73,
+      "name": "Vicky",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 74,
+      "name": "Benjiman",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 75,
+      "name": "Ram Bridge",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 76,
+      "name": "Niraj",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 77,
+      "name": "Sanjana",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 78,
+      "name": "Hanmanthu",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 79,
+      "name": "Ivan",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 80,
+      "name": "Mrs Kanta",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 81,
+      "name": "Rajend Nandan",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 82,
+      "name": "Net Ram Sharma",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 83,
+      "name": "Ram Bridge Bri",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 84,
+      "name": "Ram Tarak",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 85,
+      "name": "Ram Tarak II",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 86,
+      "name": "Kamla / Gaunlea",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 87,
+      "name": "Safal",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 88,
+      "name": "Sujed",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 89,
+      "name": "Sartaj Shema",
+      "region_id": "ham",
+      "region_name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00"
+    },
+    {
+      "id": 90,
+      "name": "Mahesh Prasad",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 91,
+      "name": "Pratima",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 92,
+      "name": "Kishor / Lushpa",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 93,
+      "name": "Sachi",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 94,
+      "name": "Ravindra Lal",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 95,
+      "name": "Raunik Lal",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 96,
+      "name": "Rajiv Lal",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 97,
+      "name": "Rakshana Chand",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 98,
+      "name": "Ravi Mish",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 99,
+      "name": "Sarwan Kumar",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 100,
+      "name": "Samara Dass",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 101,
+      "name": "Muniya",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 102,
+      "name": "Nickki",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 103,
+      "name": "Sunita",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 104,
+      "name": "Jeev",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 105,
+      "name": "Mrs Pal",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 106,
+      "name": "Pratap Chand",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 107,
+      "name": "Rashmin Pal",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 108,
+      "name": "Reena",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 109,
+      "name": "Sarwen Kumar",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 110,
+      "name": "Sarejni Ashote",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 111,
+      "name": "Shaahil",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 112,
+      "name": "Subneel",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 113,
+      "name": "Sunita Kondola Club",
+      "region_id": "aus",
+      "region_name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99"
+    },
+    {
+      "id": 114,
+      "name": "Hari Prasad",
+      "region_id": "fji",
+      "region_name": "FIJI",
+      "city": "Suva, Fiji",
+      "color": "#c040ff"
+    },
+    {
+      "id": 115,
+      "name": "Vijend Lal",
+      "region_id": "fji",
+      "region_name": "FIJI",
+      "city": "Suva, Fiji",
+      "color": "#c040ff"
+    },
+    {
+      "id": 116,
+      "name": "Ram Rajend",
+      "region_id": "fji",
+      "region_name": "FIJI",
+      "city": "Suva, Fiji",
+      "color": "#c040ff"
+    },
+    {
+      "id": 117,
+      "name": "Champa Sharma",
+      "region_id": "fji",
+      "region_name": "FIJI",
+      "city": "Suva, Fiji",
+      "color": "#c040ff"
+    },
+    {
+      "id": 118,
+      "name": "Shobna",
+      "region_id": "fji",
+      "region_name": "FIJI",
+      "city": "Suva, Fiji",
+      "color": "#c040ff"
+    },
+    {
+      "id": 119,
+      "name": "Mrs Ashok",
+      "region_id": "fji",
+      "region_name": "FIJI",
+      "city": "Suva, Fiji",
+      "color": "#c040ff"
+    },
+    {
+      "id": 120,
+      "name": "Karuna Ran",
+      "region_id": "fji",
+      "region_name": "FIJI",
+      "city": "Suva, Fiji",
+      "color": "#c040ff"
+    },
+    {
+      "id": 121,
+      "name": "Renu Kumar",
+      "region_id": "fji",
+      "region_name": "FIJI",
+      "city": "Suva, Fiji",
+      "color": "#c040ff"
+    },
+    {
+      "id": 122,
+      "name": "George Shukaj",
+      "region_id": "fji",
+      "region_name": "FIJI",
+      "city": "Suva, Fiji",
+      "color": "#c040ff"
+    },
+    {
+      "id": 123,
+      "name": "Sarshi",
+      "region_id": "fji",
+      "region_name": "FIJI",
+      "city": "Suva, Fiji",
+      "color": "#c040ff"
+    },
+    {
+      "id": 124,
+      "name": "Suatile Fsp",
+      "region_id": "fji",
+      "region_name": "FIJI",
+      "city": "Suva, Fiji",
+      "color": "#c040ff"
+    },
+    {
+      "id": 125,
+      "name": "Kaki",
+      "region_id": "usa",
+      "region_name": "USA / CANADA",
+      "city": "USA / Canada",
+      "color": "#ffaa00"
+    },
+    {
+      "id": 126,
+      "name": "Raj Kumar / Mohini",
+      "region_id": "usa",
+      "region_name": "USA / CANADA",
+      "city": "USA / Canada",
+      "color": "#ffaa00"
+    },
+    {
+      "id": 127,
+      "name": "Arun / Uma",
+      "region_id": "usa",
+      "region_name": "USA / CANADA",
+      "city": "USA / Canada",
+      "color": "#ffaa00"
+    },
+    {
+      "id": 128,
+      "name": "Usha",
+      "region_id": "usa",
+      "region_name": "USA / CANADA",
+      "city": "USA / Canada",
+      "color": "#ffaa00"
+    },
+    {
+      "id": 129,
+      "name": "Urmila",
+      "region_id": "usa",
+      "region_name": "USA / CANADA",
+      "city": "USA / Canada",
+      "color": "#ffaa00"
+    },
+    {
+      "id": 130,
+      "name": "Unita",
+      "region_id": "usa",
+      "region_name": "USA / CANADA",
+      "city": "USA / Canada",
+      "color": "#ffaa00"
+    },
+    {
+      "id": 131,
+      "name": "Danendra Lal",
+      "region_id": "usa",
+      "region_name": "USA / CANADA",
+      "city": "USA / Canada",
+      "color": "#ffaa00"
+    },
+    {
+      "id": 132,
+      "name": "Darry Lal",
+      "region_id": "usa",
+      "region_name": "USA / CANADA",
+      "city": "USA / Canada",
+      "color": "#ffaa00"
+    },
+    {
+      "id": 133,
+      "name": "Kaki Canada / Praneta",
+      "region_id": "usa",
+      "region_name": "USA / CANADA",
+      "city": "USA / Canada",
+      "color": "#ffaa00"
+    },
+    {
+      "id": 134,
+      "name": "Jaswant Lal",
+      "region_id": "oth",
+      "region_name": "OTHER AREAS",
+      "city": "Wellington, NZ",
+      "color": "#ff5577"
+    },
+    {
+      "id": 135,
+      "name": "Dr Rajesh",
+      "region_id": "oth",
+      "region_name": "OTHER AREAS",
+      "city": "Various",
+      "color": "#ff5577"
+    },
+    {
+      "id": 136,
+      "name": "Rajeshwar",
+      "region_id": "oth",
+      "region_name": "OTHER AREAS",
+      "city": "Various",
+      "color": "#ff5577"
+    },
+    {
+      "id": 137,
+      "name": "Gangaiyu Rapu",
+      "region_id": "oth",
+      "region_name": "OTHER AREAS",
+      "city": "Various",
+      "color": "#ff5577"
+    },
+    {
+      "id": 138,
+      "name": "Aneirth Dutt",
+      "region_id": "oth",
+      "region_name": "OTHER AREAS",
+      "city": "Various",
+      "color": "#ff5577"
+    },
+    {
+      "id": 139,
+      "name": "Bimla Sharma",
+      "region_id": "oth",
+      "region_name": "OTHER AREAS",
+      "city": "Various",
+      "color": "#ff5577"
+    },
+    {
+      "id": 140,
+      "name": "Warsha",
+      "region_id": "oth",
+      "region_name": "OTHER AREAS",
+      "city": "Various",
+      "color": "#ff5577"
+    },
+    {
+      "id": 141,
+      "name": "Nickky",
+      "region_id": "oth",
+      "region_name": "OTHER AREAS",
+      "city": "Various",
+      "color": "#ff5577"
+    }
+  ],
+  "total": 141,
+  "regions": [
+    {
+      "id": "akl",
+      "name": "AUCKLAND",
+      "city": "Auckland, NZ",
+      "color": "#10d8ff",
+      "count": 46
+    },
+    {
+      "id": "ham",
+      "name": "HAMILTON",
+      "city": "Hamilton, NZ",
+      "color": "#ff8c00",
+      "count": 43
+    },
+    {
+      "id": "aus",
+      "name": "AUSTRALIA",
+      "city": "Australia",
+      "color": "#00ff99",
+      "count": 24
+    },
+    {
+      "id": "fji",
+      "name": "FIJI",
+      "city": "Suva, Fiji",
+      "color": "#c040ff",
+      "count": 11
+    },
+    {
+      "id": "usa",
+      "name": "USA / CANADA",
+      "city": "USA / Canada",
+      "color": "#ffaa00",
+      "count": 9
+    },
+    {
+      "id": "oth",
+      "name": "OTHER AREAS",
+      "city": "Various",
+      "color": "#ff5577",
+      "count": 8
+    }
+  ]
+}
+</script>
+<script id="salina-photos-data" type="application/json">[
+  {
+    "slug": "02012011521",
+    "orig": "02012011521.jpg",
+    "thumb": "memories/thumbs/02012011521.jpg",
+    "medium": "memories/medium/02012011521.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-eb2ede3cb0bce71b61c2d2b0c5b7bebe-V",
+    "orig": "IMG-eb2ede3cb0bce71b61c2d2b0c5b7bebe-V.jpg",
+    "thumb": "memories/thumbs/IMG-eb2ede3cb0bce71b61c2d2b0c5b7bebe-V.jpg",
+    "medium": "memories/medium/IMG-eb2ede3cb0bce71b61c2d2b0c5b7bebe-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-e9575dff5940d788a3d9ded1976ccfd2-V",
+    "orig": "IMG-e9575dff5940d788a3d9ded1976ccfd2-V.jpg",
+    "thumb": "memories/thumbs/IMG-e9575dff5940d788a3d9ded1976ccfd2-V.jpg",
+    "medium": "memories/medium/IMG-e9575dff5940d788a3d9ded1976ccfd2-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-e618c12a90762d620b638276e359a267-V",
+    "orig": "IMG-e618c12a90762d620b638276e359a267-V.jpg",
+    "thumb": "memories/thumbs/IMG-e618c12a90762d620b638276e359a267-V.jpg",
+    "medium": "memories/medium/IMG-e618c12a90762d620b638276e359a267-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-dd5f9f25bc435028a2a07113334afb10-V",
+    "orig": "IMG-dd5f9f25bc435028a2a07113334afb10-V.jpg",
+    "thumb": "memories/thumbs/IMG-dd5f9f25bc435028a2a07113334afb10-V.jpg",
+    "medium": "memories/medium/IMG-dd5f9f25bc435028a2a07113334afb10-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-dcfbfd82b4d60a2aeac3b01269126aee-V",
+    "orig": "IMG-dcfbfd82b4d60a2aeac3b01269126aee-V.jpg",
+    "thumb": "memories/thumbs/IMG-dcfbfd82b4d60a2aeac3b01269126aee-V.jpg",
+    "medium": "memories/medium/IMG-dcfbfd82b4d60a2aeac3b01269126aee-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-db2cf6a9e3f6a96b80af4cc145e9683c-V",
+    "orig": "IMG-db2cf6a9e3f6a96b80af4cc145e9683c-V.jpg",
+    "thumb": "memories/thumbs/IMG-db2cf6a9e3f6a96b80af4cc145e9683c-V.jpg",
+    "medium": "memories/medium/IMG-db2cf6a9e3f6a96b80af4cc145e9683c-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-d41580db97e7626a7a3840d4e75dedc2-V",
+    "orig": "IMG-d41580db97e7626a7a3840d4e75dedc2-V.jpg",
+    "thumb": "memories/thumbs/IMG-d41580db97e7626a7a3840d4e75dedc2-V.jpg",
+    "medium": "memories/medium/IMG-d41580db97e7626a7a3840d4e75dedc2-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-cdc6c6f2b51ef072e6d96ed4efe40c71-V",
+    "orig": "IMG-cdc6c6f2b51ef072e6d96ed4efe40c71-V.jpg",
+    "thumb": "memories/thumbs/IMG-cdc6c6f2b51ef072e6d96ed4efe40c71-V.jpg",
+    "medium": "memories/medium/IMG-cdc6c6f2b51ef072e6d96ed4efe40c71-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-c67340048250bb0a14af91ab7ce928d8-V",
+    "orig": "IMG-c67340048250bb0a14af91ab7ce928d8-V.jpg",
+    "thumb": "memories/thumbs/IMG-c67340048250bb0a14af91ab7ce928d8-V.jpg",
+    "medium": "memories/medium/IMG-c67340048250bb0a14af91ab7ce928d8-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-b1a2e215054300c4e4e5ed484d777bd4-V",
+    "orig": "IMG-b1a2e215054300c4e4e5ed484d777bd4-V.jpg",
+    "thumb": "memories/thumbs/IMG-b1a2e215054300c4e4e5ed484d777bd4-V.jpg",
+    "medium": "memories/medium/IMG-b1a2e215054300c4e4e5ed484d777bd4-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-aeb7e803b68fbfe3cc5ae6eff144e777-V",
+    "orig": "IMG-aeb7e803b68fbfe3cc5ae6eff144e777-V.jpg",
+    "thumb": "memories/thumbs/IMG-aeb7e803b68fbfe3cc5ae6eff144e777-V.jpg",
+    "medium": "memories/medium/IMG-aeb7e803b68fbfe3cc5ae6eff144e777-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-9a19a6ccbcdeaee4e0e5f983b69de923-V",
+    "orig": "IMG-9a19a6ccbcdeaee4e0e5f983b69de923-V.jpg",
+    "thumb": "memories/thumbs/IMG-9a19a6ccbcdeaee4e0e5f983b69de923-V.jpg",
+    "medium": "memories/medium/IMG-9a19a6ccbcdeaee4e0e5f983b69de923-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-802554209196a2ee48c93935be7bddba-V",
+    "orig": "IMG-802554209196a2ee48c93935be7bddba-V.jpg",
+    "thumb": "memories/thumbs/IMG-802554209196a2ee48c93935be7bddba-V.jpg",
+    "medium": "memories/medium/IMG-802554209196a2ee48c93935be7bddba-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-7f9ba0a4c7a1fca0908fd0e3267d50b4-V",
+    "orig": "IMG-7f9ba0a4c7a1fca0908fd0e3267d50b4-V.jpg",
+    "thumb": "memories/thumbs/IMG-7f9ba0a4c7a1fca0908fd0e3267d50b4-V.jpg",
+    "medium": "memories/medium/IMG-7f9ba0a4c7a1fca0908fd0e3267d50b4-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-76ea50932d1fc47d65af290a000f5237-V",
+    "orig": "IMG-76ea50932d1fc47d65af290a000f5237-V.jpg",
+    "thumb": "memories/thumbs/IMG-76ea50932d1fc47d65af290a000f5237-V.jpg",
+    "medium": "memories/medium/IMG-76ea50932d1fc47d65af290a000f5237-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-73aad39d1d416e415a728871e23f797b-V",
+    "orig": "IMG-73aad39d1d416e415a728871e23f797b-V.jpg",
+    "thumb": "memories/thumbs/IMG-73aad39d1d416e415a728871e23f797b-V.jpg",
+    "medium": "memories/medium/IMG-73aad39d1d416e415a728871e23f797b-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-6a82cba8b8c8be85760f51105a0b2b8f-V",
+    "orig": "IMG-6a82cba8b8c8be85760f51105a0b2b8f-V.jpg",
+    "thumb": "memories/thumbs/IMG-6a82cba8b8c8be85760f51105a0b2b8f-V.jpg",
+    "medium": "memories/medium/IMG-6a82cba8b8c8be85760f51105a0b2b8f-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-2f4b42ada8fcc0132cd48a4af51ce298-V",
+    "orig": "IMG-2f4b42ada8fcc0132cd48a4af51ce298-V.jpg",
+    "thumb": "memories/thumbs/IMG-2f4b42ada8fcc0132cd48a4af51ce298-V.jpg",
+    "medium": "memories/medium/IMG-2f4b42ada8fcc0132cd48a4af51ce298-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-314a09123cafd50c99796c700fc72149-V",
+    "orig": "IMG-314a09123cafd50c99796c700fc72149-V.jpg",
+    "thumb": "memories/thumbs/IMG-314a09123cafd50c99796c700fc72149-V.jpg",
+    "medium": "memories/medium/IMG-314a09123cafd50c99796c700fc72149-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-3247b9c0191cd29f8208d48d7f1da482-V",
+    "orig": "IMG-3247b9c0191cd29f8208d48d7f1da482-V.jpg",
+    "thumb": "memories/thumbs/IMG-3247b9c0191cd29f8208d48d7f1da482-V.jpg",
+    "medium": "memories/medium/IMG-3247b9c0191cd29f8208d48d7f1da482-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-3728baedb3d836f12698212fed790a3a-V",
+    "orig": "IMG-3728baedb3d836f12698212fed790a3a-V.jpg",
+    "thumb": "memories/thumbs/IMG-3728baedb3d836f12698212fed790a3a-V.jpg",
+    "medium": "memories/medium/IMG-3728baedb3d836f12698212fed790a3a-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-3c02fe8926dfc69e29ed82a7a6e482c0-V",
+    "orig": "IMG-3c02fe8926dfc69e29ed82a7a6e482c0-V.jpg",
+    "thumb": "memories/thumbs/IMG-3c02fe8926dfc69e29ed82a7a6e482c0-V.jpg",
+    "medium": "memories/medium/IMG-3c02fe8926dfc69e29ed82a7a6e482c0-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-3db9273f6548c09ea2fe9959a534ddd3-V",
+    "orig": "IMG-3db9273f6548c09ea2fe9959a534ddd3-V.jpg",
+    "thumb": "memories/thumbs/IMG-3db9273f6548c09ea2fe9959a534ddd3-V.jpg",
+    "medium": "memories/medium/IMG-3db9273f6548c09ea2fe9959a534ddd3-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-ef92d17c9c79113c35ed2910824f17ef-V",
+    "orig": "IMG-ef92d17c9c79113c35ed2910824f17ef-V.jpg",
+    "thumb": "memories/thumbs/IMG-ef92d17c9c79113c35ed2910824f17ef-V.jpg",
+    "medium": "memories/medium/IMG-ef92d17c9c79113c35ed2910824f17ef-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-409f4b60ae7abba5dee16876a1391fca-V",
+    "orig": "IMG-409f4b60ae7abba5dee16876a1391fca-V.jpg",
+    "thumb": "memories/thumbs/IMG-409f4b60ae7abba5dee16876a1391fca-V.jpg",
+    "medium": "memories/medium/IMG-409f4b60ae7abba5dee16876a1391fca-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-45060bc49b348cab5f155d32c82ff0a9-V",
+    "orig": "IMG-45060bc49b348cab5f155d32c82ff0a9-V.jpg",
+    "thumb": "memories/thumbs/IMG-45060bc49b348cab5f155d32c82ff0a9-V.jpg",
+    "medium": "memories/medium/IMG-45060bc49b348cab5f155d32c82ff0a9-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-4a4001eb27dca1a3e430334ec8924d7b-V",
+    "orig": "IMG-4a4001eb27dca1a3e430334ec8924d7b-V.jpg",
+    "thumb": "memories/thumbs/IMG-4a4001eb27dca1a3e430334ec8924d7b-V.jpg",
+    "medium": "memories/medium/IMG-4a4001eb27dca1a3e430334ec8924d7b-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-511002ca08c0b8dbc4f8f0046bd8ac85-V",
+    "orig": "IMG-511002ca08c0b8dbc4f8f0046bd8ac85-V.jpg",
+    "thumb": "memories/thumbs/IMG-511002ca08c0b8dbc4f8f0046bd8ac85-V.jpg",
+    "medium": "memories/medium/IMG-511002ca08c0b8dbc4f8f0046bd8ac85-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-5baf0816ec282379510d571fde73eb05-V",
+    "orig": "IMG-5baf0816ec282379510d571fde73eb05-V.jpg",
+    "thumb": "memories/thumbs/IMG-5baf0816ec282379510d571fde73eb05-V.jpg",
+    "medium": "memories/medium/IMG-5baf0816ec282379510d571fde73eb05-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-5fe1421827d80a3a4494024acf5bb1b5-V",
+    "orig": "IMG-5fe1421827d80a3a4494024acf5bb1b5-V.jpg",
+    "thumb": "memories/thumbs/IMG-5fe1421827d80a3a4494024acf5bb1b5-V.jpg",
+    "medium": "memories/medium/IMG-5fe1421827d80a3a4494024acf5bb1b5-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-60dbbee08e7065fadc5d681e009534cc-V",
+    "orig": "IMG-60dbbee08e7065fadc5d681e009534cc-V.jpg",
+    "thumb": "memories/thumbs/IMG-60dbbee08e7065fadc5d681e009534cc-V.jpg",
+    "medium": "memories/medium/IMG-60dbbee08e7065fadc5d681e009534cc-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-445e2b35e4d5e44ca60c679343b87b04-V",
+    "orig": "IMG-445e2b35e4d5e44ca60c679343b87b04-V.jpg",
+    "thumb": "memories/thumbs/IMG-445e2b35e4d5e44ca60c679343b87b04-V.jpg",
+    "medium": "memories/medium/IMG-445e2b35e4d5e44ca60c679343b87b04-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-f2ad4a5b96755d0bc675dc1950bf7ae9-V",
+    "orig": "IMG-f2ad4a5b96755d0bc675dc1950bf7ae9-V.jpg",
+    "thumb": "memories/thumbs/IMG-f2ad4a5b96755d0bc675dc1950bf7ae9-V.jpg",
+    "medium": "memories/medium/IMG-f2ad4a5b96755d0bc675dc1950bf7ae9-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-f9689d0f57083c0fd85e47b63cb1bac7-V",
+    "orig": "IMG-f9689d0f57083c0fd85e47b63cb1bac7-V.jpg",
+    "thumb": "memories/thumbs/IMG-f9689d0f57083c0fd85e47b63cb1bac7-V.jpg",
+    "medium": "memories/medium/IMG-f9689d0f57083c0fd85e47b63cb1bac7-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-fa221b9c961213108123b4e350c79015-V",
+    "orig": "IMG-fa221b9c961213108123b4e350c79015-V.jpg",
+    "thumb": "memories/thumbs/IMG-fa221b9c961213108123b4e350c79015-V.jpg",
+    "medium": "memories/medium/IMG-fa221b9c961213108123b4e350c79015-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20240102-161506_Viber",
+    "orig": "Screenshot_20240102-161506_Viber.jpg",
+    "thumb": "memories/thumbs/Screenshot_20240102-161506_Viber.jpg",
+    "medium": "memories/medium/Screenshot_20240102-161506_Viber.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20240811_083404_Dropbox",
+    "orig": "Screenshot_20240811_083404_Dropbox.jpg",
+    "thumb": "memories/thumbs/Screenshot_20240811_083404_Dropbox.jpg",
+    "medium": "memories/medium/Screenshot_20240811_083404_Dropbox.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20240811_084859_Dropbox",
+    "orig": "Screenshot_20240811_084859_Dropbox.jpg",
+    "thumb": "memories/thumbs/Screenshot_20240811_084859_Dropbox.jpg",
+    "medium": "memories/medium/Screenshot_20240811_084859_Dropbox.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20240927-202525_Facebook",
+    "orig": "Screenshot_20240927-202525_Facebook.jpg",
+    "thumb": "memories/thumbs/Screenshot_20240927-202525_Facebook.jpg",
+    "medium": "memories/medium/Screenshot_20240927-202525_Facebook.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20241027_085623_Dropbox",
+    "orig": "Screenshot_20241027_085623_Dropbox.jpg",
+    "thumb": "memories/thumbs/Screenshot_20241027_085623_Dropbox.jpg",
+    "medium": "memories/medium/Screenshot_20241027_085623_Dropbox.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20241027_091055_Dropbox",
+    "orig": "Screenshot_20241027_091055_Dropbox.jpg",
+    "thumb": "memories/thumbs/Screenshot_20241027_091055_Dropbox.jpg",
+    "medium": "memories/medium/Screenshot_20241027_091055_Dropbox.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20231024-115007_Facebook",
+    "orig": "Screenshot_20231024-115007_Facebook.jpg",
+    "thumb": "memories/thumbs/Screenshot_20231024-115007_Facebook.jpg",
+    "medium": "memories/medium/Screenshot_20231024-115007_Facebook.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20241027_091513_Dropbox",
+    "orig": "Screenshot_20241027_091513_Dropbox.jpg",
+    "thumb": "memories/thumbs/Screenshot_20241027_091513_Dropbox.jpg",
+    "medium": "memories/medium/Screenshot_20241027_091513_Dropbox.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20241109_175638_Dropbox",
+    "orig": "Screenshot_20241109_175638_Dropbox.jpg",
+    "thumb": "memories/thumbs/Screenshot_20241109_175638_Dropbox.jpg",
+    "medium": "memories/medium/Screenshot_20241109_175638_Dropbox.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_2025-08-19_142126",
+    "orig": "Screenshot_2025-08-19_142126.jpg",
+    "thumb": "memories/thumbs/Screenshot_2025-08-19_142126.jpg",
+    "medium": "memories/medium/Screenshot_2025-08-19_142126.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_2025-08-19_143023",
+    "orig": "Screenshot_2025-08-19_143023.jpg",
+    "thumb": "memories/thumbs/Screenshot_2025-08-19_143023.jpg",
+    "medium": "memories/medium/Screenshot_2025-08-19_143023.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_2025-08-28_213429",
+    "orig": "Screenshot_2025-08-28_213429.jpg",
+    "thumb": "memories/thumbs/Screenshot_2025-08-28_213429.jpg",
+    "medium": "memories/medium/Screenshot_2025-08-28_213429.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20250105-163937_Viber",
+    "orig": "Screenshot_20250105-163937_Viber.jpg",
+    "thumb": "memories/thumbs/Screenshot_20250105-163937_Viber.jpg",
+    "medium": "memories/medium/Screenshot_20250105-163937_Viber.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20250810-133815_Facebook",
+    "orig": "Screenshot_20250810-133815_Facebook.jpg",
+    "thumb": "memories/thumbs/Screenshot_20250810-133815_Facebook.jpg",
+    "medium": "memories/medium/Screenshot_20250810-133815_Facebook.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20241109_175150_Dropbox",
+    "orig": "Screenshot_20241109_175150_Dropbox.jpg",
+    "thumb": "memories/thumbs/Screenshot_20241109_175150_Dropbox.jpg",
+    "medium": "memories/medium/Screenshot_20241109_175150_Dropbox.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-2e663e7de53d8a927119293b99c4f083-V",
+    "orig": "IMG-2e663e7de53d8a927119293b99c4f083-V.jpg",
+    "thumb": "memories/thumbs/IMG-2e663e7de53d8a927119293b99c4f083-V.jpg",
+    "medium": "memories/medium/IMG-2e663e7de53d8a927119293b99c4f083-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20231002-091023_Facebook",
+    "orig": "Screenshot_20231002-091023_Facebook.jpg",
+    "thumb": "memories/thumbs/Screenshot_20231002-091023_Facebook.jpg",
+    "medium": "memories/medium/Screenshot_20231002-091023_Facebook.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20230312_215649_Gallery",
+    "orig": "Screenshot_20230312_215649_Gallery.jpg",
+    "thumb": "memories/thumbs/Screenshot_20230312_215649_Gallery.jpg",
+    "medium": "memories/medium/Screenshot_20230312_215649_Gallery.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-fa8d10e5b2d28d0a73e473d0ff7dba70-V",
+    "orig": "IMG-fa8d10e5b2d28d0a73e473d0ff7dba70-V.jpg",
+    "thumb": "memories/thumbs/IMG-fa8d10e5b2d28d0a73e473d0ff7dba70-V.jpg",
+    "medium": "memories/medium/IMG-fa8d10e5b2d28d0a73e473d0ff7dba70-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-fdce9262e75a359bee768f2b2c48df24-V",
+    "orig": "IMG-fdce9262e75a359bee768f2b2c48df24-V.jpg",
+    "thumb": "memories/thumbs/IMG-fdce9262e75a359bee768f2b2c48df24-V.jpg",
+    "medium": "memories/medium/IMG-fdce9262e75a359bee768f2b2c48df24-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-febed3b44ceff003c7adb415cf9e7a4c-V",
+    "orig": "IMG-febed3b44ceff003c7adb415cf9e7a4c-V.jpg",
+    "thumb": "memories/thumbs/IMG-febed3b44ceff003c7adb415cf9e7a4c-V.jpg",
+    "medium": "memories/medium/IMG-febed3b44ceff003c7adb415cf9e7a4c-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG007",
+    "orig": "IMG007.jpg",
+    "thumb": "memories/thumbs/IMG007.jpg",
+    "medium": "memories/medium/IMG007.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20210731-181634_Facebook",
+    "orig": "Screenshot_20210731-181634_Facebook.jpg",
+    "thumb": "memories/thumbs/Screenshot_20210731-181634_Facebook.jpg",
+    "medium": "memories/medium/Screenshot_20210731-181634_Facebook.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20211222-073653_Facebook",
+    "orig": "Screenshot_20211222-073653_Facebook.jpg",
+    "thumb": "memories/thumbs/Screenshot_20211222-073653_Facebook.jpg",
+    "medium": "memories/medium/Screenshot_20211222-073653_Facebook.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20230801-203856_Facebook",
+    "orig": "Screenshot_20230801-203856_Facebook.jpg",
+    "thumb": "memories/thumbs/Screenshot_20230801-203856_Facebook.jpg",
+    "medium": "memories/medium/Screenshot_20230801-203856_Facebook.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20220324-075323_Photos",
+    "orig": "Screenshot_20220324-075323_Photos.jpg",
+    "thumb": "memories/thumbs/Screenshot_20220324-075323_Photos.jpg",
+    "medium": "memories/medium/Screenshot_20220324-075323_Photos.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20220417-081329_Photos",
+    "orig": "Screenshot_20220417-081329_Photos.jpg",
+    "thumb": "memories/thumbs/Screenshot_20220417-081329_Photos.jpg",
+    "medium": "memories/medium/Screenshot_20220417-081329_Photos.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20220508-110009_Facebook",
+    "orig": "Screenshot_20220508-110009_Facebook.jpg",
+    "thumb": "memories/thumbs/Screenshot_20220508-110009_Facebook.jpg",
+    "medium": "memories/medium/Screenshot_20220508-110009_Facebook.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20221002-115124_Facebook",
+    "orig": "Screenshot_20221002-115124_Facebook.jpg",
+    "thumb": "memories/thumbs/Screenshot_20221002-115124_Facebook.jpg",
+    "medium": "memories/medium/Screenshot_20221002-115124_Facebook.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20221023-150743_Facebook",
+    "orig": "Screenshot_20221023-150743_Facebook.jpg",
+    "thumb": "memories/thumbs/Screenshot_20221023-150743_Facebook.jpg",
+    "medium": "memories/medium/Screenshot_20221023-150743_Facebook.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_2023-04-09_120914",
+    "orig": "Screenshot_2023-04-09_120914.jpg",
+    "thumb": "memories/thumbs/Screenshot_2023-04-09_120914.jpg",
+    "medium": "memories/medium/Screenshot_2023-04-09_120914.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_2023-04-09_120927",
+    "orig": "Screenshot_2023-04-09_120927.jpg",
+    "thumb": "memories/thumbs/Screenshot_2023-04-09_120927.jpg",
+    "medium": "memories/medium/Screenshot_2023-04-09_120927.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20220410-082816_Photos",
+    "orig": "Screenshot_20220410-082816_Photos.jpg",
+    "thumb": "memories/thumbs/Screenshot_20220410-082816_Photos.jpg",
+    "medium": "memories/medium/Screenshot_20220410-082816_Photos.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-29321ca5d65b20d2f3135ab98e0177cb-V",
+    "orig": "IMG-29321ca5d65b20d2f3135ab98e0177cb-V.jpg",
+    "thumb": "memories/thumbs/IMG-29321ca5d65b20d2f3135ab98e0177cb-V.jpg",
+    "medium": "memories/medium/IMG-29321ca5d65b20d2f3135ab98e0177cb-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-262d9463c2b60de096cd7e34b46b14df-V",
+    "orig": "IMG-262d9463c2b60de096cd7e34b46b14df-V.jpg",
+    "thumb": "memories/thumbs/IMG-262d9463c2b60de096cd7e34b46b14df-V.jpg",
+    "medium": "memories/medium/IMG-262d9463c2b60de096cd7e34b46b14df-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-219a450d48a195d1356df88b260e6708-V",
+    "orig": "IMG-219a450d48a195d1356df88b260e6708-V.jpg",
+    "thumb": "memories/thumbs/IMG-219a450d48a195d1356df88b260e6708-V.jpg",
+    "medium": "memories/medium/IMG-219a450d48a195d1356df88b260e6708-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20250818-103151_Viber",
+    "orig": "Screenshot_20250818-103151_Viber.jpg",
+    "thumb": "memories/thumbs/Screenshot_20250818-103151_Viber.jpg",
+    "medium": "memories/medium/Screenshot_20250818-103151_Viber.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "FACE_RC_1663576196487",
+    "orig": "FACE_RC_1663576196487.jpg",
+    "thumb": "memories/thumbs/FACE_RC_1663576196487.jpg",
+    "medium": "memories/medium/FACE_RC_1663576196487.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "FB_IMG_1553900786036",
+    "orig": "FB_IMG_1553900786036.jpg",
+    "thumb": "memories/thumbs/FB_IMG_1553900786036.jpg",
+    "medium": "memories/medium/FB_IMG_1553900786036.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-0456b49f25dc315636d428b1b6b76d28-V",
+    "orig": "IMG-0456b49f25dc315636d428b1b6b76d28-V.jpg",
+    "thumb": "memories/thumbs/IMG-0456b49f25dc315636d428b1b6b76d28-V.jpg",
+    "medium": "memories/medium/IMG-0456b49f25dc315636d428b1b6b76d28-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-05a810888ca77f66aaa1ba4cf3061f0b-V",
+    "orig": "IMG-05a810888ca77f66aaa1ba4cf3061f0b-V.jpg",
+    "thumb": "memories/thumbs/IMG-05a810888ca77f66aaa1ba4cf3061f0b-V.jpg",
+    "medium": "memories/medium/IMG-05a810888ca77f66aaa1ba4cf3061f0b-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "Screenshot_20250820_102135_Facebook",
+    "orig": "Screenshot_20250820_102135_Facebook.jpg",
+    "thumb": "memories/thumbs/Screenshot_20250820_102135_Facebook.jpg",
+    "medium": "memories/medium/Screenshot_20250820_102135_Facebook.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-1049e9900705c00841e7cfa16a481ef2-V",
+    "orig": "IMG-1049e9900705c00841e7cfa16a481ef2-V.jpg",
+    "thumb": "memories/thumbs/IMG-1049e9900705c00841e7cfa16a481ef2-V.jpg",
+    "medium": "memories/medium/IMG-1049e9900705c00841e7cfa16a481ef2-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-1d53f1a5bef1d681d12ed45e7b33edaa-V",
+    "orig": "IMG-1d53f1a5bef1d681d12ed45e7b33edaa-V.jpg",
+    "thumb": "memories/thumbs/IMG-1d53f1a5bef1d681d12ed45e7b33edaa-V.jpg",
+    "medium": "memories/medium/IMG-1d53f1a5bef1d681d12ed45e7b33edaa-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-102869676f2808a3e7a101a91c3ee713-V",
+    "orig": "IMG-102869676f2808a3e7a101a91c3ee713-V.jpg",
+    "thumb": "memories/thumbs/IMG-102869676f2808a3e7a101a91c3ee713-V.jpg",
+    "medium": "memories/medium/IMG-102869676f2808a3e7a101a91c3ee713-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-1a95426ad39f80839fcdff08bf22f7d1-V",
+    "orig": "IMG-1a95426ad39f80839fcdff08bf22f7d1-V.jpg",
+    "thumb": "memories/thumbs/IMG-1a95426ad39f80839fcdff08bf22f7d1-V.jpg",
+    "medium": "memories/medium/IMG-1a95426ad39f80839fcdff08bf22f7d1-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "IMG-1b04022d3b4b92f5c14ba071d6385530-V",
+    "orig": "IMG-1b04022d3b4b92f5c14ba071d6385530-V.jpg",
+    "thumb": "memories/thumbs/IMG-1b04022d3b4b92f5c14ba071d6385530-V.jpg",
+    "medium": "memories/medium/IMG-1b04022d3b4b92f5c14ba071d6385530-V.jpg",
+    "date": "2026-06-04",
+    "year": 2026
+  },
+  {
+    "slug": "20250819_160219",
+    "orig": "20250819_160219.jpg",
+    "thumb": "memories/thumbs/20250819_160219.jpg",
+    "medium": "memories/medium/20250819_160219.jpg",
+    "date": "2025-08-19",
+    "year": 2025
+  },
+  {
+    "slug": "20250819_160209",
+    "orig": "20250819_160209.jpg",
+    "thumb": "memories/thumbs/20250819_160209.jpg",
+    "medium": "memories/medium/20250819_160209.jpg",
+    "date": "2025-08-19",
+    "year": 2025
+  },
+  {
+    "slug": "20250819_160043",
+    "orig": "20250819_160043.jpg",
+    "thumb": "memories/thumbs/20250819_160043.jpg",
+    "medium": "memories/medium/20250819_160043.jpg",
+    "date": "2025-08-19",
+    "year": 2025
+  },
+  {
+    "slug": "20250819_155901",
+    "orig": "20250819_155901.jpg",
+    "thumb": "memories/thumbs/20250819_155901.jpg",
+    "medium": "memories/medium/20250819_155901.jpg",
+    "date": "2025-08-19",
+    "year": 2025
+  },
+  {
+    "slug": "20250819_155856",
+    "orig": "20250819_155856.jpg",
+    "thumb": "memories/thumbs/20250819_155856.jpg",
+    "medium": "memories/medium/20250819_155856.jpg",
+    "date": "2025-08-19",
+    "year": 2025
+  },
+  {
+    "slug": "20241228_120612",
+    "orig": "20241228_120612.jpg",
+    "thumb": "memories/thumbs/20241228_120612.jpg",
+    "medium": "memories/medium/20241228_120612.jpg",
+    "date": "2024-12-28",
+    "year": 2024
+  },
+  {
+    "slug": "20241228_110530",
+    "orig": "20241228_110530.jpg",
+    "thumb": "memories/thumbs/20241228_110530.jpg",
+    "medium": "memories/medium/20241228_110530.jpg",
+    "date": "2024-12-28",
+    "year": 2024
+  },
+  {
+    "slug": "20241225_140412",
+    "orig": "20241225_140412.jpg",
+    "thumb": "memories/thumbs/20241225_140412.jpg",
+    "medium": "memories/medium/20241225_140412.jpg",
+    "date": "2024-12-25",
+    "year": 2024
+  },
+  {
+    "slug": "20240901_183015",
+    "orig": "20240901_183015.jpg",
+    "thumb": "memories/thumbs/20240901_183015.jpg",
+    "medium": "memories/medium/20240901_183015.jpg",
+    "date": "2024-09-01",
+    "year": 2024
+  },
+  {
+    "slug": "20240417_191017",
+    "orig": "20240417_191017.jpg",
+    "thumb": "memories/thumbs/20240417_191017.jpg",
+    "medium": "memories/medium/20240417_191017.jpg",
+    "date": "2024-04-17",
+    "year": 2024
+  },
+  {
+    "slug": "20240324_173918",
+    "orig": "20240324_173918.jpg",
+    "thumb": "memories/thumbs/20240324_173918.jpg",
+    "medium": "memories/medium/20240324_173918.jpg",
+    "date": "2024-03-24",
+    "year": 2024
+  },
+  {
+    "slug": "20240310_090346__2_",
+    "orig": "20240310_090346__2_.jpg",
+    "thumb": "memories/thumbs/20240310_090346__2_.jpg",
+    "medium": "memories/medium/20240310_090346__2_.jpg",
+    "date": "2024-03-10",
+    "year": 2024
+  },
+  {
+    "slug": "20240210_175601",
+    "orig": "20240210_175601.jpg",
+    "thumb": "memories/thumbs/20240210_175601.jpg",
+    "medium": "memories/medium/20240210_175601.jpg",
+    "date": "2024-02-10",
+    "year": 2024
+  },
+  {
+    "slug": "20240103_113958",
+    "orig": "20240103_113958.jpg",
+    "thumb": "memories/thumbs/20240103_113958.jpg",
+    "medium": "memories/medium/20240103_113958.jpg",
+    "date": "2024-01-03",
+    "year": 2024
+  },
+  {
+    "slug": "20240102_141939",
+    "orig": "20240102_141939.jpg",
+    "thumb": "memories/thumbs/20240102_141939.jpg",
+    "medium": "memories/medium/20240102_141939.jpg",
+    "date": "2024-01-02",
+    "year": 2024
+  },
+  {
+    "slug": "20231231_150543_2",
+    "orig": "20231231_150543_2.jpg",
+    "thumb": "memories/thumbs/20231231_150543_2.jpg",
+    "medium": "memories/medium/20231231_150543_2.jpg",
+    "date": "2023-12-31",
+    "year": 2023
+  },
+  {
+    "slug": "20231226_200003",
+    "orig": "20231226_200003.jpg",
+    "thumb": "memories/thumbs/20231226_200003.jpg",
+    "medium": "memories/medium/20231226_200003.jpg",
+    "date": "2023-12-26",
+    "year": 2023
+  },
+  {
+    "slug": "20231202_140612",
+    "orig": "20231202_140612.jpg",
+    "thumb": "memories/thumbs/20231202_140612.jpg",
+    "medium": "memories/medium/20231202_140612.jpg",
+    "date": "2023-12-02",
+    "year": 2023
+  },
+  {
+    "slug": "20230528_221340",
+    "orig": "20230528_221340.jpg",
+    "thumb": "memories/thumbs/20230528_221340.jpg",
+    "medium": "memories/medium/20230528_221340.jpg",
+    "date": "2023-05-28",
+    "year": 2023
+  },
+  {
+    "slug": "20230330_143722",
+    "orig": "20230330_143722.jpg",
+    "thumb": "memories/thumbs/20230330_143722.jpg",
+    "medium": "memories/medium/20230330_143722.jpg",
+    "date": "2023-03-30",
+    "year": 2023
+  },
+  {
+    "slug": "20230318_200028",
+    "orig": "20230318_200028.jpg",
+    "thumb": "memories/thumbs/20230318_200028.jpg",
+    "medium": "memories/medium/20230318_200028.jpg",
+    "date": "2023-03-18",
+    "year": 2023
+  },
+  {
+    "slug": "20230313_221758",
+    "orig": "20230313_221758.jpg",
+    "thumb": "memories/thumbs/20230313_221758.jpg",
+    "medium": "memories/medium/20230313_221758.jpg",
+    "date": "2023-03-13",
+    "year": 2023
+  },
+  {
+    "slug": "20230313_183445",
+    "orig": "20230313_183445.jpg",
+    "thumb": "memories/thumbs/20230313_183445.jpg",
+    "medium": "memories/medium/20230313_183445.jpg",
+    "date": "2023-03-13",
+    "year": 2023
+  },
+  {
+    "slug": "20230312_131418",
+    "orig": "20230312_131418.jpg",
+    "thumb": "memories/thumbs/20230312_131418.jpg",
+    "medium": "memories/medium/20230312_131418.jpg",
+    "date": "2023-03-12",
+    "year": 2023
+  },
+  {
+    "slug": "20230226_183502",
+    "orig": "20230226_183502.jpg",
+    "thumb": "memories/thumbs/20230226_183502.jpg",
+    "medium": "memories/medium/20230226_183502.jpg",
+    "date": "2023-02-26",
+    "year": 2023
+  },
+  {
+    "slug": "20230117_153415",
+    "orig": "20230117_153415.jpg",
+    "thumb": "memories/thumbs/20230117_153415.jpg",
+    "medium": "memories/medium/20230117_153415.jpg",
+    "date": "2023-01-17",
+    "year": 2023
+  },
+  {
+    "slug": "20221129_120704",
+    "orig": "20221129_120704.jpg",
+    "thumb": "memories/thumbs/20221129_120704.jpg",
+    "medium": "memories/medium/20221129_120704.jpg",
+    "date": "2022-11-29",
+    "year": 2022
+  },
+  {
+    "slug": "20220915_160421",
+    "orig": "20220915_160421.jpg",
+    "thumb": "memories/thumbs/20220915_160421.jpg",
+    "medium": "memories/medium/20220915_160421.jpg",
+    "date": "2022-09-15",
+    "year": 2022
+  },
+  {
+    "slug": "20220910_171519",
+    "orig": "20220910_171519.jpg",
+    "thumb": "memories/thumbs/20220910_171519.jpg",
+    "medium": "memories/medium/20220910_171519.jpg",
+    "date": "2022-09-10",
+    "year": 2022
+  },
+  {
+    "slug": "20220521_205652",
+    "orig": "20220521_205652.jpg",
+    "thumb": "memories/thumbs/20220521_205652.jpg",
+    "medium": "memories/medium/20220521_205652.jpg",
+    "date": "2022-05-21",
+    "year": 2022
+  },
+  {
+    "slug": "20220520_084125",
+    "orig": "20220520_084125.jpg",
+    "thumb": "memories/thumbs/20220520_084125.jpg",
+    "medium": "memories/medium/20220520_084125.jpg",
+    "date": "2022-05-20",
+    "year": 2022
+  },
+  {
+    "slug": "20220221_200649",
+    "orig": "20220221_200649.jpg",
+    "thumb": "memories/thumbs/20220221_200649.jpg",
+    "medium": "memories/medium/20220221_200649.jpg",
+    "date": "2022-02-21",
+    "year": 2022
+  },
+  {
+    "slug": "20220221_200341",
+    "orig": "20220221_200341.jpg",
+    "thumb": "memories/thumbs/20220221_200341.jpg",
+    "medium": "memories/medium/20220221_200341.jpg",
+    "date": "2022-02-21",
+    "year": 2022
+  },
+  {
+    "slug": "20220220_120904",
+    "orig": "20220220_120904.jpg",
+    "thumb": "memories/thumbs/20220220_120904.jpg",
+    "medium": "memories/medium/20220220_120904.jpg",
+    "date": "2022-02-20",
+    "year": 2022
+  },
+  {
+    "slug": "20210122_144159",
+    "orig": "20210122_144159.jpg",
+    "thumb": "memories/thumbs/20210122_144159.jpg",
+    "medium": "memories/medium/20210122_144159.jpg",
+    "date": "2021-01-22",
+    "year": 2021
+  },
+  {
+    "slug": "20201213_163157",
+    "orig": "20201213_163157.jpg",
+    "thumb": "memories/thumbs/20201213_163157.jpg",
+    "medium": "memories/medium/20201213_163157.jpg",
+    "date": "2020-12-13",
+    "year": 2020
+  },
+  {
+    "slug": "20200613_202608",
+    "orig": "20200613_202608.jpg",
+    "thumb": "memories/thumbs/20200613_202608.jpg",
+    "medium": "memories/medium/20200613_202608.jpg",
+    "date": "2020-06-13",
+    "year": 2020
+  },
+  {
+    "slug": "20191029_214646",
+    "orig": "20191029_214646.jpg",
+    "thumb": "memories/thumbs/20191029_214646.jpg",
+    "medium": "memories/medium/20191029_214646.jpg",
+    "date": "2019-10-29",
+    "year": 2019
+  },
+  {
+    "slug": "20191028_182441",
+    "orig": "20191028_182441.jpg",
+    "thumb": "memories/thumbs/20191028_182441.jpg",
+    "medium": "memories/medium/20191028_182441.jpg",
+    "date": "2019-10-28",
+    "year": 2019
+  },
+  {
+    "slug": "20191028_182425",
+    "orig": "20191028_182425.jpg",
+    "thumb": "memories/thumbs/20191028_182425.jpg",
+    "medium": "memories/medium/20191028_182425.jpg",
+    "date": "2019-10-28",
+    "year": 2019
+  },
+  {
+    "slug": "20190907_194906",
+    "orig": "20190907_194906.jpg",
+    "thumb": "memories/thumbs/20190907_194906.jpg",
+    "medium": "memories/medium/20190907_194906.jpg",
+    "date": "2019-09-07",
+    "year": 2019
+  },
+  {
+    "slug": "20190801_144256",
+    "orig": "20190801_144256.jpg",
+    "thumb": "memories/thumbs/20190801_144256.jpg",
+    "medium": "memories/medium/20190801_144256.jpg",
+    "date": "2019-08-01",
+    "year": 2019
+  },
+  {
+    "slug": "20190508_140239",
+    "orig": "20190508_140239.jpg",
+    "thumb": "memories/thumbs/20190508_140239.jpg",
+    "medium": "memories/medium/20190508_140239.jpg",
+    "date": "2019-05-08",
+    "year": 2019
+  },
+  {
+    "slug": "20190218_114934",
+    "orig": "20190218_114934.jpg",
+    "thumb": "memories/thumbs/20190218_114934.jpg",
+    "medium": "memories/medium/20190218_114934.jpg",
+    "date": "2019-02-18",
+    "year": 2019
+  },
+  {
+    "slug": "20190207_072238",
+    "orig": "20190207_072238.jpg",
+    "thumb": "memories/thumbs/20190207_072238.jpg",
+    "medium": "memories/medium/20190207_072238.jpg",
+    "date": "2019-02-07",
+    "year": 2019
+  },
+  {
+    "slug": "20190101_181945",
+    "orig": "20190101_181945.jpg",
+    "thumb": "memories/thumbs/20190101_181945.jpg",
+    "medium": "memories/medium/20190101_181945.jpg",
+    "date": "2019-01-01",
+    "year": 2019
+  },
+  {
+    "slug": "20181225_190045",
+    "orig": "20181225_190045.jpg",
+    "thumb": "memories/thumbs/20181225_190045.jpg",
+    "medium": "memories/medium/20181225_190045.jpg",
+    "date": "2018-12-25",
+    "year": 2018
+  },
+  {
+    "slug": "20181202_154228",
+    "orig": "20181202_154228.jpg",
+    "thumb": "memories/thumbs/20181202_154228.jpg",
+    "medium": "memories/medium/20181202_154228.jpg",
+    "date": "2018-12-02",
+    "year": 2018
+  },
+  {
+    "slug": "20181021_205806",
+    "orig": "20181021_205806.jpg",
+    "thumb": "memories/thumbs/20181021_205806.jpg",
+    "medium": "memories/medium/20181021_205806.jpg",
+    "date": "2018-10-21",
+    "year": 2018
+  },
+  {
+    "slug": "20180611_224205",
+    "orig": "20180611_224205.jpg",
+    "thumb": "memories/thumbs/20180611_224205.jpg",
+    "medium": "memories/medium/20180611_224205.jpg",
+    "date": "2018-06-11",
+    "year": 2018
+  },
+  {
+    "slug": "20180408_235956",
+    "orig": "20180408_235956.jpg",
+    "thumb": "memories/thumbs/20180408_235956.jpg",
+    "medium": "memories/medium/20180408_235956.jpg",
+    "date": "2018-04-08",
+    "year": 2018
+  },
+  {
+    "slug": "20180403_140113",
+    "orig": "20180403_140113.jpg",
+    "thumb": "memories/thumbs/20180403_140113.jpg",
+    "medium": "memories/medium/20180403_140113.jpg",
+    "date": "2018-04-03",
+    "year": 2018
+  },
+  {
+    "slug": "20171214_175238",
+    "orig": "20171214_175238.jpg",
+    "thumb": "memories/thumbs/20171214_175238.jpg",
+    "medium": "memories/medium/20171214_175238.jpg",
+    "date": "2017-12-14",
+    "year": 2017
+  },
+  {
+    "slug": "20171209_155103",
+    "orig": "20171209_155103.jpg",
+    "thumb": "memories/thumbs/20171209_155103.jpg",
+    "medium": "memories/medium/20171209_155103.jpg",
+    "date": "2017-12-09",
+    "year": 2017
+  },
+  {
+    "slug": "20170819_202711",
+    "orig": "20170819_202711.jpg",
+    "thumb": "memories/thumbs/20170819_202711.jpg",
+    "medium": "memories/medium/20170819_202711.jpg",
+    "date": "2017-08-19",
+    "year": 2017
+  },
+  {
+    "slug": "20170530_151653",
+    "orig": "20170530_151653.jpg",
+    "thumb": "memories/thumbs/20170530_151653.jpg",
+    "medium": "memories/medium/20170530_151653.jpg",
+    "date": "2017-05-30",
+    "year": 2017
+  },
+  {
+    "slug": "20170211_133129",
+    "orig": "20170211_133129.jpg",
+    "thumb": "memories/thumbs/20170211_133129.jpg",
+    "medium": "memories/medium/20170211_133129.jpg",
+    "date": "2017-02-11",
+    "year": 2017
+  },
+  {
+    "slug": "20161020_133112",
+    "orig": "20161020_133112.jpg",
+    "thumb": "memories/thumbs/20161020_133112.jpg",
+    "medium": "memories/medium/20161020_133112.jpg",
+    "date": "2016-10-20",
+    "year": 2016
+  },
+  {
+    "slug": "20160920_194108",
+    "orig": "20160920_194108.jpg",
+    "thumb": "memories/thumbs/20160920_194108.jpg",
+    "medium": "memories/medium/20160920_194108.jpg",
+    "date": "2016-09-20",
+    "year": 2016
+  }
+]
+</script>
+<script>
+(function(){
+  try { window.GUESTS_DATA = JSON.parse(document.getElementById('salina-guests-data').textContent); } catch(e) { console.warn('guests parse', e); }
+  try { window.MEMORIES_DATA = JSON.parse(document.getElementById('salina-photos-data').textContent); } catch(e) { console.warn('memories parse', e); }
+})();
+</script>
+<script src="./hub.js"></script>
+
+<div id="mandapPinGate">
+  <button class="mdp-gate-close" id="mdpCloseGate" aria-label="Close">✕</button>
+  <div class="mdp-gate-icon">🔱</div>
+  <div class="mdp-gate-title">Mandap</div>
+  <div class="mdp-gate-sub">Sacred · Admin only · Bapu + Deep</div>
+  <div class="mdp-dots">
+    <div class="mdp-pd"></div><div class="mdp-pd"></div><div class="mdp-pd"></div><div class="mdp-pd"></div>
+  </div>
+  <div class="mdp-pin-err" id="mdpPinErr">&nbsp;</div>
+  <div class="mdp-pad">
+    <div class="mdp-pad-key" data-k="1">1</div><div class="mdp-pad-key" data-k="2">2</div><div class="mdp-pad-key" data-k="3">3</div>
+    <div class="mdp-pad-key" data-k="4">4</div><div class="mdp-pad-key" data-k="5">5</div><div class="mdp-pad-key" data-k="6">6</div>
+    <div class="mdp-pad-key" data-k="7">7</div><div class="mdp-pad-key" data-k="8">8</div><div class="mdp-pad-key" data-k="9">9</div>
+    <div></div><div class="mdp-pad-key" data-k="0">0</div><div class="mdp-pad-key del" data-k="del">DEL</div>
+  </div>
+</div>
+
+<div id="mdpQrModal">
+  <div class="mdp-qr-card">
+    <div id="mdpQrTarget"></div>
+    <div id="mdpQrUrl"></div>
+    <div class="mdp-qr-actions">
+      <button class="mdp-qr-close" onclick="mandapCopyQrUrl()">Copy URL</button>
+      <button class="mdp-qr-close" onclick="mandapHideQr()">Close</button>
+    </div>
+  </div>
+</div>
+<script src="./mandap.js"></script>
+<script src="./elevation.js"></script>
+<script src="./surprises.js"></script>
+<script src="./globe.js"></script>
+<script src="./finale.js"></script>
+</body>
+</html>
