@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salina — How to Send Invitations & Use the Hub</title>
+<style>
+  :root {
+    --gold: #FFD700;
+    --saffron: #FF9500;
+    --coral: #FF6B6B;
+    --green: #00C896;
+    --bg: #0A0812;
+    --card: #12101A;
+    --border: rgba(255,200,0,0.25);
+    --text: #F0E8D0;
+    --dim: #9090A0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 18px; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 0 0 60px;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, #1a0a2e 0%, #0A0812 60%);
+    border-bottom: 2px solid var(--border);
+    padding: 48px 24px 40px;
+    text-align: center;
+  }
+  .hero .diya { font-size: 3rem; display: block; margin-bottom: 12px; animation: float 3s ease-in-out infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  .hero h1 { font-size: 2rem; color: var(--gold); letter-spacing: 2px; margin-bottom: 8px; }
+  .hero p { color: var(--dim); font-size: 1rem; }
+
+  /* ── Text size toggle ── */
+  .size-bar {
+    background: #16131F;
+    border-bottom: 1px solid var(--border);
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.85rem;
+    color: var(--dim);
+  }
+  .size-btn {
+    background: #252035;
+    border: 1px solid var(--border);
+    color: var(--gold);
+    padding: 4px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .size-btn:hover { background: #352050; }
+
+  /* ── Nav ── */
+  .nav {
+    display: flex;
+    gap: 12px;
+    padding: 20px 24px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav a {
+    white-space: nowrap;
+    background: #1A1528;
+    border: 1px solid var(--border);
+    color: var(--gold);
+    text-decoration: none;
+    padding: 8px 18px;
+    border-radius: 24px;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+  }
+  .nav a:hover { background: #2A2040; }
+
+  /* ── Section ── */
+  .section {
+    max-width: 820px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+  .section-title {
+    font-size: 1.4rem;
+    color: var(--saffron);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-title .num {
+    width: 36px; height: 36px;
+    background: var(--saffron);
+    color: #000;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+
+  /* ── Step card ── */
+  .step {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .step::before {
+    content: '';
+    position: absolute; top:0; left:0; right:0; height:3px;
+    background: linear-gradient(90deg, var(--gold), var(--saffron));
+  }
+  .step-num {
+    display: inline-block;
+    background: var(--gold);
+    color: #000;
+    font-weight: bold;
+    font-size: 0.85rem;
+    padding: 2px 10px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+  }
+  .step h3 { font-size: 1.15rem; color: var(--gold); margin-bottom: 8px; }
+  .step p { color: var(--text); margin-bottom: 10px; }
+  .step .tip {
+    background: rgba(255,200,0,0.08);
+    border-left: 3px solid var(--gold);
+    padding: 10px 14px;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.9rem;
+    color: var(--dim);
+    margin-top: 12px;
+  }
+
+  /* ── Animated demo box ── */
+  .demo {
+    background: #0D0A18;
+    border: 1px solid rgba(255,200,0,0.15);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 16px 0;
+    text-align: center;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+  .demo-label { font-size: 0.8rem; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* ── Animated typing ── */
+  .typing-demo {
+    font-family: monospace;
+    font-size: 1rem;
+    color: var(--green);
+    border-right: 2px solid var(--green);
+    padding-right: 4px;
+    animation: blink 0.8s step-end infinite;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  @keyframes blink { 0%,100%{border-color:var(--green)} 50%{border-color:transparent} }
+
+  /* ── Animated button ── */
+  .demo-btn {
+    display: inline-block;
+    padding: 12px 28px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    animation: pulse-btn 2s ease-in-out infinite;
+  }
+  @keyframes pulse-btn { 0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,200,0,0.4)} 50%{transform:scale(1.04);box-shadow:0 0 0 12px rgba(255,200,0,0)} }
+  .btn-wa  { background: #25D366; color: #fff; }
+  .btn-sms { background: #007AFF; color: #fff; }
+  .btn-copy{ background: #8A4FFF; color: #fff; }
+  .btn-yes { background: linear-gradient(135deg,#FFD700,#FF9500); color: #000; }
+  .btn-call{ background: linear-gradient(135deg,#00C896,#009070); color: #fff; }
+  .btn-no  { background: #444; color: #fff; }
+
+  /* ── Arrow steps ── */
+  .arrow-flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    align-items: center;
+    margin: 20px 0;
+    justify-content: center;
+  }
+  .flow-step {
+    background: #1A1528;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    text-align: center;
+    font-size: 0.85rem;
+    min-width: 100px;
+    flex-shrink: 0;
+  }
+  .flow-step .icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+  .flow-arrow { color: var(--gold); font-size: 1.4rem; margin: 0 8px; }
+
+  /* ── Big call button ── */
+  .call-card {
+    background: linear-gradient(135deg, #003820, #001810);
+    border: 2px solid var(--green);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    margin: 20px 0;
+  }
+  .call-card .phone { font-size: 3rem; }
+  .call-card h3 { color: var(--green); font-size: 1.3rem; margin: 8px 0; }
+  .call-card .number { font-size: 2rem; color: var(--gold); font-weight: bold; letter-spacing: 2px; margin: 8px 0; }
+  .call-card p { color: var(--dim); }
+
+  /* ── Big text toggle ── */
+  body.big-text { font-size: 24px; }
+  body.big-text .hero h1 { font-size: 2.4rem; }
+  body.big-text .step h3 { font-size: 1.4rem; }
+
+  /* ── Print ── */
+  @media print {
+    .size-bar, .nav { display: none; }
+    .step { break-inside: avoid; }
+  }
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 1.5rem; }
+    .section-title { font-size: 1.1rem; }
+  }
+
+  /* ── Bounce animation for arrows ── */
+  .bounce { animation: bounce 1.5s ease-in-out infinite; }
+  @keyframes bounce { 0%,100%{transform:translateX(0)} 50%{transform:translateX(5px)} }
+
+  /* ── Spinning loader ── */
+  .spinner {
+    width: 32px; height: 32px;
+    border: 3px solid rgba(255,200,0,0.2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Success tick ── */
+  .tick-anim {
+    font-size: 3rem;
+    animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+  @keyframes pop { 0%{transform:scale(0)} 100%{transform:scale(1)} }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="diya">🪔</span>
+  <h1>SALINA CEREMONY GUIDE</h1>
+  <p>How to send invitations &amp; use the Hub — for Sachind &amp; family</p>
+</div>
+
+<div class="size-bar">
+  <span>👁 Need bigger text?</span>
+  <button class="size-btn" onclick="document.body.classList.toggle('big-text')">Bigger / Normal</button>
+</div>
+
+<nav class="nav">
+  <a href="#send">📨 Send Invitations</a>
+  <a href="#rsvp">✅ Guest RSVP</a>
+  <a href="#hub">🏠 Use the Hub</a>
+  <a href="#call">📞 Just Call</a>
+  <a href="#faq">❓ Questions</a>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PART 1: SEND INVITATIONS                                        -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="send" class="section">
+  <div class="section-title"><span class="num">1</span> How to Send an Invitation</div>
+
+  <div class="step">
+    <div class="step-num">Step 1</div>
+    <h3>Open the Hub on your computer or phone</h3>
+    <p>Type this address into your browser:</p>
+    <div class="demo">
+      <div class="demo-label">Type in your browser</div>
+      <div style="font-size:1.1rem;color:var(--gold);font-family:monospace;">http://localhost:8123</div>
+    </div>
+    <p>You will see a lock screen. Enter the PIN: <strong style="color:var(--gold);font-size:1.3rem;">020146</strong></p>
+    <div class="tip">💡 This is Mum's birthday — 2nd January 1946</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">Step 2</div>
+    <h3>Find the "Send Invitation" section</h3>
+    <p>Scroll down the page until you see a box that says <strong>"Share invitation with guests"</strong>.</p>
+    <div class="demo">
+      <div class="demo-label">What you will see</div>
+      <div style="border:2px solid var(--gold);border-radius:8px;padding:16px;text-align:left;width:100%;max-width:400px;">
+        <div style="color:var(--dim);font-size:0.85rem;margin-bottom:8px;">Type their name:</div>
+        <div class="typing-demo" id="typingDemo">The Singh Family</div>
+      </div>
+    </div>
+    <p>Type the family's name exactly as you want it to appear in their invitation — for example: <em>"The Sharma Family"</em> or <em>"Uncle Raj &amp; Aunty Priya"</em></p>
+  </div>
+
+  <div class="step">
+    <div class="step-num">Step 3</div>
+    <h3>Choose how to send it</h3>
+    <p>Three big buttons will appear. Tap the one that matches how you talk to this family:</p>
+
+    <div style="display:flex;flex-direction:column;gap:16px;margin:16px 0;">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <button class="demo-btn btn-wa" style="animation:none;min-width:140px;">📱 WhatsApp</button>
+        <span>Opens WhatsApp with the message already written. Just press <strong>Send</strong>.</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <button class="demo-btn btn-sms" style="animation:none;min-width:140px;">💬 SMS Text</button>
+        <span>Opens a text message with the invitation. Just press <strong>Send</strong>.</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <button class="demo-btn btn-copy" style="animation:none;min-width:140px;">📋 Copy Link</button>
+        <span>Copies the link. Paste it into any message (Facebook, Viber, email).</span>
+      </div>
+    </div>
+
+    <div class="tip">💡 <strong>WhatsApp is easiest.</strong> One tap to open, one tap to send. The message is already written for you.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">Step 4</div>
+    <h3>The message is already written — just send it!</h3>
+    <p>When WhatsApp opens, you will see a message like this already typed out:</p>
+    <div class="demo" style="text-align:left;align-items:flex-start;">
+      <div style="background:#1A1A2E;border-radius:12px;padding:16px;font-size:0.9rem;max-width:100%;border-left:3px solid #25D366;">
+        <div style="color:#25D366;font-weight:bold;margin-bottom:8px;">💬 WhatsApp Message Preview</div>
+        🌸 <em>Dear The Singh Family,</em><br><br>
+        With love and blessings, you are invited to Mum's 12-month Salina ceremony...<br><br>
+        📅 <strong>Saturday 15 August</strong> — Evening Pooja, 6:30 PM<br>
+        📅 <strong>Sunday 16 August</strong> — Pundit Pooja, 10:30 AM<br><br>
+        📍 Hamilton, Aotearoa New Zealand<br><br>
+        Please click to let us know you are coming:<br>
+        <span style="color:var(--gold);">👉 [your personalised link]</span>
+      </div>
+    </div>
+    <p>You <strong>do not need to type anything</strong>. Just press the green Send button.</p>
+  </div>
+
+</section>
+
+<hr>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PART 2: WHAT GUESTS SEE                                         -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="rsvp" class="section">
+  <div class="section-title"><span class="num" style="background:var(--green);">2</span> What the Guest Sees</div>
+
+  <p style="margin-bottom:20px;">When a guest clicks the link you sent, here is what happens — step by step:</p>
+
+  <!-- Flow diagram -->
+  <div class="arrow-flow">
+    <div class="flow-step"><span class="icon">📱</span>Tap link</div>
+    <div class="flow-arrow bounce">→</div>
+    <div class="flow-step"><span class="icon">🌸</span>Pretty intro (6 sec)</div>
+    <div class="flow-arrow bounce">→</div>
+    <div class="flow-step"><span class="icon">📋</span>Choose answer</div>
+    <div class="flow-arrow bounce">→</div>
+    <div class="flow-step"><span class="icon">📤</span>Message sent to you</div>
+    <div class="flow-arrow bounce">→</div>
+    <div class="flow-step"><span class="icon">✅</span>Done!</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">Guest step 1</div>
+    <h3>A beautiful introduction plays (about 6 seconds)</h3>
+    <p>Golden flowers and a blessing appear on screen. Mum's photo appears with a soft glow. This is the introduction — the guest does not need to do anything. It will continue by itself.</p>
+    <div class="demo">
+      <div class="demo-label">The intro animation</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div style="font-size:2.5rem;animation:float 2s ease-in-out infinite;">🌺</div>
+        <div style="color:var(--gold);font-size:0.9rem;">Golden petals rising...</div>
+        <div class="spinner"></div>
+      </div>
+    </div>
+    <div class="tip">💡 If they want to skip the intro, there is a small <strong>"Skip"</strong> button at the top right.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">Guest step 2</div>
+    <h3>They see their personal invitation</h3>
+    <p>Their name appears in the greeting — <em>"Dear The Singh Family,"</em>. The ceremony dates, times, and location are shown clearly.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-num">Guest step 3</div>
+    <h3>They choose one answer — just one tap</h3>
+    <p>Five big colourful buttons appear. The guest taps <strong>one</strong>:</p>
+
+    <div style="display:flex;flex-direction:column;gap:12px;margin:16px 0;">
+      <button class="demo-btn btn-yes" style="animation:pulse-btn 2s ease-in-out infinite;text-align:left;padding-left:20px;">
+        ⭐ Yes — Both Days <span style="font-size:0.75rem;opacity:0.7;">(RECOMMENDED)</span>
+      </button>
+      <button class="demo-btn" style="background:#2A6035;color:#fff;animation:none;">📅 Saturday Only</button>
+      <button class="demo-btn" style="background:#2A3560;color:#fff;animation:none;">📅 Sunday Only</button>
+      <button class="demo-btn btn-no" style="animation:none;">💐 Sadly, cannot attend</button>
+      <button class="demo-btn btn-call" style="animation:none;">📞 Or Call Sachind</button>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">Guest step 4</div>
+    <h3>A message is written for them — they just tap Send</h3>
+    <p>After choosing, a message appears on screen — already written. They just tap <strong>WhatsApp</strong> or <strong>Email</strong> to send it to you.</p>
+    <div class="demo">
+      <div class="tick-anim" id="tick">✅</div>
+      <div style="color:var(--green);font-size:1rem;">Response confirmed!</div>
+      <div style="color:var(--dim);font-size:0.85rem;">Message already written — just tap Send</div>
+    </div>
+    <div class="tip">💡 If a guest is confused, they can always call Sachind: <strong style="color:var(--green);">021 293 5401</strong></div>
+  </div>
+
+</section>
+
+<hr>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PART 3: USING THE HUB                                           -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="hub" class="section">
+  <div class="section-title"><span class="num" style="background:var(--saffron);">3</span> Using the Hub (Admin Area)</div>
+
+  <div class="step">
+    <div class="step-num">Access</div>
+    <h3>Open the Hub in your browser</h3>
+    <div class="demo">
+      <div class="demo-label">Browser address</div>
+      <div style="font-size:1.1rem;color:var(--gold);font-family:monospace;">http://localhost:8123/hub.html</div>
+    </div>
+    <p>Enter PIN: <strong style="color:var(--gold);font-size:1.3rem;">020146</strong> (Mum's birthday)</p>
+    <p>For admin sections (like guest list): PIN <strong style="color:var(--saffron);">1946</strong></p>
+  </div>
+
+  <div class="step">
+    <div class="step-num">What you can do</div>
+    <h3>Hub features at a glance</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:16px 0;">
+      <div style="background:#1A1528;border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-size:1.8rem;">📊</div>
+        <div style="color:var(--gold);font-weight:bold;margin:6px 0;">RSVP Tracker</div>
+        <div style="color:var(--dim);font-size:0.85rem;">See who has replied</div>
+      </div>
+      <div style="background:#1A1528;border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-size:1.8rem;">👨‍👩‍👧</div>
+        <div style="color:var(--gold);font-weight:bold;margin:6px 0;">Guest List</div>
+        <div style="color:var(--dim);font-size:0.85rem;">635 contacts, by region</div>
+      </div>
+      <div style="background:#1A1528;border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-size:1.8rem;">⏳</div>
+        <div style="color:var(--gold);font-weight:bold;margin:6px 0;">Countdown</div>
+        <div style="color:var(--dim);font-size:0.85rem;">Days until ceremony</div>
+      </div>
+      <div style="background:#1A1528;border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-size:1.8rem;">📸</div>
+        <div style="color:var(--gold);font-weight:bold;margin:6px 0;">Memories</div>
+        <div style="color:var(--dim);font-size:0.85rem;">Photos of Mum</div>
+      </div>
+      <div style="background:#1A1528;border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-size:1.8rem;">🍛</div>
+        <div style="color:var(--gold);font-weight:bold;margin:6px 0;">Recipes</div>
+        <div style="color:var(--dim);font-size:0.85rem;">Ceremony food guide</div>
+      </div>
+      <div style="background:#1A1528;border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-size:1.8rem;">📍</div>
+        <div style="color:var(--gold);font-weight:bold;margin:6px 0;">Venue & Map</div>
+        <div style="color:var(--dim);font-size:0.85rem;">14 Beaumont St, Hamilton</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<hr>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PART 4: JUST CALL                                               -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="call" class="section">
+  <div class="section-title"><span class="num" style="background:var(--green);color:#000;">4</span> Don't want to use the computer?</div>
+
+  <p style="margin-bottom:16px;">That is perfectly fine. You can always call instead:</p>
+
+  <div class="call-card">
+    <div class="phone">📞</div>
+    <h3>Call Sachind</h3>
+    <div class="number">021 293 5401</div>
+    <p>He will help send the invitation or note the RSVP for you.</p>
+  </div>
+
+  <div class="call-card" style="margin-top:16px;">
+    <div class="phone">💬</div>
+    <h3>WhatsApp Sachind</h3>
+    <div class="number">021 293 5401</div>
+    <p>Send a message on WhatsApp saying who is coming and how many people.</p>
+  </div>
+
+</section>
+
+<hr>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PART 5: FAQ                                                      -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="faq" class="section">
+  <div class="section-title"><span class="num" style="background:var(--coral);color:#000;">5</span> Common Questions</div>
+
+  <div class="step">
+    <h3>❓ The screen has flowers and music — is that normal?</h3>
+    <p><strong>Yes, completely normal.</strong> When a guest opens the invitation link, a 6-second blessing animation plays with golden petals. It will continue on its own, or they can tap <strong>Skip</strong>.</p>
+  </div>
+
+  <div class="step">
+    <h3>❓ What if a guest changes their mind about coming?</h3>
+    <p>They can open the same invitation link again and choose a different answer. There is a <strong>"Go back"</strong> button on the confirmation screen.</p>
+  </div>
+
+  <div class="step">
+    <h3>❓ I cannot see the website — what do I do?</h3>
+    <p>The server needs to be running on the computer. Open PowerShell and type:</p>
+    <div class="demo" style="font-family:monospace;color:var(--green);font-size:0.9rem;">
+      node C:\SALINA\_server.js
+    </div>
+    <p>Or simply call Sachind on <strong>021 293 5401</strong>.</p>
+  </div>
+
+  <div class="step">
+    <h3>❓ What if a guest does not have WhatsApp?</h3>
+    <p>They can use the <strong>SMS</strong> button to send a text message instead, or use the <strong>Email</strong> button, or just call Sachind directly.</p>
+  </div>
+
+  <div class="step">
+    <h3>❓ What if the text is too small?</h3>
+    <p>Tap the <strong>"Bigger Text"</strong> button at the top of the invitation page. It makes all text 1.5× larger.</p>
+    <div class="demo">
+      <div class="demo-label">Where to find it</div>
+      <div style="border:2px solid var(--saffron);border-radius:8px;padding:12px;font-size:1rem;color:var(--saffron);">
+        Aa Bigger Text
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <h3>❓ Ceremony dates and location?</h3>
+    <div style="background:#1A1528;border-radius:10px;padding:16px;margin-top:8px;">
+      <div style="color:var(--gold);font-size:1rem;margin-bottom:8px;">📅 Ceremony Schedule</div>
+      <div style="margin-bottom:8px;"><strong style="color:var(--saffron);">Saturday 15 August 2026</strong> — Evening Pooja, 6:30 PM</div>
+      <div style="margin-bottom:8px;"><strong style="color:var(--saffron);">Sunday 16 August 2026</strong> — Pundit Pooja, 10:30 AM</div>
+      <div style="margin-top:12px;color:var(--dim);">📍 14 Beaumont Street, Hamilton, New Zealand</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ── Footer ── -->
+<div style="text-align:center;padding:40px 20px;border-top:1px solid var(--border);color:var(--dim);">
+  <div style="font-size:2rem;margin-bottom:12px;">🪔</div>
+  <div style="color:var(--gold);margin-bottom:6px;">With love &amp; blessings</div>
+  <div>Sachind &amp; the Lal Family</div>
+  <div style="margin-top:16px;font-size:0.8rem;">Salina Ceremony — August 2026 · Hamilton, Aotearoa</div>
+  <div style="margin-top:8px;">
+    <a href="#" onclick="window.print()" style="color:var(--gold);text-decoration:none;">🖨 Print this guide</a>
+  </div>
+</div>
+
+<script>
+  // Animated typing demo
+  const names = ['The Singh Family', 'Uncle Raj & Aunty Priya', 'The Sharma Whanau', 'Cousin Deepak', 'The Patel Family'];
+  let nameIdx = 0, charIdx = 0, deleting = false;
+  function typeNext() {
+    const el = document.getElementById('typingDemo');
+    if (!el) return;
+    const target = names[nameIdx];
+    if (!deleting) {
+      el.textContent = target.slice(0, charIdx + 1);
+      charIdx++;
+      if (charIdx === target.length) { deleting = true; setTimeout(typeNext, 1500); return; }
+    } else {
+      el.textContent = target.slice(0, charIdx - 1);
+      charIdx--;
+      if (charIdx === 0) { deleting = false; nameIdx = (nameIdx + 1) % names.length; }
+    }
+    setTimeout(typeNext, deleting ? 40 : 80);
+  }
+  setTimeout(typeNext, 1000);
+
+  // Re-trigger tick animation on scroll
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = document.getElementById('tick');
+        if (el) { el.style.animation = 'none'; void el.offsetWidth; el.style.animation = 'pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards'; }
+      }
+    });
+  });
+  const tick = document.getElementById('tick');
+  if (tick) observer.observe(tick);
+</script>
+</body>
+</html>
