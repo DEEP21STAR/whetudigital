@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1a0e08">
+<meta name="color-scheme" content="dark">
+<style>html{background:#06030a}</style>
 <title>SALINA · Tulawati Lal Mummy · by Whetū Digital</title>
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" type="image/png" href="./mum-portrait.png">
@@ -68,8 +70,8 @@ body{background:radial-gradient(ellipse at 20% 0%,#1a0e0d 0%,transparent 50%),ra
 .mr-petal{position:absolute;width:12px;height:34px;left:50%;top:50%;background:linear-gradient(180deg,rgba(245,197,87,.7),rgba(249,115,22,.3),transparent);border-radius:50% 50% 4px 4px;transform-origin:center top}
 .mandala-petals{position:absolute;inset:18%;border-radius:50%}
 /* ── aurora orbs ── */
-.aurora{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
-.orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:.55;animation:orbDrift 22s ease-in-out infinite}
+.aurora{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;contain:strict}
+.orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:.55;animation:orbDrift 22s ease-in-out infinite;will-change:transform;transform:translateZ(0)}
 .orb1{width:720px;height:720px;background:radial-gradient(circle,rgba(245,197,87,.42),transparent 70%);top:-220px;left:-180px}
 .orb2{width:560px;height:560px;background:radial-gradient(circle,rgba(249,115,22,.4),transparent 70%);top:28%;right:-160px;animation-delay:-5s}
 .orb3{width:500px;height:500px;background:radial-gradient(circle,rgba(232,114,74,.36),transparent 70%);bottom:-120px;left:22%;animation-delay:-9s}
@@ -92,6 +94,7 @@ body{background:radial-gradient(ellipse at 20% 0%,#1a0e0d 0%,transparent 50%),ra
 /* ── PIN ── */
 #pinGate{position:fixed;inset:0;z-index:9000;background:radial-gradient(ellipse at center,#1a0e08 0%,#000 90%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:20px;transition:opacity .9s var(--ease),visibility .9s;overflow:hidden}
 #pinGate.hidden{opacity:0;visibility:hidden;pointer-events:none}
+#pinGate.hidden-instant{opacity:0;visibility:hidden;pointer-events:none;transition:none!important}
 /* Memory cycling backdrop on PIN screen */
 #pgMemBg{position:absolute;inset:0;z-index:0;pointer-events:none}
 .pgmem-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 2s ease-in-out}
@@ -604,7 +607,7 @@ section.section.active{display:block;animation:sectionIn .6s var(--ease)}
 <canvas id="confetti" aria-hidden="true"></canvas>
 <audio id="bell" src="./bell.wav" preload="auto"></audio>
 <div class="toast" id="toast"></div>
-<a id="fbBtn" href="./feedback.html" target="_blank" rel="noopener" title="Share thoughts with Deep" style="position:fixed;bottom:24px;left:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#f5c557,#f97316);display:flex;align-items:center;justify-content:center;font-size:1.5rem;text-decoration:none;z-index:9500;box-shadow:0 8px 30px rgba(249,115,22,.5),0 0 30px rgba(245,197,87,.3);cursor:pointer;transition:transform .25s,box-shadow .25s;animation:fbPulse 3s ease-in-out infinite">💌</a>
+<a id="fbBtn" href="./salina_feedback.html" target="_blank" rel="noopener" title="Share thoughts with Deep" style="position:fixed;bottom:24px;left:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#f5c557,#f97316);display:flex;align-items:center;justify-content:center;font-size:1.5rem;text-decoration:none;z-index:9500;box-shadow:0 8px 30px rgba(249,115,22,.5),0 0 30px rgba(245,197,87,.3);cursor:pointer;transition:transform .25s,box-shadow .25s;animation:fbPulse 3s ease-in-out infinite">💌</a>
 <style>@keyframes fbPulse{0%,100%{box-shadow:0 8px 30px rgba(249,115,22,.5),0 0 30px rgba(245,197,87,.3)}50%{box-shadow:0 8px 40px rgba(249,115,22,.7),0 0 50px rgba(245,197,87,.5)}}#fbBtn:hover{transform:translateY(-3px) scale(1.08)}</style>
 <div id="pinGate"><div id="pgMemBg"></div><div class="pg-title">SALINA<em>Family hub</em></div><div class="pg-sub">Enter PIN to continue</div><div class="pg-hint">Hint: Mum&#39;s birthday &middot; DDMMYY</div><div class="pg-dots"><div class="pg-dot" id="pd0"></div><div class="pg-dot" id="pd1"></div><div class="pg-dot" id="pd2"></div><div class="pg-dot" id="pd3"></div><div class="pg-dot" id="pd4"></div><div class="pg-dot" id="pd5"></div></div><div class="pg-err" id="pgErr">&nbsp;</div><div class="pg-pad"><div class="pg-key" data-k="1">1</div><div class="pg-key" data-k="2">2</div><div class="pg-key" data-k="3">3</div><div class="pg-key" data-k="4">4</div><div class="pg-key" data-k="5">5</div><div class="pg-key" data-k="6">6</div><div class="pg-key" data-k="7">7</div><div class="pg-key" data-k="8">8</div><div class="pg-key" data-k="9">9</div><div></div><div class="pg-key" data-k="0">0</div><div class="pg-key del" data-k="del">DEL</div></div><div id="pgMemLabel">A Memory of Mum</div></div>
 <div id="cine" onclick="skipCine()"><div class="cine-sanskrit"><span class="cine-om">&#x950;</span>&#x936;&#x93E;&#x928;&#x94D;&#x924;&#x93F;&#x903; &#x936;&#x93E;&#x928;&#x94D;&#x924;&#x93F;&#x903; &#x936;&#x93E;&#x928;&#x94D;&#x924;&#x93F;&#x903;</div><div class="cine-portrait"><img id="cinePortraitImg" src="./mum-portrait.png" onerror="this.onerror=null;this.src='./memories/medium/02012011521.jpg'" alt="Tulawati Lal Mummy"></div><div class="cine-name">Tulawati Lal<em>&laquo;MUMMY&raquo;</em></div><div class="cine-dates">Salina &middot; 12 Months &middot; 15-16 August 2026</div><button class="cine-skip" onclick="event.stopPropagation();skipCine()">SKIP &#8250;</button></div><main id="app" hidden>

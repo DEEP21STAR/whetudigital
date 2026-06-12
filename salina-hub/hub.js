@@ -60,7 +60,7 @@ document.addEventListener('keydown', e => {
 
 /* Auto-unlock if already unlocked this session */
 if (sessionStorage.getItem('salina_unlocked') === '1') {
-  $('#pinGate').classList.add('hidden');
+  $('#pinGate').classList.add('hidden-instant');
   // Skip cine if already seen this session
   if (sessionStorage.getItem('salina_cine_seen') === '1') {
     $('#cine').classList.add('hidden');
@@ -687,8 +687,15 @@ function updateTimestamp() {
     cycleTimer = setInterval(nextSlide, CYCLE_MS);
   }
 
-  // Load photos from manifest then build slideshow
+  // Load photos from manifest, build slides ONCE (no double-build flicker)
   function loadAndStart() {
+    // Show portrait immediately via CSS — no DOM nodes yet, no flash
+    bg.style.backgroundImage = `url('${PORTRAIT}')`;
+    bg.style.backgroundSize  = 'cover';
+    bg.style.backgroundPosition = 'center';
+    bg.style.opacity = '0.22';
+    bg.style.transition = 'opacity 2s ease-in-out';
+
     fetch('./photos_manifest.json')
       .then(r => r.json())
       .then(manifest => {
@@ -696,31 +703,33 @@ function updateTimestamp() {
           .map(m => ({ m, sort: Math.random() }))
           .sort((a, b) => a.sort - b.sort)
           .map(x => x.m);
-        // Portrait first, then up to 20 random memory photos
         const memPhotos = shuffled.slice(0, 20).map(m => './' + (m.medium || m.thumb || m.orig));
         photos = [PORTRAIT, ...memPhotos];
+      })
+      .catch(() => { /* fallback: portrait only */ })
+      .finally(() => {
+        // Remove CSS placeholder THEN build DOM slides once — no innerHTML flash
+        bg.style.backgroundImage = '';
+        bg.style.backgroundSize  = '';
+        bg.style.backgroundPosition = '';
+        bg.style.opacity = '';
+        bg.style.transition = '';
         buildSlides();
         startCycle();
-      })
-      .catch(() => {
-        // Fallback: just portrait
-        buildSlides();
       });
   }
 
-  // Stop slideshow when PIN unlocked
+  // Stop slideshow when PIN unlocked (handles both .hidden and .hidden-instant)
   const pinGate = document.getElementById('pinGate');
   if (pinGate) {
     new MutationObserver(() => {
-      if (pinGate.classList.contains('hidden')) {
+      if (pinGate.classList.contains('hidden') || pinGate.classList.contains('hidden-instant')) {
         if (cycleTimer) { clearInterval(cycleTimer); cycleTimer = null; }
       }
     }).observe(pinGate, { attributes: true, attributeFilter: ['class'] });
   }
 
-  // Start immediately (before manifest loads, show portrait)
-  buildSlides();
-  startCycle();
+  // Start (single path — no double buildSlides)
   loadAndStart();
 })();
 
