@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>SALINA · Invitation Manager</title>
+<style>
+html{background:#06030a}
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#06030a;--bg2:#0d050c;--card:rgba(26,14,8,.85);
+  --gold:#f5c557;--gold2:#fff3d6;--orange:#f97316;--coral:#e8724a;
+  --text:#f0e6d3;--text2:#c9b89a;--muted:#7a6754;
+  --border:rgba(245,197,87,.22);--border2:rgba(245,197,87,.42);
+  --ok:#10b981;--warn:#f59e0b;--err:#ef4444;--info:#60a5fa;
+  --serif:'Georgia',serif;--sans:'Segoe UI',system-ui,sans-serif;--mono:'Courier New',monospace;
+  --r:12px;
+}
+body{font-family:var(--sans);background:radial-gradient(ellipse at 20% 0%,#1a0e0d,transparent 55%),radial-gradient(ellipse at 80% 100%,#0d0716,transparent 55%),var(--bg);color:var(--text);min-height:100vh;padding:0 0 60px}
+
+/* ── Header ── */
+.header{background:rgba(10,5,18,.92);border-bottom:1px solid var(--border);padding:18px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;backdrop-filter:blur(16px)}
+.header-mark{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--orange));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#1a0e08;flex-shrink:0}
+.header-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--gold2)}
+.header-title em{display:block;font-style:normal;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;font-family:var(--mono);margin-top:2px}
+.header-back{margin-left:auto;padding:8px 16px;background:rgba(245,197,87,.1);border:1px solid var(--border);border-radius:8px;color:var(--gold);font-size:12px;letter-spacing:1px;text-decoration:none;text-transform:uppercase;font-family:var(--mono)}
+.header-back:hover{background:rgba(245,197,87,.2)}
+
+/* ── Stats bar ── */
+.stats-bar{display:flex;gap:10px;padding:16px 20px;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+.stat-chip{flex:1;min-width:100px;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;text-align:center}
+.stat-chip .n{font-family:var(--serif);font-size:26px;font-weight:700;color:var(--gold2)}
+.stat-chip .l{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:4px}
+.stat-chip.ok .n{color:var(--ok)}
+.stat-chip.warn .n{color:var(--warn)}
+.stat-chip.info .n{color:var(--info)}
+
+/* ── Toolbar ── */
+.toolbar{padding:14px 20px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--border);background:rgba(10,5,18,.5)}
+.search-wrap{flex:1;min-width:200px;position:relative}
+.search-wrap input{width:100%;padding:10px 10px 10px 36px;background:rgba(10,5,18,.7);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-family:var(--sans)}
+.search-wrap input:focus{outline:none;border-color:var(--gold)}
+.search-wrap::before{content:"🔍";position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none}
+.filter-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.ftab{padding:8px 14px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:11px;letter-spacing:1px;cursor:pointer;font-family:var(--mono);text-transform:uppercase;transition:all .2s}
+.ftab:hover{border-color:var(--gold);color:var(--gold)}
+.ftab.active{background:rgba(245,197,87,.18);border-color:var(--gold);color:var(--gold2)}
+.sort-btn{padding:8px 14px;background:rgba(245,197,87,.08);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:11px;letter-spacing:1px;cursor:pointer;font-family:var(--mono);text-transform:uppercase}
+.sort-btn:hover{color:var(--gold);border-color:var(--gold)}
+
+/* ── Table ── */
+.table-wrap{overflow-x:auto;padding:0 20px 20px}
+table{width:100%;border-collapse:collapse;margin-top:14px;min-width:680px}
+thead th{padding:10px 12px;text-align:left;font-family:var(--mono);font-size:9.5px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+thead th:hover{color:var(--gold)}
+thead th .sort-arrow{margin-left:4px;opacity:.4}
+thead th.sorted .sort-arrow{opacity:1;color:var(--gold)}
+tbody tr{border-bottom:1px solid rgba(245,197,87,.06);transition:background .15s}
+tbody tr:hover{background:rgba(245,197,87,.04)}
+tbody td{padding:11px 12px;font-size:13.5px;vertical-align:middle}
+.td-name{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--gold2)}
+.td-phone{font-family:var(--mono);font-size:12px;color:var(--text2);letter-spacing:.5px}
+.td-phone a{color:inherit;text-decoration:none}
+.td-phone a:hover{color:var(--gold);text-decoration:underline}
+.wa-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;font-size:11px;font-family:var(--mono);letter-spacing:1px;font-weight:600}
+.wa-badge.yes{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.3)}
+.wa-badge.no{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2)}
+.rsvp-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:6px;font-size:11px;font-family:var(--mono);letter-spacing:1px;font-weight:600;cursor:pointer}
+.rsvp-badge.attending{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.3)}
+.rsvp-badge.declined{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2)}
+.rsvp-badge.pending{background:rgba(122,103,84,.12);color:var(--muted);border:1px solid rgba(122,103,84,.25)}
+.rsvp-badge.loading{background:rgba(96,165,250,.1);color:var(--info);border:1px solid rgba(96,165,250,.2);animation:blink 1.2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:.6}50%{opacity:1}}
+.actions{display:flex;gap:6px;flex-wrap:nowrap}
+.btn-wa{padding:6px 12px;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.3);border-radius:7px;color:#25d366;font-size:11px;font-family:var(--mono);cursor:pointer;text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;transition:all .15s}
+.btn-wa:hover{background:rgba(37,211,102,.22);border-color:#25d366}
+.btn-sms{padding:6px 12px;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.25);border-radius:7px;color:var(--info);font-size:11px;font-family:var(--mono);cursor:pointer;text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;transition:all .15s}
+.btn-sms:hover{background:rgba(96,165,250,.2);border-color:var(--info)}
+.btn-rsvp{padding:6px 11px;background:rgba(245,197,87,.08);border:1px solid var(--border);border-radius:7px;color:var(--muted);font-size:11px;font-family:var(--mono);cursor:pointer;transition:all .15s}
+.btn-rsvp:hover{color:var(--gold);border-color:var(--gold)}
+
+/* ── Empty state ── */
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty .e-ico{font-size:3rem;margin-bottom:12px}
+
+/* ── Loading ── */
+.loading-row td{text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:12px}
+
+/* ── Toast ── */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(245,197,87,.9);color:#1a0e08;padding:10px 20px;border-radius:10px;font-family:var(--mono);font-size:12px;letter-spacing:1px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
+#toast.show{opacity:1}
+
+/* ── RSVP modal ── */
+#rsvpModal{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.7);align-items:center;justify-content:center;padding:20px}
+#rsvpModal.show{display:flex}
+.modal-card{background:rgba(26,14,8,.97);border:1px solid var(--border2);border-radius:20px;padding:28px;max-width:420px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.modal-title{font-family:var(--serif);font-size:18px;color:var(--gold);margin-bottom:8px}
+.modal-name{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--gold2);margin-bottom:20px}
+.modal-btns{display:flex;flex-direction:column;gap:10px}
+.m-btn{padding:14px;border-radius:12px;border:1px solid var(--border);background:rgba(245,197,87,.06);color:var(--text);font-family:var(--sans);font-size:15px;cursor:pointer;transition:all .2s;text-align:left;display:flex;align-items:center;gap:12px}
+.m-btn:hover{background:rgba(245,197,87,.14);border-color:var(--gold)}
+.m-btn-cancel{margin-top:6px;padding:10px;background:transparent;border:none;color:var(--muted);cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase}
+
+/* ── SMS guide section ── */
+.sms-guide{margin:0 20px 20px;padding:20px 22px;background:var(--card);border:1px solid var(--border);border-radius:14px}
+.sms-guide h3{font-family:var(--serif);font-size:17px;color:var(--gold);margin-bottom:10px}
+.sms-guide p{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:8px}
+.sms-guide .step{padding:8px 12px;background:rgba(10,5,18,.5);border-left:3px solid var(--gold);border-radius:0 6px 6px 0;margin:6px 0;font-size:13px;color:var(--text2)}
+.sms-guide .step b{color:var(--gold2)}
+.sms-guide a{color:var(--gold)}
+
+/* ── Invite message preview ── */
+.msg-preview{margin:0 20px 20px;padding:18px;background:rgba(10,5,18,.7);border:1px solid var(--border);border-radius:12px;font-size:13px;color:var(--text2);line-height:1.7;white-space:pre-wrap;font-family:var(--mono)}
+
+.section-label{padding:14px 20px 6px;font-family:var(--mono);font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-mark">🪔</div>
+  <div class="header-title">Invitation Manager<em>SALINA · Tulawati Lal</em></div>
+  <a class="header-back" href="./hub.html">← Hub</a>
+</div>
+
+<!-- Stats bar -->
+<div class="stats-bar" id="statsBar">
+  <div class="stat-chip"><div class="n" id="sTotal">…</div><div class="l">Contacts</div></div>
+  <div class="stat-chip info"><div class="n" id="sWA">…</div><div class="l">WhatsApp</div></div>
+  <div class="stat-chip warn"><div class="n" id="sNoWA">…</div><div class="l">SMS Only</div></div>
+  <div class="stat-chip ok"><div class="n" id="sRsvpd">…</div><div class="l">RSVP'd</div></div>
+  <div class="stat-chip"><div class="n" id="sPending">…</div><div class="l">Pending</div></div>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar">
+  <div class="search-wrap">
+    <input id="searchInput" type="search" placeholder="Search name or phone…" oninput="applyFilters()">
+  </div>
+  <div class="filter-tabs">
+    <button class="ftab active" data-f="all" onclick="setFilter('all',this)">All</button>
+    <button class="ftab" data-f="wa" onclick="setFilter('wa',this)">WhatsApp ✅</button>
+    <button class="ftab" data-f="nowa" onclick="setFilter('nowa',this)">SMS Only ❌</button>
+    <button class="ftab" data-f="rsvpd" onclick="setFilter('rsvpd',this)">RSVP'd</button>
+    <button class="ftab" data-f="pending" onclick="setFilter('pending',this)">Pending</button>
+  </div>
+  <button class="sort-btn" onclick="toggleSort()">⇅ A-Z</button>
+</div>
+
+<!-- Table -->
+<div class="table-wrap">
+  <table id="contactTable">
+    <thead>
+      <tr>
+        <th onclick="sortBy('name')" id="th-name"># Name <span class="sort-arrow">↕</span></th>
+        <th onclick="sortBy('phone')" id="th-phone">Phone <span class="sort-arrow">↕</span></th>
+        <th>WhatsApp</th>
+        <th onclick="sortBy('rsvp')" id="th-rsvp">RSVP <span class="sort-arrow">↕</span></th>
+        <th>Send Invitation</th>
+      </tr>
+    </thead>
+    <tbody id="contactBody">
+      <tr class="loading-row"><td colspan="5">Loading contacts…</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- SMS Desktop Guide -->
+<div class="section-label">📱 Send SMS from Desktop (no WhatsApp needed)</div>
+<div class="sms-guide">
+  <h3>Windows Phone Link — free, built into Windows 11</h3>
+  <p>Works with any Android phone. Once set up, you can send & receive SMS from your desktop.</p>
+  <div class="step"><b>Step 1:</b> Press <b>Win key</b> → search <b>"Phone Link"</b> → open it</div>
+  <div class="step"><b>Step 2:</b> On your Android phone → install <b>"Link to Windows"</b> app (Google Play)</div>
+  <div class="step"><b>Step 3:</b> Scan the QR code shown in Phone Link on your PC with the app</div>
+  <div class="step"><b>Step 4:</b> Accept the Bluetooth pairing → done. Messages tab appears in Phone Link</div>
+  <div class="step"><b>Step 5:</b> Click any SMS button below to pre-fill the invitation → it opens in Phone Link or your default SMS app</div>
+  <p style="margin-top:12px"><b>Alternative:</b> If you use Google Messages on Android → open <a href="https://messages.google.com/web" target="_blank">messages.google.com/web</a> in Brave → scan QR → send SMS from browser.</p>
+</div>
+
+<!-- Invitation message preview -->
+<div class="section-label">📋 Invitation Message Template</div>
+<div class="msg-preview" id="msgPreview">Loading…</div>
+
+<!-- RSVP modal -->
+<div id="rsvpModal">
+  <div class="modal-card">
+    <div class="modal-title">Update RSVP Status for</div>
+    <div class="modal-name" id="modalName">—</div>
+    <div class="modal-btns">
+      <button class="m-btn" onclick="setRsvp('attending')">✅ Attending — will be there</button>
+      <button class="m-btn" onclick="setRsvp('declined')">❌ Declined — cannot make it</button>
+      <button class="m-btn" onclick="setRsvp('pending')">🕐 Pending — awaiting reply</button>
+    </div>
+    <button class="m-btn-cancel" onclick="closeModal()">Cancel</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+/* ── Config ── */
+const RSVP_URL = 'https://whetudigital.co.nz/salina-hub/rsvp.html';
+const SUPABASE_URL = 'https://rfprohbmzwmegzqvcgnn.supabase.co/rest/v1/salina_rsvps';
+const SUPABASE_KEY = 'sb_publishable_HxEvloe9FMmbsoom8FnRSw_8HKvwrqX';
+
+const INVITE_MSG = (name, link) =>
+`🪔 Dear ${name},
+
+You are warmly invited to the 12-month Salina ceremony for our beloved Mum, Tulawati Lal "Mummy".
+
+🗓 15–16 August 2026 (Saturday & Sunday)
+📍 Hamilton, New Zealand
+
+Please RSVP via the link below:
+${link}
+
+With love & blessings 🙏
+Sachind & Family`;
+
+/* ── State ── */
+let allContacts = [];
+let rsvpData = {};       // name (lowercase) → response string
+let localRsvp = {};      // localStorage overrides
+let currentFilter = 'all';
+let sortCol = 'name';
+let sortAsc = true;
+let modalContact = null;
+
+/* ── Toast ── */
+function toast(msg, ms=2400) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), ms);
+}
+
+/* ── Load contacts.json ── */
+async function loadContacts() {
+  try {
+    const r = await fetch('./contacts.json');
+    const data = await r.json();
+    // Filter out placeholder entries (name = "," or empty)
+    allContacts = data.filter(c => c.name && c.name.trim() !== ',' && c.name.trim() !== '').map(c => ({
+      id: c.id,
+      name: c.name.trim(),
+      phone: (c.phone || '').trim(),
+      wa: (c.wa || '').trim(),
+      email: (c.email || '').trim(),
+      status: c.status || 'pending',
+      notes: c.notes || '',
+    }));
+    return true;
+  } catch (e) {
+    console.error('Failed to load contacts.json:', e);
+    return false;
+  }
+}
+
+/* ── Load RSVP data from Supabase ── */
+async function loadRsvpData() {
+  try {
+    const r = await fetch(SUPABASE_URL + '?select=name,response&limit=1000', {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    if (!r.ok) return;
+    const rows = await r.json();
+    // Build map: lowercase name → latest response
+    rsvpData = {};
+    rows.forEach(row => {
+      if (row.name) rsvpData[row.name.toLowerCase().trim()] = row.response;
+    });
+  } catch (e) {
+    console.warn('Supabase RSVP load failed:', e);
+  }
+}
+
+/* ── Get RSVP status for a contact ── */
+function getRsvpStatus(contact) {
+  const key = contact.name.toLowerCase();
+  if (localRsvp[contact.id] !== undefined) return localRsvp[contact.id];
+  if (rsvpData[key]) return rsvpData[key];
+  return contact.status || 'pending';
+}
+
+/* ── Build invitation link ── */
+function inviteLink(name) {
+  return RSVP_URL + '?name=' + encodeURIComponent(name);
+}
+
+/* ── WhatsApp link ── */
+function waLink(contact) {
+  const num = (contact.wa || contact.phone).replace(/[^0-9+]/g, '');
+  const msg = INVITE_MSG(contact.name, inviteLink(contact.name));
+  return 'https://wa.me/' + num.replace('+','') + '?text=' + encodeURIComponent(msg);
+}
+
+/* ── SMS link (opens Phone Link or default SMS handler) ── */
+function smsLink(contact) {
+  const num = contact.phone.replace(/[^0-9+]/g, '');
+  const msg = INVITE_MSG(contact.name, inviteLink(contact.name));
+  return 'sms:' + num + '?body=' + encodeURIComponent(msg);
+}
+
+/* ── Render stats ── */
+function renderStats() {
+  const total = allContacts.length;
+  const waCount = allContacts.filter(c => c.wa).length;
+  const noWa = total - waCount;
+  const rsvpd = allContacts.filter(c => {
+    const s = getRsvpStatus(c);
+    return s === 'attending' || s === 'declined';
+  }).length;
+  const pending = total - rsvpd;
+  document.getElementById('sTotal').textContent = total;
+  document.getElementById('sWA').textContent = waCount;
+  document.getElementById('sNoWA').textContent = noWa;
+  document.getElementById('sRsvpd').textContent = rsvpd;
+  document.getElementById('sPending').textContent = pending;
+}
+
+/* ── Render table ── */
+function renderTable() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  let rows = allContacts.filter(c => {
+    if (search && !c.name.toLowerCase().includes(search) && !c.phone.includes(search)) return false;
+    const rsvp = getRsvpStatus(c);
+    if (currentFilter === 'wa') return !!c.wa;
+    if (currentFilter === 'nowa') return !c.wa;
+    if (currentFilter === 'rsvpd') return rsvp === 'attending' || rsvp === 'declined';
+    if (currentFilter === 'pending') return rsvp === 'pending';
+    return true;
+  });
+
+  // Sort
+  rows.sort((a, b) => {
+    let av, bv;
+    if (sortCol === 'name')   { av = a.name.toLowerCase(); bv = b.name.toLowerCase(); }
+    else if (sortCol === 'phone') { av = a.phone; bv = b.phone; }
+    else if (sortCol === 'rsvp')  { av = getRsvpStatus(a); bv = getRsvpStatus(b); }
+    else { av = ''; bv = ''; }
+    if (av < bv) return sortAsc ? -1 : 1;
+    if (av > bv) return sortAsc ? 1 : -1;
+    return 0;
+  });
+
+  const tbody = document.getElementById('contactBody');
+  if (rows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:12px">No contacts match this filter.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map((c, i) => {
+    const rsvp = getRsvpStatus(c);
+    const rsvpLabel = rsvp === 'attending' ? '✅ Attending' : rsvp === 'declined' ? '❌ Declined' : '⏳ Pending';
+    const rsvpClass = rsvp === 'attending' ? 'attending' : rsvp === 'declined' ? 'declined' : 'pending';
+    const hasWa = !!c.wa;
+    const phoneDisplay = c.phone || '—';
+    const waNum = (c.wa || c.phone).replace(/[^0-9+]/g, '');
+
+    return `<tr>
+      <td class="td-name">${i+1}. ${esc(c.name)}</td>
+      <td class="td-phone">
+        ${c.phone ? `<a href="tel:${c.phone}" title="Call">${esc(c.phone)}</a>` : '<span style="color:var(--muted)">—</span>'}
+      </td>
+      <td><span class="wa-badge ${hasWa ? 'yes' : 'no'}">${hasWa ? '✅ WA' : '❌ SMS'}</span></td>
+      <td><span class="rsvp-badge ${rsvpClass}" onclick="openModal(${c.id})" title="Click to update">${rsvpLabel}</span></td>
+      <td class="actions">
+        ${hasWa && waNum
+          ? `<a class="btn-wa" href="${waLink(c)}" target="_blank" rel="noopener">📲 WhatsApp</a>`
+          : `<a class="btn-sms" href="${smsLink(c)}" onclick="smsClick(event,'${c.phone.replace(/'/g,"\\'")}','${c.name.replace(/'/g,"\\'")}')">💬 SMS</a>`
+        }
+        <button class="btn-rsvp" onclick="openModal(${c.id})" title="Log RSVP">✎ RSVP</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ── SMS click handler (copy to clipboard as fallback) ── */
+function smsClick(e, phone, name) {
+  // If sms: scheme not handled, fall back to clipboard copy
+  const msg = INVITE_MSG(name, inviteLink(name));
+  setTimeout(() => {
+    if (document.hasFocus()) {
+      navigator.clipboard.writeText(msg).then(() => {
+        toast('Message copied — paste into SMS or text app');
+      }).catch(() => {
+        prompt('Copy invitation for ' + name + ':', msg);
+      });
+    }
+  }, 600);
+}
+
+/* ── Filter / sort ── */
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+function applyFilters() { renderTable(); }
+
+function sortBy(col) {
+  if (sortCol === col) { sortAsc = !sortAsc; }
+  else { sortCol = col; sortAsc = true; }
+  document.querySelectorAll('thead th').forEach(th => th.classList.remove('sorted'));
+  const th = document.getElementById('th-' + col);
+  if (th) th.classList.add('sorted');
+  renderTable();
+}
+
+function toggleSort() { sortAsc = !sortAsc; renderTable(); }
+
+/* ── RSVP modal ── */
+function openModal(id) {
+  modalContact = allContacts.find(c => c.id === id);
+  if (!modalContact) return;
+  document.getElementById('modalName').textContent = modalContact.name;
+  document.getElementById('rsvpModal').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('rsvpModal').classList.remove('show');
+  modalContact = null;
+}
+function setRsvp(status) {
+  if (!modalContact) return;
+  localRsvp[modalContact.id] = status;
+  // Persist to localStorage
+  try { localStorage.setItem('salina_rsvp_overrides', JSON.stringify(localRsvp)); } catch(e){}
+  // Also update contacts array
+  const c = allContacts.find(x => x.id === modalContact.id);
+  if (c) c.status = status;
+  closeModal();
+  renderTable();
+  renderStats();
+  toast('RSVP updated: ' + modalContact.name + ' → ' + status);
+}
+
+/* ── Message preview ── */
+function renderMsgPreview() {
+  const sample = allContacts[0];
+  if (!sample) return;
+  document.getElementById('msgPreview').textContent = INVITE_MSG(sample.name, inviteLink(sample.name));
+}
+
+/* ── Init ── */
+(async () => {
+  // Load localStorage RSVP overrides
+  try {
+    const saved = localStorage.getItem('salina_rsvp_overrides');
+    if (saved) localRsvp = JSON.parse(saved);
+  } catch(e){}
+
+  const [ok] = await Promise.all([loadContacts(), loadRsvpData()]);
+  if (!ok) {
+    document.getElementById('contactBody').innerHTML =
+      `<tr class="loading-row"><td colspan="5">⚠ Could not load contacts.json — open this file via a local server (e.g. run hub.html with the local server) or from NAS.</td></tr>`;
+    return;
+  }
+
+  renderStats();
+  renderTable();
+  renderMsgPreview();
+
+  // Sort by name A-Z by default
+  sortBy('name');
+})();
+
+/* ── Keyboard shortcut: Escape closes modal ── */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+</body>
+</html>

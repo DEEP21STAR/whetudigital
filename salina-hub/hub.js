@@ -10,7 +10,7 @@ const CFG = {
   PIN: localStorage.getItem('salina_pin') || '020146',  // Mum's birthday DDMMYY (2 Jan 1946) — set via localStorage to override
   EVENT_DATE: new Date('2026-08-15T18:30:00+12:00'),
   VENUE_LAT: -37.7833, VENUE_LON: 175.2900,
-  SHARE_URL: localStorage.getItem('salina_share_url') || location.href.replace(/hub\.html.*/, 'index.html'),
+  SHARE_URL: localStorage.getItem('salina_share_url') || location.href.replace(/hub\.html.*/, 'rsvp.html').replace(/index\.html.*/, 'rsvp.html'),
   ADMIN_PIN: localStorage.getItem('salina_admin_pin') || '1946',
 };
 
