@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coach Guide — Train with Mimi</title>
+<meta name="description" content="Everything Mimi needs to run her coaching business from the dashboard.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg: oklch(8% 0.03 340); --primary: oklch(72% 0.28 340); --primary-dim: oklch(72% 0.28 340 / 0.15);
+  --primary-glow: oklch(72% 0.28 340 / 0.4); --gold: oklch(85% 0.18 80); --accent: oklch(76% 0.22 300);
+  --text: oklch(96% 0.005 340); --text-dim: oklch(70% 0.02 340); --text-muted: oklch(50% 0.015 340);
+  --glass: oklch(15% 0.03 340 / 0.7); --glass-border: oklch(72% 0.28 340 / 0.2);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.65; overflow-x: hidden; }
+body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse 700px 500px at 15% 15%, oklch(72% 0.28 340 / 0.25), transparent 60%),
+              radial-gradient(ellipse 500px 600px at 85% 75%, oklch(85% 0.18 80 / 0.12), transparent 60%); filter: blur(60px); }
+.nav { position: sticky; top: 0; z-index: 50; background: linear-gradient(180deg, oklch(8% 0.03 340 / 0.95), oklch(8% 0.03 340 / 0.7)); backdrop-filter: blur(14px); padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--glass-border); }
+.brand { font-family: 'Space Grotesk'; font-weight: 800; font-size: 1.4rem; background: linear-gradient(135deg, var(--primary), var(--gold)); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: 0.04em; }
+.back { font-family: 'Geist Mono'; font-size: 0.78rem; color: var(--text-dim); text-decoration: none; padding: 8px 14px; border: 1px solid var(--glass-border); border-radius: 999px; letter-spacing: 1px; text-transform: uppercase; }
+.back:hover { color: var(--primary); border-color: var(--primary); }
+.hero { padding: 80px 24px 60px; max-width: 880px; margin: 0 auto; text-align: center; }
+.hero-eyebrow { display: inline-block; padding: 6px 14px; background: var(--primary-dim); border: 1px solid var(--primary); border-radius: 999px; font-family: 'Geist Mono'; font-size: 0.72rem; color: var(--primary); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 22px; }
+.hero h1 { font-family: 'Space Grotesk'; font-weight: 800; font-size: clamp(2.4rem, 5vw, 3.8rem); line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 18px; }
+.hero h1 .accent { background: linear-gradient(135deg, var(--primary), var(--gold)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero p { color: var(--text-dim); font-size: 1.15rem; max-width: 640px; margin: 0 auto; }
+.toc { max-width: 720px; margin: 40px auto 60px; padding: 24px; background: var(--glass); border: 1px solid var(--glass-border); border-radius: 18px; backdrop-filter: blur(12px); }
+.toc-title { font-family: 'Geist Mono'; font-size: 0.7rem; color: var(--primary); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px; }
+.toc ol { padding-left: 22px; color: var(--text); }
+.toc li { padding: 4px 0; }
+.toc a { color: var(--text); text-decoration: none; transition: color 0.2s; }
+.toc a:hover { color: var(--primary); }
+.section { max-width: 820px; margin: 0 auto; padding: 60px 24px; border-top: 1px solid var(--glass-border); }
+.section-num { font-family: 'Geist Mono'; font-size: 0.78rem; color: var(--primary); letter-spacing: 3px; text-transform: uppercase; }
+.section h2 { font-family: 'Space Grotesk'; font-weight: 700; font-size: clamp(1.8rem, 3.5vw, 2.6rem); margin: 10px 0 24px; letter-spacing: -0.015em; line-height: 1.2; }
+.section h2 .accent { background: linear-gradient(135deg, var(--primary), var(--gold)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.section p { color: var(--text); font-size: 1.05rem; margin-bottom: 16px; }
+.section ul, .section ol { margin: 0 0 18px 26px; color: var(--text); }
+.section li { padding: 4px 0; }
+.callout { padding: 18px 22px; background: var(--primary-dim); border-left: 3px solid var(--primary); border-radius: 8px; margin: 22px 0; }
+.callout strong { color: var(--primary); font-family: 'Geist Mono'; font-size: 0.7rem; letter-spacing: 3px; text-transform: uppercase; display: block; margin-bottom: 6px; }
+.kbd { font-family: 'Geist Mono'; padding: 2px 8px; background: oklch(20% 0.03 340); border: 1px solid var(--glass-border); border-radius: 4px; font-size: 0.85rem; color: var(--primary); }
+.footer { text-align: center; padding: 80px 24px 40px; border-top: 1px solid var(--glass-border); }
+.footer-logo { font-family: 'Space Grotesk'; font-weight: 800; font-size: clamp(2rem, 5vw, 3.4rem); background: linear-gradient(90deg, var(--primary), var(--gold), var(--primary)); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shim 6s ease-in-out infinite; }
+@keyframes shim { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+.footer-meta { font-family: 'Geist Mono'; font-size: 0.74rem; color: var(--text-muted); letter-spacing: 2px; margin-top: 14px; text-transform: uppercase; }
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+.reveal.in { opacity: 1; transform: translateY(0); }
+
+.parent-brand { margin-top: 50px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.parent-eyebrow { font-family: 'Geist Mono', monospace; font-size: 0.7rem; color: var(--text-muted); letter-spacing: 4px; text-transform: uppercase; }
+.parent-wordmark { display: inline-flex; align-items: center; gap: 14px; padding: 8px 18px; border-radius: 999px; transition: background 0.35s var(--ease); cursor: pointer; }
+.parent-wordmark:hover { background: var(--primary-dim); }
+.parent-star { display: inline-flex; color: var(--gold); animation: starPulse 4s ease-in-out infinite; }
+@keyframes starPulse { 0%,100% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 12px var(--gold)); } 50% { transform: rotate(180deg) scale(1.15); filter: drop-shadow(0 0 22px var(--primary-glow)); } }
+.parent-text { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: clamp(1.3rem, 3vw, 1.8rem); letter-spacing: 0.04em;
+  background: linear-gradient(90deg, var(--gold), var(--primary), var(--gold)); background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent; animation: footShim 5s ease-in-out infinite; }
+.parent-tag { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 1rem; color: var(--text-dim); }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="brand">MIMI - COACH GUIDE</div>
+  <a href="./index.html" class="back">Back to dashboard</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow">For Mimi only - new client onboarding</div>
+  <h1>The first 5 days, and<br><span class="accent">every day after.</span></h1>
+  <p>You built the body. I'll keep the business honest. This guide walks through every screen, every button, and every decision the dashboard makes for you - so you know what to trust and where to step in.</p>
+</section>
+
+<section class="toc">
+  <div class="toc-title">In this guide</div>
+  <ol>
+    <li><a href="#d1">Day 1 - Set up your studio profile and PIN</a></li>
+    <li><a href="#d2">Day 2 - Add your first client + program</a></li>
+    <li><a href="#d3">Day 3 - Read your morning AI brief</a></li>
+    <li><a href="#d4">Day 4 - Send a branded email + SMS</a></li>
+    <li><a href="#d5">Day 5 - Launch a promo broadcast</a></li>
+    <li><a href="#ref">Reference - KPI cards, every panel explained</a></li>
+    <li><a href="#help">When something feels wrong</a></li>
+  </ol>
+</section>
+<section class="section" id="d1">
+  <div class="section-num">DAY 01</div>
+  <h2>Set up your <span class="accent">studio profile</span> and PIN</h2>
+  <p>Open the dashboard. First time only, you'll be asked to set a 4-digit PIN. Make it something only you and your phone know. The PIN never leaves your device - it's stored locally, no server, no leak risk.</p>
+  <p>Fill in: studio name (default: "Train with Mimi"), location (Aotearoa NZ), and your booking email. The booking email is what shows on the public services page when someone clicks "Book a free consult".</p>
+  <div class="callout"><strong>Why this matters</strong>Once your PIN is set, every refresh skips the login screen until you sign out. Saves you 8 seconds every morning - that's an hour a year.</div>
+</section>
+
+<section class="section" id="d2">
+  <div class="section-num">DAY 02</div>
+  <h2>Add your <span class="accent">first client</span> and program</h2>
+  <p>Click <span class="kbd">Clients</span> in the side nav. Click <span class="kbd">+ Add client</span> top-right. Required fields: name, email, phone, primary goal. Optional but recommended: starting weight, training experience, any injuries.</p>
+  <p>Once the client is saved, click their card and hit <span class="kbd">Program builder</span>. Drag exercises from the library onto the week-view. Each exercise has form cues, a common-mistake note, and a women-specific cue baked in - tap any exercise to expand.</p>
+  <div class="callout"><strong>Tip</strong>Start simpler than you think. A 4-exercise StrongHer template beats an 8-exercise plan they'll never finish. The library is sorted by difficulty (1-5 dots) - keep newbies on 1-2.</div>
+</section>
+
+<section class="section" id="d3">
+  <div class="section-num">DAY 03</div>
+  <h2>Read your <span class="accent">morning AI brief</span></h2>
+  <p>Every morning at 6:00 NZ time, the dashboard generates a "What should I do today" brief. It runs as a quiet background job - no email spam.</p>
+  <p>The brief gives you 3-5 prioritised actions for the day. Examples it surfaces:</p>
+  <ul>
+    <li>"Hana hasn't booked next month - send rebook prompt"</li>
+    <li>"Sophie hit her 100kg deadlift milestone yesterday - one-click celebrate"</li>
+    <li>"Revenue dropped 18% this week vs last - 2 candidate reasons"</li>
+  </ul>
+  <p>You can ignore, snooze, or one-click execute each action. The brief learns from what you accept vs ignore - within 30 days it gets specific to how you actually coach.</p>
+  <div class="callout"><strong>Don't trust blindly</strong>The AI is suggesting, not deciding. If a "send rebook prompt" doesn't feel right because Hana told you in person she's pausing, just dismiss it. The AI won't text anyone without your tap.</div>
+</section>
+
+<section class="section" id="d4">
+  <div class="section-num">DAY 04</div>
+  <h2>Send a branded <span class="accent">email or SMS</span></h2>
+  <p>Two channels: email (free, longer) and SMS (paid ~5c NZ each, instant). Both share the same template library and personalisation tokens.</p>
+  <p>To send: <span class="kbd">Comms</span> tab > pick template (Welcome / Week-1 check-in / Plateau pep-talk / Win-back / etc.) > pick the client > preview > send.</p>
+  <p>Personalisation tokens auto-fill from client data: <span class="kbd">{first_name}</span>, <span class="kbd">{last_session}</span>, <span class="kbd">{streak_weeks}</span>, <span class="kbd">{next_session_day}</span>. Drop them anywhere in the body.</p>
+  <p>Inbound replies land in <span class="kbd">Comms > Inbox</span>. Threaded by client. Email inbound is free (Gmail relay). SMS inbound is the same cost as outbound (paid).</p>
+  <div class="callout"><strong>Cost discipline</strong>Use email for nurture, SMS only for time-sensitive: booking reminders, missed-session prompts, and promo broadcasts. SMS broadcast to 50 clients = $2.50 NZ - worth it for a fill-the-gap promo.</div>
+</section>
+
+<section class="section" id="d5">
+  <div class="section-num">DAY 05</div>
+  <h2>Launch a <span class="accent">promo broadcast</span></h2>
+  <p>Promos live in <span class="kbd">Comms > Broadcast</span>. The flow:</p>
+  <ol>
+    <li><strong>Segment</strong> - tag-based filter (new lead / active / paused / inactive). Or hand-pick.</li>
+    <li><strong>Template</strong> - pick from the promo library. Tokens auto-fill per recipient.</li>
+    <li><strong>Channel</strong> - email, SMS, or both. SMS shows cost preview before send.</li>
+    <li><strong>Timing</strong> - "send now" or "AI-suggest best time". The AI looks at when each client typically replies (mornings vs evenings) and schedules per-person.</li>
+    <li><strong>Preview</strong> - shows the message as the first 3 recipients will see it, with their personal tokens filled in.</li>
+    <li><strong>Send</strong> - one tap. Real-time delivery + reply tracking starts immediately.</li>
+  </ol>
+  <p>Promo templates that work seasonally: school holidays = "fit-mum reset", post-NYE = "January transform", mid-winter = "indoor strength", spring = "wedding-prep 12-week".</p>
+</section>
+
+<section class="section" id="ref">
+  <div class="section-num">REFERENCE</div>
+  <h2>Every dashboard panel, <span class="accent">explained.</span></h2>
+  <p><strong>Active Clients</strong> - count of clients with status = active. Excludes paused, archived, churned. The trend below shows the count change vs 30 days ago.</p>
+  <p><strong>Sessions This Week</strong> - count of completed + booked sessions Mon-Sun. The dotted line is the current day - filled bars are done, dashed bars are upcoming.</p>
+  <p><strong>Monthly Revenue</strong> - sum of paid invoices in the current calendar month. Pulled from Stripe Connect once wired. Until then: marked SAMPLE.</p>
+  <p><strong>Avg Progress</strong> - composite score: streak, strength gain, body comp shift, retention. Capped at 100. The trend uses your last 90 days.</p>
+  <p><strong>Weekly Sessions chart</strong> - same data as the KPI, but per-day bars. Hover to see client names.</p>
+  <p><strong>Revenue Trend chart</strong> - rolling 6-month revenue. Inflection points (sharp dips/peaks) get auto-flagged with a small dot for "what changed".</p>
+  <p><strong>Today's Sessions</strong> - real-time. Click any session row to open the client's program, then mark sets done on the fly.</p>
+  <p><strong>Streak</strong> - days in a row you logged at least one session. Resets at midnight if zero sessions. Decorative + motivational - doesn't affect any data.</p>
+</section>
+
+<section class="section" id="help">
+  <div class="section-num">HELP</div>
+  <h2>When something <span class="accent">feels wrong</span></h2>
+  <p>If a number looks off, the dashboard has a verification path. Click any KPI > "Show source data". You'll see the raw rows that built the number. If those look wrong, the integration is the issue, not the dashboard.</p>
+  <p>If a client says they didn't get an email/SMS you sent: <span class="kbd">Comms > History</span> > click the send event > see delivery status (sent / opened / clicked / bounced).</p>
+  <p>For anything stuck, open Telegram and message Deep - the system pushes alerts to <span class="kbd">deepstar-phoenix</span> automatically when missions fail.</p>
+  <div class="callout"><strong>You are not on your own</strong>Every Saturday morning, the system runs a self-audit and emails you a "what changed this week" summary. If you ever wonder "did anything break?" - check Sunday inbox first.</div>
+</section>
+
+<footer class="footer">
+  <div class="footer-logo">Whetu Digital</div>
+  <div class="footer-meta">Built for Mimi, by Whetu Digital - hello@whetudigital.co.nz</div>
+</footer>
+
+<script>
+const io = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -10% 0px' });
+document.querySelectorAll('.section, .toc').forEach(el => { el.classList.add('reveal'); io.observe(el); });
+</script>
+</body>
+</html>

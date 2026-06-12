@@ -1,0 +1,59 @@
+[
+  {
+    "id": "session-reminder",
+    "name": "Session reminder - 24h",
+    "when": "24 hours before a booked session",
+    "body": "Hey {first_name}, your session with Mimi is tomorrow at {session_time}. Reply STOP to opt out. - Mimi",
+    "tokens": [
+      "first_name",
+      "session_time"
+    ],
+    "chars": 113
+  },
+  {
+    "id": "missed-you",
+    "name": "Missed session check-in",
+    "when": "2 hours after a missed booked session",
+    "body": "{first_name}, missed you this morning. All good? Reply with a quick word and we will reschedule for this week. - Mimi",
+    "tokens": [
+      "first_name"
+    ],
+    "chars": 127
+  },
+  {
+    "id": "promo-broadcast",
+    "name": "Promo - school holiday reset",
+    "when": "Manual broadcast on segment 'paused' or 'inactive'",
+    "body": "{first_name}, 12 spots opening for the fit-mum reset starting {start_date}. Reply IN if you want one. - Mimi",
+    "tokens": [
+      "first_name",
+      "start_date"
+    ],
+    "chars": 113
+  },
+  {
+    "id": "milestone",
+    "name": "Milestone celebration",
+    "when": "Auto-fire on big milestone (first 100kg, 12-week mark)",
+    "body": "{first_name} you absolute legend. {milestone_short}. Big proud of you. See you {next_session_day}. - M",
+    "tokens": [
+      "first_name",
+      "milestone_short",
+      "next_session_day"
+    ],
+    "chars": 105
+  },
+  {
+    "id": "payment-due",
+    "name": "Payment due - gentle reminder",
+    "when": "3 days before auto-debit fails or invoice due date",
+    "body": "Hey {first_name}, just a gentle heads up your {month_name} payment is due {due_date}. {amount_label}. If something is up, message me. - Mimi",
+    "tokens": [
+      "first_name",
+      "month_name",
+      "due_date",
+      "amount_label"
+    ],
+    "chars": 140
+  }
+]

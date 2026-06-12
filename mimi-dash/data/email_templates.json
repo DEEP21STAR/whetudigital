@@ -1,0 +1,211 @@
+[
+  {
+    "id": "welcome",
+    "name": "Welcome - new client",
+    "when": "Day 0 - within 2 hours of first booking",
+    "subject": "Welcome to the StrongHer movement, {first_name}",
+    "preheader": "Your first session is locked in. Here is what to expect.",
+    "body": [
+      "Hey {first_name},",
+      "I am so glad you said yes. The first decision is always the hardest - everything from here is easier than that one was.",
+      "Your first session is {first_session_day} at {first_session_time}. Here is what to bring: water bottle, runners, and an open mind. That is it. No fancy gear needed.",
+      "Before we meet, three quick reads (each under 2 minutes):",
+      "1. What StrongHer training actually looks like - {link_about}",
+      "2. Your home prep checklist - {link_prep}",
+      "3. The 4 women-only rules of this space - {link_rules}",
+      "If anything comes up before then, hit reply. I read every message myself.",
+      "See you {first_session_day}.",
+      "Mimi"
+    ],
+    "tokens": [
+      "first_name",
+      "first_session_day",
+      "first_session_time",
+      "link_about",
+      "link_prep",
+      "link_rules"
+    ],
+    "tone": "warm_direct"
+  },
+  {
+    "id": "week-1-checkin",
+    "name": "Week 1 check-in",
+    "when": "Day 7 - after first full week of training",
+    "subject": "How did week 1 actually feel, {first_name}?",
+    "preheader": "Real talk - the first week is always the hardest. Hit reply.",
+    "body": [
+      "{first_name},",
+      "One week in. You did {sessions_completed_w1} sessions. Your strongest lift so far: {best_lift_w1}.",
+      "Here is what I want to know - not the polite answer, the real one:",
+      "- How is your body feeling today? Tired-good or tired-too-much?",
+      "- What felt amazing last week?",
+      "- What felt awful?",
+      "Reply with even one word answers. I read every reply and adjust week 2 based on what you tell me.",
+      "Most women say week 2 is when their body starts to feel like it remembers. Trust the process.",
+      "M"
+    ],
+    "tokens": [
+      "first_name",
+      "sessions_completed_w1",
+      "best_lift_w1"
+    ],
+    "tone": "warm_curious"
+  },
+  {
+    "id": "plateau-pep",
+    "name": "Plateau pep talk",
+    "when": "When a client logs same weight 3+ sessions in a row on a key lift",
+    "subject": "Plateaus are not stuck - they are leveling up",
+    "preheader": "Your body is doing something specific right now. Here is what.",
+    "body": [
+      "{first_name},",
+      "I noticed your {plateau_lift} has stayed at {plateau_weight} for the last {plateau_sessions} sessions.",
+      "Here is the truth: plateaus are not a stop sign, they are a build-up. Your nervous system is laying down new wiring before it lets you express new strength. The work you are doing now is making the breakthrough possible - it just is not visible yet.",
+      "Three things we will do this week:",
+      "1. Drop the working weight 10 percent, add 2 reps. Volume drives the next jump.",
+      "2. One tempo set - 3 second descent. Time under tension flips the switch.",
+      "3. Sleep 30 minutes earlier. Recovery is where the strength actually lands.",
+      "We will retest {plateau_lift} on {retest_day}. Trust the plan.",
+      "M"
+    ],
+    "tokens": [
+      "first_name",
+      "plateau_lift",
+      "plateau_weight",
+      "plateau_sessions",
+      "retest_day"
+    ],
+    "tone": "reassuring_specific"
+  },
+  {
+    "id": "milestone",
+    "name": "Milestone celebration",
+    "when": "Auto-fire on first 100kg deadlift, 60kg bench, 80kg squat, 12-week mark, etc.",
+    "subject": "You just did {milestone_label} - and I am not surprised",
+    "preheader": "This is the moment we have been building for.",
+    "body": [
+      "{first_name}.",
+      "{milestone_label}.",
+      "I want you to read that line again. Out loud if you can.",
+      "{milestone_context_one_line}",
+      "Here is what just changed for you - not the lift. The way you walk into a room. The way you say no when something is not for you. The way your kids see you, if that is part of your story.",
+      "Take the rest of today and do something just for you. We will hit the gym again {next_session_day} - new ceiling, new chase.",
+      "Proud of you,",
+      "Mimi"
+    ],
+    "tokens": [
+      "first_name",
+      "milestone_label",
+      "milestone_context_one_line",
+      "next_session_day"
+    ],
+    "tone": "celebratory_grounded"
+  },
+  {
+    "id": "win-back",
+    "name": "Win-back - inactive client",
+    "when": "Client has not logged a session in 14+ days, status still active",
+    "subject": "No pressure, just checking in",
+    "preheader": "This is not a sales email. Read it anyway.",
+    "body": [
+      "{first_name},",
+      "It has been a couple of weeks since I saw you in the gym. I am not writing to chase you - I am writing because I care.",
+      "Life happens. Work. Kids. A funeral. A flu that lingered. Things you do not always want to put in writing. I do not need the reason.",
+      "Here is what I want you to know:",
+      "1. Your spot is still yours. I have not touched your program.",
+      "2. Coming back after a break is not starting over. It is starting from where you are. Different thing.",
+      "3. If you want to chat first, no training, just coffee - reply with the word 'coffee' and I will send you a time.",
+      "I am here when you are ready.",
+      "Mimi"
+    ],
+    "tokens": [
+      "first_name"
+    ],
+    "tone": "caring_no_pressure"
+  },
+  {
+    "id": "holiday-promo",
+    "name": "Seasonal promo - school holidays",
+    "when": "School holiday windows (NZ) for fit-mum reset campaigns",
+    "subject": "The fit-mum 4-week reset - school holidays edition",
+    "preheader": "Limited to 12 spots, real coaching - not a challenge.",
+    "body": [
+      "{first_name},",
+      "School holidays start {holiday_start_date}. I am opening 12 spots for the fit-mum reset.",
+      "It is 4 weeks. Three 45-minute sessions a week, scheduled around school drop-off. {price_label}.",
+      "What you get:",
+      "- Custom 4-week program built for your starting point",
+      "- A reset on nutrition - no meal plans, just two habits that work",
+      "- WhatsApp accountability so you cannot ghost yourself",
+      "- A new strongest lift by week 4",
+      "Why now: you have time this holiday you do not have during term. Use it on you. The kids will copy what they see.",
+      "If you want one of the 12 spots - reply 'in' and I will send you the booking link.",
+      "Mimi"
+    ],
+    "tokens": [
+      "first_name",
+      "holiday_start_date",
+      "price_label"
+    ],
+    "tone": "direct_warm"
+  },
+  {
+    "id": "referral",
+    "name": "Referral ask",
+    "when": "Client at 12+ weeks, milestone achieved, high NPS",
+    "subject": "A small ask, {first_name}",
+    "preheader": "Two weeks free for both of you. Read on.",
+    "body": [
+      "{first_name},",
+      "You have been with me for {client_weeks} weeks now. You have hit {client_main_milestone}. You moved from {client_starting_state} to {client_current_state}.",
+      "I have a small ask. If you know one woman who would benefit from this kind of training, refer her to me. Here is what happens:",
+      "- She gets a free 30-minute consult plus 2 weeks free on any program she chooses.",
+      "- You get 2 weeks credited back to your account.",
+      "- Nobody gets spammed. I do not cold-message. She has to choose to book.",
+      "Your referral link: {referral_link}",
+      "If nobody comes to mind, no problem at all. The work you are doing is the best advert anyway - people are watching.",
+      "Thanks for being here,",
+      "Mimi"
+    ],
+    "tokens": [
+      "first_name",
+      "client_weeks",
+      "client_main_milestone",
+      "client_starting_state",
+      "client_current_state",
+      "referral_link"
+    ],
+    "tone": "appreciative_specific"
+  },
+  {
+    "id": "monthly",
+    "name": "Monthly newsletter",
+    "when": "First Monday of each month, 7 AM NZ",
+    "subject": "{month_name} - what is new and what you should care about",
+    "preheader": "3 things, all under a minute to read.",
+    "body": [
+      "Hey - quick {month_name} note from the studio.",
+      "1. NEW THIS MONTH: {feature_one_line}. Why I added it: {feature_reason_one_line}.",
+      "2. STORY OF THE MONTH: {client_story_first_name} hit {client_story_milestone}. She started {client_story_weeks} weeks ago at {client_story_start}. Her quote: '{client_story_quote}'",
+      "3. WHAT TO READ: {article_title} - {article_link}. 2-minute read on {article_topic}.",
+      "If you want to bring anyone into the studio this month, my schedule is at {booking_link}. School holiday spots fill first.",
+      "More soon,",
+      "Mimi"
+    ],
+    "tokens": [
+      "month_name",
+      "feature_one_line",
+      "feature_reason_one_line",
+      "client_story_first_name",
+      "client_story_milestone",
+      "client_story_weeks",
+      "client_story_start",
+      "client_story_quote",
+      "article_title",
+      "article_link",
+      "article_topic",
+      "booking_link"
+    ],
+    "tone": "newsletter_brief"
+  }
+]

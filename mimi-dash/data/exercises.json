@@ -1,0 +1,307 @@
+[
+  {
+    "id": "goblet-squat",
+    "name": "Goblet Squat",
+    "category": "squat",
+    "equipment": "kettlebell",
+    "difficulty": 2,
+    "muscle_primary": [
+      "quadriceps",
+      "glutes",
+      "core"
+    ],
+    "muscle_secondary": [
+      "hamstrings",
+      "adductors"
+    ],
+    "form_cues": [
+      "Hold the bell close to your chest, elbows tight",
+      "Sit between your hips, knees tracking over toes",
+      "Brace your core as you stand - exhale on the way up"
+    ],
+    "common_mistake": "Letting the knees collapse inward at the bottom of the squat",
+    "progression": "barbell-back-squat",
+    "regression": null,
+    "women_specific_note": "Great pre/post-natal squat - load is in front so the lower back stays neutral"
+  },
+  {
+    "id": "barbell-back-squat",
+    "name": "Barbell Back Squat",
+    "category": "squat",
+    "equipment": "barbell",
+    "difficulty": 4,
+    "muscle_primary": [
+      "quadriceps",
+      "glutes",
+      "core"
+    ],
+    "muscle_secondary": [
+      "hamstrings",
+      "adductors",
+      "erector spinae"
+    ],
+    "form_cues": [
+      "Screw your feet into the floor to make a stable base",
+      "Brace 360 degrees - ribs down, belly hard in all directions",
+      "Hip-hinge slightly as you descend, knees track over toes"
+    ],
+    "common_mistake": "Caving the chest forward and rounding the upper back as the bar drives you down",
+    "progression": "front-squat",
+    "regression": "goblet-squat",
+    "women_specific_note": "Use a slightly wider stance to suit a wider Q-angle - feet 5-10 degrees out"
+  },
+  {
+    "id": "romanian-deadlift",
+    "name": "Romanian Deadlift (RDL)",
+    "category": "hinge",
+    "equipment": "barbell",
+    "difficulty": 3,
+    "muscle_primary": [
+      "hamstrings",
+      "glutes"
+    ],
+    "muscle_secondary": [
+      "erector spinae",
+      "lats",
+      "trapezius"
+    ],
+    "form_cues": [
+      "Hinge from the hips - push your bum back, do not bend at the spine",
+      "Bar stays glued to your legs the whole way down",
+      "Stop when you feel a deep hamstring stretch, then drive hips through"
+    ],
+    "common_mistake": "Squatting the bar down instead of hinging - knees bend too much, hamstrings never load",
+    "progression": "conventional-deadlift",
+    "regression": "kb-romanian-deadlift",
+    "women_specific_note": "Best lift for posture, glute shape, and protecting your back through perimenopause"
+  },
+  {
+    "id": "conventional-deadlift",
+    "name": "Conventional Deadlift",
+    "category": "hinge",
+    "equipment": "barbell",
+    "difficulty": 5,
+    "muscle_primary": [
+      "hamstrings",
+      "glutes",
+      "erector spinae"
+    ],
+    "muscle_secondary": [
+      "quadriceps",
+      "lats",
+      "trapezius",
+      "forearms"
+    ],
+    "form_cues": [
+      "Set up with the bar over the mid-foot, shins just brushing the bar",
+      "Take a big breath, brace, then push the floor away with your feet",
+      "Lockout is hips and knees together - squeeze glutes, do not lean back"
+    ],
+    "common_mistake": "Lifting hips first so the bar pulls away from the body - turns it into a back lift",
+    "progression": null,
+    "regression": "romanian-deadlift",
+    "women_specific_note": "Master the brace before loading heavy - pelvic floor and TVA work together to protect everything"
+  },
+  {
+    "id": "barbell-hip-thrust",
+    "name": "Barbell Hip Thrust",
+    "category": "hinge",
+    "equipment": "barbell",
+    "difficulty": 3,
+    "muscle_primary": [
+      "glutes",
+      "hamstrings"
+    ],
+    "muscle_secondary": [
+      "core",
+      "quadriceps"
+    ],
+    "form_cues": [
+      "Shoulder blades on the bench, ribs down, chin tucked",
+      "Drive through your heels and squeeze your glutes hard at the top",
+      "Lockout hips parallel to the floor - do not overarch your back"
+    ],
+    "common_mistake": "Hyperextending the lower back at the top instead of squeezing through the glutes",
+    "progression": "single-leg-hip-thrust",
+    "regression": "glute-bridge",
+    "women_specific_note": "The single best lift for glute development - train it 2x/week if that is your goal"
+  },
+  {
+    "id": "bench-press",
+    "name": "Bench Press",
+    "category": "push",
+    "equipment": "barbell",
+    "difficulty": 3,
+    "muscle_primary": [
+      "pectoralis major",
+      "triceps",
+      "anterior deltoid"
+    ],
+    "muscle_secondary": [
+      "serratus anterior",
+      "core"
+    ],
+    "form_cues": [
+      "Pin your shoulder blades down and back into the bench",
+      "Lower the bar to your sternum with elbows at about 45 degrees from your body",
+      "Press up and slightly back so the bar finishes over your shoulders"
+    ],
+    "common_mistake": "Flaring elbows wide to 90 degrees - stresses the shoulder and reduces chest engagement",
+    "progression": "incline-bench-press",
+    "regression": "dumbbell-bench-press",
+    "women_specific_note": "Most women have proportionally longer arms - a slightly wider grip can feel stronger"
+  },
+  {
+    "id": "overhead-press",
+    "name": "Overhead Press (OHP)",
+    "category": "push",
+    "equipment": "barbell",
+    "difficulty": 4,
+    "muscle_primary": [
+      "anterior deltoid",
+      "lateral deltoid",
+      "triceps"
+    ],
+    "muscle_secondary": [
+      "upper chest",
+      "core",
+      "glutes"
+    ],
+    "form_cues": [
+      "Bar racked on shoulders, elbows under wrists, glutes squeezed",
+      "Press straight up - move your head back so the bar travels vertically",
+      "Bring your head through under the bar at lockout, biceps next to ears"
+    ],
+    "common_mistake": "Pressing the bar in front of the head instead of straight up - costs 30% of strength",
+    "progression": "push-press",
+    "regression": "seated-dumbbell-press",
+    "women_specific_note": "Strong overhead pressing protects bone density in wrist and shoulder through perimenopause"
+  },
+  {
+    "id": "dumbbell-row",
+    "name": "Single-Arm Dumbbell Row",
+    "category": "pull",
+    "equipment": "dumbbell",
+    "difficulty": 2,
+    "muscle_primary": [
+      "latissimus dorsi",
+      "rhomboids",
+      "middle trapezius"
+    ],
+    "muscle_secondary": [
+      "biceps",
+      "rear deltoid",
+      "core"
+    ],
+    "form_cues": [
+      "Brace one hand on the bench, back flat like a tabletop",
+      "Pull the dumbbell to your hip, not your chest - elbow drives back",
+      "Squeeze the shoulder blade at the top, control the lower"
+    ],
+    "common_mistake": "Rotating the torso to hoist the weight - turns it into a side bend, not a row",
+    "progression": "barbell-bent-over-row",
+    "regression": "supported-chest-row",
+    "women_specific_note": "Best lift for fixing desk-rounded shoulders and mum-back from carrying babies"
+  },
+  {
+    "id": "lat-pulldown",
+    "name": "Lat Pulldown",
+    "category": "pull",
+    "equipment": "machine",
+    "difficulty": 2,
+    "muscle_primary": [
+      "latissimus dorsi",
+      "biceps"
+    ],
+    "muscle_secondary": [
+      "rhomboids",
+      "middle trapezius",
+      "rear deltoid"
+    ],
+    "form_cues": [
+      "Grip just outside shoulder width, sit tall with a slight lean back",
+      "Pull elbows down to your ribs, not behind you",
+      "Pause at the bottom, feel the lats squeeze, control the way up"
+    ],
+    "common_mistake": "Pulling with the arms and ignoring the lats - bar finishes at the chin and biceps fry first",
+    "progression": "pull-ups",
+    "regression": "assisted-lat-pulldown",
+    "women_specific_note": "Build the lats first - they make pull-ups possible and shape a strong-looking back"
+  },
+  {
+    "id": "farmer-carry",
+    "name": "Farmer Carry",
+    "category": "carry",
+    "equipment": "dumbbell",
+    "difficulty": 2,
+    "muscle_primary": [
+      "core",
+      "grip",
+      "trapezius"
+    ],
+    "muscle_secondary": [
+      "quadriceps",
+      "glutes",
+      "shoulders"
+    ],
+    "form_cues": [
+      "Stand tall - chest up, shoulders down and back, eyes forward",
+      "Walk in short, controlled steps with feet under your hips",
+      "Brace your core like someone is about to nudge you sideways"
+    ],
+    "common_mistake": "Letting the shoulders shrug up around the ears - switches off the lats and overloads the traps",
+    "progression": "single-arm-suitcase-carry",
+    "regression": "kb-suitcase-hold",
+    "women_specific_note": "Carries are the most life-relevant strength move - groceries, kids, gym bags feel effortless"
+  },
+  {
+    "id": "plank",
+    "name": "Front Plank",
+    "category": "core",
+    "equipment": "bodyweight",
+    "difficulty": 1,
+    "muscle_primary": [
+      "transverse abdominis",
+      "rectus abdominis"
+    ],
+    "muscle_secondary": [
+      "glutes",
+      "shoulders",
+      "quadriceps"
+    ],
+    "form_cues": [
+      "Elbows under shoulders, body in one straight line from head to heels",
+      "Tuck the tailbone slightly under to neutralise the lower back",
+      "Squeeze glutes and quads, breathe through the brace - no holding your breath"
+    ],
+    "common_mistake": "Letting the hips sag toward the floor - turns the plank into a lower-back hang",
+    "progression": "rkc-plank",
+    "regression": "knees-down-plank",
+    "women_specific_note": "Re-train deep core after pregnancy here before any sit-ups or crunches"
+  },
+  {
+    "id": "hollow-hold",
+    "name": "Hollow Hold",
+    "category": "core",
+    "equipment": "bodyweight",
+    "difficulty": 3,
+    "muscle_primary": [
+      "rectus abdominis",
+      "transverse abdominis",
+      "hip flexors"
+    ],
+    "muscle_secondary": [
+      "quadriceps",
+      "shoulders"
+    ],
+    "form_cues": [
+      "Press your lower back flat into the floor - no light should get under it",
+      "Lift legs and shoulders just enough to keep that flat back",
+      "Arms long overhead, breathe shallow into your ribs"
+    ],
+    "common_mistake": "Lifting too high so the lower back lifts off the floor and the hip flexors do the work",
+    "progression": "hollow-rock",
+    "regression": "dead-bug",
+    "women_specific_note": "Best position to learn TVA engagement - keep the rib-to-pelvis distance closed throughout"
+  }
+]

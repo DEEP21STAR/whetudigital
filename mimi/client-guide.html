@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Client Guide — Train with Mimi</title>
+<meta name="description" content="Your guide to getting the most out of training with Mimi.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&family=Cormorant+Garamond:ital,wght@1,600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg: oklch(8% 0.03 340); --primary: oklch(72% 0.28 340); --primary-dim: oklch(72% 0.28 340 / 0.15);
+  --primary-glow: oklch(72% 0.28 340 / 0.4); --gold: oklch(85% 0.18 80); --accent: oklch(76% 0.22 300);
+  --text: oklch(96% 0.005 340); --text-dim: oklch(70% 0.02 340); --text-muted: oklch(50% 0.015 340);
+  --glass: oklch(15% 0.03 340 / 0.7); --glass-border: oklch(72% 0.28 340 / 0.2);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.65; overflow-x: hidden; }
+body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse 700px 600px at 20% 20%, oklch(72% 0.28 340 / 0.28), transparent 60%),
+              radial-gradient(ellipse 500px 600px at 80% 70%, oklch(85% 0.18 80 / 0.15), transparent 60%); filter: blur(60px); }
+.nav { position: sticky; top: 0; z-index: 50; background: linear-gradient(180deg, oklch(8% 0.03 340 / 0.95), oklch(8% 0.03 340 / 0.7)); backdrop-filter: blur(14px); padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--glass-border); }
+.brand { font-family: 'Space Grotesk'; font-weight: 800; font-size: 1.4rem; background: linear-gradient(135deg, var(--primary), var(--gold)); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: 0.04em; }
+.back { font-family: 'Inter'; font-size: 0.85rem; color: var(--text-dim); text-decoration: none; padding: 8px 18px; border: 1px solid var(--glass-border); border-radius: 999px; }
+.back:hover { color: var(--primary); border-color: var(--primary); }
+.hero { padding: 90px 24px 60px; max-width: 880px; margin: 0 auto; text-align: center; }
+.hero h1 { font-family: 'Space Grotesk'; font-weight: 800; font-size: clamp(2.4rem, 5vw, 4rem); line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 22px; }
+.hero h1 .italic { font-family: 'Cormorant Garamond'; font-style: italic; font-weight: 600; background: linear-gradient(135deg, var(--gold), var(--primary)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero p { color: var(--text-dim); font-size: 1.2rem; max-width: 620px; margin: 0 auto; }
+.cards { max-width: 1080px; margin: 30px auto; padding: 0 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+.card { padding: 28px 24px; background: var(--glass); border: 1px solid var(--glass-border); border-radius: 18px; backdrop-filter: blur(12px); transition: transform 0.4s var(--ease), border-color 0.3s; }
+.card:hover { transform: translateY(-4px); border-color: var(--primary); }
+.card-num { font-family: 'Space Grotesk'; font-weight: 800; font-size: 2.4rem; background: linear-gradient(135deg, var(--primary), var(--gold)); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1; margin-bottom: 12px; }
+.card h3 { font-family: 'Space Grotesk'; font-weight: 700; font-size: 1.15rem; margin-bottom: 8px; }
+.card p { color: var(--text-dim); font-size: 0.95rem; line-height: 1.6; }
+.section { max-width: 800px; margin: 0 auto; padding: 60px 24px; border-top: 1px solid var(--glass-border); }
+.section h2 { font-family: 'Space Grotesk'; font-weight: 700; font-size: clamp(1.8rem, 3.5vw, 2.4rem); margin-bottom: 22px; letter-spacing: -0.015em; }
+.section h2 .accent { background: linear-gradient(135deg, var(--primary), var(--gold)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.section p { color: var(--text); font-size: 1.05rem; margin-bottom: 16px; }
+.callout { padding: 18px 22px; background: var(--primary-dim); border-left: 3px solid var(--primary); border-radius: 8px; margin: 22px 0; }
+.callout strong { color: var(--primary); font-family: 'Space Grotesk'; font-size: 0.92rem; display: block; margin-bottom: 4px; }
+.footer { text-align: center; padding: 80px 24px 40px; border-top: 1px solid var(--glass-border); }
+.footer-logo { font-family: 'Space Grotesk'; font-weight: 800; font-size: clamp(2rem, 5vw, 3.4rem); background: linear-gradient(90deg, var(--primary), var(--gold), var(--primary)); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shim 6s ease-in-out infinite; }
+@keyframes shim { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+.footer-meta { font-family: 'Inter'; font-size: 0.85rem; color: var(--text-muted); margin-top: 14px; }
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+.reveal.in { opacity: 1; transform: translateY(0); }
+
+.parent-brand { margin-top: 50px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.parent-eyebrow { font-family: 'Geist Mono', monospace; font-size: 0.7rem; color: var(--text-muted); letter-spacing: 4px; text-transform: uppercase; }
+.parent-wordmark { display: inline-flex; align-items: center; gap: 14px; padding: 8px 18px; border-radius: 999px; transition: background 0.35s var(--ease); cursor: pointer; }
+.parent-wordmark:hover { background: var(--primary-dim); }
+.parent-star { display: inline-flex; color: var(--gold); animation: starPulse 4s ease-in-out infinite; }
+@keyframes starPulse { 0%,100% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 12px var(--gold)); } 50% { transform: rotate(180deg) scale(1.15); filter: drop-shadow(0 0 22px var(--primary-glow)); } }
+.parent-text { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: clamp(1.3rem, 3vw, 1.8rem); letter-spacing: 0.04em;
+  background: linear-gradient(90deg, var(--gold), var(--primary), var(--gold)); background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent; animation: footShim 5s ease-in-out infinite; }
+.parent-tag { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 1rem; color: var(--text-dim); }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="brand">MIMI - YOUR GUIDE</div>
+  <a href="./index.html" class="back">Open my dashboard</a>
+</nav>
+
+<section class="hero">
+  <h1>Welcome to <span class="italic">your training space.</span></h1>
+  <p>Here is how everything works. None of it is complicated, and Mimi will walk you through the rest in person. Bookmark this page - come back any time you want to remember how something works.</p>
+</section>
+
+<div class="cards">
+  <div class="card"><div class="card-num">01</div><h3>Your weekly plan</h3><p>Open the dashboard, tap "This week". You will see each training day, what to do, and how long it will take.</p></div>
+  <div class="card"><div class="card-num">02</div><h3>Log a session</h3><p>After training, tap the session you just did. Confirm the weights you used. Add a note if it felt different than expected. Done.</p></div>
+  <div class="card"><div class="card-num">03</div><h3>Form-check video</h3><p>Stuck on a lift? Record a 10-second video on your phone, upload it. You get text feedback in under a minute.</p></div>
+  <div class="card"><div class="card-num">04</div><h3>Ask Mimi</h3><p>One tap on the message button. Replies come on the same day, usually faster. No question is too small.</p></div>
+</div>
+
+<section class="section">
+  <h2>Reading your <span class="accent">weekly plan</span></h2>
+  <p>Each week starts on Monday. The plan shows your training days, your rest days, and a short note from Mimi about the focus for that week.</p>
+  <p>Each training day has 3-6 exercises. Tap any exercise to see how to do it - there is a short demo video, three form cues, and one common mistake to avoid. The video shows you exactly what good form looks like.</p>
+  <p>Reps and weight are starting points. If something feels too easy or too hard, log what you actually did. Mimi adjusts your plan based on what you log, not what was on paper.</p>
+  <div class="callout"><strong>You decide the order</strong>If a day says "squat, then bench, then row" and you want to bench first because the squat rack is busy - do that. The order matters less than getting it done.</div>
+</section>
+
+<section class="section">
+  <h2>What the <span class="accent">streak</span> means</h2>
+  <p>Your streak counts how many weeks in a row you have done at least 2 sessions. Miss a week, streak resets to zero. Hit 4 weeks, you unlock a small celebration screen. Hit 12, you get a free month review with Mimi.</p>
+  <p>The streak is there because consistency beats intensity. The strongest woman you know is not the one who killed two sessions and quit - she is the one who kept showing up.</p>
+  <div class="callout"><strong>Life happens</strong>You can pause your streak for one week per quarter for things like work travel, illness, or just needing a break. Tap "Pause week" - your streak holds.</div>
+</section>
+
+<section class="section">
+  <h2>How <span class="accent">form-check</span> works</h2>
+  <p>Open any session. Tap the camera icon next to a lift. Record yourself doing the exercise (10-15 seconds is enough). Upload.</p>
+  <p>The system reads your movement using your phone's camera, compares it to ideal form for that lift, and gives you 2-3 specific cues. Examples:</p>
+  <ul>
+    <li>"Your knees are caving in at the bottom of the squat - drive them out as you stand"</li>
+    <li>"Hips are rising before shoulders on the deadlift - keep your back flat and push the floor away"</li>
+    <li>"Bar path is drifting forward on the press - bring your head back through at lockout"</li>
+  </ul>
+  <p>It's not magic and it's not perfect - it catches the big stuff. For anything subtle, send Mimi the video and she will look at it personally.</p>
+</section>
+
+<section class="section">
+  <h2>Messages with <span class="accent">Mimi</span></h2>
+  <p>The message button is in the bottom right of every screen. Tap it to write to Mimi directly. She gets the message instantly. You will hear back the same day - usually within 2-3 hours during her working hours.</p>
+  <p>Use messages for: questions about a lift, feeling stuck, life events that affect training (new job, holiday, period symptoms), asking for adjustments.</p>
+  <p>For emergencies (injury, severe pain, can't make a session), call Mimi - the phone icon next to the message button.</p>
+</section>
+
+<section class="section">
+  <h2>Your <span class="accent">progress</span> page</h2>
+  <p>Every month, you get a personal progress summary. It shows:</p>
+  <ul>
+    <li>Your strongest lifts vs 90 days ago</li>
+    <li>Body composition trends (if you logged them)</li>
+    <li>How many sessions you did vs your plan</li>
+    <li>Mimi's note on what you crushed and what to focus on next month</li>
+  </ul>
+  <p>The progress page is private to you. Mimi sees a different version for coaching decisions, but your personal page is yours alone.</p>
+  <div class="callout"><strong>The scale lies, the mirror tells one story, the bar tells the truth</strong>Strength gains are the fastest signal that your body is changing. Lift heavier this month than last month and the rest follows.</div>
+</section>
+
+<footer class="footer">
+  <div class="footer-logo">Whetu Digital</div>
+  <div class="footer-meta">Made with care for Mimi's clients - questions? hello@whetudigital.co.nz</div>
+</footer>
+
+<script>
+const io = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -10% 0px' });
+document.querySelectorAll('.section, .card').forEach(el => { el.classList.add('reveal'); io.observe(el); });
+</script>
+</body>
+</html>
