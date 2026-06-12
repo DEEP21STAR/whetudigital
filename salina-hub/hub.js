@@ -597,7 +597,7 @@ function setupAmbientAudio() {
   let playing = true;
   let loopTimer = null;
   let lastPlayTime = 0;
-  const LOOP_MS = 60000; // 60-second cycle
+  const LOOP_MS = 25000; // 25-second cycle
 
   function playNow() {
     lastPlayTime = Date.now();
