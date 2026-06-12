@@ -586,22 +586,50 @@ function setupShare() {
 
 /* ────────────────────────── AMBIENT AUDIO TOGGLE ────────────────────────── */
 function setupAmbientAudio() {
-  // Create floating ambient toggle in bottom-right
   const btn = document.createElement('button');
   btn.id = 'ambientBtn';
   btn.setAttribute('aria-label', 'Toggle ambient music');
-  btn.style.cssText = 'position:fixed;bottom:24px;right:24px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,rgba(245,197,87,.16),rgba(249,115,22,.1));border:1px solid rgba(212,165,50,.42);color:#f5c557;font-size:22px;cursor:pointer;z-index:200;backdrop-filter:blur(14px);box-shadow:0 8px 24px rgba(0,0,0,.4),0 0 28px rgba(245,197,87,.18);transition:transform .25s ease,background .25s;display:flex;align-items:center;justify-content:center';
-  btn.textContent = '♪';
+  btn.style.cssText = 'position:fixed;bottom:24px;right:24px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,rgba(245,197,87,.32),rgba(249,115,22,.22));border:1px solid rgba(212,165,50,.42);color:#f5c557;font-size:22px;cursor:pointer;z-index:200;backdrop-filter:blur(14px);box-shadow:0 8px 24px rgba(0,0,0,.4),0 0 28px rgba(245,197,87,.18);transition:transform .25s ease,background .25s;display:flex;align-items:center;justify-content:center';
+  btn.textContent = '⏸';
   document.body.appendChild(btn);
-  let audio = null; let playing = false;
+  const audio = new Audio('./om-hum.wav');
+  audio.volume = 0.32;
+  let playing = true;
+  let loopTimer = null;
+  let lastPlayTime = 0;
+  const LOOP_MS = 60000; // 60-second cycle
+
+  function playNow() {
+    lastPlayTime = Date.now();
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+  }
+  audio.addEventListener('ended', () => {
+    if (!playing) return;
+    const elapsed = Date.now() - lastPlayTime;
+    const wait = Math.max(0, LOOP_MS - elapsed);
+    loopTimer = setTimeout(playNow, wait);
+  });
+
+  // Auto-start as soon as PIN gate hides (PIN tap = user interaction = autoplay allowed)
+  const pinGate = document.getElementById('pinGate');
+  if (pinGate) {
+    new MutationObserver(() => {
+      if (pinGate.classList.contains('hidden') && playing) {
+        setTimeout(playNow, 800); // small delay for cinematic to start
+      }
+    }).observe(pinGate, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  function setBtnOn()  { btn.textContent = '⏸'; btn.style.background = 'linear-gradient(135deg,rgba(245,197,87,.32),rgba(249,115,22,.22))'; }
+  function setBtnOff() { btn.textContent = '♪'; btn.style.background = 'linear-gradient(135deg,rgba(245,197,87,.16),rgba(249,115,22,.1))'; }
+
   btn.addEventListener('click', () => {
-    if (!audio) {
-      audio = new Audio('./om-hum.wav');
-      audio.loop = true; audio.volume = 0.32;
+    if (playing) {
+      playing = false; clearTimeout(loopTimer); audio.pause(); setBtnOff(); toast('Ambient off');
+    } else {
+      playing = true; setBtnOn(); playNow(); toast('Ambient on');
     }
-    if (playing) { audio.pause(); btn.textContent = '♪'; btn.style.background = 'linear-gradient(135deg,rgba(245,197,87,.16),rgba(249,115,22,.1))'; toast('Ambient off'); }
-    else        { audio.play().catch(()=>toast('Tap allowed only after interaction')); btn.textContent = '⏸'; btn.style.background = 'linear-gradient(135deg,rgba(245,197,87,.32),rgba(249,115,22,.22))'; toast('Ambient on'); }
-    playing = !playing;
   });
   // Click feedback bell
   document.addEventListener('click', e => {

@@ -112,7 +112,7 @@ function showRandomMemoryCard() {
     <div style="font-family:var(--mono,monospace);font-size:11px;color:var(--gold2,#f5c557);letter-spacing:4px;text-transform:uppercase;animation:cineUp 1s ease-out forwards;opacity:0">A memory of Mum</div>
     <img src="./${m.medium || m.thumb || m.orig}" style="max-width:84vw;max-height:64vh;border-radius:16px;box-shadow:0 30px 80px rgba(0,0,0,.7),0 0 100px rgba(245,197,87,.2);animation:memInScale 1.4s var(--ease,ease-out) forwards;opacity:0;transform:scale(.92)" alt="">
     <div style="font-family:var(--serif,serif);font-size:clamp(16px,2.2vw,22px);color:var(--gold3,#fff3d6);font-style:italic;letter-spacing:.5px;animation:cineUp 1.2s ease-out .8s forwards;opacity:0">${m.date || ''}</div>
-    <div style="font-family:var(--mono,monospace);font-size:10px;color:var(--muted,#7a6754);letter-spacing:3px;text-transform:uppercase;animation:cineUp 1s ease-out 1.6s forwards;opacity:0">Click anywhere to dismiss</div>
+    <div style="font-family:var(--mono,monospace);font-size:10px;color:var(--muted,#7a6754);letter-spacing:3px;text-transform:uppercase;animation:cineUp 1s ease-out 1.6s forwards;opacity:0">Click / Touch to dismiss</div>
   `;
   // Add the keyframe if not present
   if (!$('#memInScaleKf')) {
