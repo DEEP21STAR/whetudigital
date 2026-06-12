@@ -507,12 +507,12 @@ function renderMemories() {
   MEMORIES.forEach(m => { (byYear[m.year || 'Undated'] ||= []).push(m); });
   const years = Object.keys(byYear).sort((a, b) => String(b).localeCompare(String(a)));
   root.innerHTML = years.map(y => `
-    <div class="mem-year-band"><div class="mem-year">${y}</div><div class="mem-year-sub"><b>${byYear[y].length}</b> moments</div></div>
+    <div class="mem-year-band"><div class="mem-year">Memories</div><div class="mem-year-sub"><b>${byYear[y].length}</b> moments</div></div>
     <div class="memories-grid">
       ${byYear[y].map((m, i) => `
         <div class="mem-card observe" data-slug="${escapeHtml(m.slug)}" data-year="${y}">
           <img loading="lazy" src="./${m.thumb || m.medium || m.orig}" alt="${escapeHtml(m.slug)}">
-          <div class="mem-card-meta"><span>${escapeHtml(m.date || '')}</span><span class="mem-card-date">${i+1}/${byYear[y].length}</span></div>
+          <div class="mem-card-meta"><span class="mem-card-date">${i+1}/${byYear[y].length}</span></div>
         </div>`).join('')}
     </div>
   `).join('');
@@ -531,7 +531,7 @@ function openLB() {
   const m = MEMORIES.find(x => x.slug === slug);
   if (!m) return;
   $('#lbImg').src = './' + (m.medium || m.orig);
-  $('#lbMeta').textContent = `${m.date || ''} · ${lbIndex+1} of ${lbList.length}`;
+  $('#lbMeta').textContent = `${lbIndex+1} of ${lbList.length}`;
   $('#lightbox').classList.add('active');
 }
 window.closeLB = () => $('#lightbox').classList.remove('active');
