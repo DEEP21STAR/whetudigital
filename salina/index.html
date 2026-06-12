@@ -18,6 +18,48 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { font-size: 18px; }
+
+  /* ── PIN Gate ── */
+  #pin-gate {
+    position: fixed; inset: 0; z-index: 9999;
+    background: #0A0812;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  #pin-gate .diya { font-size: 3.5rem; margin-bottom: 8px; animation: float 3s ease-in-out infinite; }
+  #pin-gate h2 { color: var(--gold); font-size: 1.4rem; letter-spacing: 2px; margin-bottom: 4px; text-align: center; }
+  #pin-gate .sub { color: var(--dim); font-size: 0.85rem; margin-bottom: 28px; text-align: center; }
+  #pin-dots {
+    display: flex; gap: 12px; margin-bottom: 28px;
+  }
+  .pdot {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 2px solid var(--gold);
+    background: transparent;
+    transition: background 0.15s;
+  }
+  .pdot.filled { background: var(--gold); }
+  #pin-keypad {
+    display: grid; grid-template-columns: repeat(3, 72px);
+    gap: 12px;
+  }
+  .pkey {
+    height: 72px; border-radius: 14px;
+    background: #1a1428; border: 1px solid var(--border);
+    color: var(--text); font-size: 1.5rem; font-weight: 600;
+    cursor: pointer; transition: background 0.12s, transform 0.08s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .pkey:active { background: #2a2040; transform: scale(0.93); }
+  .pkey.del { font-size: 1.1rem; color: var(--dim); }
+  #pin-error {
+    margin-top: 16px; color: var(--coral);
+    font-size: 0.9rem; min-height: 1.2em;
+    text-align: center; opacity: 0; transition: opacity 0.2s;
+  }
+  #pin-error.show { opacity: 1; }
+
   body {
     font-family: 'Segoe UI', system-ui, sans-serif;
     background: var(--bg);
@@ -266,6 +308,36 @@
 </style>
 </head>
 <body>
+
+<!-- PIN GATE -->
+<div id="pin-gate">
+  <div class="diya">🪔</div>
+  <h2>SALINA</h2>
+  <p class="sub">Family access only — enter PIN to continue</p>
+  <div id="pin-dots">
+    <div class="pdot" id="d0"></div>
+    <div class="pdot" id="d1"></div>
+    <div class="pdot" id="d2"></div>
+    <div class="pdot" id="d3"></div>
+    <div class="pdot" id="d4"></div>
+    <div class="pdot" id="d5"></div>
+  </div>
+  <div id="pin-keypad">
+    <button class="pkey" onclick="pk('1')">1</button>
+    <button class="pkey" onclick="pk('2')">2</button>
+    <button class="pkey" onclick="pk('3')">3</button>
+    <button class="pkey" onclick="pk('4')">4</button>
+    <button class="pkey" onclick="pk('5')">5</button>
+    <button class="pkey" onclick="pk('6')">6</button>
+    <button class="pkey" onclick="pk('7')">7</button>
+    <button class="pkey" onclick="pk('8')">8</button>
+    <button class="pkey" onclick="pk('9')">9</button>
+    <button class="pkey del" onclick="pkd()">⌫</button>
+    <button class="pkey" onclick="pk('0')">0</button>
+    <button class="pkey del" onclick="pkc()">✕</button>
+  </div>
+  <div id="pin-error"></div>
+</div>
 
 <div class="hero">
   <span class="diya">🪔</span>
@@ -606,6 +678,35 @@
     setTimeout(typeNext, deleting ? 40 : 80);
   }
   setTimeout(typeNext, 1000);
+
+  // PIN gate
+  (function() {
+    var PIN = '020146', entered = '', gate = document.getElementById('pin-gate');
+    if (localStorage.getItem('salina_unlocked') === '1') { gate.style.display = 'none'; return; }
+    function render() {
+      for (var i = 0; i < 6; i++) document.getElementById('d'+i).classList.toggle('filled', i < entered.length);
+    }
+    function shake() {
+      var err = document.getElementById('pin-error');
+      err.textContent = 'Incorrect PIN — try again';
+      err.classList.add('show');
+      setTimeout(function(){ err.classList.remove('show'); }, 1800);
+    }
+    window.pk = function(d) {
+      if (entered.length >= 6) return;
+      entered += d; render();
+      if (entered.length === 6) {
+        if (entered === PIN) {
+          localStorage.setItem('salina_unlocked', '1');
+          gate.style.transition = 'opacity 0.4s';
+          gate.style.opacity = '0';
+          setTimeout(function(){ gate.style.display = 'none'; }, 400);
+        } else { entered = ''; render(); shake(); }
+      }
+    };
+    window.pkd = function() { entered = entered.slice(0,-1); render(); };
+    window.pkc = function() { entered = ''; render(); };
+  })();
 
   // Re-trigger tick animation on scroll
   const observer = new IntersectionObserver(entries => {
