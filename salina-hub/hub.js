@@ -649,4 +649,103 @@ function updateTimestamp() {
   upd(); setInterval(upd, 60000);
 }
 
+/* ─── PIN SCREEN MEMORY CYCLING SLIDESHOW ─────────────────────── */
+(function initPinSlideshow() {
+  const bg = document.getElementById('pgMemBg');
+  if (!bg) return;
+
+  const CYCLE_MS = 10000;  // 10 seconds between slides
+  const FADE_MS  = 2000;   // 2 second crossfade
+  const PORTRAIT = './mum-portrait.png';
+
+  // Start with Mum's portrait, then cycle through memory photos
+  let photos = [PORTRAIT];
+  let current = 0;
+  let slides = [];
+  let cycleTimer = null;
+
+  function buildSlides() {
+    bg.innerHTML = '';
+    slides = photos.map((src, i) => {
+      const div = document.createElement('div');
+      div.className = 'pgmem-slide' + (i === 0 ? ' active' : '');
+      div.style.backgroundImage = `url('${src}')`;
+      bg.appendChild(div);
+      return div;
+    });
+  }
+
+  function nextSlide() {
+    if (slides.length < 2) return;
+    slides[current].classList.remove('active');
+    current = (current + 1) % slides.length;
+    slides[current].classList.add('active');
+  }
+
+  function startCycle() {
+    if (cycleTimer) clearInterval(cycleTimer);
+    cycleTimer = setInterval(nextSlide, CYCLE_MS);
+  }
+
+  // Load photos from manifest then build slideshow
+  function loadAndStart() {
+    fetch('./photos_manifest.json')
+      .then(r => r.json())
+      .then(manifest => {
+        const shuffled = manifest
+          .map(m => ({ m, sort: Math.random() }))
+          .sort((a, b) => a.sort - b.sort)
+          .map(x => x.m);
+        // Portrait first, then up to 20 random memory photos
+        const memPhotos = shuffled.slice(0, 20).map(m => './' + (m.medium || m.thumb || m.orig));
+        photos = [PORTRAIT, ...memPhotos];
+        buildSlides();
+        startCycle();
+      })
+      .catch(() => {
+        // Fallback: just portrait
+        buildSlides();
+      });
+  }
+
+  // Stop slideshow when PIN unlocked
+  const pinGate = document.getElementById('pinGate');
+  if (pinGate) {
+    new MutationObserver(() => {
+      if (pinGate.classList.contains('hidden')) {
+        if (cycleTimer) { clearInterval(cycleTimer); cycleTimer = null; }
+      }
+    }).observe(pinGate, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  // Start immediately (before manifest loads, show portrait)
+  buildSlides();
+  startCycle();
+  loadAndStart();
+})();
+
+/* ─── CINE INTRO AUDIO ─────────────────────────────────────────── */
+(function initCineAudio() {
+  // Play om-hum during cinematic intro (triggers on first user tap = PIN key press)
+  const cine = document.getElementById('cine');
+  if (!cine) return;
+  let cineAudio = null;
+  document.addEventListener('click', function onFirstTap(e) {
+    if (!e.target.closest('.pg-key')) return;
+    document.removeEventListener('click', onFirstTap);
+    cineAudio = new Audio('./om-hum.wav');
+    cineAudio.loop = false;
+    cineAudio.volume = 0.25;
+    cineAudio.play().catch(() => {});
+    // Stop cine audio once intro ends / skipped
+    const observer = new MutationObserver(() => {
+      if (cine.style.display === 'none' || cine.hidden) {
+        if (cineAudio) { cineAudio.pause(); cineAudio = null; }
+        observer.disconnect();
+      }
+    });
+    observer.observe(cine, { attributes: true, attributeFilter: ['style','hidden'] });
+  }, { once: false });
+})();
+
 })();

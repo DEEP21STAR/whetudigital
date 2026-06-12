@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Share Your Thoughts · SALINA</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--gold:#f5c557;--gold2:#fff3d6;--orange:#f97316;--text:#f0e6d3;--muted:#7a6754;--bg:#0a0512;--card:#1a0e08}
+body{font-family:'Georgia',serif;background:radial-gradient(ellipse at top,#1a0e08 0%,var(--bg) 70%);color:var(--text);min-height:100vh;padding:40px 20px;display:flex;align-items:center;justify-content:center}
+.fb-card{background:rgba(26,14,8,.85);border:1px solid rgba(245,197,87,.3);border-radius:24px;padding:40px;max-width:560px;width:100%;backdrop-filter:blur(20px);box-shadow:0 30px 100px rgba(0,0,0,.6),0 0 80px rgba(245,197,87,.15)}
+.fb-diya{font-size:3rem;text-align:center;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.fb-title{font-size:1.8rem;text-align:center;background:linear-gradient(135deg,var(--gold2),var(--gold),var(--orange));-webkit-background-clip:text;color:transparent;margin:12px 0 4px;letter-spacing:1px}
+.fb-sub{text-align:center;color:var(--muted);font-size:.85rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:24px}
+.fb-form{display:flex;flex-direction:column;gap:16px}
+.fb-type{display:flex;gap:10px;flex-wrap:wrap}
+.fb-chip{flex:1;min-width:120px;padding:14px;background:rgba(245,197,87,.08);border:1px solid rgba(245,197,87,.25);border-radius:14px;color:var(--text);font-family:inherit;font-size:.95rem;cursor:pointer;transition:all .2s;text-align:center}
+.fb-chip:hover{background:rgba(245,197,87,.16)}
+.fb-chip.selected{background:linear-gradient(135deg,rgba(245,197,87,.3),rgba(249,115,22,.2));border-color:var(--gold);box-shadow:0 0 24px rgba(245,197,87,.3)}
+label{font-size:.8rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+input,textarea{width:100%;padding:14px;background:rgba(10,5,18,.6);border:1px solid rgba(245,197,87,.25);border-radius:12px;color:var(--text);font-family:inherit;font-size:1rem;resize:vertical;transition:border-color .2s}
+input:focus,textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 18px rgba(245,197,87,.2)}
+textarea{min-height:120px;font-family:Georgia,serif}
+.fb-send{padding:16px;background:linear-gradient(135deg,var(--gold),var(--orange));color:#1a0e08;border:none;border-radius:12px;font-family:inherit;font-size:1.05rem;font-weight:700;letter-spacing:1px;cursor:pointer;transition:transform .15s,box-shadow .2s;text-transform:uppercase}
+.fb-send:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(245,197,87,.4)}
+.fb-send:disabled{opacity:.6;cursor:not-allowed}
+.fb-success{display:none;text-align:center;padding:30px 20px}
+.fb-success.show{display:block;animation:fadein .6s ease-out}
+@keyframes fadein{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.fb-tick{font-size:4rem;color:#00c896;display:inline-block;animation:pop .6s cubic-bezier(.175,.885,.32,1.275)}
+@keyframes pop{0%{transform:scale(0)}100%{transform:scale(1)}}
+.fb-back{display:inline-block;margin-top:20px;color:var(--gold);text-decoration:none;font-size:.9rem;border-bottom:1px solid transparent;transition:border-color .2s}
+.fb-back:hover{border-color:var(--gold)}
+.fb-foot{text-align:center;color:var(--muted);font-size:.7rem;margin-top:24px;letter-spacing:2px}
+.fb-foot em{color:var(--gold);font-style:italic}
+.tip{font-size:.78rem;color:var(--muted);font-style:italic;text-align:center;margin-top:-8px}
+</style>
+</head>
+<body>
+<div class="fb-card" id="fbCard">
+  <div class="fb-diya">🪔</div>
+  <div class="fb-title">Share Your Thoughts</div>
+  <div class="fb-sub">SALINA · Family Feedback</div>
+
+  <form class="fb-form" id="fbForm">
+    <div>
+      <label>What kind of message?</label>
+      <div class="fb-type" id="fbType">
+        <div class="fb-chip" data-type="appreciation">💛 Appreciation</div>
+        <div class="fb-chip" data-type="suggestion">💡 Suggestion</div>
+        <div class="fb-chip" data-type="memory">📸 Memory to share</div>
+        <div class="fb-chip" data-type="other">✍ Other</div>
+      </div>
+    </div>
+    <div>
+      <label>Your name <span style="opacity:.5">(optional)</span></label>
+      <input type="text" id="fbName" placeholder="So I know who to thank…">
+    </div>
+    <div>
+      <label>Your message</label>
+      <textarea id="fbMsg" placeholder="Share anything — kind words, ideas to make this better, or a memory of Mum you want to add…" required></textarea>
+      <div class="tip">Your words come straight to Deep via Telegram 🪔</div>
+    </div>
+    <button type="submit" class="fb-send" id="fbSend">Send with Love →</button>
+  </form>
+
+  <div class="fb-success" id="fbSuccess">
+    <div class="fb-tick">✓</div>
+    <h2 style="color:var(--gold);margin:14px 0 6px;font-family:Georgia,serif">Thank you 🙏</h2>
+    <p style="color:var(--text);font-style:italic;line-height:1.6">Your message has been received with love.<br>Every word means so much.</p>
+    <a href="#" class="fb-back" onclick="location.reload();return false;">Send another →</a>
+  </div>
+
+  <div class="fb-foot">Built with care for Mum · <em>Whetū Digital</em></div>
+</div>
+
+<script>
+const TG_TOKEN = "8904643204:AAFYaQHyeHdTFYhf926pufBLLkZO7tVlD54";
+const TG_CHAT  = "2057729109";
+let selectedType = "appreciation";
+
+document.querySelectorAll('.fb-chip').forEach(chip => {
+  if (chip.dataset.type === 'appreciation') chip.classList.add('selected');
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.fb-chip').forEach(c => c.classList.remove('selected'));
+    chip.classList.add('selected');
+    selectedType = chip.dataset.type;
+  });
+});
+
+document.getElementById('fbForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = document.getElementById('fbSend');
+  const msg = document.getElementById('fbMsg').value.trim();
+  const name = document.getElementById('fbName').value.trim() || 'Anonymous family member';
+  if (!msg) return;
+
+  const ICONS = {appreciation:'💛', suggestion:'💡', memory:'📸', other:'✍'};
+  const LABELS = {appreciation:'APPRECIATION', suggestion:'SUGGESTION', memory:'MEMORY SHARED', other:'MESSAGE'};
+  const text = `🪔 *SALINA Family Hub Feedback*\n\n${ICONS[selectedType]} *${LABELS[selectedType]}*\n\nFrom: ${name}\n\n"${msg}"\n\n_Received with love · ${new Date().toLocaleString('en-NZ')}_`;
+
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  try {
+    // Try direct Telegram (works if token is real)
+    if (TG_TOKEN && !TG_TOKEN.startsWith('__')) {
+      await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: TG_CHAT, text, parse_mode: 'Markdown' })
+      });
+    } else {
+      // Fallback: post to local relay (if hub server is running)
+      await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: selectedType, name, message: msg, text })
+      }).catch(() => {
+        // Final fallback: open WhatsApp share to Deep
+        const wa = `https://wa.me/64212935401?text=${encodeURIComponent(text.replace(/\*/g,''))}`;
+        window.open(wa, '_blank');
+      });
+    }
+    document.getElementById('fbForm').style.display = 'none';
+    document.getElementById('fbSuccess').classList.add('show');
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Try Again →';
+    alert('Could not send — please try again or call Deep: 021 293 5401');
+  }
+});
+</script>
+</body>
+</html>
+

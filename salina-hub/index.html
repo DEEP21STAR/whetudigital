@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1a0e08">
-<title>SALINA Command · Tulawati Lal Mummy · by Whetū Digital</title>
+<title>SALINA · Tulawati Lal Mummy · by Whetū Digital</title>
 <link rel="manifest" href="./manifest.json">
-<link rel="icon" type="image/png" href="/salina/favicon.ico">
+<link rel="icon" type="image/png" href="./mum-portrait.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="./vendor/echarts.min.js"></script>
+<script src="./vendor/qrcode.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -90,8 +90,18 @@ body{background:radial-gradient(ellipse at 20% 0%,#1a0e0d 0%,transparent 50%),ra
 .glass:hover::after{opacity:1}
 .tilt{transition:transform .3s var(--ease)}
 /* ── PIN ── */
-#pinGate{position:fixed;inset:0;z-index:9000;background:radial-gradient(ellipse at center,#1a0e08 0%,#000 90%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:20px;transition:opacity .9s var(--ease),visibility .9s}
+#pinGate{position:fixed;inset:0;z-index:9000;background:radial-gradient(ellipse at center,#1a0e08 0%,#000 90%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:20px;transition:opacity .9s var(--ease),visibility .9s;overflow:hidden}
 #pinGate.hidden{opacity:0;visibility:hidden;pointer-events:none}
+/* Memory cycling backdrop on PIN screen */
+#pgMemBg{position:absolute;inset:0;z-index:0;pointer-events:none}
+.pgmem-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 2s ease-in-out}
+.pgmem-slide.active{opacity:0.22}
+/* Vignette over memory slide */
+#pgMemBg::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 10%,rgba(0,0,0,.82) 70%);pointer-events:none}
+/* Memory label bottom of PIN */
+#pgMemLabel{font-family:var(--mono,monospace);font-size:10px;letter-spacing:3px;color:rgba(245,197,87,.5);text-transform:uppercase;animation:pgPulse 3s ease-in-out infinite;z-index:1}
+/* All PIN content above backdrop */
+#pinGate>*:not(#pgMemBg){position:relative;z-index:1}
 .pg-title{font-family:var(--serif);font-size:clamp(32px,5vw,52px);font-weight:600;text-align:center;background:linear-gradient(135deg,#fff3d6,#f5c557,#f97316);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:.5px;animation:pgPulse 4s ease-in-out infinite}
 @keyframes pgPulse{0%,100%{filter:drop-shadow(0 0 14px rgba(245,197,87,.4))}50%{filter:drop-shadow(0 0 28px rgba(249,115,22,.6))}}
 .pg-title em{font-style:italic;display:block;font-size:.45em;color:var(--text2);font-weight:500;letter-spacing:3px;margin-top:8px;text-transform:uppercase;background:none;-webkit-text-fill-color:var(--text2)}
@@ -594,10 +604,12 @@ section.section.active{display:block;animation:sectionIn .6s var(--ease)}
 <canvas id="confetti" aria-hidden="true"></canvas>
 <audio id="bell" src="./bell.wav" preload="auto"></audio>
 <div class="toast" id="toast"></div>
-<div id="pinGate"><div class="pg-title">SALINA Command<em>Family hub</em></div><div class="pg-sub">Enter PIN to continue</div><div class="pg-hint">Hint: Mum&#39;s birthday &middot; DDMMYY</div><div class="pg-dots"><div class="pg-dot" id="pd0"></div><div class="pg-dot" id="pd1"></div><div class="pg-dot" id="pd2"></div><div class="pg-dot" id="pd3"></div><div class="pg-dot" id="pd4"></div><div class="pg-dot" id="pd5"></div></div><div class="pg-err" id="pgErr">&nbsp;</div><div class="pg-pad"><div class="pg-key" data-k="1">1</div><div class="pg-key" data-k="2">2</div><div class="pg-key" data-k="3">3</div><div class="pg-key" data-k="4">4</div><div class="pg-key" data-k="5">5</div><div class="pg-key" data-k="6">6</div><div class="pg-key" data-k="7">7</div><div class="pg-key" data-k="8">8</div><div class="pg-key" data-k="9">9</div><div></div><div class="pg-key" data-k="0">0</div><div class="pg-key del" data-k="del">DEL</div></div></div>
-<div id="cine" onclick="skipCine()"><div class="cine-sanskrit"><span class="cine-om">&#x950;</span>&#x936;&#x93E;&#x928;&#x94D;&#x924;&#x93F;&#x903; &#x936;&#x93E;&#x928;&#x94D;&#x924;&#x93F;&#x903; &#x936;&#x93E;&#x928;&#x94D;&#x924;&#x93F;&#x903;</div><div class="cine-portrait"><img src="./mum-portrait.png" alt="Tulawati Lal Mummy"></div><div class="cine-name">Tulawati Lal<em>&laquo;MUMMY&raquo;</em></div><div class="cine-dates">Salina &middot; 12 Months &middot; 15-16 August 2026</div><button class="cine-skip" onclick="event.stopPropagation();skipCine()">SKIP &#8250;</button></div><main id="app" hidden>
+<a id="fbBtn" href="./feedback.html" target="_blank" rel="noopener" title="Share thoughts with Deep" style="position:fixed;bottom:24px;left:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#f5c557,#f97316);display:flex;align-items:center;justify-content:center;font-size:1.5rem;text-decoration:none;z-index:9500;box-shadow:0 8px 30px rgba(249,115,22,.5),0 0 30px rgba(245,197,87,.3);cursor:pointer;transition:transform .25s,box-shadow .25s;animation:fbPulse 3s ease-in-out infinite">💌</a>
+<style>@keyframes fbPulse{0%,100%{box-shadow:0 8px 30px rgba(249,115,22,.5),0 0 30px rgba(245,197,87,.3)}50%{box-shadow:0 8px 40px rgba(249,115,22,.7),0 0 50px rgba(245,197,87,.5)}}#fbBtn:hover{transform:translateY(-3px) scale(1.08)}</style>
+<div id="pinGate"><div id="pgMemBg"></div><div class="pg-title">SALINA<em>Family hub</em></div><div class="pg-sub">Enter PIN to continue</div><div class="pg-hint">Hint: Mum&#39;s birthday &middot; DDMMYY</div><div class="pg-dots"><div class="pg-dot" id="pd0"></div><div class="pg-dot" id="pd1"></div><div class="pg-dot" id="pd2"></div><div class="pg-dot" id="pd3"></div><div class="pg-dot" id="pd4"></div><div class="pg-dot" id="pd5"></div></div><div class="pg-err" id="pgErr">&nbsp;</div><div class="pg-pad"><div class="pg-key" data-k="1">1</div><div class="pg-key" data-k="2">2</div><div class="pg-key" data-k="3">3</div><div class="pg-key" data-k="4">4</div><div class="pg-key" data-k="5">5</div><div class="pg-key" data-k="6">6</div><div class="pg-key" data-k="7">7</div><div class="pg-key" data-k="8">8</div><div class="pg-key" data-k="9">9</div><div></div><div class="pg-key" data-k="0">0</div><div class="pg-key del" data-k="del">DEL</div></div><div id="pgMemLabel">A Memory of Mum</div></div>
+<div id="cine" onclick="skipCine()"><div class="cine-sanskrit"><span class="cine-om">&#x950;</span>&#x936;&#x93E;&#x928;&#x94D;&#x924;&#x93F;&#x903; &#x936;&#x93E;&#x928;&#x94D;&#x924;&#x93F;&#x903; &#x936;&#x93E;&#x928;&#x94D;&#x924;&#x93F;&#x903;</div><div class="cine-portrait"><img id="cinePortraitImg" src="./mum-portrait.png" onerror="this.onerror=null;this.src='./memories/medium/02012011521.jpg'" alt="Tulawati Lal Mummy"></div><div class="cine-name">Tulawati Lal<em>&laquo;MUMMY&raquo;</em></div><div class="cine-dates">Salina &middot; 12 Months &middot; 15-16 August 2026</div><button class="cine-skip" onclick="event.stopPropagation();skipCine()">SKIP &#8250;</button></div><main id="app" hidden>
 <div class="topbar">
-  <div class="brand"><div class="brand-mark">&#10047;</div><div class="brand-text">SALINA Command<em>Family Hub &middot; Whet&#363; Digital</em></div></div>
+  <div class="brand"><div class="brand-mark">&#10047;</div><div class="brand-text">SALINA<em>Family Hub &middot; Whet&#363; Digital</em></div></div>
   <div class="nav">
     <button class="nav-btn active" data-section="overview"><span>&#9685; Overview</span></button>
     <button class="nav-btn" data-section="guests"><span>&#128101; Guests</span></button>
@@ -767,11 +779,11 @@ section.section.active{display:block;animation:sectionIn .6s var(--ease)}
 </main>
 
 <div class="lightbox" id="lightbox"><button class="lb-close" onclick="closeLB()">&times;</button><button class="lb-prev" onclick="lbStep(-1)">&#8249;</button><button class="lb-next" onclick="lbStep(1)">&#8250;</button><img class="lb-img" id="lbImg" alt=""><div class="lb-meta" id="lbMeta"></div></div>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.min.js"></script>
+<script src="./vendor/gsap.min.js"></script>
+<script src="./vendor/ScrollTrigger.min.js"></script>
+<script src="./vendor/vanilla-tilt.min.js"></script>
+<script src="./vendor/lenis.min.js"></script>
+<script src="./vendor/three.min.js"></script>
 <script>
 // Smooth scroll via Lenis
 if (window.Lenis) {
