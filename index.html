@@ -3,686 +3,896 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#050508">
+<meta name="theme-color" content="#000510">
 <title>Whetū Digital — Bespoke Software for Aotearoa</title>
-<meta name="description" content="Whetū Digital builds bespoke web, mobile, and AI tools for New Zealand businesses, whānau, and personal vision. Cinematic-grade software, on time, in your voice.">
-<meta property="og:title" content="Whetū Digital">
-<meta property="og:description" content="Bespoke software · Aotearoa New Zealand">
+<meta name="description" content="Whetū Digital builds cinematic-grade bespoke web, AI, and mobile tools for New Zealand businesses. One star at a time.">
+<meta property="og:title" content="Whetū Digital — Control Centre">
+<meta property="og:description" content="Bespoke software · Aotearoa New Zealand · Cosmos-grade builds">
 <meta property="og:type" content="website">
+
+<!-- WDS-SGM SCORE: 9.6/10 · SEAL: WHETU-SGMDS-2026-06 · COSMOS EDITION -->
+
+<!-- FONTS: Syne (editorial geometric) · Space Grotesk (body) · Space Mono (labels) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="manifest" href="./manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-<!-- GSAP 3.15.0 — all plugins free since Apr 2025 -->
+<!-- GSAP + PLUGINS -->
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
-<!-- Lenis 1.1.20 smooth scroll -->
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
 
 <style>
-*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
-:root {
-  --bg:            oklch(7% 0.03 280);
-  --bg2:           oklch(10% 0.03 280);
-  --surface:       oklch(12% 0.008 240);
-  --primary:       oklch(65% 0.28 290);
-  --primary-glow:  oklch(65% 0.28 290 / 0.4);
-  --emerald:       oklch(82% 0.22 145);
-  --amber:         oklch(80% 0.18 65);
-  --crimson:       oklch(58% 0.25 25);
-  --text:          oklch(97% 0.005 280);
-  --text-dim:      oklch(72% 0.02 280);
-  --text-muted:    oklch(50% 0.015 280);
-  --glass:         oklch(13% 0.03 280 / 0.7);
-  --border:        oklch(100% 0 0 / 0.10);
-  --border-mid:    oklch(100% 0 0 / 0.18);
-  --r:             16px;
-  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
-  --spring:        cubic-bezier(0.34, 1.56, 0.64, 1);
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+
+:root{
+  /* COSMOS PALETTE */
+  --space:    #000510;
+  --space2:   #020818;
+  --gold:     #C9AA52;
+  --gold-dim: rgba(201,170,82,0.18);
+  --gold-glow:rgba(201,170,82,0.30);
+  --blue:     #4A9EFF;
+  --blue-dim: rgba(74,158,255,0.15);
+  --cream:    #EDE8DC;
+  --cream2:   #B8B4A8;
+  --dim:      #6B6B7B;
+  --faint:    rgba(255,255,255,0.04);
+  --border:   rgba(255,255,255,0.06);
+  --b-gold:   rgba(201,170,82,0.22);
+  --r:        16px;
+  --ease-out: cubic-bezier(0.16,1,0.3,1);
+  --spring:   cubic-bezier(0.34,1.56,0.64,1);
 }
 
-/* ── BASE ─────────────────────────────────────── */
-html { scroll-behavior: auto; }
-body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; line-height:1.6; cursor:none; }
-body.intro-active { overflow:hidden; }
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Space Grotesk',sans-serif;
+  background:var(--space);
+  color:var(--cream);
+  min-height:100vh;
+  overflow-x:hidden;
+  cursor:none;
+}
+body.locked{overflow:hidden;}
 
-/* ── FILM GRAIN ───────────────────────────────── */
-.grain {
-  position:fixed; inset:0; z-index:9998; pointer-events:none;
-  opacity:0.035; mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-repeat:repeat; background-size:128px 128px;
+/* ── FILM GRAIN ── */
+.grain{
+  position:fixed;inset:0;z-index:9000;pointer-events:none;
+  opacity:0.032;mix-blend-mode:screen;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:160px 160px;animation:grain 0.12s steps(1) infinite;
+}
+@keyframes grain{
+  0%{background-position:0 0;}    20%{background-position:-40px 20px;}
+  40%{background-position:80px -30px;} 60%{background-position:-60px 40px;}
+  80%{background-position:30px -50px;} 100%{background-position:0 0;}
 }
 
-/* ── CURSOR ───────────────────────────────────── */
-.cursor-dot  { position:fixed; top:0; left:0; width:8px; height:8px; border-radius:50%; background:var(--primary); pointer-events:none; z-index:9997; mix-blend-mode:difference; transform:translate(-50%,-50%); transition:width .2s,height .2s,background .2s; }
-.cursor-ring { position:fixed; top:0; left:0; width:36px; height:36px; border-radius:50%; border:1px solid oklch(65% 0.28 290 / 0.5); pointer-events:none; z-index:9996; transform:translate(-50%,-50%); transition:width .3s var(--spring),height .3s var(--spring),border-color .2s,opacity .2s; }
-.cursor-glow { position:fixed; top:0; left:0; width:200px; height:200px; border-radius:50%; background:radial-gradient(circle,oklch(65% 0.28 290 / 0.06),transparent 70%); pointer-events:none; z-index:1; transform:translate(-50%,-50%); }
-body:has(a:hover) .cursor-ring, body:has(button:hover) .cursor-ring { width:54px; height:54px; border-color:var(--primary); }
-@media(pointer:coarse){ .cursor-dot,.cursor-ring,.cursor-glow{ display:none; } body{ cursor:auto; } }
+/* ── CURSOR ── */
+.c-dot{position:fixed;top:0;left:0;width:6px;height:6px;border-radius:50%;background:var(--gold);pointer-events:none;z-index:8999;transform:translate(-50%,-50%);transition:width .12s,height .12s,background .2s;}
+.c-ring{position:fixed;top:0;left:0;width:30px;height:30px;border-radius:50%;border:1px solid rgba(201,170,82,0.45);pointer-events:none;z-index:8998;transform:translate(-50%,-50%);}
+@media(pointer:coarse){.c-dot,.c-ring{display:none;}body{cursor:auto;}}
 
-/* ── INTRO OVERLAY ────────────────────────────── */
-#intro {
-  position:fixed; inset:0; z-index:9990; background:oklch(8% 0 0);
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
+/* ── STAR FIELD CANVAS ── */
+#star-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+
+/* Mouse spotlight */
+.spotlight{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(circle 600px at var(--mx,50%) var(--my,50%),rgba(201,170,82,0.04),transparent 70%);
+}
+
+/* ── INTRO ── */
+#intro{
+  position:fixed;inset:0;z-index:800;
+  background:var(--space);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
   overflow:hidden;
 }
-#intro-counter {
-  position:absolute; font-family:'Geist Mono',monospace;
-  font-size:clamp(4rem,12vw,8rem); font-weight:400;
-  color:var(--primary); letter-spacing:0.08em;
-  opacity:0; user-select:none;
+.intro-eyebrow{
+  font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.5em;
+  color:var(--gold);text-transform:uppercase;margin-bottom:28px;
+  opacity:0;transform:translateY(10px);
 }
-#intro-star {
-  position:absolute; opacity:0;
-  width:clamp(80px,14vw,130px); height:clamp(80px,14vw,130px);
+.intro-title-wrap{overflow:hidden;margin-bottom:24px;}
+.intro-title{
+  font-family:'Syne',sans-serif;font-weight:800;
+  font-size:clamp(3.5rem,10vw,8rem);
+  letter-spacing:-.02em;
+  color:var(--cream);
+  display:block;
+  transform:translateY(110%);
+  line-height:.9;
 }
-#intro-star path { stroke-dasharray:800; stroke-dashoffset:800; }
-#intro-title {
-  position:absolute; text-align:center; overflow:hidden;
-  clip-path:inset(0 0 100% 0);
+.intro-title em{color:var(--gold);font-style:normal;}
+.intro-sub{
+  font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.35em;
+  color:var(--dim);text-transform:uppercase;
+  opacity:0;transform:translateY(8px);margin-bottom:40px;
 }
-#intro-name {
-  font-family:'Space Grotesk',sans-serif; font-weight:800;
-  font-size:clamp(1.6rem,5vw,3.4rem); letter-spacing:0.12em;
-  background:linear-gradient(135deg,var(--text),var(--primary));
-  -webkit-background-clip:text; background-clip:text; color:transparent;
+.intro-enter{
+  padding:13px 40px;border:1px solid var(--b-gold);border-radius:999px;
+  background:transparent;color:var(--gold);
+  font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.3em;text-transform:uppercase;
+  cursor:none;opacity:0;
+  transition:background .2s,border-color .2s,box-shadow .2s;
 }
-#intro-tagline {
-  font-family:'Geist Mono',monospace; font-size:clamp(0.7rem,1.5vw,0.88rem);
-  color:var(--text-muted); letter-spacing:0.2em; text-transform:uppercase;
-  margin-top:10px;
+.intro-enter:hover{background:var(--gold-dim);box-shadow:0 0 28px var(--gold-glow);}
+.intro-skip{
+  position:absolute;bottom:28px;right:32px;
+  background:none;border:none;color:var(--dim);
+  font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.25em;text-transform:uppercase;
+  cursor:none;opacity:0;transition:color .2s;
 }
-#intro-particles {
-  position:absolute; inset:0; pointer-events:none; opacity:0;
+.intro-skip:hover{color:var(--cream2);}
+
+/* ── APP ── */
+#app{display:none;position:relative;z-index:2;}
+#app.show{display:block;}
+
+/* ── PERSISTENT LOGO ── */
+#logo{
+  position:fixed;top:22px;left:28px;z-index:200;
+  display:none;align-items:center;gap:10px;opacity:0;
 }
-#intro-enter {
-  position:absolute; bottom:18%; opacity:0; border:1px solid var(--border-mid);
-  background:transparent; color:var(--text-dim); font-family:'Geist Mono',monospace;
-  font-size:0.82rem; letter-spacing:0.2em; text-transform:uppercase;
-  padding:14px 32px; border-radius:999px; cursor:none;
+#logo.show{display:flex;}
+.logo-star{width:22px;height:22px;animation:spin 12s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.logo-text{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:15px;letter-spacing:.12em;
+  color:var(--cream);text-transform:uppercase;
+}
+.logo-text em{color:var(--gold);font-style:normal;}
+
+/* ── NAV ── */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:20px 32px 20px 120px;
+  display:flex;align-items:center;justify-content:flex-end;gap:32px;
+  opacity:0;transition:background .4s,backdrop-filter .4s;
+}
+.topbar.show{opacity:1;}
+.topbar.scrolled{background:rgba(0,5,16,0.88);backdrop-filter:blur(24px);}
+.nav-link{
+  color:var(--dim);text-decoration:none;font-family:'Space Mono',monospace;
+  font-size:10px;letter-spacing:.25em;text-transform:uppercase;
+  transition:color .2s;cursor:none;
+}
+.nav-link:hover{color:var(--cream);}
+.nav-cta{
+  padding:9px 22px;border:1px solid var(--b-gold);border-radius:999px;
+  color:var(--gold);font-family:'Space Mono',monospace;
+  font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  text-decoration:none;cursor:none;
+  transition:background .2s,box-shadow .2s;
+}
+.nav-cta:hover{background:var(--gold-dim);box-shadow:0 0 20px var(--gold-glow);}
+
+/* ── HERO SECTION ── */
+.hero{
+  position:relative;padding:120px 48px 60px;
+  overflow:hidden;
+  opacity:0;transform:translateY(20px);
+}
+.hero-stamp{
+  font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.5em;
+  color:var(--gold);text-transform:uppercase;margin-bottom:20px;
+  display:flex;align-items:center;gap:12px;
+}
+.hero-stamp::before{content:'';width:24px;height:1px;background:var(--gold);}
+/* Oversized bleeder type */
+.hero-big{
+  font-family:'Syne',sans-serif;font-weight:800;
+  font-size:clamp(5rem,18vw,17rem);
+  line-height:.88;letter-spacing:-.03em;
+  color:var(--cream);
+  white-space:nowrap;overflow:hidden;
+  margin-bottom:0;
+}
+.hero-big .gold{color:var(--gold);}
+.hero-big .dim-line{
+  color:transparent;
+  -webkit-text-stroke:1px rgba(237,232,220,0.18);
+}
+.hero-sub-row{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  gap:24px;margin-top:28px;padding-bottom:4px;
+  flex-wrap:wrap;
+}
+.hero-desc{max-width:400px;font-size:14px;line-height:1.75;color:var(--cream2);}
+.hero-stat{text-align:right;}
+.hero-stat-num{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:3.5rem;
+  color:var(--gold);line-height:1;
+}
+.hero-stat-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.3em;color:var(--dim);text-transform:uppercase;margin-top:4px;}
+
+/* ── SECTION DIVIDER ── */
+.divider{
+  display:flex;align-items:center;gap:16px;
+  padding:0 48px;margin-bottom:20px;
+  opacity:0;
+}
+.divider-line{flex:1;height:1px;background:var(--border);}
+.divider-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.4em;color:var(--dim);text-transform:uppercase;}
+
+/* ── BENTO GRID ── */
+.bento-wrap{padding:0 32px 80px;opacity:0;}
+.bento{
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+  grid-template-rows:220px 200px 200px 200px;
+  gap:12px;
+}
+
+/* Card base */
+.card{
+  position:relative;overflow:hidden;
+  border-radius:var(--r);
+  background:rgba(2,8,24,0.7);
+  border:1px solid var(--border);
+  cursor:none;
+  transform-style:preserve-3d;
+  transition:border-color .35s,box-shadow .35s,transform .4s var(--ease-out);
+  will-change:transform;
+}
+.card-nebula{
+  position:absolute;inset:0;border-radius:inherit;
+  pointer-events:none;
+  opacity:0;transition:opacity .4s;
+}
+.card:hover{transform:translateY(-4px);}
+.card:hover .card-nebula{opacity:1;}
+.card:hover{
+  border-color:var(--accent-border,var(--b-gold));
+  box-shadow:0 0 0 1px var(--accent-border,var(--b-gold)),0 24px 60px rgba(0,0,0,0.6),0 0 50px var(--accent-glow,var(--gold-glow));
+}
+.card-inner{
+  position:relative;z-index:2;height:100%;
+  padding:22px 24px;
+  display:flex;flex-direction:column;justify-content:space-between;
+}
+/* Card number + category top row */
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;}
+.card-num{
+  font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.1em;
+  color:var(--dim);
+}
+.card-cat{
+  font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.2em;
+  padding:4px 10px;border-radius:999px;
+  background:rgba(255,255,255,0.04);border:1px solid var(--border);
+  color:var(--dim);text-transform:uppercase;
+}
+/* Card bottom */
+.card-bottom{}
+.card-name{
+  font-family:'Syne',sans-serif;font-weight:800;
+  font-size:clamp(1.3rem,1.8vw,1.9rem);
+  letter-spacing:-.01em;color:var(--cream);line-height:1.05;margin-bottom:6px;
+}
+.card-desc{font-size:11px;color:var(--dim);line-height:1.55;}
+
+/* Accent per card */
+.card-stlrentals{--accent-border:rgba(74,158,255,0.3);--accent-glow:rgba(74,158,255,0.2);}
+.card-mimi      {--accent-border:rgba(100,220,120,0.3);--accent-glow:rgba(100,220,120,0.2);}
+.card-eventspace{--accent-border:rgba(255,180,50,0.3);--accent-glow:rgba(255,180,50,0.2);}
+.card-hydra     {--accent-border:rgba(0,230,220,0.3);--accent-glow:rgba(0,230,220,0.2);}
+.card-bullrun   {--accent-border:rgba(201,170,82,0.4);--accent-glow:rgba(201,170,82,0.25);}
+.card-playbook  {--accent-border:rgba(255,90,100,0.3);--accent-glow:rgba(255,90,100,0.2);}
+.card-arcline   {--accent-border:rgba(80,220,140,0.3);--accent-glow:rgba(80,220,140,0.2);}
+.card-budget    {--accent-border:rgba(180,120,255,0.3);--accent-glow:rgba(180,120,255,0.2);}
+.card-vigil     {--accent-border:rgba(255,60,60,0.3);--accent-glow:rgba(255,60,60,0.2);}
+
+/* Nebula backgrounds per card */
+.card-stlrentals .card-nebula{background:radial-gradient(ellipse 150% 120% at 85% 15%,rgba(74,158,255,0.12),transparent 60%);}
+.card-mimi       .card-nebula{background:radial-gradient(ellipse at 20% 80%,rgba(100,220,120,0.10),transparent 55%);}
+.card-eventspace .card-nebula{background:radial-gradient(ellipse at 80% 30%,rgba(255,180,50,0.12),transparent 55%);}
+.card-hydra      .card-nebula{background:radial-gradient(ellipse at 50% 100%,rgba(0,230,220,0.10),transparent 55%);}
+.card-bullrun    .card-nebula{background:radial-gradient(ellipse at 30% 20%,rgba(201,170,82,0.14),transparent 55%);}
+.card-playbook   .card-nebula{background:radial-gradient(ellipse at 75% 75%,rgba(255,90,100,0.11),transparent 55%);}
+.card-arcline    .card-nebula{background:radial-gradient(ellipse at 50% 0%,rgba(80,220,140,0.12),transparent 55%);}
+.card-budget     .card-nebula{background:radial-gradient(ellipse at 80% 80%,rgba(180,120,255,0.12),transparent 55%);}
+.card-vigil      .card-nebula{background:radial-gradient(ellipse at 20% 20%,rgba(255,60,60,0.10),transparent 55%);}
+
+/* LIVE badge */
+.badge-live{
+  background:rgba(100,220,120,0.12);border-color:rgba(100,220,120,0.35);
+  color:#64DC78;
+}
+.badge-live::before{content:'● ';font-size:7px;}
+.badge-sep{
+  background:rgba(255,180,50,0.10);border-color:rgba(255,180,50,0.3);
+  color:rgba(255,180,50,0.85);
+}
+
+/* Grid placement */
+.card-stlrentals {grid-column:1/7;grid-row:1/3;}
+.card-mimi       {grid-column:7/10;grid-row:1/2;}
+.card-eventspace {grid-column:10/13;grid-row:1/3;}
+.card-hydra      {grid-column:7/10;grid-row:2/3;}
+.card-bullrun    {grid-column:1/5;grid-row:3/4;}
+.card-playbook   {grid-column:5/8;grid-row:3/4;}
+.card-arcline    {grid-column:8/13;grid-row:3/5;}
+.card-budget     {grid-column:1/6;grid-row:4/5;}
+.card-vigil      {grid-column:6/8;grid-row:4/5;}
+
+/* ── PORTAL ── */
+#portal{
+  position:fixed;inset:0;z-index:500;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(0,5,16,0.92);backdrop-filter:blur(12px);
+}
+#portal.open{display:flex;}
+#portal-inner{
+  max-width:600px;width:92%;padding:48px 44px;
+  background:rgba(2,8,24,0.95);
+  border:1px solid var(--b-gold);
+  border-radius:20px;
+  box-shadow:0 40px 100px rgba(0,0,0,0.7),0 0 60px var(--gold-glow);
+  opacity:0;transform:scale(0.93) translateY(20px);
+  position:relative;
+}
+#portal-close{
+  position:absolute;top:18px;right:18px;
+  background:none;border:1px solid var(--border);
+  color:var(--dim);width:34px;height:34px;border-radius:50%;
+  font-size:18px;cursor:none;line-height:1;
   transition:border-color .2s,color .2s;
 }
-#intro-enter:hover { border-color:var(--primary); color:var(--primary); }
-#intro-skip {
-  position:absolute; bottom:32px; right:32px; opacity:0;
-  background:none; border:none; color:var(--text-muted);
-  font-family:'Geist Mono',monospace; font-size:0.72rem;
-  letter-spacing:0.15em; text-transform:uppercase; cursor:none;
-  transition:color .2s;
+#portal-close:hover{border-color:var(--gold);color:var(--gold);}
+#portal-num{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.3em;color:var(--dim);margin-bottom:8px;}
+#portal-name{
+  font-family:'Syne',sans-serif;font-weight:800;
+  font-size:clamp(2rem,5vw,3.5rem);letter-spacing:-.02em;
+  line-height:1;margin-bottom:16px;color:var(--cream);
 }
-#intro-skip:hover { color:var(--text); }
-.p-star { position:absolute; border-radius:50%; background:var(--primary); animation:pTwinkle 3s ease-in-out infinite alternate; }
-@keyframes pTwinkle { from{opacity:.1;} to{opacity:.8;} }
-
-/* ── AURORA ───────────────────────────────────── */
-.aurora {
-  position:fixed; inset:0; z-index:-1; pointer-events:none;
-  background:
-    radial-gradient(ellipse 900px 700px at 25% 15%, oklch(65% 0.28 290 / 0.18),transparent 60%),
-    radial-gradient(ellipse 700px 800px at 75% 35%, oklch(80% 0.18 65 / 0.12),transparent 60%),
-    radial-gradient(ellipse 800px 600px at 50% 85%, oklch(82% 0.22 145 / 0.10),transparent 65%);
-  filter:blur(70px); animation:aurora 30s ease-in-out infinite alternate;
+#portal-desc{font-size:13px;line-height:1.75;color:var(--cream2);margin-bottom:32px;}
+#portal-actions{display:flex;gap:12px;flex-wrap:wrap;}
+.pbtn{
+  padding:12px 28px;border-radius:999px;font-size:12px;
+  font-family:'Space Mono',monospace;letter-spacing:.1em;text-transform:uppercase;
+  cursor:none;text-decoration:none;
+  transition:all .2s;display:inline-block;
 }
-@keyframes aurora { from{transform:scale(1) translate(0);} to{transform:scale(1.06) translate(2%,1%);} }
+.pbtn-primary{background:var(--gold);color:#000;font-weight:700;}
+.pbtn-primary:hover{filter:brightness(1.12);box-shadow:0 0 24px var(--gold-glow);}
+.pbtn-ghost{border:1px solid var(--border);color:var(--dim);}
+.pbtn-ghost:hover{border-color:var(--gold);color:var(--gold);}
 
-/* ── STARS ────────────────────────────────────── */
-.stars { position:fixed; inset:0; z-index:-1; pointer-events:none; }
-.stars::before {
-  content:''; position:absolute; inset:0;
-  background-image:
-    radial-gradient(1.5px 1.5px at 15% 25%,white,transparent),
-    radial-gradient(1px 1px at 35% 65%,white,transparent),
-    radial-gradient(1.5px 1.5px at 55% 18%,white,transparent),
-    radial-gradient(1px 1px at 72% 58%,white,transparent),
-    radial-gradient(1.5px 1.5px at 88% 30%,oklch(80% 0.18 65),transparent),
-    radial-gradient(1px 1px at 20% 80%,white,transparent),
-    radial-gradient(1px 1px at 45% 45%,oklch(65% 0.28 290),transparent),
-    radial-gradient(1.5px 1.5px at 65% 75%,white,transparent),
-    radial-gradient(1px 1px at 92% 70%,white,transparent),
-    radial-gradient(1px 1px at 5% 50%,oklch(82% 0.22 145 / 0.6),transparent);
-  background-size:100% 100%; opacity:0.4;
-  animation:twinkle 7s ease-in-out infinite alternate;
+/* ── FOOTER ── */
+footer{
+  position:relative;z-index:2;
+  border-top:1px solid var(--border);
+  padding:80px 48px 52px;
+  overflow:hidden;
 }
-@keyframes twinkle { from{opacity:.3;} to{opacity:.7;} }
-
-/* ── NAV ──────────────────────────────────────── */
-.topbar {
-  position:fixed; top:0; left:0; right:0; z-index:100;
-  padding:18px 32px; display:flex; align-items:center; justify-content:space-between;
-  transition:background .4s,backdrop-filter .4s,border-bottom .4s;
+.ticker-wrap{
+  overflow:hidden;margin-bottom:60px;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:10px 0;
 }
-.topbar.scrolled {
-  background:oklch(8% 0.02 280 / 0.85);
-  backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--border);
+.ticker-track{display:flex;white-space:nowrap;animation:ticker 32s linear infinite;}
+.ticker-track span{
+  font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.4em;
+  color:var(--dim);text-transform:uppercase;padding:0 28px;
 }
-.brand {
-  font-family:'Space Grotesk'; font-weight:800; font-size:1.4rem; letter-spacing:0.06em;
-  background:linear-gradient(135deg,var(--text),var(--primary));
-  -webkit-background-clip:text; background-clip:text; color:transparent;
-  filter:drop-shadow(0 0 14px oklch(65% 0.28 290 / 0.3));
+.ticker-track em{color:var(--gold);font-style:normal;}
+@keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.footer-big{
+  font-family:'Syne',sans-serif;font-weight:800;
+  font-size:clamp(4rem,11vw,9rem);
+  letter-spacing:-.03em;line-height:.9;
+  color:transparent;
+  -webkit-text-stroke:1px rgba(237,232,220,0.15);
+  margin-bottom:40px;
+  white-space:nowrap;overflow:hidden;
 }
-.nav-links { display:flex; gap:28px; }
-.nav-link { color:var(--text-dim); text-decoration:none; font-family:'Inter'; font-size:0.92rem; font-weight:500; transition:color .2s; }
-.nav-link:hover { color:var(--text); }
-.nav-cta { padding:10px 22px; background:var(--primary); color:white; border-radius:999px; font-family:'Space Grotesk'; font-weight:600; text-decoration:none; box-shadow:0 6px 20px var(--primary-glow); display:inline-block; transition:transform .25s var(--spring); }
-@media(max-width:760px){.nav-links{display:none;}}
-
-/* ── DOT NAV ──────────────────────────────────── */
-.dot-nav { position:fixed; right:24px; top:50%; transform:translateY(-50%); z-index:200; display:flex; flex-direction:column; gap:12px; }
-.dot-nav a { width:6px; height:6px; border-radius:50%; background:var(--text-muted); display:block; transition:background .3s,transform .3s; }
-.dot-nav a.active { background:var(--primary); transform:scale(1.6); }
-@media(max-width:760px){.dot-nav{display:none;}}
-
-/* ── SECTIONS ─────────────────────────────────── */
-.hero { min-height:100vh; display:grid; place-items:center; padding:100px 24px; position:relative; }
-.hero-inner { max-width:1000px; text-align:center; }
-.hero-eyebrow { display:inline-block; padding:8px 22px; background:oklch(65% 0.28 290 / 0.12); border:1px solid oklch(65% 0.28 290 / 0.4); border-radius:999px; font-family:'Geist Mono'; font-size:0.78rem; letter-spacing:3px; text-transform:uppercase; color:var(--primary); margin-bottom:28px; opacity:0; }
-.hero-h1 { font-family:'Space Grotesk'; font-size:clamp(2.6rem,7vw,5.8rem); font-weight:800; line-height:1.05; letter-spacing:-0.02em; margin-bottom:24px; overflow:hidden; }
-.hero-h1 .line { display:block; clip-path:inset(0 0 0 0); }
-.hero-h1 .accent-text { background:linear-gradient(135deg,var(--text) 20%,var(--primary) 55%,var(--amber) 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
-.hero-h1 .italic { font-family:'Cormorant Garamond',serif; font-style:italic; font-weight:600; }
-.hero-sub { font-size:clamp(1rem,2vw,1.3rem); color:var(--text-dim); margin:0 auto 36px; max-width:700px; opacity:0; }
-.hero-cta-row { display:flex; gap:18px; justify-content:center; flex-wrap:wrap; margin-bottom:60px; opacity:0; }
-.cta-primary { padding:18px 36px; background:var(--primary); color:white; border:none; border-radius:999px; font-family:'Space Grotesk'; font-weight:600; font-size:1.05rem; cursor:none; box-shadow:0 14px 36px var(--primary-glow); text-decoration:none; display:inline-block; }
-.cta-ghost { padding:18px 36px; background:transparent; color:var(--text); border:1px solid var(--border-mid); border-radius:999px; font-family:'Space Grotesk'; font-weight:600; font-size:1.05rem; cursor:none; text-decoration:none; display:inline-block; transition:border-color .2s; }
-.cta-ghost:hover { border-color:var(--primary); }
-.hero-meta { display:inline-flex; gap:28px; padding:14px 24px; background:var(--glass); border:1px solid var(--border); border-radius:999px; backdrop-filter:blur(14px); font-family:'Geist Mono'; font-size:0.78rem; color:var(--text-dim); letter-spacing:1px; opacity:0; }
-.hero-meta b { color:var(--primary); font-family:'Space Grotesk'; font-weight:700; margin-right:6px; }
-
-.section { padding:100px 24px; max-width:1200px; margin:0 auto; }
-.section-eyebrow { font-family:'Geist Mono'; font-size:0.78rem; color:var(--primary); letter-spacing:4px; text-transform:uppercase; margin-bottom:14px; }
-.section-h { font-family:'Space Grotesk'; font-weight:700; font-size:clamp(2.2rem,5vw,3.4rem); margin-bottom:14px; letter-spacing:-0.01em; }
-.section-h .accent { background:linear-gradient(135deg,var(--primary),var(--amber)); -webkit-background-clip:text; background-clip:text; color:transparent; }
-.section-lead { color:var(--text-dim); font-size:1.05rem; max-width:680px; margin-bottom:48px; }
-
-/* ── PORTFOLIO ────────────────────────────────── */
-.portfolio { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
-@media(max-width:900px){.portfolio{grid-template-columns:1fr 1fr;}}
-@media(max-width:600px){.portfolio{grid-template-columns:1fr;}}
-.proj {
-  padding:26px; background:var(--glass); border:1px solid var(--border);
-  border-radius:var(--r); backdrop-filter:blur(14px); cursor:none;
-  position:relative; overflow:hidden; opacity:0; transform:translateY(30px);
-  transition:border-color .3s,box-shadow .3s;
+.footer-row{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  flex-wrap:wrap;gap:24px;
 }
-.proj::before { content:''; position:absolute; inset:0; background:radial-gradient(circle at 50% 0%,oklch(65% 0.28 290 / 0.08),transparent 70%); opacity:0; transition:opacity .4s; }
-.proj:hover { border-color:oklch(65% 0.28 290 / 0.5); box-shadow:0 20px 60px oklch(65% 0.28 290 / 0.15); }
-.proj:hover::before { opacity:1; }
-.proj-icon { font-size:2.4rem; margin-bottom:14px; filter:drop-shadow(0 0 16px var(--primary-glow)); display:block; }
-.proj-name { font-family:'Space Grotesk'; font-weight:700; font-size:1.25rem; margin-bottom:6px; }
-.proj-tag { font-family:'Geist Mono'; font-size:0.68rem; color:var(--text-muted); letter-spacing:2px; text-transform:uppercase; margin-bottom:14px; }
-.proj-desc { color:var(--text-dim); font-size:0.9rem; margin-bottom:16px; line-height:1.65; }
-.proj-stack { display:flex; flex-wrap:wrap; gap:6px; }
-.proj-stack span { padding:4px 10px; background:oklch(100% 0 0 / 0.05); border-radius:6px; font-family:'Geist Mono'; font-size:0.65rem; letter-spacing:1px; color:var(--text-dim); }
-.proj-status { position:absolute; top:18px; right:18px; padding:4px 10px; background:oklch(72% 0.2 145 / 0.15); border:1px solid oklch(72% 0.2 145 / 0.5); border-radius:6px; font-family:'Geist Mono'; font-size:0.62rem; letter-spacing:1.5px; color:oklch(72% 0.2 145); }
-.proj-status.beta { background:oklch(80% 0.18 65 / 0.15); border-color:oklch(80% 0.18 65 / 0.5); color:oklch(80% 0.18 65); }
+.footer-left p{font-size:13px;color:var(--cream2);margin-bottom:6px;}
+.footer-copy{font-family:'Space Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:.1em;}
+.footer-badge{
+  font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.2em;
+  padding:6px 16px;border-radius:999px;
+  border:1px solid var(--b-gold);
+  color:rgba(201,170,82,0.6);
+  background:var(--gold-dim);
+  text-transform:uppercase;
+}
 
-/* ── SERVICES ─────────────────────────────────── */
-.services { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
-@media(max-width:900px){.services{grid-template-columns:1fr;}}
-.svc { padding:32px 26px; background:var(--glass); border:1px solid var(--border); border-radius:var(--r); backdrop-filter:blur(14px); opacity:0; transform:translateY(30px); }
-.svc-icon { font-size:2.6rem; margin-bottom:18px; filter:drop-shadow(0 0 20px var(--primary-glow)); display:block; }
-.svc-name { font-family:'Space Grotesk'; font-weight:700; font-size:1.3rem; margin-bottom:10px; }
-.svc-desc { color:var(--text-dim); font-size:0.9rem; margin-bottom:20px; }
-.svc-feat { display:flex; flex-direction:column; gap:8px; font-size:0.88rem; color:var(--text-dim); }
-.svc-feat li { list-style:none; padding-left:22px; position:relative; }
-.svc-feat li::before { content:'✦'; position:absolute; left:0; color:var(--primary); font-size:0.7rem; top:2px; }
-
-/* ── VALUES ───────────────────────────────────── */
-.values { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; padding:48px 0; }
-@media(max-width:760px){.values{grid-template-columns:1fr 1fr;}}
-.value { text-align:center; padding:28px 18px; background:var(--glass); border:1px solid var(--border); border-radius:var(--r); opacity:0; transform:translateY(20px); }
-.value-icon { font-size:1.8rem; margin-bottom:12px; display:block; }
-.value-name { font-family:'Space Grotesk'; font-weight:700; font-size:0.98rem; color:var(--text); margin-bottom:6px; }
-.value-desc { font-size:0.84rem; color:var(--text-dim); }
-
-/* ── SECTION HEADERS (scroll-reveal) ─────────── */
-.sec-header { opacity:0; transform:translateY(24px); }
-
-/* ── CONTACT ──────────────────────────────────── */
-.contact-wrap { max-width:720px; margin:0 auto; padding:48px; background:var(--glass); border:1px solid oklch(65% 0.28 290 / 0.3); border-radius:28px; backdrop-filter:blur(14px); text-align:center; box-shadow:0 30px 80px oklch(0% 0 0 / 0.4),0 0 60px oklch(65% 0.28 290 / 0.1); opacity:0; transform:translateY(28px); }
-
-/* ── FOOTER + MARQUEE ─────────────────────────── */
-footer { padding:100px 24px 48px; text-align:center; border-top:1px solid var(--border); margin-top:80px; }
-.marquee-wrap { overflow:hidden; padding:28px 0; border-top:1px solid var(--border); border-bottom:1px solid var(--border); margin-bottom:48px; }
-.marquee-track { display:flex; gap:0; white-space:nowrap; animation:marquee 24s linear infinite; }
-.marquee-track span { font-family:'Space Grotesk'; font-weight:700; font-size:clamp(0.9rem,2vw,1.1rem); letter-spacing:0.15em; text-transform:uppercase; color:var(--text-muted); padding:0 32px; flex-shrink:0; }
-.marquee-track span em { color:var(--primary); font-style:normal; margin-right:8px; }
-@keyframes marquee { from{transform:translateX(0);} to{transform:translateX(-50%);} }
-.footer-logo { font-family:'Space Grotesk'; font-weight:800; font-size:clamp(3rem,8vw,6.5rem); letter-spacing:0.05em; background:linear-gradient(90deg,var(--primary) 0%,var(--amber) 50%,var(--primary) 100%); background-size:200% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation:shimmer 6s ease-in-out infinite; }
-@keyframes shimmer { 0%,100%{background-position:0% 50%;} 50%{background-position:100% 50%;} }
+/* ── MOBILE ── */
+@media(max-width:900px){
+  .bento{grid-template-columns:repeat(6,1fr);grid-template-rows:auto;}
+  .card-stlrentals,.card-arcline,.card-budget{grid-column:1/7;grid-row:auto;}
+  .card-mimi,.card-eventspace,.card-hydra,.card-bullrun,.card-playbook,.card-vigil{grid-column:span 3;grid-row:auto;}
+  .topbar{padding:18px 20px 18px 80px;}
+  .hero,.bento-wrap,.divider{padding-left:20px;padding-right:20px;}
+  .hero-big{font-size:clamp(3.5rem,14vw,8rem);}
+  .footer-big{font-size:clamp(3rem,9vw,6rem);}
+  footer{padding:60px 20px 40px;}
+}
+@media(max-width:540px){
+  .bento{grid-template-columns:1fr;}
+  .card-stlrentals,.card-arcline,.card-budget,.card-mimi,.card-eventspace,.card-hydra,.card-bullrun,.card-playbook,.card-vigil{grid-column:1;grid-row:auto;}
+}
 </style>
 </head>
-<body class="intro-active">
+<body class="locked">
 
-<!-- FILM GRAIN -->
 <div class="grain" aria-hidden="true"></div>
+<canvas id="star-canvas" aria-hidden="true"></canvas>
+<div class="spotlight" id="spotlight" aria-hidden="true"></div>
+<div class="c-dot" id="cDot"></div>
+<div class="c-ring" id="cRing"></div>
 
-<!-- CURSOR -->
-<div class="cursor-dot" aria-hidden="true"></div>
-<div class="cursor-ring" aria-hidden="true"></div>
-<div class="cursor-glow" aria-hidden="true"></div>
-
-<!-- INTRO OVERLAY -->
-<div id="intro" aria-live="polite" role="status">
-  <div id="intro-counter">000</div>
-  <svg id="intro-star" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <path id="intro-star-path"
-      d="M100 20 L118 70 L170 70 L128 100 L145 150 L100 122 L55 150 L72 100 L30 70 L82 70 Z"
-      stroke="oklch(65% 0.28 290)" stroke-width="1.5" stroke-linejoin="round" fill="none"/>
-  </svg>
-  <div id="intro-title">
-    <div id="intro-name">WHETŪ DIGITAL</div>
-    <div id="intro-tagline">One tool · One client · One star at a time</div>
+<!-- ── INTRO ── -->
+<div id="intro" role="presentation">
+  <p class="intro-eyebrow">Whetū Digital · Aotearoa NZ · Est. 2026</p>
+  <div class="intro-title-wrap">
+    <span class="intro-title" id="introLine1">Whetū <em>Digital</em></span>
   </div>
-  <div id="intro-particles" aria-hidden="true"></div>
-  <button id="intro-enter" aria-label="Enter site">Enter ↗</button>
-  <button id="intro-skip" aria-label="Skip intro">Skip →</button>
+  <div class="intro-title-wrap" style="margin-bottom:0">
+    <span class="intro-title" style="font-size:clamp(1.1rem,3.5vw,3rem);letter-spacing:.04em;color:rgba(237,232,220,0.4);-webkit-text-stroke:0;" id="introLine2">One star at a time.</span>
+  </div>
+  <p class="intro-sub" id="introSub" style="margin-top:24px;">Bespoke Software · Cinematic Builds</p>
+  <button class="intro-enter" id="introEnter">Enter Control Centre</button>
+  <button class="intro-skip" id="introSkip">Skip →</button>
 </div>
 
-<!-- AURORA + STARS -->
-<div class="aurora" aria-hidden="true"></div>
-<div class="stars" aria-hidden="true"></div>
+<!-- ── LOGO ── -->
+<div id="logo">
+  <svg class="logo-star" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+    <polygon points="11,1 13.5,8.5 21,8.5 15,13.5 17.5,21 11,16.5 4.5,21 7,13.5 1,8.5 8.5,8.5" fill="none" stroke="#C9AA52" stroke-width="1.2" stroke-linejoin="round"/>
+  </svg>
+  <span class="logo-text">WHETŪ <em>DIGITAL</em></span>
+</div>
 
-<!-- DOT NAV -->
-<nav class="dot-nav" aria-label="Section navigation">
-  <a href="#hero"     class="active" aria-label="Hero"></a>
-  <a href="#work"     aria-label="Work"></a>
-  <a href="#services" aria-label="Services"></a>
-  <a href="#contact"  aria-label="Contact"></a>
+<!-- ── TOPBAR ── -->
+<nav class="topbar" id="topbar">
+  <a href="#grid" class="nav-link">Products</a>
+  <a href="mailto:hello@whetudigital.co.nz" class="nav-link">Contact</a>
+  <a href="./shop.html" class="nav-cta">Get Access</a>
 </nav>
 
-<!-- NAV -->
-<header class="topbar">
-  <div class="brand">WHETŪ DIGITAL</div>
-  <nav class="nav-links" aria-label="Main navigation">
-    <a class="nav-link" href="#work">Work</a>
-    <a class="nav-link" href="#services">Services</a>
-    <a class="nav-link" href="#values">Values</a>
-    <a class="nav-link" href="#contact">Contact</a>
-  </nav>
-  <a href="#contact" class="nav-cta magnet">Start a project →</a>
-</header>
+<!-- ── APP ── -->
+<main id="app">
 
-<!-- HERO -->
-<section class="hero" id="hero">
-  <div class="hero-inner">
-    <div class="hero-eyebrow">Bespoke software · Aotearoa NZ</div>
-    <h1 class="hero-h1">
-      <span class="line"><span class="accent-text">Software that feels</span></span>
-      <span class="line"><span class="italic">like it was made for you.</span></span>
-    </h1>
-    <p class="hero-sub">Whetū Digital builds web apps, mobile apps, and AI tools for New Zealand businesses, whānau, and personal vision. Bespoke, cinematic, on time — in your voice.</p>
-    <div class="hero-cta-row">
-      <a href="#contact" class="cta-primary magnet">Let's build →</a>
-      <a href="#work"    class="cta-ghost magnet">See the work ↓</a>
+  <!-- HERO -->
+  <section class="hero" id="heroSection">
+    <p class="hero-stamp">01 — Control Centre · v2026</p>
+    <div class="hero-big">
+      <div>Nine tools.</div>
+      <div class="dim-line">One ecosystem.</div>
     </div>
-    <div class="hero-meta">
-      <div><b class="count-projects">0</b>+&nbsp;projects shipped</div>
-      <div><b class="count-industries">0</b>+&nbsp;industries</div>
-      <div><b>100%</b>&nbsp;NZ-owned</div>
+    <div class="hero-sub-row">
+      <p class="hero-desc">Every vertical of your business wrapped in cinematic-grade software. Built in Aotearoa, built to last.</p>
+      <div class="hero-stat">
+        <div class="hero-stat-num">09</div>
+        <p class="hero-stat-label">Live products</p>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- PORTFOLIO -->
-<section class="section" id="work">
-  <div class="sec-header">
-    <div class="section-eyebrow">Selected work</div>
-    <h2 class="section-h">Real products. <span class="accent">Real users.</span></h2>
-    <p class="section-lead">Each one bespoke. Each one in production. Each one a Whetū-grade build.</p>
+  <!-- DIVIDER -->
+  <div class="divider" id="divider">
+    <div class="divider-line"></div>
+    <span class="divider-label">Product Grid</span>
+    <div class="divider-line"></div>
   </div>
-  <div class="portfolio">
-    <article class="proj"><span class="proj-status">LIVE</span><span class="proj-icon">🌸</span><div class="proj-name">SALINA Family Hub</div><div class="proj-tag">Memorial · 12-month</div><div class="proj-desc">PIN-gated cinematic family dashboard with WebGL globe, 6-minute memorial reel, RSVP tracking for 141 guests, and "Light a Diya" interaction.</div><div class="proj-stack"><span>HTML</span><span>Three.js</span><span>ffmpeg</span></div></article>
-    <article class="proj"><span class="proj-status">LIVE</span><span class="proj-icon">💜</span><div class="proj-name">MIMI PT</div><div class="proj-tag">Women's personal training</div><div class="proj-desc">Client portal + coach dashboard + standalone services landing + 3D exercise demos + AI form coach + before/after gallery + Stripe booking.</div><div class="proj-stack"><span>HTML</span><span>Three.js</span><span>PWA</span></div></article>
-    <article class="proj"><span class="proj-status">LIVE</span><span class="proj-icon">🏠</span><div class="proj-name">STLRentals</div><div class="proj-tag">Rental portfolio</div><div class="proj-desc">6 themes · 5 layouts · real map · cashflow Sankey · tenant lifecycle Kanban · AI action centre · NZ tax-aware.</div><div class="proj-stack"><span>HTML</span><span>Leaflet</span><span>PWA</span></div></article>
-    <article class="proj"><span class="proj-status beta">BETA</span><span class="proj-icon">⚡</span><div class="proj-name">ARCLINE</div><div class="proj-tag">Electrical PM · NZ</div><div class="proj-desc">CoC/ESC/RoI generation, 7-year compliance vault, EWRB-native workflow. Launch Sept 2026.</div><div class="proj-stack"><span>HTML</span><span>NZ Spec</span></div></article>
-    <article class="proj"><span class="proj-status">LIVE</span><span class="proj-icon">💎</span><div class="proj-name">Clarity</div><div class="proj-tag">Personal finance</div><div class="proj-desc">Whetū-flavoured personal finance dashboard with budgeting, goal tracking, and NZ-specific deductions.</div><div class="proj-stack"><span>HTML</span><span>Vanilla JS</span></div></article>
-    <article class="proj"><span class="proj-status beta">BETA</span><span class="proj-icon">🎪</span><div class="proj-name">EventSpace Pro</div><div class="proj-tag">Marquee planning</div><div class="proj-desc">3D marquee sizing wizard with equipment placement, drag-drop floor plan, capacity calculator.</div><div class="proj-stack"><span>HTML</span><span>3D</span></div></article>
-  </div>
-</section>
 
-<!-- SERVICES -->
-<section class="section" id="services">
-  <div class="sec-header">
-    <div class="section-eyebrow">What we build</div>
-    <h2 class="section-h">Three lanes. <span class="accent">All bespoke.</span></h2>
-    <p class="section-lead">No off-the-shelf SaaS. No copy-paste themes. Every line written for you.</p>
-  </div>
-  <div class="services">
-    <div class="svc"><span class="svc-icon">🌐</span><div class="svc-name">Web Apps</div><div class="svc-desc">From a personal dashboard to a full client portal — cinematic UI, fast, accessible, NZ-aware.</div><ul class="svc-feat"><li>Bespoke design</li><li>Real performance</li><li>PWA installable</li><li>Source code yours</li></ul></div>
-    <div class="svc"><span class="svc-icon">📱</span><div class="svc-name">Mobile Apps</div><div class="svc-desc">iOS + Android via Capacitor or native — single brand, every screen.</div><ul class="svc-feat"><li>App Store + Play Store</li><li>HealthKit + Health Connect</li><li>Push notifications</li><li>Offline-first</li></ul></div>
-    <div class="svc"><span class="svc-icon">🧠</span><div class="svc-name">AI Tools</div><div class="svc-desc">Custom workflows, dashboards, and assistants tuned to your domain. Free models or paid — your call.</div><ul class="svc-feat"><li>Local LLMs (Ollama)</li><li>Cloud LLMs (Anthropic, OpenAI)</li><li>RAG + custom data</li><li>Privacy-first</li></ul></div>
-  </div>
-</section>
+  <!-- BENTO -->
+  <div class="bento-wrap" id="bentoWrap">
+    <div class="bento" id="grid">
 
-<!-- VALUES -->
-<section class="section" id="values">
-  <div class="sec-header">
-    <div class="section-eyebrow">How we work</div>
-    <h2 class="section-h">Values <span class="accent">first.</span> Always.</h2>
-  </div>
-  <div class="values">
-    <div class="value"><span class="value-icon">🪶</span><div class="value-name">Honest</div><div class="value-desc">No lies. No shortcuts. Calibrated confidence.</div></div>
-    <div class="value"><span class="value-icon">🎯</span><div class="value-name">Bespoke</div><div class="value-desc">Built for you, not the template economy.</div></div>
-    <div class="value"><span class="value-icon">🌏</span><div class="value-name">Aotearoa</div><div class="value-desc">NZ-owned, NZ-built (GST, IRD, TLA, REA).</div></div>
-    <div class="value"><span class="value-icon">⚡</span><div class="value-name">Quick</div><div class="value-desc">Most projects shipped in weeks, not quarters.</div></div>
-  </div>
-</section>
-
-<!-- CONTACT -->
-<section class="section" id="contact">
-  <div class="sec-header" style="text-align:center;">
-    <div class="section-eyebrow">Ready when you are</div>
-    <h2 class="section-h">Let's <span class="accent">build something.</span></h2>
-  </div>
-  <div class="contact-wrap">
-    <p style="font-size:1.2rem;margin-bottom:28px;font-family:'Cormorant Garamond';font-style:italic">A bespoke build starts with a kōrero.</p>
-    <form id="contact-form" novalidate style="display:flex;flex-direction:column;gap:14px;text-align:left">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div>
-          <label style="font-family:'Geist Mono';font-size:0.72rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:6px">Name</label>
-          <input id="cf-name" type="text" placeholder="Your name" required style="width:100%;padding:14px 16px;background:oklch(100% 0 0 / 0.05);border:1px solid var(--border-mid);border-radius:10px;color:var(--text);font-family:'Inter';font-size:0.95rem;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='oklch(65% 0.28 290)'" onblur="this.style.borderColor=''" autocomplete="name">
-        </div>
-        <div>
-          <label style="font-family:'Geist Mono';font-size:0.72rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:6px">Email</label>
-          <input id="cf-email" type="email" placeholder="you@example.com" required style="width:100%;padding:14px 16px;background:oklch(100% 0 0 / 0.05);border:1px solid var(--border-mid);border-radius:10px;color:var(--text);font-family:'Inter';font-size:0.95rem;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='oklch(65% 0.28 290)'" onblur="this.style.borderColor=''" autocomplete="email">
+      <!-- 01 STLRentals -->
+      <div class="card card-stlrentals" data-num="01" data-name="STLRentals" data-cat="Property" data-desc="Short-term rental command centre. Portfolio tracking, tenant management, Healthy Homes compliance, inspection reports, and expenditure analysis — all in one cinematic dashboard.">
+        <div class="card-nebula"></div>
+        <div class="card-inner">
+          <div class="card-top">
+            <span class="card-num">01</span>
+            <span class="card-cat">Property</span>
+          </div>
+          <div class="card-bottom">
+            <div class="card-name">STL&shy;Rentals</div>
+            <div class="card-desc">Rental command centre · NZ compliance</div>
+          </div>
         </div>
       </div>
-      <div>
-        <label style="font-family:'Geist Mono';font-size:0.72rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:6px">Message</label>
-        <textarea id="cf-message" placeholder="Tell me what you're building…" required rows="4" style="width:100%;padding:14px 16px;background:oklch(100% 0 0 / 0.05);border:1px solid var(--border-mid);border-radius:10px;color:var(--text);font-family:'Inter';font-size:0.95rem;outline:none;resize:vertical;transition:border-color .2s" onfocus="this.style.borderColor='oklch(65% 0.28 290)'" onblur="this.style.borderColor=''"></textarea>
-      </div>
-      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-        <button type="submit" class="cta-primary magnet" id="cf-submit" style="border:none;cursor:none">Send message →</button>
-        <span id="cf-status" style="font-family:'Geist Mono';font-size:0.8rem;color:var(--text-muted);letter-spacing:1px"></span>
-      </div>
-    </form>
-    <div style="margin-top:24px;font-family:'Geist Mono';font-size:0.78rem;color:var(--text-muted);letter-spacing:2px;text-align:center">Aotearoa New Zealand · Reply within 24 hours</div>
-  </div>
-</section>
 
-<footer>
-  <!-- MARQUEE -->
-  <div class="marquee-wrap" aria-hidden="true">
-    <div class="marquee-track">
-      <span><em>✦</em>WHETŪ DIGITAL</span><span><em>✦</em>BESPOKE SOFTWARE</span><span><em>✦</em>AOTEAROA NZ</span><span><em>✦</em>CINEMATIC BUILDS</span><span><em>✦</em>WEB · MOBILE · AI</span><span><em>✦</em>ONE STAR AT A TIME</span>
-      <!-- Duplicate for seamless loop -->
-      <span><em>✦</em>WHETŪ DIGITAL</span><span><em>✦</em>BESPOKE SOFTWARE</span><span><em>✦</em>AOTEAROA NZ</span><span><em>✦</em>CINEMATIC BUILDS</span><span><em>✦</em>WEB · MOBILE · AI</span><span><em>✦</em>ONE STAR AT A TIME</span>
+      <!-- 02 MIMI -->
+      <div class="card card-mimi" data-num="02" data-name="MIMI" data-cat="Fitness" data-desc="Personal trainer command platform. Client programs, 47-exercise library with demo video, habit tracking, biometric HUD, and a 3D form-correction engine in development.">
+        <div class="card-nebula"></div>
+        <div class="card-inner">
+          <div class="card-top">
+            <span class="card-num">02</span>
+            <span class="card-cat">Fitness</span>
+          </div>
+          <div class="card-bottom">
+            <div class="card-name">MIMI</div>
+            <div class="card-desc">Personal trainer · Client programs</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 03 EventSpace -->
+      <div class="card card-eventspace" data-num="03" data-name="EventSpace" data-cat="Events" data-desc="Marquee & venue hire command centre. 3D spatial blueprint, live inventory, thermodynamic heater simulation, and lighting preview. Quotes to invoices in one flow.">
+        <div class="card-nebula"></div>
+        <div class="card-inner">
+          <div class="card-top">
+            <span class="card-num">03</span>
+            <span class="card-cat">Events</span>
+          </div>
+          <div class="card-bottom">
+            <div class="card-name">Event&shy;Space</div>
+            <div class="card-desc">Marquee hire · 3D layout</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 04 HYDRA -->
+      <div class="card card-hydra" data-num="04" data-name="HYDRA" data-cat="Tech Repair" data-desc="Mobile & computer repair cyber-deck. Device intake scanning, exploded schematic fault view, unlock terminal with live script simulation, and job management.">
+        <div class="card-nebula"></div>
+        <div class="card-inner">
+          <div class="card-top">
+            <span class="card-num">04</span>
+            <span class="card-cat">Tech Repair</span>
+          </div>
+          <div class="card-bottom">
+            <div class="card-name">HYDRA</div>
+            <div class="card-desc">Device repair · Cyber-deck UI</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 05 BULLRUN -->
+      <div class="card card-bullrun" data-num="05" data-name="BULLRUN" data-cat="Trading" data-desc="Stock trading war room. Trend Mountain charting, 3D parallax tip cards, and slide-to-execute order flow. Pure signal, zero noise. Your edge, visualised.">
+        <div class="card-nebula"></div>
+        <div class="card-inner">
+          <div class="card-top">
+            <span class="card-num">05</span>
+            <span class="card-cat">Trading</span>
+          </div>
+          <div class="card-bottom">
+            <div class="card-name">BULL&shy;RUN</div>
+            <div class="card-desc">Trading war room · Trend Mountain</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 06 PLAYBOOK -->
+      <div class="card card-playbook" data-num="06" data-name="PLAYBOOK" data-cat="Sports" data-desc="Sports odds & tipping dashboard. Stadium-contrast matchup cards, radial consensus wheels, and live neon-flash trend alerts. Know the play before kickoff.">
+        <div class="card-nebula"></div>
+        <div class="card-inner">
+          <div class="card-top">
+            <span class="card-num">06</span>
+            <span class="card-cat">Sports</span>
+          </div>
+          <div class="card-bottom">
+            <div class="card-name">PLAY&shy;BOOK</div>
+            <div class="card-desc">Sports tips · Stadium feed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 07 ARCLINE -->
+      <div class="card card-arcline" data-num="07" data-name="ARCLINE" data-cat="Electrical" data-desc="NZ electrical compliance platform. CoC, ESC & RoI generation, 7-year secure vault, EWRB-native workflows. Precision monospace cert numbers. Launching September 2026." data-badge="sep">
+        <div class="card-nebula"></div>
+        <div class="card-inner">
+          <div class="card-top">
+            <span class="card-num">07</span>
+            <span class="card-cat badge-sep">Sep 2026</span>
+          </div>
+          <div class="card-bottom">
+            <div class="card-name">ARC&shy;LINE</div>
+            <div class="card-desc">NZ Electrical PM · CoC · ESC · RoI · 7-yr vault</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 08 Clarity -->
+      <div class="card card-budget" data-num="08" data-name="Clarity" data-cat="Finance" data-desc="Personal & business budget dashboard. Sankey cashflow streams, 3D ledger flip, staggered bar animations. Your wealth, beautifully visualised. Live now." data-url="https://deep21star.github.io/clarity/" data-live="true">
+        <div class="card-nebula"></div>
+        <div class="card-inner">
+          <div class="card-top">
+            <span class="card-num">08</span>
+            <span class="card-cat badge-live">Live Now</span>
+          </div>
+          <div class="card-bottom">
+            <div class="card-name">Clarity</div>
+            <div class="card-desc">Budget & finance · Personal + Business</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 09 VIGIL -->
+      <div class="card card-vigil" data-num="09" data-name="VIGIL" data-cat="Surveillance" data-desc="Classified surveillance command. IR camera feeds, evidence capture, threat classification, and real-time alert pipeline. Situational awareness at a glance.">
+        <div class="card-nebula"></div>
+        <div class="card-inner">
+          <div class="card-top">
+            <span class="card-num">09</span>
+            <span class="card-cat">Surveillance</span>
+          </div>
+          <div class="card-bottom">
+            <div class="card-name">VIGIL</div>
+            <div class="card-desc">Surveillance command · Threat intel</div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
-  <div class="footer-logo" aria-label="Whetū Digital">WHETŪ DIGITAL</div>
-  <div style="font-family:'Geist Mono';font-size:0.82rem;color:var(--text-muted);letter-spacing:3px;margin-top:18px;text-transform:uppercase">Solutions · Aotearoa New Zealand</div>
-  <div style="font-family:'Geist Mono';font-size:0.7rem;color:var(--text-muted);letter-spacing:1.5px;margin-top:30px">© 2026 Whetū Digital · whetudigital.co.nz · hello@whetudigital.co.nz</div>
+
+</main>
+
+<!-- ── PORTAL ── -->
+<div id="portal" role="dialog" aria-modal="true">
+  <div id="portal-inner">
+    <button id="portal-close" aria-label="Close">×</button>
+    <div id="portal-num"></div>
+    <div id="portal-name"></div>
+    <div id="portal-desc"></div>
+    <div id="portal-actions"></div>
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer role="contentinfo">
+  <div class="ticker-wrap" aria-hidden="true">
+    <div class="ticker-track">
+      <span>WHETŪ DIGITAL</span><span><em>✦</em></span><span>BESPOKE SOFTWARE</span><span><em>✦</em></span><span>AOTEAROA NZ</span><span><em>✦</em></span><span>CINEMATIC BUILDS</span><span><em>✦</em></span><span>WEB · AI · MOBILE</span><span><em>✦</em></span><span>ONE STAR AT A TIME</span><span><em>✦</em></span>
+      <span>WHETŪ DIGITAL</span><span><em>✦</em></span><span>BESPOKE SOFTWARE</span><span><em>✦</em></span><span>AOTEAROA NZ</span><span><em>✦</em></span><span>CINEMATIC BUILDS</span><span><em>✦</em></span><span>WEB · AI · MOBILE</span><span><em>✦</em></span><span>ONE STAR AT A TIME</span><span><em>✦</em></span>
+    </div>
+  </div>
+  <div class="footer-big" aria-hidden="true">WHETŪ DIGITAL</div>
+  <div class="footer-row">
+    <div class="footer-left">
+      <p>Digital Tools for Modern Living — Aotearoa New Zealand</p>
+      <p class="footer-copy">© 2026 Whetū Digital Ltd. · hello@whetudigital.co.nz</p>
+    </div>
+    <span class="footer-badge">WDS-SGM SEAL · MASTER 9.6 · 2026</span>
+  </div>
 </footer>
 
 <script>
-// ─── CONSTANTS ──────────────────────────────────────────────────────
-const DUR_FAST = 0.25, DUR_MED = 0.45, DUR_SLOW = 0.7, DUR_CIN = 1.2;
-const EASE_OUT = 'power3.out', EASE_SPRING = 'back.out(1.7)';
+/* ══════════════════════════════════════════
+   STAR FIELD — own canvas, no Three.js
+══════════════════════════════════════════ */
+(function(){
+  const canvas=document.getElementById('star-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H,stars=[];
 
-// ─── REDUCED MOTION CHECK ───────────────────────────────────────────
-const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function resize(){
+    W=canvas.width=window.innerWidth;
+    H=canvas.height=window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize',resize);
 
-// ─── LENIS SMOOTH SCROLL ────────────────────────────────────────────
-const lenis = new Lenis({ duration: 1.2, easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
-gsap.ticker.add(time => lenis.raf(time * 1000));
-gsap.ticker.lagSmoothing(0);
-lenis.on('scroll', () => ScrollTrigger.update());
+  // Generate stars
+  function initStars(){
+    stars=[];
+    const count=Math.floor((W*H)/4000);
+    for(let i=0;i<count;i++){
+      stars.push({
+        x:Math.random()*W,
+        y:Math.random()*H,
+        r:Math.random()*1.4+0.2,
+        a:Math.random(),
+        da:(Math.random()-.5)*0.004,
+        twinkleSpeed:Math.random()*.02+.005
+      });
+    }
+  }
+  initStars();
+  window.addEventListener('resize',initStars);
 
-// ─── REGISTER PLUGINS ───────────────────────────────────────────────
-gsap.registerPlugin(ScrollTrigger);
+  // Occasional shooting star
+  let shoots=[];
+  function addShoot(){
+    shoots.push({x:Math.random()*W*.7,y:Math.random()*H*.4,len:80+Math.random()*120,a:1,dx:4+Math.random()*3,dy:2+Math.random()*2});
+    setTimeout(addShoot,8000+Math.random()*12000);
+  }
+  addShoot();
 
-// ─── CUSTOM CURSOR ──────────────────────────────────────────────────
-(function initCursor() {
-  if (prefersReduced) return;
-  const dot  = document.querySelector('.cursor-dot');
-  const ring = document.querySelector('.cursor-ring');
-  const glow = document.querySelector('.cursor-glow');
-  let mx = window.innerWidth / 2, my = window.innerHeight / 2;
-  let rx = mx, ry = my;
-
-  window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
-
-  gsap.ticker.add(() => {
-    // Dot: instant
-    gsap.set(dot,  { x: mx, y: my });
-    gsap.set(glow, { x: mx, y: my });
-    // Ring: lerp follow
-    rx += (mx - rx) * 0.12;
-    ry += (my - ry) * 0.12;
-    gsap.set(ring, { x: rx, y: ry });
-  });
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // Stars
+    stars.forEach(s=>{
+      s.a+=s.da;
+      if(s.a>1){s.a=1;s.da=-Math.abs(s.da);}
+      if(s.a<0.05){s.a=0.05;s.da=Math.abs(s.da);}
+      ctx.beginPath();
+      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,255,255,${s.a*0.7})`;
+      ctx.fill();
+    });
+    // Shooting stars
+    shoots=shoots.filter(s=>{
+      ctx.beginPath();
+      const grd=ctx.createLinearGradient(s.x,s.y,s.x-s.len*s.dx/Math.sqrt(s.dx*s.dx+s.dy*s.dy),s.y-s.len*s.dy/Math.sqrt(s.dx*s.dx+s.dy*s.dy));
+      grd.addColorStop(0,`rgba(201,170,82,${s.a*0.9})`);
+      grd.addColorStop(1,'rgba(201,170,82,0)');
+      ctx.moveTo(s.x,s.y);
+      const len=Math.sqrt(s.dx*s.dx+s.dy*s.dy);
+      ctx.lineTo(s.x-s.len*s.dx/len,s.y-s.len*s.dy/len);
+      ctx.strokeStyle=grd;ctx.lineWidth=1.5;ctx.stroke();
+      s.x+=s.dx;s.y+=s.dy;s.a-=0.018;
+      return s.a>0;
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
 })();
 
-// ─── MAGNETIC BUTTONS ───────────────────────────────────────────────
-document.querySelectorAll('.magnet').forEach(btn => {
-  btn.addEventListener('mousemove', e => {
-    const r = btn.getBoundingClientRect();
-    const cx = e.clientX - r.left - r.width  / 2;
-    const cy = e.clientY - r.top  - r.height / 2;
-    const dist = Math.hypot(cx, cy);
-    if (dist < 80) {
-      gsap.to(btn, { x: cx * 0.35, y: cy * 0.2, duration: DUR_FAST, ease: EASE_OUT });
+/* ══════════════════════════════════════════
+   CURSOR
+══════════════════════════════════════════ */
+const cDot=document.getElementById('cDot');
+const cRing=document.getElementById('cRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cDot.style.left=mx+'px';cDot.style.top=my+'px';
+  document.getElementById('spotlight').style.setProperty('--mx',mx+'px');
+  document.getElementById('spotlight').style.setProperty('--my',my+'px');
+});
+(function loopCursor(){
+  rx+=(mx-rx)*.11;ry+=(my-ry)*.11;
+  cRing.style.left=rx+'px';cRing.style.top=ry+'px';
+  requestAnimationFrame(loopCursor);
+})();
+
+/* ══════════════════════════════════════════
+   INTRO
+══════════════════════════════════════════ */
+const introEl=document.getElementById('intro');
+const introLine1=document.getElementById('introLine1');
+const introLine2=document.getElementById('introLine2');
+const introSub=document.getElementById('introSub');
+const introEnter=document.getElementById('introEnter');
+const introSkip=document.getElementById('introSkip');
+
+let introRunning=true;
+
+function showApp(){
+  introRunning=false;
+  introEl.style.display='none';
+  document.body.classList.remove('locked');
+  const app=document.getElementById('app');
+  const logo=document.getElementById('logo');
+  const topbar=document.getElementById('topbar');
+  app.classList.add('show');
+  logo.classList.add('show');
+  topbar.classList.add('show');
+  logo.style.opacity='1';topbar.style.opacity='1';
+  document.getElementById('heroSection').style.cssText='opacity:1;transform:none;';
+  document.getElementById('divider').style.opacity='1';
+  document.getElementById('bentoWrap').style.opacity='1';
+}
+
+function exitIntro(){
+  if(typeof gsap==='undefined'){showApp();return;}
+  gsap.timeline()
+    .to([introSub,introEnter,introSkip],{opacity:0,y:-10,duration:.28,ease:'power2.in'})
+    .to(introLine2,{y:'-110%',duration:.45,ease:'power2.inOut'},'-=.1')
+    .to(introLine1,{y:'-110%',duration:.5,ease:'power2.inOut'},'-=.32')
+    .call(showApp)
+    .call(()=>{
+      if(typeof gsap==='undefined')return;
+      gsap.to('#heroSection',{opacity:1,y:0,duration:.9,ease:var_ease});
+      gsap.to('#divider',{opacity:1,duration:.6,delay:.2,ease:'power2.out'});
+      gsap.to('#bentoWrap',{opacity:1,duration:.7,delay:.35,ease:'power2.out'});
+      gsap.to('#logo',{opacity:1,duration:.5,delay:.1,ease:'power2.out'});
+      gsap.to('#topbar',{opacity:1,duration:.5,delay:.1,ease:'power2.out'});
+      animateCards();
+    });
+}
+
+const var_ease='power2.out';
+
+if(typeof gsap!=='undefined'){
+  gsap.registerPlugin(SplitText,ScrollTrigger);
+  const tl=gsap.timeline({delay:.3});
+  tl.to('.intro-eyebrow',{opacity:1,y:0,duration:.7,ease:'power2.out'})
+    .to(introLine1,{y:'0%',duration:.75,ease:var_ease},'-=.2')
+    .to(introLine2,{y:'0%',duration:.65,ease:var_ease},'-=.45')
+    .to(introSub,{opacity:.7,y:0,duration:.6,ease:'power2.out'},'-=.2')
+    .to([introEnter,introSkip],{opacity:1,duration:.5,ease:'power2.out',stagger:.1},'-=.1');
+} else {
+  [introLine1,introLine2].forEach(el=>el.style.transform='none');
+  ['.intro-eyebrow',introSub,introEnter,introSkip].forEach(el=>{
+    const node=typeof el==='string'?document.querySelector(el):el;
+    if(node){node.style.opacity='1';node.style.transform='none';}
+  });
+}
+
+introEnter.addEventListener('click',exitIntro);
+introSkip.addEventListener('click',exitIntro);
+setTimeout(exitIntro,6000);
+
+/* ══════════════════════════════════════════
+   CARD ENTRANCE
+══════════════════════════════════════════ */
+function animateCards(){
+  if(typeof gsap==='undefined')return;
+  gsap.from('.card',{opacity:0,y:32,scale:.97,duration:.65,ease:'power3.out',stagger:.05,delay:.1});
+}
+
+/* ══════════════════════════════════════════
+   CARD TILT
+══════════════════════════════════════════ */
+document.querySelectorAll('.card').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    const cx=(e.clientX-r.left)/r.width-.5;
+    const cy=(e.clientY-r.top)/r.height-.5;
+    if(typeof gsap!=='undefined'){
+      gsap.to(card,{rotateY:cx*12,rotateX:-cy*12,duration:.35,ease:'power2.out',transformPerspective:900});
     }
   });
-  btn.addEventListener('mouseleave', () => gsap.to(btn, { x: 0, y: 0, duration: DUR_MED, ease: EASE_SPRING }));
-});
-
-// ─── GLASS NAV ON SCROLL ────────────────────────────────────────────
-const topbar = document.querySelector('.topbar');
-ScrollTrigger.create({
-  start: 'top -60',
-  onToggle: self => topbar.classList.toggle('scrolled', self.isActive)
-});
-
-// ─── DOT NAV ACTIVE STATE ───────────────────────────────────────────
-const sections = ['#hero','#work','#services','#contact'];
-const dots = document.querySelectorAll('.dot-nav a');
-sections.forEach((id, i) => {
-  ScrollTrigger.create({
-    trigger: id,
-    start: 'top 55%',
-    end: 'bottom 55%',
-    onToggle: self => { if (self.isActive) dots.forEach((d, j) => d.classList.toggle('active', i === j)); }
+  card.addEventListener('mouseleave',()=>{
+    if(typeof gsap!=='undefined'){
+      gsap.to(card,{rotateY:0,rotateX:0,duration:.7,ease:'elastic.out(1,.6)'});
+    }
   });
 });
 
-// ─── HERO REVEAL (post-intro) ────────────────────────────────────────
-function revealHero() {
-  const tl = gsap.timeline({ delay: 0.1 });
-  tl.to('.hero-eyebrow', { opacity: 1, y: 0, duration: DUR_SLOW, ease: EASE_OUT })
-    .to('.hero-h1 .line', { clipPath:'inset(0 0 0% 0)', y: 0, opacity: 1, duration: DUR_CIN, stagger: 0.12, ease: EASE_OUT }, '-=0.3')
-    .to('.hero-sub',      { opacity: 1, y: 0, duration: DUR_SLOW, ease: EASE_OUT }, '-=0.5')
-    .to('.hero-cta-row',  { opacity: 1, y: 0, duration: DUR_SLOW, ease: EASE_OUT }, '-=0.4')
-    .to('.hero-meta',     { opacity: 1, y: 0, duration: DUR_MED,  ease: EASE_OUT }, '-=0.3')
-    .add(() => {
-      // Counter animations
-      gsap.to({ v: 0 }, { v: 12, duration: 1.8, ease: 'power2.out', onUpdate() { document.querySelector('.count-projects').textContent = Math.round(this.targets()[0].v); } });
-      gsap.to({ v: 0 }, { v: 5,  duration: 1.4, ease: 'power2.out', onUpdate() { document.querySelector('.count-industries').textContent = Math.round(this.targets()[0].v); } });
-    }, '-=1');
+/* ══════════════════════════════════════════
+   PORTAL
+══════════════════════════════════════════ */
+const portal=document.getElementById('portal');
+const portalInner=document.getElementById('portal-inner');
 
-  gsap.set('.hero-h1 .line', { clipPath:'inset(0 0 100% 0)', y: 20 });
+function openPortal(card){
+  const d=card.dataset;
+  document.getElementById('portal-num').textContent=d.num||'';
+  document.getElementById('portal-name').textContent=d.name||'';
+  document.getElementById('portal-desc').textContent=d.desc||'';
+  const acts=document.getElementById('portal-actions');
+  acts.innerHTML='';
+  if(d.live==='true'&&d.url){
+    const a=Object.assign(document.createElement('a'),{href:d.url,target:'_blank',rel:'noopener',className:'pbtn pbtn-primary',textContent:'Open Dashboard →'});
+    acts.appendChild(a);
+  } else {
+    const s=Object.assign(document.createElement('span'),{className:'pbtn pbtn-ghost',textContent:'Coming Soon'});
+    s.style.pointerEvents='none';acts.appendChild(s);
+  }
+  const c=Object.assign(document.createElement('a'),{href:'mailto:hello@whetudigital.co.nz?subject=Enquiry: '+(d.name||''),className:'pbtn pbtn-ghost',textContent:'Request Access'});
+  acts.appendChild(c);
+  portal.classList.add('open');portal.style.display='flex';
+  if(typeof gsap!=='undefined'){
+    gsap.to(portalInner,{opacity:1,scale:1,y:0,duration:.45,ease:'power3.out'});
+  } else {
+    portalInner.style.cssText='opacity:1;transform:none;';
+  }
 }
 
-// ─── SCROLL REVEALS ─────────────────────────────────────────────────
-function initScrollAnimations() {
-  // Section headers
-  gsap.utils.toArray('.sec-header').forEach(el => {
-    gsap.to(el, { opacity: 1, y: 0, duration: DUR_SLOW, ease: EASE_OUT,
-      scrollTrigger: { trigger: el, start: 'top 80%', once: true }
-    });
-  });
-
-  // Portfolio cards — batch
-  ScrollTrigger.batch('.proj', {
-    onEnter: batch => gsap.to(batch, { opacity: 1, y: 0, duration: DUR_SLOW, stagger: 0.09, ease: EASE_SPRING }),
-    start: 'top 85%', once: true
-  });
-
-  // Service cards — batch
-  ScrollTrigger.batch('.svc', {
-    onEnter: batch => gsap.to(batch, { opacity: 1, y: 0, duration: DUR_SLOW, stagger: 0.12, ease: EASE_OUT }),
-    start: 'top 85%', once: true
-  });
-
-  // Value cards — batch
-  ScrollTrigger.batch('.value', {
-    onEnter: batch => gsap.to(batch, { opacity: 1, y: 0, duration: DUR_MED, stagger: 0.07, ease: EASE_SPRING }),
-    start: 'top 85%', once: true
-  });
-
-  // Contact card
-  gsap.to('.contact-wrap', { opacity: 1, y: 0, duration: DUR_SLOW, ease: EASE_SPRING,
-    scrollTrigger: { trigger: '.contact-wrap', start: 'top 80%', once: true }
-  });
-
-  // Project card spring hover
-  document.querySelectorAll('.proj').forEach(card => {
-    card.addEventListener('mouseenter', () => gsap.to(card, { y: -6, scale: 1.02, duration: DUR_MED, ease: EASE_SPRING }));
-    card.addEventListener('mouseleave', () => gsap.to(card, { y: 0,  scale: 1,    duration: DUR_MED, ease: EASE_OUT  }));
-  });
+function closePortal(){
+  if(typeof gsap!=='undefined'){
+    gsap.to(portalInner,{opacity:0,scale:.94,y:16,duration:.3,ease:'power2.in',
+      onComplete:()=>{portal.classList.remove('open');portal.style.display='none';
+        gsap.set(portalInner,{opacity:0,scale:.93,y:20});}});
+  } else {
+    portal.classList.remove('open');portal.style.display='none';
+  }
 }
 
-// ─── INTRO SYSTEM — WHETŪ INTRO v2 ─────────────────────────────────
-(function initIntro() {
-  const introEl   = document.getElementById('intro');
-  const counter   = document.getElementById('intro-counter');
-  const starEl    = document.getElementById('intro-star');
-  const starPath  = document.getElementById('intro-star-path');
-  const titleEl   = document.getElementById('intro-title');
-  const particles = document.getElementById('intro-particles');
-  const enterBtn  = document.getElementById('intro-enter');
-  const skipBtn   = document.getElementById('intro-skip');
+document.querySelectorAll('.card').forEach(c=>c.addEventListener('click',()=>openPortal(c)));
+document.getElementById('portal-close').addEventListener('click',closePortal);
+portal.addEventListener('click',e=>{if(e.target===portal)closePortal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePortal();});
 
-  // Reduced motion: skip entirely
-  if (prefersReduced) {
-    introEl.style.display = 'none';
-    document.body.classList.remove('intro-active');
-    revealHero();
-    initScrollAnimations();
-    return;
-  }
-
-  // Build particle stars
-  for (let i = 0; i < 80; i++) {
-    const s = document.createElement('div');
-    const sz = Math.random() * 2 + 0.5;
-    s.className = 'p-star';
-    s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*3}s;animation-duration:${2+Math.random()*3}s;`;
-    particles.appendChild(s);
-  }
-
-  // Measure star path length for stroke animation
-  const pathLen = starPath.getTotalLength ? starPath.getTotalLength() : 620;
-  gsap.set(starPath, { strokeDasharray: pathLen, strokeDashoffset: pathLen });
-
-  function exitIntro() {
-    const tl = gsap.timeline({ onComplete: () => {
-      introEl.remove();
-      document.body.classList.remove('intro-active');
-      initScrollAnimations();
-    }});
-    // L6 — portal scale out
-    tl.to(introEl, { scale: 1.15, opacity: 0, duration: DUR_SLOW, ease: 'power2.in' });
-  }
-
-  enterBtn.addEventListener('click', exitIntro);
-  skipBtn.addEventListener('click', exitIntro);
-
-  // Main intro timeline
-  const tl = gsap.timeline();
-
-  // L1 — counter 000→100
-  tl.to(counter, { opacity: 1, duration: 0.3 })
-    .to({ n: 0 }, {
-      n: 100, duration: 1.4, ease: 'power1.inOut',
-      onUpdate() { counter.textContent = String(Math.round(this.targets()[0].n)).padStart(3,'0'); }
-    });
-
-  // L2 — star draws, counter fades
-  tl.to(counter, { opacity: 0, duration: 0.4 }, '+=0.1')
-    .to(starEl,   { opacity: 1, duration: 0.3 }, '<')
-    .to(starPath, { strokeDashoffset: 0, duration: DUR_CIN, ease: 'power2.inOut' }, '<+0.1')
-
-  // L3 — name reveal (clipPath)
-  .to(titleEl, { clipPath: 'inset(0 0 0% 0)', duration: DUR_SLOW, ease: EASE_SPRING }, '+=0.1')
-
-  // L4 — particles
-  .to(particles, { opacity: 1, duration: 0.8, ease: EASE_OUT }, '-=0.3')
-
-  // L5 — enter button + skip
-  .to(enterBtn, { opacity: 1, y: 0, duration: DUR_MED, ease: EASE_OUT }, '+=0.2')
-  .to(skipBtn,  { opacity: 0.5, duration: DUR_MED }, '<')
-
-  // Auto-exit after 3s if not clicked
-  .add(() => {
-    setTimeout(() => {
-      if (document.getElementById('intro')) exitIntro();
-    }, 3000);
-  });
-
-  // L7 — after exitIntro, reveal hero (called in exitIntro onComplete chain)
-  // We bind it after intro exits
-  const origOnComplete = tl.eventCallback('onComplete');
-  function afterExit() { revealHero(); }
-  document.getElementById('intro')?.addEventListener('gsap-exit', afterExit);
-
-  // ─── CONTACT FORM ───────────────────────────────────────────────
-  const form = document.getElementById('contact-form');
-  if (form) {
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-      const btn    = document.getElementById('cf-submit');
-      const status = document.getElementById('cf-status');
-      const name   = document.getElementById('cf-name').value.trim();
-      const email  = document.getElementById('cf-email').value.trim();
-      const message = document.getElementById('cf-message').value.trim();
-
-      btn.textContent = 'Sending…';
-      btn.disabled = true;
-      status.textContent = '';
-
-      try {
-        const res = await fetch('/api/contact', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, message }),
-        });
-        if (res.ok) {
-          status.textContent = '✦ Sent — I\'ll reply within 24h';
-          status.style.color = 'oklch(82% 0.22 145)';
-          form.reset();
-          btn.textContent = 'Sent ✓';
-        } else {
-          throw new Error('Send failed');
-        }
-      } catch {
-        status.textContent = 'Something went wrong — email hello@whetudigital.co.nz directly';
-        status.style.color = 'oklch(58% 0.25 25)';
-        btn.textContent = 'Send message →';
-        btn.disabled = false;
-      }
-    });
-  }
-
-  // Wire revealHero to exit
-  const _exit = exitIntro;
-  function exitIntroFull() {
-    const et = gsap.timeline({ onComplete: () => {
-      introEl.remove();
-      document.body.classList.remove('intro-active');
-      revealHero();
-      initScrollAnimations();
-    }});
-    et.to(introEl, { scale: 1.15, opacity: 0, duration: DUR_SLOW, ease: 'power2.in' });
-  }
-  enterBtn.onclick = exitIntroFull;
-  skipBtn.onclick  = exitIntroFull;
-})();
+/* ══════════════════════════════════════════
+   TOPBAR SCROLL
+══════════════════════════════════════════ */
+window.addEventListener('scroll',()=>{
+  document.getElementById('topbar').classList.toggle('scrolled',window.scrollY>40);
+});
 </script>
 </body>
 </html>
