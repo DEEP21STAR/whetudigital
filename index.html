@@ -240,8 +240,16 @@ body.locked{overflow:hidden;}
 .card-nebula{
   position:absolute;inset:0;border-radius:inherit;
   pointer-events:none;
-  opacity:0;transition:opacity .4s;
+  opacity:0.55;transition:opacity .4s;
 }
+.card-glyph{
+  position:absolute;right:-8px;bottom:-16px;z-index:1;
+  font-family:'Syne',sans-serif;font-weight:800;
+  font-size:clamp(5rem,8vw,8rem);letter-spacing:-.04em;line-height:1;
+  color:rgba(255,255,255,0.04);pointer-events:none;user-select:none;
+  transition:color .4s;
+}
+.card:hover .card-glyph{color:rgba(255,255,255,0.07);}
 .card:hover{transform:translateY(-4px);}
 .card:hover .card-nebula{opacity:1;}
 .card:hover{
@@ -253,6 +261,13 @@ body.locked{overflow:hidden;}
   padding:22px 24px;
   display:flex;flex-direction:column;justify-content:space-between;
 }
+/* Accent line at card bottom */
+.card::after{
+  content:'';position:absolute;bottom:0;left:10%;right:10%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent-border,var(--b-gold)),transparent);
+  opacity:0;transition:opacity .4s;
+}
+.card:hover::after{opacity:1;}
 /* Card number + category top row */
 .card-top{display:flex;align-items:flex-start;justify-content:space-between;}
 .card-num{
@@ -286,15 +301,15 @@ body.locked{overflow:hidden;}
 .card-vigil     {--accent-border:rgba(255,60,60,0.3);--accent-glow:rgba(255,60,60,0.2);}
 
 /* Nebula backgrounds per card */
-.card-stlrentals .card-nebula{background:radial-gradient(ellipse 150% 120% at 85% 15%,rgba(74,158,255,0.12),transparent 60%);}
-.card-mimi       .card-nebula{background:radial-gradient(ellipse at 20% 80%,rgba(100,220,120,0.10),transparent 55%);}
-.card-eventspace .card-nebula{background:radial-gradient(ellipse at 80% 30%,rgba(255,180,50,0.12),transparent 55%);}
-.card-hydra      .card-nebula{background:radial-gradient(ellipse at 50% 100%,rgba(0,230,220,0.10),transparent 55%);}
-.card-bullrun    .card-nebula{background:radial-gradient(ellipse at 30% 20%,rgba(201,170,82,0.14),transparent 55%);}
-.card-playbook   .card-nebula{background:radial-gradient(ellipse at 75% 75%,rgba(255,90,100,0.11),transparent 55%);}
-.card-arcline    .card-nebula{background:radial-gradient(ellipse at 50% 0%,rgba(80,220,140,0.12),transparent 55%);}
-.card-budget     .card-nebula{background:radial-gradient(ellipse at 80% 80%,rgba(180,120,255,0.12),transparent 55%);}
-.card-vigil      .card-nebula{background:radial-gradient(ellipse at 20% 20%,rgba(255,60,60,0.10),transparent 55%);}
+.card-stlrentals .card-nebula{background:radial-gradient(ellipse 160% 130% at 85% 10%,rgba(74,158,255,0.22),transparent 58%),radial-gradient(ellipse at 10% 90%,rgba(74,158,255,0.10),transparent 45%);}
+.card-mimi       .card-nebula{background:radial-gradient(ellipse at 20% 75%,rgba(100,220,120,0.22),transparent 55%),radial-gradient(ellipse at 80% 20%,rgba(100,220,120,0.08),transparent 45%);}
+.card-eventspace .card-nebula{background:radial-gradient(ellipse at 80% 25%,rgba(255,180,50,0.24),transparent 55%),radial-gradient(ellipse at 20% 80%,rgba(255,180,50,0.08),transparent 45%);}
+.card-hydra      .card-nebula{background:radial-gradient(ellipse at 50% 90%,rgba(0,230,220,0.22),transparent 55%),radial-gradient(ellipse at 70% 10%,rgba(0,230,220,0.08),transparent 45%);}
+.card-bullrun    .card-nebula{background:radial-gradient(ellipse at 30% 20%,rgba(201,170,82,0.26),transparent 55%),radial-gradient(ellipse at 80% 85%,rgba(201,170,82,0.10),transparent 45%);}
+.card-playbook   .card-nebula{background:radial-gradient(ellipse at 75% 70%,rgba(255,90,100,0.22),transparent 55%),radial-gradient(ellipse at 20% 20%,rgba(255,90,100,0.08),transparent 45%);}
+.card-arcline    .card-nebula{background:radial-gradient(ellipse at 50% 0%,rgba(80,220,140,0.24),transparent 55%),radial-gradient(ellipse at 80% 90%,rgba(80,220,140,0.08),transparent 45%);}
+.card-budget     .card-nebula{background:radial-gradient(ellipse at 80% 80%,rgba(180,120,255,0.24),transparent 55%),radial-gradient(ellipse at 20% 20%,rgba(180,120,255,0.08),transparent 45%);}
+.card-vigil      .card-nebula{background:radial-gradient(ellipse at 20% 20%,rgba(255,60,60,0.22),transparent 55%),radial-gradient(ellipse at 80% 80%,rgba(255,60,60,0.08),transparent 45%);}
 
 /* LIVE badge */
 .badge-live{
@@ -491,6 +506,7 @@ footer{
       <!-- 01 STLRentals -->
       <div class="card card-stlrentals" data-num="01" data-name="STLRentals" data-cat="Property" data-desc="Short-term rental command centre. Portfolio tracking, tenant management, Healthy Homes compliance, inspection reports, and expenditure analysis — all in one cinematic dashboard.">
         <div class="card-nebula"></div>
+        <div class="card-glyph">STL</div>
         <div class="card-inner">
           <div class="card-top">
             <span class="card-num">01</span>
@@ -506,6 +522,7 @@ footer{
       <!-- 02 MIMI -->
       <div class="card card-mimi" data-num="02" data-name="MIMI" data-cat="Fitness" data-desc="Personal trainer command platform. Client programs, 47-exercise library with demo video, habit tracking, biometric HUD, and a 3D form-correction engine in development.">
         <div class="card-nebula"></div>
+        <div class="card-glyph">MI</div>
         <div class="card-inner">
           <div class="card-top">
             <span class="card-num">02</span>
@@ -521,6 +538,7 @@ footer{
       <!-- 03 EventSpace -->
       <div class="card card-eventspace" data-num="03" data-name="EventSpace" data-cat="Events" data-desc="Marquee & venue hire command centre. 3D spatial blueprint, live inventory, thermodynamic heater simulation, and lighting preview. Quotes to invoices in one flow.">
         <div class="card-nebula"></div>
+        <div class="card-glyph">EVT</div>
         <div class="card-inner">
           <div class="card-top">
             <span class="card-num">03</span>
@@ -536,6 +554,7 @@ footer{
       <!-- 04 HYDRA -->
       <div class="card card-hydra" data-num="04" data-name="HYDRA" data-cat="Tech Repair" data-desc="Mobile & computer repair cyber-deck. Device intake scanning, exploded schematic fault view, unlock terminal with live script simulation, and job management.">
         <div class="card-nebula"></div>
+        <div class="card-glyph">HYD</div>
         <div class="card-inner">
           <div class="card-top">
             <span class="card-num">04</span>
@@ -551,6 +570,7 @@ footer{
       <!-- 05 BULLRUN -->
       <div class="card card-bullrun" data-num="05" data-name="BULLRUN" data-cat="Trading" data-desc="Stock trading war room. Trend Mountain charting, 3D parallax tip cards, and slide-to-execute order flow. Pure signal, zero noise. Your edge, visualised.">
         <div class="card-nebula"></div>
+        <div class="card-glyph">BUL</div>
         <div class="card-inner">
           <div class="card-top">
             <span class="card-num">05</span>
@@ -566,6 +586,7 @@ footer{
       <!-- 06 PLAYBOOK -->
       <div class="card card-playbook" data-num="06" data-name="PLAYBOOK" data-cat="Sports" data-desc="Sports odds & tipping dashboard. Stadium-contrast matchup cards, radial consensus wheels, and live neon-flash trend alerts. Know the play before kickoff.">
         <div class="card-nebula"></div>
+        <div class="card-glyph">PLY</div>
         <div class="card-inner">
           <div class="card-top">
             <span class="card-num">06</span>
@@ -581,6 +602,7 @@ footer{
       <!-- 07 ARCLINE -->
       <div class="card card-arcline" data-num="07" data-name="ARCLINE" data-cat="Electrical" data-desc="NZ electrical compliance platform. CoC, ESC & RoI generation, 7-year secure vault, EWRB-native workflows. Precision monospace cert numbers. Launching September 2026." data-badge="sep">
         <div class="card-nebula"></div>
+        <div class="card-glyph">ARC</div>
         <div class="card-inner">
           <div class="card-top">
             <span class="card-num">07</span>
@@ -596,6 +618,7 @@ footer{
       <!-- 08 Clarity -->
       <div class="card card-budget" data-num="08" data-name="Clarity" data-cat="Finance" data-desc="Personal & business budget dashboard. Sankey cashflow streams, 3D ledger flip, staggered bar animations. Your wealth, beautifully visualised. Live now." data-url="https://deep21star.github.io/clarity/" data-live="true">
         <div class="card-nebula"></div>
+        <div class="card-glyph">CLR</div>
         <div class="card-inner">
           <div class="card-top">
             <span class="card-num">08</span>
@@ -611,6 +634,7 @@ footer{
       <!-- 09 VIGIL -->
       <div class="card card-vigil" data-num="09" data-name="VIGIL" data-cat="Surveillance" data-desc="Classified surveillance command. IR camera feeds, evidence capture, threat classification, and real-time alert pipeline. Situational awareness at a glance.">
         <div class="card-nebula"></div>
+        <div class="card-glyph">VGL</div>
         <div class="card-inner">
           <div class="card-top">
             <span class="card-num">09</span>
