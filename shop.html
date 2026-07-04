@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Whetū Digital · Shop bespoke software</title>
+<meta name="description" content="Buy ready-made Whetū Digital templates, or commission a bespoke build. Personal dashboards, business apps, AI tools.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.3/dist/lenis.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tsparticles/engine@3.7.1/tsparticles.engine.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tsparticles/preset-links@3.7.1/tsparticles.preset.links.min.js"></script>
+<style>
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg: oklch(7% 0.03 280);
+  --primary: oklch(78% 0.22 280);
+  --primary-glow: oklch(78% 0.22 280 / 0.5);
+  --accent: oklch(82% 0.18 60);
+  --gold: oklch(85% 0.18 80);
+  --text: oklch(96% 0.005 280);
+  --text-dim: oklch(70% 0.02 280);
+  --text-muted: oklch(50% 0.015 280);
+  --glass: oklch(13% 0.03 280 / 0.7);
+  --border: oklch(78% 0.22 280 / 0.18);
+  --r: 16px;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6; }
+body::before { content:''; position:fixed; inset:0; z-index:-1; background:
+  radial-gradient(ellipse 800px 600px at 25% 15%, oklch(78% 0.22 280 / 0.22), transparent 60%),
+  radial-gradient(ellipse 600px 700px at 75% 35%, oklch(82% 0.18 60 / 0.16), transparent 60%); filter: blur(70px); }
+.topbar { position: sticky; top: 0; z-index: 100; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(180deg, rgba(0,0,0,0.8), rgba(0,0,0,0.4)); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); }
+.brand { font-family: 'Space Grotesk'; font-weight: 800; font-size: 1.3rem; letter-spacing: 0.05em; background: linear-gradient(135deg, var(--primary), var(--gold)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.topbar-links { display: flex; gap: 18px; align-items: center; }
+.cart { padding: 8px 18px; background: var(--primary); color: white; border-radius: 999px; font-family: 'Space Grotesk'; font-weight: 600; font-size: 0.88rem; cursor: pointer; box-shadow: 0 6px 18px var(--primary-glow); }
+.cart-badge { display: inline-block; background: white; color: var(--primary); padding: 1px 7px; border-radius: 10px; font-size: 0.7rem; margin-left: 6px; }
+.hero { padding: 80px 24px 60px; text-align: center; max-width: 900px; margin: 0 auto; }
+.hero h1 { font-family: 'Space Grotesk'; font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 800; line-height: 1.1; margin-bottom: 14px; }
+.hero h1 .accent { background: linear-gradient(135deg, var(--primary), var(--gold)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero p { color: var(--text-dim); font-size: 1.1rem; }
+.filter-bar { max-width: 1200px; margin: 0 auto 28px; padding: 0 24px; display: flex; gap: 10px; flex-wrap: wrap; }
+.chip { padding: 8px 16px; background: var(--glass); border: 1px solid var(--border); border-radius: 999px; font-family: 'Geist Mono'; font-size: 0.78rem; letter-spacing: 1.5px; cursor: pointer; transition: all 0.2s; color: var(--text-dim); text-transform: uppercase; }
+.chip:hover { color: var(--text); }
+.chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+.shop-grid { max-width: 1200px; margin: 0 auto 60px; padding: 0 24px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+@media(max-width:900px) { .shop-grid { grid-template-columns: 1fr 1fr; } }
+@media(max-width:600px) { .shop-grid { grid-template-columns: 1fr; } }
+.prod { background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 26px; transition: transform 0.3s, border-color 0.3s; cursor: pointer; backdrop-filter: blur(14px); position: relative; }
+.prod:hover { transform: translateY(-4px); border-color: var(--primary); }
+.prod-img { aspect-ratio: 4/3; border-radius: 12px; background: linear-gradient(135deg, oklch(20% 0.05 280), oklch(10% 0.03 280)); display: flex; align-items: center; justify-content: center; font-size: 4rem; margin-bottom: 16px; box-shadow: inset 0 0 40px rgba(0,0,0,0.5); filter: drop-shadow(0 0 18px var(--primary-glow)); }
+.prod-cat { font-family: 'Geist Mono'; font-size: 0.65rem; letter-spacing: 2px; color: var(--primary); text-transform: uppercase; margin-bottom: 4px; }
+.prod-name { font-family: 'Space Grotesk'; font-weight: 700; font-size: 1.15rem; margin-bottom: 6px; }
+.prod-desc { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 14px; min-height: 50px; }
+.prod-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--border); }
+.prod-price { font-family: 'Space Grotesk'; font-weight: 700; font-size: 1.3rem; }
+.prod-price .unit { font-size: 0.75rem; color: var(--text-dim); font-weight: 400; }
+.prod-add { padding: 8px 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-family: 'Geist Mono'; font-weight: 600; font-size: 0.72rem; cursor: pointer; letter-spacing: 1px; transition: transform 0.2s; }
+.prod-add:hover { transform: scale(1.05); }
+.tier-badge { position: absolute; top: 14px; right: 14px; padding: 3px 9px; border-radius: 6px; font-family: 'Geist Mono'; font-size: 0.62rem; letter-spacing: 1.5px; }
+.tier-badge.ready { background: oklch(72% 0.2 145 / 0.2); color: oklch(72% 0.2 145); border: 1px solid oklch(72% 0.2 145); }
+.tier-badge.bespoke { background: var(--primary-glow); color: var(--text); border: 1px solid var(--primary); }
+.tier-badge.coming { background: oklch(78% 0.22 70 / 0.2); color: oklch(78% 0.22 70); border: 1px solid oklch(78% 0.22 70); }
+.section-title { max-width: 1200px; margin: 60px auto 24px; padding: 0 24px; }
+.section-title h2 { font-family: 'Space Grotesk'; font-weight: 700; font-size: 1.8rem; margin-bottom: 6px; }
+.section-title p { color: var(--text-dim); font-size: 0.95rem; }
+.process { max-width: 1200px; margin: 0 auto; padding: 0 24px 60px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+@media(max-width:760px) { .process { grid-template-columns: 1fr 1fr; } }
+.step { padding: 24px; background: var(--glass); border: 1px solid var(--border); border-radius: 16px; text-align: center; position: relative; }
+.step-num { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: white; font-family: 'Space Grotesk'; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px var(--primary-glow); }
+.step-name { font-family: 'Space Grotesk'; font-weight: 600; margin-top: 10px; margin-bottom: 6px; }
+.step-desc { font-size: 0.82rem; color: var(--text-dim); }
+footer { padding: 80px 24px 40px; border-top: 1px solid var(--border); margin-top: 60px; text-align: center; }
+.footer-logo { font-family: 'Space Grotesk'; font-weight: 800; font-size: clamp(2.4rem, 6vw, 4.5rem); letter-spacing: 0.04em; background: linear-gradient(90deg, var(--primary) 0%, var(--gold) 50%, var(--primary) 100%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 5s ease-in-out infinite; }
+@keyframes shimmer { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+/* Cart drawer */
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 380px; max-width: 92vw; background: linear-gradient(180deg, oklch(11% 0.03 280), oklch(8% 0.02 280)); border-left: 1px solid var(--primary); transform: translateX(110%); transition: transform 0.4s var(--ease); z-index: 200; padding: 24px; display: flex; flex-direction: column; box-shadow: -20px 0 60px rgba(0,0,0,0.6); }
+.drawer.open { transform: translateX(0); }
+.drawer-close { position: absolute; top: 18px; right: 18px; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text); cursor: pointer; }
+.drawer h3 { font-family: 'Space Grotesk'; font-weight: 700; margin-bottom: 18px; }
+.cart-list { flex: 1; overflow-y: auto; }
+.cart-item { padding: 14px 0; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+.cart-item-name { font-family: 'Space Grotesk'; font-weight: 600; font-size: 0.92rem; }
+.cart-item-price { font-family: 'Geist Mono'; color: var(--primary); }
+.cart-total { padding: 18px 0; border-top: 1px solid var(--border); display: flex; justify-content: space-between; font-family: 'Space Grotesk'; font-weight: 700; font-size: 1.15rem; }
+.checkout { padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-family: 'Space Grotesk'; font-weight: 600; cursor: pointer; box-shadow: 0 12px 32px var(--primary-glow); margin-top: 14px; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a href="./index.html" style="text-decoration:none"><div class="brand">WHETŪ DIGITAL</div></a>
+  <div class="topbar-links">
+    <button class="cart" id="cartBtn">🛒 Cart <span class="cart-badge" id="cartBadge">0</span></button>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>Shop bespoke <span class="accent">software.</span></h1>
+  <p>Ready-made Whetū templates · bespoke commissions · monthly retainers. New Zealand built, your name on the source.</p>
+</section>
+
+<div class="filter-bar">
+  <div class="chip active" data-cat="all">All</div>
+  <div class="chip" data-cat="template">Templates</div>
+  <div class="chip" data-cat="bespoke">Bespoke builds</div>
+  <div class="chip" data-cat="retainer">Retainers</div>
+  <div class="chip" data-cat="addon">Add-ons</div>
+</div>
+
+<div class="shop-grid" id="grid"></div>
+
+<div class="section-title">
+  <h2>How it works</h2>
+  <p>Four steps from kōrero to live</p>
+</div>
+<div class="process">
+  <div class="step"><div class="step-num">1</div><div class="step-name">Kōrero</div><div class="step-desc">A 30-min chat about what you need. Free.</div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-name">Mockup</div><div class="step-desc">Sketch + scope + price within 48 hours.</div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-name">Build</div><div class="step-desc">2-4 weeks typically. Demo at each milestone.</div></div>
+  <div class="step"><div class="step-num">4</div><div class="step-name">Ship</div><div class="step-desc">Live. Source yours. Optional retainer for upkeep.</div></div>
+</div>
+
+<footer>
+  <div class="footer-logo">WHETŪ DIGITAL</div>
+  <div style="font-family:'Geist Mono';font-size:0.85rem;color:var(--text-muted);letter-spacing:3px;margin-top:18px;text-transform:uppercase">Solutions · Aotearoa New Zealand</div>
+  <div style="font-family:'Geist Mono';font-size:0.7rem;color:var(--text-muted);letter-spacing:1.5px;margin-top:30px">© 2026 Whetū Digital Ltd. · hello@whetudigital.co.nz</div>
+</footer>
+
+<div class="drawer" id="drawer">
+  <button class="drawer-close" id="drawerClose">✕</button>
+  <h3>Your cart</h3>
+  <div class="cart-list" id="cartList"></div>
+  <div class="cart-total">Total <span id="cartTotal">$0</span></div>
+  <button class="checkout" id="checkoutBtn">Get in touch →</button>
+</div>
+
+<script>
+const PRODS = [
+  // Templates (ready-made)
+  { id: 'salina',   cat: 'template', tier: 'ready',   icon: '🌸', name: 'SALINA Family Hub', desc: 'Memorial dashboard template with PIN gate, photo memorial reel, RSVP tracking.', price: 890 },
+  { id: 'mimi',     cat: 'template', tier: 'ready',   icon: '💜', name: 'Mimi PT Dashboard', desc: 'Personal trainer dashboard with client portal, 3D demos, booking.', price: 1490 },
+  { id: 'stlr',     cat: 'template', tier: 'ready',   icon: '🏠', name: 'STLRentals', desc: 'Rental portfolio with map, Kanban, cashflow analytics, tenant portal.', price: 1890 },
+  { id: 'clarity',  cat: 'template', tier: 'ready',   icon: '💎', name: 'Clarity Personal Finance', desc: 'Budgeting, goals, NZ tax calculator. Whetū-flavoured.', price: 690 },
+  { id: 'arcline',  cat: 'template', tier: 'ready',   icon: '⚡', name: 'ARCLINE Electrical PM', desc: 'EWRB-compliant electrical job tracker. CoC/ESC generation, 7-year vault. NZ licensed.', price: 2490 },
+  { id: 'eventspace', cat: 'template', tier: 'ready', icon: '🏛', name: 'EventSpace Hire Wizard', desc: 'Venue hire platform with 3-step wizard, package builder, real-time availability.', price: 1690 },
+  // Bespoke builds
+  { id: 'webapp',   cat: 'bespoke', tier: 'bespoke', icon: '🌐', name: 'Bespoke Web App', desc: 'Built for your specific business. Source code yours.', price: 4900 },
+  { id: 'mobileapp',cat: 'bespoke', tier: 'bespoke', icon: '📱', name: 'Bespoke Mobile App', desc: 'iOS + Android via Capacitor or native Swift/Kotlin.', price: 7900 },
+  { id: 'aitool',   cat: 'bespoke', tier: 'bespoke', icon: '🧠', name: 'Bespoke AI Tool', desc: 'Custom AI assistant, dashboard, or workflow.', price: 3900 },
+  { id: 'land',     cat: 'bespoke', tier: 'ready',   icon: '🚀', name: 'Landing Page (cinematic)', desc: 'Single-page marketing site. Cinematic intro, animated hero, mobile-first.', price: 1290 },
+  // Retainers
+  { id: 'starter',  cat: 'retainer', tier: 'ready',  icon: '⚡', name: 'Starter Retainer', desc: '4 hours/month maintenance + tweaks. Response within 24h.', price: 290 },
+  { id: 'growth',   cat: 'retainer', tier: 'ready',  icon: '🌱', name: 'Growth Retainer', desc: '10 hours/month — features + maintenance. Priority support.', price: 690 },
+  { id: 'partner',  cat: 'retainer', tier: 'ready',  icon: '🤝', name: 'Partner Retainer', desc: '24 hours/month — strategic + dev partnership. Dedicated Slack.', price: 1590 },
+  // Add-ons
+  { id: 'video',    cat: 'addon', tier: 'ready',     icon: '🎬', name: 'Cinematic Hero Video', desc: '30-60s MP4 reel, color-graded, branded. Delivered in 5 days.', price: 390 },
+  { id: 'pwa',      cat: 'addon', tier: 'ready',     icon: '📲', name: 'PWA Hardening', desc: 'Manifest + service worker + install prompt. Offline-ready.', price: 290 },
+  { id: 'globe',    cat: 'addon', tier: 'ready',     icon: '🌐', name: '3D Globe / Visualisation', desc: 'Three.js shader-based custom visualisation for hero section.', price: 690 },
+  { id: 'seo',      cat: 'addon', tier: 'ready',     icon: '🔍', name: 'SEO Foundation Pack', desc: 'Schema markup, meta, sitemap, robots.txt, Google Search Console.', price: 390 },
+  // Coming
+  { id: 'shopify',  cat: 'template', tier: 'coming', icon: '🛍', name: 'Shopify Theme (Whetū)', desc: 'Whetū-grade cinematic theme for your own Shopify store. Coming Q3 2026.', price: 1490 },
+];
+
+const cart = [];
+const grid = document.getElementById('grid');
+const drawer = document.getElementById('drawer');
+
+function render(cat = 'all') {
+  grid.innerHTML = PRODS.filter(p => cat === 'all' || p.cat === cat).map(p => `
+    <div class="prod" data-id="${p.id}">
+      <span class="tier-badge ${p.tier}">${p.tier === 'ready' ? 'READY' : p.tier === 'bespoke' ? 'BESPOKE' : 'COMING'}</span>
+      <div class="prod-img">${p.icon}</div>
+      <div class="prod-cat">${p.cat}</div>
+      <div class="prod-name">${p.name}</div>
+      <div class="prod-desc">${p.desc}</div>
+      <div class="prod-foot">
+        <div class="prod-price">$${p.price.toLocaleString()}${p.cat === 'retainer' ? '<span class="unit"> /mo</span>' : ''}</div>
+        <button class="prod-add" data-id="${p.id}">Add to cart</button>
+      </div>
+    </div>
+  `).join('');
+  grid.querySelectorAll('.prod-add').forEach(b => b.onclick = (e) => { e.stopPropagation(); add(b.dataset.id); });
+}
+
+function add(id) {
+  const p = PRODS.find(x => x.id === id);
+  if (!p) return;
+  cart.push(p);
+  document.getElementById('cartBadge').textContent = cart.length;
+  drawer.classList.add('open');
+  renderCart();
+}
+
+function renderCart() {
+  const list = document.getElementById('cartList');
+  if (!cart.length) { list.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:30px;font-style:italic">Cart empty</div>'; document.getElementById('cartTotal').textContent = '$0'; return; }
+  list.innerHTML = cart.map((p, i) => `<div class="cart-item">
+    <div><div class="cart-item-name">${p.icon} ${p.name}</div></div>
+    <div><div class="cart-item-price">$${p.price.toLocaleString()}</div><button onclick="window.removeFromCart(${i})" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.75rem;margin-top:4px">remove</button></div>
+  </div>`).join('');
+  document.getElementById('cartTotal').textContent = '$' + cart.reduce((s, p) => s + p.price, 0).toLocaleString();
+}
+window.removeFromCart = i => { cart.splice(i, 1); document.getElementById('cartBadge').textContent = cart.length; renderCart(); };
+
+document.querySelectorAll('.chip').forEach(c => c.onclick = () => {
+  document.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+  c.classList.add('active');
+  render(c.dataset.cat);
+});
+document.getElementById('cartBtn').onclick = () => drawer.classList.add('open');
+document.getElementById('drawerClose').onclick = () => drawer.classList.remove('open');
+
+document.getElementById('checkoutBtn').onclick = () => {
+  if (!cart.length) { alert('Add something to your cart first ♥'); return; }
+  const items = cart.map(p => `• ${p.icon} ${p.name} — $${p.price.toLocaleString()}${p.cat==='retainer'?'/mo':''}`).join('\n');
+  const total = cart.reduce((s, p) => s + p.price, 0);
+  const subject = encodeURIComponent(`Whetū Digital — Enquiry ($${total.toLocaleString()})`);
+  const body = encodeURIComponent(`Kia ora,\n\nI'm interested in the following:\n\n${items}\n\nTotal: $${total.toLocaleString()}\n\nMy name: \nBest way to reach me: \nBrief description of my project: \n\nLooking forward to hearing from you.\n`);
+  window.location.href = `mailto:hello@whetudigital.co.nz?subject=${subject}&body=${body}`;
+};
+
+render();
+renderCart();
+
+// ── Animation init ──
+(function(){
+  if (window.Lenis) {
+    const lenis = new Lenis({ lerp: 0.09, smoothWheel: true });
+    if (window.gsap) {
+      gsap.ticker.add(t => lenis.raf(t * 1000));
+      gsap.ticker.lagSmoothing(0);
+    } else {
+      (function raf(t){ lenis.raf(t); requestAnimationFrame(raf); })(0);
+    }
+  }
+  if (window.gsap) {
+    gsap.from('.hero', { y: 30, opacity: 0, duration: 0.8, ease: 'power3.out' });
+    gsap.from('.filter-bar', { y: 20, opacity: 0, duration: 0.6, delay: 0.2, ease: 'power2.out' });
+    if (window.ScrollTrigger) {
+      gsap.registerPlugin(ScrollTrigger);
+      gsap.utils.toArray('.prod').forEach((el, i) => {
+        gsap.from(el, { y: 24, opacity: 0, duration: 0.5, ease: 'power2.out',
+          scrollTrigger: { trigger: el, start: 'top 88%', once: true }, delay: (i % 4) * 0.07 });
+      });
+    }
+  }
+  if (window.tsParticles) {
+    const c = document.createElement('div');
+    c.id = 'shop-particles';
+    c.style.cssText = 'position:fixed;inset:0;z-index:0;pointer-events:none';
+    document.body.prepend(c);
+    tsParticles.load('shop-particles', {
+      background: { color: { value: 'transparent' } },
+      fpsLimit: 60,
+      particles: {
+        color: { value: '#8b5cf6' },
+        links: { color: '#8b5cf6', distance: 140, enable: true, opacity: 0.08, width: 0.5 },
+        move: { enable: true, speed: 0.3, outModes: { default: 'bounce' } },
+        number: { value: 20, density: { enable: true, area: 1000 } },
+        opacity: { value: 0.12 },
+        shape: { type: 'circle' },
+        size: { value: { min: 1, max: 2 } }
+      },
+      detectRetina: true
+    });
+  }
+})();
+</script>
+</body>
+</html>
