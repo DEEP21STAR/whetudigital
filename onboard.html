@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Client Onboarding — Whetū Digital</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:oklch(8% 0 0);--bg2:oklch(11% 0.01 270);--bg3:oklch(14% 0.015 270);--border:oklch(22% 0.02 270);--text:oklch(92% 0 0);--sub:oklch(65% 0 0);--pink:oklch(78% 0.18 320);--violet:oklch(65% 0.28 290);--cyan:oklch(72% 0.18 200);--radius:14px;--gap:20px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;padding:40px 20px}
+.container{max-width:680px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:40px}
+.brand-star{font-size:28px}
+.brand-name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;background:linear-gradient(135deg,var(--pink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.brand-tag{font-size:11px;color:var(--sub);letter-spacing:.06em;text-transform:uppercase}
+h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(24px,5vw,36px);font-weight:700;margin-bottom:8px;line-height:1.2}
+.subtitle{color:var(--sub);font-size:15px;margin-bottom:36px;line-height:1.6}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:var(--gap)}
+.card-title{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--pink);margin-bottom:18px}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:13px;font-weight:500;color:var(--sub);margin-bottom:6px;letter-spacing:.02em}
+.field input,.field textarea,.field select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--pink)}
+.field select{cursor:pointer}
+.field select option{background:var(--bg3)}
+.field textarea{resize:vertical;min-height:100px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:500px){.field-row{grid-template-columns:1fr}}
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:400px){.check-grid{grid-template-columns:1fr}}
+.check-item{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;cursor:pointer;transition:border-color .2s}
+.check-item:hover{border-color:var(--border)}
+.check-item input[type=checkbox]{accent-color:var(--pink);width:15px;height:15px;cursor:pointer}
+.check-item.checked{border-color:var(--pink);background:oklch(14% 0.02 320)}
+.check-item span{font-size:13px}
+.budget-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.budget-btn{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;cursor:pointer;font-size:13px;font-weight:500;transition:all .2s}
+.budget-btn:hover,.budget-btn.active{border-color:var(--violet);background:oklch(14% 0.02 290);color:var(--violet)}
+.timeline-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.timeline-btn{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 8px;text-align:center;cursor:pointer;font-size:12px;font-weight:500;transition:all .2s;line-height:1.4}
+.timeline-btn:hover,.timeline-btn.active{border-color:var(--cyan);background:oklch(14% 0.02 200);color:var(--cyan)}
+.submit-btn{width:100%;background:linear-gradient(135deg,var(--pink),var(--violet));border:none;border-radius:var(--radius);padding:16px;color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;cursor:pointer;letter-spacing:.02em;transition:opacity .2s;margin-top:8px}
+.submit-btn:hover{opacity:.85}
+.success-box{display:none;background:oklch(14% 0.03 145);border:1px solid oklch(55% 0.2 145);border-radius:var(--radius);padding:24px;text-align:center;margin-top:20px}
+.success-box h3{font-family:'Space Grotesk',sans-serif;color:oklch(72% 0.2 145);margin-bottom:8px}
+.success-box p{font-size:14px;color:var(--sub)}
+.note{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="brand">
+    <div class="brand-star">✦</div>
+    <div>
+      <div class="brand-name">Whetū Digital</div>
+      <div class="brand-tag">Client Onboarding</div>
+    </div>
+  </div>
+
+  <h1>Let's build something great together</h1>
+  <p class="subtitle">Fill this in and I'll prepare a proposal tailored to your project. Takes about 3 minutes.</p>
+
+  <form id="onboardForm">
+    <div class="card">
+      <div class="card-title">About you</div>
+      <div class="field-row">
+        <div class="field">
+          <label>First name *</label>
+          <input type="text" id="firstName" placeholder="Jane" required>
+        </div>
+        <div class="field">
+          <label>Last name *</label>
+          <input type="text" id="lastName" placeholder="Smith" required>
+        </div>
+      </div>
+      <div class="field">
+        <label>Email address *</label>
+        <input type="email" id="email" placeholder="jane@yourcompany.co.nz" required>
+      </div>
+      <div class="field">
+        <label>Phone (optional)</label>
+        <input type="tel" id="phone" placeholder="+64 21 000 0000">
+      </div>
+      <div class="field">
+        <label>Business / Organisation name</label>
+        <input type="text" id="business" placeholder="Smith & Co Ltd">
+      </div>
+      <div class="field">
+        <label>Industry</label>
+        <select id="industry">
+          <option value="">Select your industry…</option>
+          <option>Property / Real Estate</option>
+          <option>Electrical / Trades</option>
+          <option>Events / Hospitality</option>
+          <option>Health & Fitness</option>
+          <option>Finance / Accounting</option>
+          <option>Retail / E-commerce</option>
+          <option>Construction</option>
+          <option>Professional Services</option>
+          <option>Non-profit / Community</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">What do you need?</div>
+      <div class="check-grid" id="servicesGrid">
+        <label class="check-item"><input type="checkbox" value="website"> <span>🌐 Website / Landing Page</span></label>
+        <label class="check-item"><input type="checkbox" value="dashboard"> <span>📊 Business Dashboard</span></label>
+        <label class="check-item"><input type="checkbox" value="booking"> <span>📅 Booking / Scheduling</span></label>
+        <label class="check-item"><input type="checkbox" value="portal"> <span>🔐 Client Portal</span></label>
+        <label class="check-item"><input type="checkbox" value="forms"> <span>📋 Custom Forms / CRM</span></label>
+        <label class="check-item"><input type="checkbox" value="ecommerce"> <span>🛒 E-commerce / Shop</span></label>
+        <label class="check-item"><input type="checkbox" value="automation"> <span>⚙️ Automation / Scripts</span></label>
+        <label class="check-item"><input type="checkbox" value="other"> <span>✨ Other / Not sure yet</span></label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Budget range (NZD)</div>
+      <div class="budget-grid" id="budgetGrid">
+        <div class="budget-btn" data-v="Under $500">Under $500</div>
+        <div class="budget-btn" data-v="$500–$1,500">$500–$1,500</div>
+        <div class="budget-btn" data-v="$1,500–$3,000">$1,500–$3k</div>
+        <div class="budget-btn" data-v="$3,000–$6,000">$3k–$6k</div>
+        <div class="budget-btn" data-v="$6,000–$12,000">$6k–$12k</div>
+        <div class="budget-btn" data-v="$12,000+">$12k+</div>
+      </div>
+      <input type="hidden" id="budgetValue">
+    </div>
+
+    <div class="card">
+      <div class="card-title">Timeline</div>
+      <div class="timeline-grid" id="timelineGrid">
+        <div class="timeline-btn" data-v="ASAP (1–2 weeks)">🔥 ASAP<br><small>1–2 weeks</small></div>
+        <div class="timeline-btn" data-v="1 month">📅 1 month</div>
+        <div class="timeline-btn" data-v="2–3 months">🗓 2–3 months</div>
+        <div class="timeline-btn" data-v="Flexible">🌿 Flexible</div>
+      </div>
+      <input type="hidden" id="timelineValue">
+    </div>
+
+    <div class="card">
+      <div class="card-title">Tell me about your project</div>
+      <div class="field">
+        <label>What problem are you trying to solve? *</label>
+        <textarea id="projectDesc" placeholder="e.g. I need a booking system for my personal training business — clients book sessions, I see my calendar, they get email reminders." required></textarea>
+      </div>
+      <div class="field">
+        <label>Any existing website or inspiration links?</label>
+        <input type="text" id="inspiration" placeholder="https://... or describe your style">
+      </div>
+      <div class="field">
+        <label>Anything else I should know?</label>
+        <textarea id="extra" style="min-height:72px" placeholder="Deadlines, specific integrations, access needs, team size…"></textarea>
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn">Send my brief → hello@whetudigital.co.nz</button>
+    <p class="note" style="text-align:center;margin-top:12px">This opens your email client with everything pre-filled. I'll reply within 24 hours.</p>
+  </form>
+
+  <div class="success-box" id="successBox">
+    <h3>✓ Brief ready — your email client is opening</h3>
+    <p>If it didn't open automatically, email <strong>hello@whetudigital.co.nz</strong><br>with "Client Brief" as the subject.</p>
+  </div>
+</div>
+
+<script>
+// Toggle checkbox card styling
+document.querySelectorAll('.check-item input').forEach(cb => {
+  cb.addEventListener('change', () => {
+    cb.closest('.check-item').classList.toggle('checked', cb.checked);
+  });
+});
+
+// Budget toggle
+document.querySelectorAll('.budget-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.budget-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('budgetValue').value = btn.dataset.v;
+  });
+});
+
+// Timeline toggle
+document.querySelectorAll('.timeline-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.timeline-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('timelineValue').value = btn.dataset.v;
+  });
+});
+
+document.getElementById('onboardForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const name = `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`.trim();
+  const email = document.getElementById('email').value;
+  const phone = document.getElementById('phone').value;
+  const business = document.getElementById('business').value;
+  const industry = document.getElementById('industry').value;
+  const services = [...document.querySelectorAll('#servicesGrid input:checked')].map(cb => cb.value).join(', ') || 'Not specified';
+  const budget = document.getElementById('budgetValue').value || 'Not specified';
+  const timeline = document.getElementById('timelineValue').value || 'Not specified';
+  const desc = document.getElementById('projectDesc').value;
+  const inspiration = document.getElementById('inspiration').value;
+  const extra = document.getElementById('extra').value;
+
+  const subject = encodeURIComponent(`Whetū Digital — New Brief from ${name}`);
+  const body = encodeURIComponent(
+`Kia ora,
+
+Here's my project brief:
+
+NAME: ${name}
+EMAIL: ${email}
+PHONE: ${phone || 'Not provided'}
+BUSINESS: ${business || 'Not provided'}
+INDUSTRY: ${industry || 'Not specified'}
+
+SERVICES NEEDED: ${services}
+BUDGET: ${budget}
+TIMELINE: ${timeline}
+
+PROJECT DESCRIPTION:
+${desc}
+
+INSPIRATION / LINKS:
+${inspiration || 'None provided'}
+
+OTHER NOTES:
+${extra || 'None'}
+
+---
+Submitted via whetudigital.co.nz/onboard`
+  );
+
+  window.location.href = `mailto:hello@whetudigital.co.nz?subject=${subject}&body=${body}`;
+  document.getElementById('successBox').style.display = 'block';
+});
+</script>
+</body>
+</html>

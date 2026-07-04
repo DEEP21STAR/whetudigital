@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Account Settings — Whetū Digital</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:oklch(8% 0 0);--bg2:oklch(11% 0.01 270);--bg3:oklch(14% 0.015 270);--border:oklch(22% 0.02 270);--text:oklch(92% 0 0);--sub:oklch(62% 0 0);--pink:oklch(78% 0.18 320);--violet:oklch(65% 0.28 290);--green:oklch(65% 0.2 145);--red:oklch(60% 0.22 25);--radius:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;padding:32px 16px}
+.container{max-width:660px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:32px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.brand-star{font-size:26px}
+.brand-name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;background:linear-gradient(135deg,var(--pink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.brand-tag{font-size:11px;color:var(--sub);letter-spacing:.06em;text-transform:uppercase}
+.tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:4px}
+.tab{flex:1;padding:9px;text-align:center;font-size:12px;font-weight:500;border-radius:7px;cursor:pointer;color:var(--sub);transition:all .2s}
+.tab.active{background:oklch(18% 0.02 280);color:var(--text)}
+.panel{display:none}
+.panel.active{display:block}
+.section-title{font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--pink);margin-bottom:12px;margin-top:20px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.section-title:first-child{margin-top:0}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:12px;font-weight:500;color:var(--sub);margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus{border-color:var(--pink)}
+.field textarea{resize:vertical;min-height:80px}
+.field textarea:focus{border-color:var(--pink)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.grid-2{grid-template-columns:1fr}}
+.avatar-row{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--violet));display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#fff;font-family:'Space Grotesk',sans-serif;flex-shrink:0;cursor:pointer;position:relative}
+.avatar-change{position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;font-size:11px}
+.avatar:hover .avatar-change{display:flex}
+.avatar-info{flex:1}
+.avatar-name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px}
+.avatar-role{font-size:12px;color:var(--sub)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-label{font-size:13px;font-weight:500}
+.toggle-sub{font-size:11px;color:var(--sub);margin-top:2px}
+.toggle{width:40px;height:22px;background:var(--border);border-radius:11px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--pink)}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s}
+.toggle.on::after{transform:translateX(18px)}
+.product-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.product-item:last-child{border-bottom:none}
+.product-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--bg3)}
+.product-name{font-size:13px;font-weight:500;margin-bottom:2px}
+.product-plan{font-size:11px;color:var(--sub)}
+.badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:5px;text-transform:uppercase;letter-spacing:.05em}
+.badge-active{background:oklch(20% 0.05 145);color:var(--green)}
+.badge-inactive{background:var(--bg3);color:var(--sub)}
+.btn-save{width:100%;background:linear-gradient(135deg,var(--pink),var(--violet));border:none;border-radius:var(--radius);padding:13px;color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;cursor:pointer;transition:opacity .2s;margin-top:16px}
+.btn-save:hover{opacity:.85}
+.btn-danger{width:100%;background:oklch(12% 0.03 25);border:1px solid oklch(30% 0.15 25);border-radius:var(--radius);padding:12px;color:var(--red);font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;cursor:pointer;transition:border-color .2s}
+.btn-danger:hover{border-color:var(--red)}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid oklch(35% 0.15 145);border-radius:10px;padding:12px 18px;font-size:13px;color:var(--green);transform:translateY(80px);opacity:0;transition:all .3s;z-index:9999}
+.toast.show{transform:translateY(0);opacity:1}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="brand">
+    <div class="brand-star">✦</div>
+    <div>
+      <div class="brand-name">Whetū Digital</div>
+      <div class="brand-tag">Account Settings</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('profile')">Profile</div>
+    <div class="tab" onclick="switchTab('notifications')">Notifications</div>
+    <div class="tab" onclick="switchTab('products')">Products</div>
+    <div class="tab" onclick="switchTab('security')">Security</div>
+  </div>
+
+  <!-- Profile -->
+  <div class="panel active" id="panel-profile">
+    <div class="card">
+      <div class="avatar-row">
+        <div class="avatar" id="avatarEl">
+          <span id="avatarInitials">D</span>
+          <div class="avatar-change">✎</div>
+        </div>
+        <div class="avatar-info">
+          <div class="avatar-name" id="avatarName">Deep</div>
+          <div class="avatar-role">Owner · Whetū Digital</div>
+        </div>
+      </div>
+
+      <div class="section-title">Personal information</div>
+      <div class="grid-2">
+        <div class="field"><label>First name</label><input id="pfFirst" value="Deep" oninput="updateAvatar()"></div>
+        <div class="field"><label>Last name</label><input id="pfLast" value="" oninput="updateAvatar()"></div>
+      </div>
+      <div class="field"><label>Display name</label><input id="pfDisplay" value="Deep" placeholder="How you appear to clients"></div>
+      <div class="field"><label>Email</label><input type="email" id="pfEmail" value="desideepu@gmail.com"></div>
+      <div class="field"><label>Phone</label><input type="tel" id="pfPhone" placeholder="+64 …"></div>
+      <div class="field"><label>Location</label><input id="pfLocation" value="Aotearoa, New Zealand"></div>
+      <div class="field"><label>Bio / About</label><textarea id="pfBio" placeholder="Brief intro shown on client-facing pages…"></textarea></div>
+
+      <div class="section-title">Business</div>
+      <div class="field"><label>Business name</label><input id="bName" value="Whetū Digital" placeholder="Trading as…"></div>
+      <div class="field"><label>Business email</label><input type="email" id="bEmail" value="hello@whetudigital.co.nz"></div>
+      <div class="field"><label>Website</label><input id="bWeb" value="whetudigital.co.nz"></div>
+      <div class="grid-2">
+        <div class="field"><label>GST number</label><input id="bGST" placeholder="NZ GST number (optional)"></div>
+        <div class="field"><label>NZBN</label><input id="bNZBN" placeholder="NZBN (optional)"></div>
+      </div>
+    </div>
+    <button class="btn-save" onclick="saveProfile()">Save profile</button>
+  </div>
+
+  <!-- Notifications -->
+  <div class="panel" id="panel-notifications">
+    <div class="card">
+      <div class="section-title">Email notifications</div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">New client enquiry</div><div class="toggle-sub">When someone submits the onboarding form</div></div>
+        <div class="toggle on" id="notif-enquiry" onclick="toggleSwitch(this)"></div>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">Shop order</div><div class="toggle-sub">Cart enquiry received via shop page</div></div>
+        <div class="toggle on" id="notif-order" onclick="toggleSwitch(this)"></div>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">Invoice paid</div><div class="toggle-sub">Payment confirmation from client</div></div>
+        <div class="toggle on" id="notif-invoice" onclick="toggleSwitch(this)"></div>
+      </div>
+
+      <div class="section-title" style="margin-top:16px">Push notifications (ntfy)</div>
+      <div class="field"><label>ntfy topic</label><input id="ntfyTopic" value="deepstar-phoenix" placeholder="your-ntfy-topic"></div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">ARCLINE — CoC due reminders</div><div class="toggle-sub">7 days before CoC deadline</div></div>
+        <div class="toggle on" id="notif-coc" onclick="toggleSwitch(this)"></div>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">CLARITY — Budget alerts</div><div class="toggle-sub">When spending exceeds threshold</div></div>
+        <div class="toggle" id="notif-budget" onclick="toggleSwitch(this)"></div>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">STL Rentals — Payment reminders</div><div class="toggle-sub">3 days before rent due date</div></div>
+        <div class="toggle on" id="notif-rent" onclick="toggleSwitch(this)"></div>
+      </div>
+    </div>
+    <button class="btn-save" onclick="saveNotifs()">Save notification settings</button>
+  </div>
+
+  <!-- Products -->
+  <div class="panel" id="panel-products">
+    <div class="card">
+      <div class="section-title">Active products</div>
+      <div class="product-item">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="product-icon">🏠</div>
+          <div><div class="product-name">STL Rentals</div><div class="product-plan">Property management dashboard</div></div>
+        </div>
+        <span class="badge badge-active">Active</span>
+      </div>
+      <div class="product-item">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="product-icon">⚡</div>
+          <div><div class="product-name">ARCLINE</div><div class="product-plan">NZ Electrical PM · EWRB compliant</div></div>
+        </div>
+        <span class="badge badge-active">Active</span>
+      </div>
+      <div class="product-item">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="product-icon">💰</div>
+          <div><div class="product-name">CLARITY Budget</div><div class="product-plan">Personal finance · Deep & Mimi</div></div>
+        </div>
+        <span class="badge badge-active">Active</span>
+      </div>
+      <div class="product-item">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="product-icon">🗓</div>
+          <div><div class="product-name">SALINA Family Hub</div><div class="product-plan">Family calendar & events</div></div>
+        </div>
+        <span class="badge badge-active">Active</span>
+      </div>
+      <div class="product-item">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="product-icon">🏛</div>
+          <div><div class="product-name">EventSpace Wizard</div><div class="product-plan">Venue hire quoting tool</div></div>
+        </div>
+        <span class="badge badge-inactive">Paused</span>
+      </div>
+    </div>
+    <button class="btn-save" onclick="showToast('Product settings saved')">Save product settings</button>
+  </div>
+
+  <!-- Security -->
+  <div class="panel" id="panel-security">
+    <div class="card">
+      <div class="section-title">Change password</div>
+      <div class="field"><label>Current password</label><input type="password" id="pwCurrent" placeholder="••••••••"></div>
+      <div class="field"><label>New password</label><input type="password" id="pwNew" placeholder="Min 12 characters" oninput="checkPw()"></div>
+      <div class="field"><label>Confirm new password</label><input type="password" id="pwConfirm" placeholder="Repeat new password" oninput="checkPw()"></div>
+      <div id="pwFeedback" style="font-size:12px;margin-top:-6px;margin-bottom:8px;color:var(--sub)"></div>
+
+      <div class="section-title">Sessions</div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">Two-factor authentication</div><div class="toggle-sub">Require OTP on login</div></div>
+        <div class="toggle" id="sec-2fa" onclick="toggleSwitch(this)"></div>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">Session timeout (30 min)</div><div class="toggle-sub">Auto-logout on inactivity</div></div>
+        <div class="toggle on" id="sec-timeout" onclick="toggleSwitch(this)"></div>
+      </div>
+    </div>
+
+    <button class="btn-save" onclick="saveSecurity()" style="margin-bottom:12px">Update password</button>
+
+    <div class="card">
+      <div class="section-title">Danger zone</div>
+      <p style="font-size:13px;color:var(--sub);margin-bottom:14px">Deleting your account removes all data permanently and cannot be undone.</p>
+      <button class="btn-danger" onclick="confirmDelete()">Delete account</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  const tabs = document.querySelectorAll('.tab');
+  const map = { profile:0, notifications:1, products:2, security:3 };
+  tabs[map[id]].classList.add('active');
+  document.getElementById('panel-' + id).classList.add('active');
+}
+
+function toggleSwitch(el) { el.classList.toggle('on'); }
+
+function updateAvatar() {
+  const f = (document.getElementById('pfFirst').value || '').charAt(0).toUpperCase();
+  const l = (document.getElementById('pfLast').value || '').charAt(0).toUpperCase();
+  document.getElementById('avatarInitials').textContent = f + l || 'D';
+  const full = [document.getElementById('pfFirst').value, document.getElementById('pfLast').value].filter(Boolean).join(' ');
+  document.getElementById('avatarName').textContent = full || 'User';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = '✓ ' + msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function saveProfile() { showToast('Profile saved'); }
+function saveNotifs() { showToast('Notification settings saved'); }
+function saveSecurity() {
+  const pw = document.getElementById('pwNew').value;
+  const conf = document.getElementById('pwConfirm').value;
+  if (pw && pw !== conf) { document.getElementById('pwFeedback').textContent = '⚠ Passwords do not match'; return; }
+  if (pw && pw.length < 12) { document.getElementById('pwFeedback').textContent = '⚠ Minimum 12 characters'; return; }
+  document.getElementById('pwFeedback').textContent = '';
+  showToast('Password updated');
+}
+
+function checkPw() {
+  const pw = document.getElementById('pwNew').value;
+  const conf = document.getElementById('pwConfirm').value;
+  const fb = document.getElementById('pwFeedback');
+  if (!pw) { fb.textContent = ''; return; }
+  if (pw.length < 12) { fb.style.color = 'var(--red)'; fb.textContent = 'Too short (min 12 characters)'; return; }
+  if (conf && pw !== conf) { fb.style.color = 'var(--red)'; fb.textContent = 'Passwords do not match'; return; }
+  if (conf && pw === conf) { fb.style.color = 'var(--green)'; fb.textContent = '✓ Passwords match'; return; }
+  fb.style.color = 'var(--sub)'; fb.textContent = 'Enter password above to confirm';
+}
+
+function confirmDelete() {
+  const confirmed = prompt('Type DELETE to confirm account deletion:');
+  if (confirmed === 'DELETE') {
+    showToast('Account deletion requested — contact hello@whetudigital.co.nz');
+  }
+}
+</script>
+</body>
+</html>
