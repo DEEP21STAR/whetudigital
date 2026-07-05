@@ -1,0 +1,151 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pricing — Whetū Digital</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:oklch(8% 0 0);--bg2:oklch(11% 0.01 270);--bg3:oklch(14% 0.015 270);--border:oklch(22% 0.02 270);--text:oklch(92% 0 0);--sub:oklch(65% 0 0);--pink:oklch(78% 0.18 320);--violet:oklch(65% 0.28 290);--cyan:oklch(72% 0.18 200);--gold:oklch(80% 0.18 80);--radius:16px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;padding:60px 20px;background-image:radial-gradient(ellipse at 50% 0%,oklch(14% 0.04 290/0.5),transparent 60%)}
+.container{max-width:1000px;margin:0 auto}
+.brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:60px}
+.brand-name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:24px;background:linear-gradient(135deg,var(--pink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(32px,6vw,56px);font-weight:700;text-align:center;margin-bottom:16px;line-height:1.15}
+.hero-title span{background:linear-gradient(135deg,var(--pink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{text-align:center;color:var(--sub);font-size:17px;max-width:560px;margin:0 auto 60px;line-height:1.65}
+.tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-bottom:60px}
+.tier{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:32px;position:relative;overflow:hidden;transition:transform .25s,border-color .25s}
+.tier:hover{transform:translateY(-4px);border-color:oklch(35% 0.04 270)}
+.tier.featured{border-color:var(--violet);background:linear-gradient(145deg,oklch(12% 0.02 270),oklch(10% 0.01 290))}
+.tier.featured::before{content:'Most Popular';position:absolute;top:16px;right:-28px;background:linear-gradient(135deg,var(--pink),var(--violet));color:#fff;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 36px;transform:rotate(35deg)}
+.tier-name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;margin-bottom:8px}
+.tier-price{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:40px;margin-bottom:4px}
+.tier-price span{font-size:18px;font-weight:400;color:var(--sub)}
+.tier-desc{color:var(--sub);font-size:14px;margin-bottom:24px;line-height:1.5;border-bottom:1px solid var(--border);padding-bottom:20px}
+.feat-list{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.feat-list li{display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:1.5}
+.feat-list li::before{content:'✓';color:var(--pink);font-weight:700;flex-shrink:0;margin-top:1px}
+.feat-list li.muted{color:var(--sub)}
+.feat-list li.muted::before{content:'—';color:oklch(35% 0 0)}
+.tier-btn{display:block;width:100%;padding:13px;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;text-align:center;text-decoration:none;letter-spacing:.03em;transition:all .2s;cursor:pointer;border:none}
+.tier-btn.primary{background:linear-gradient(135deg,var(--pink),var(--violet));color:#fff}
+.tier-btn.primary:hover{opacity:.88}
+.tier-btn.secondary{background:oklch(14% 0.02 270);border:1px solid var(--border);color:var(--text)}
+.tier-btn.secondary:hover{border-color:var(--violet);color:var(--violet)}
+.faq{max-width:720px;margin:0 auto 60px}
+.faq h2{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;margin-bottom:32px;text-align:center}
+.faq-item{border-bottom:1px solid var(--border);padding:20px 0}
+.faq-q{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.faq-q::after{content:'+';font-size:22px;color:var(--sub);transition:transform .2s;flex-shrink:0}
+.faq-item.open .faq-q::after{transform:rotate(45deg)}
+.faq-a{color:var(--sub);font-size:14px;line-height:1.7;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .2s}
+.faq-item.open .faq-a{max-height:300px;padding-top:12px}
+.cta-bar{background:linear-gradient(135deg,oklch(12% 0.03 290),oklch(10% 0.025 320));border:1px solid var(--border);border-radius:var(--radius);padding:40px;text-align:center;max-width:720px;margin:0 auto}
+.cta-bar h2{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;margin-bottom:10px}
+.cta-bar p{color:var(--sub);margin-bottom:24px;font-size:15px}
+.cta-bar a{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--pink),var(--violet));border-radius:12px;padding:14px 28px;color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;text-decoration:none;letter-spacing:.02em;transition:opacity .2s}
+.cta-bar a:hover{opacity:.88}
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--sub);font-size:13px;text-decoration:none;margin-bottom:32px;transition:color .2s}
+.back-link:hover{color:var(--pink)}
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="./index.html" class="back-link">← Back to Whetū Digital</a>
+  <div class="brand">
+    <span style="font-size:28px">✦</span>
+    <div class="brand-name">Whetū Digital</div>
+  </div>
+
+  <h1 class="hero-title">Simple, honest <span>pricing</span></h1>
+  <p class="hero-sub">No subscriptions. No hidden fees. You own everything we build. All prices in NZD including GST.</p>
+
+  <div class="tiers">
+    <div class="tier">
+      <div class="tier-name">Starter</div>
+      <div class="tier-price">$799<span> one-off</span></div>
+      <p class="tier-desc">Perfect for individuals and micro-businesses needing a professional digital presence fast.</p>
+      <ul class="feat-list">
+        <li>Single-page website or landing page</li>
+        <li>Mobile-optimised design</li>
+        <li>Contact form + email integration</li>
+        <li>Google Analytics setup</li>
+        <li>Hosted on GitHub Pages (free)</li>
+        <li>1 round of revisions</li>
+        <li>Delivered in 5–7 days</li>
+        <li class="muted">Custom dashboard</li>
+        <li class="muted">Ongoing support retainer</li>
+      </ul>
+      <a href="./onboard.html" class="tier-btn secondary">Start a project →</a>
+    </div>
+
+    <div class="tier featured">
+      <div class="tier-name" style="color:var(--pink)">Professional</div>
+      <div class="tier-price" style="color:var(--pink)">$2,400<span> one-off</span></div>
+      <p class="tier-desc">For businesses that need a complete digital toolkit — website, dashboard, forms, and automation.</p>
+      <ul class="feat-list">
+        <li>Multi-page website (up to 8 pages)</li>
+        <li>Custom business dashboard</li>
+        <li>Client portal or booking forms</li>
+        <li>OKLCH dark design system</li>
+        <li>Animation + interactive UI</li>
+        <li>3 rounds of revisions</li>
+        <li>Delivered in 2–3 weeks</li>
+        <li>SEO + sitemap + robots.txt</li>
+        <li class="muted">Monthly retainer included</li>
+      </ul>
+      <a href="./onboard.html" class="tier-btn primary">Start a project →</a>
+    </div>
+
+    <div class="tier">
+      <div class="tier-name" style="color:var(--gold)">Enterprise</div>
+      <div class="tier-price" style="color:var(--gold)">Custom<span> quote</span></div>
+      <p class="tier-desc">Full-stack solutions for larger teams — multi-user systems, integrations, and ongoing partnerships.</p>
+      <ul class="feat-list">
+        <li>Everything in Professional</li>
+        <li>Multi-user / role-based access</li>
+        <li>API integrations (Supabase, etc.)</li>
+        <li>Shopify / e-commerce builds</li>
+        <li>Custom automations + scripts</li>
+        <li>Unlimited revisions</li>
+        <li>Priority delivery</li>
+        <li>Monthly retainer &amp; SLA</li>
+      </ul>
+      <a href="./onboard.html" class="tier-btn secondary">Get a quote →</a>
+    </div>
+  </div>
+
+  <div class="faq">
+    <h2>Common questions</h2>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.closest('.faq-item').classList.toggle('open')">Do I own the code?</div>
+      <div class="faq-a">Yes — 100%. Everything we build is yours. We deliver source files (HTML/CSS/JS) and you can host them anywhere. No lock-in, no ongoing fees unless you choose a retainer.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.closest('.faq-item').classList.toggle('open')">What's your tech stack?</div>
+      <div class="faq-a">Vanilla HTML/CSS/JS — no React, no WordPress, no Webflow. Fast, portable, and maintainable. We use OKLCH colour systems, GSAP animations, and modern CSS. Everything runs in a browser with zero build chain.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.closest('.faq-item').classList.toggle('open')">How long does a project take?</div>
+      <div class="faq-a">Starter: 5–7 days. Professional: 2–3 weeks. Enterprise: project-specific — we'll scope it in the brief call. We work fast because we don't use frameworks that need build steps.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.closest('.faq-item').classList.toggle('open')">Do you offer payment plans?</div>
+      <div class="faq-a">Yes. Standard split: 50% deposit to start, 50% on delivery. For Enterprise projects we can discuss milestone-based billing. All invoices are in NZD with GST.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.closest('.faq-item').classList.toggle('open')">Can you host and maintain my site?</div>
+      <div class="faq-a">We set you up on free hosting (GitHub Pages / Cloudflare Pages). For ongoing maintenance, content updates, and feature additions, we offer monthly retainers from $150/mo. Ask us during onboarding.</div>
+    </div>
+  </div>
+
+  <div class="cta-bar">
+    <h2>Ready to start?</h2>
+    <p>Tell us about your project — we'll reply within 24 hours with a clear proposal.</p>
+    <a href="./onboard.html">Start a project →</a>
+  </div>
+</div>
+</body>
+</html>

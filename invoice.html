@@ -1,0 +1,252 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invoice Generator — Whetū Digital</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:oklch(8% 0 0);--bg2:oklch(11% .01 270);--bg3:oklch(14% .015 270);--border:oklch(22% .02 270);--text:oklch(92% 0 0);--sub:oklch(62% 0 0);--pink:oklch(78% .18 320);--violet:oklch(65% .28 290);--radius:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:Inter,sans-serif;min-height:100vh;padding:32px 16px}
+.container{max-width:760px;margin:0 auto}
+.brand-row{display:flex;align-items:center;gap:10px;margin-bottom:24px}
+.brand-name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;background:linear-gradient(135deg,var(--pink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+h1{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px}
+.sub{font-size:13px;color:var(--sub);margin-bottom:22px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px}
+.sec{font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--pink);margin-bottom:12px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;font-weight:500;color:var(--sub);margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:9px 11px;color:var(--text);font-family:Inter,sans-serif;font-size:13px;outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--pink)}
+.field select option{background:var(--bg3)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.g2{grid-template-columns:1fr}}
+.line-item{display:grid;grid-template-columns:1fr 90px 90px 90px 32px;gap:8px;align-items:center;margin-bottom:8px}
+@media(max-width:560px){.line-item{grid-template-columns:1fr 70px 70px 70px 28px}}
+.line-item input{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-family:Inter,sans-serif;font-size:13px;outline:none}
+.line-item input:focus{border-color:var(--pink)}
+.line-item input[readonly]{background:oklch(12% .01 270);color:var(--sub)}
+.line-header{display:grid;grid-template-columns:1fr 90px 90px 90px 32px;gap:8px;margin-bottom:6px}
+@media(max-width:560px){.line-header{grid-template-columns:1fr 70px 70px 70px 28px}}
+.line-header span{font-size:11px;color:var(--sub);font-weight:500}
+.del-btn{background:none;border:1px solid oklch(30% .1 25);border-radius:6px;color:oklch(55% .15 25);cursor:pointer;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.del-btn:hover{border-color:oklch(50% .2 25);color:oklch(60% .22 25)}
+.add-line{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--sub);font-size:13px;cursor:pointer;margin-top:4px;transition:border-color .2s}
+.add-line:hover{border-color:var(--pink)}
+.totals{text-align:right;padding:14px 0;border-top:1px solid var(--border);margin-top:8px}
+.total-row{font-size:13px;margin-bottom:6px;color:var(--sub)}
+.total-row span{color:var(--text);margin-left:16px;font-weight:500}
+.grand-total{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:var(--pink)}
+.gst-note{font-size:11px;color:var(--sub);margin-top:4px}
+.btn{width:100%;background:linear-gradient(135deg,var(--pink),var(--violet));border:none;border-radius:var(--radius);padding:13px;color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;cursor:pointer;margin-top:4px}
+/* Print invoice */
+.inv-preview{display:none;background:#fff;color:#111;border-radius:var(--radius);padding:36px;margin-top:18px;font-family:Inter,sans-serif}
+.inv-top{display:flex;justify-content:space-between;margin-bottom:28px}
+.inv-from h2{font-size:20px;font-weight:700;background:linear-gradient(135deg,#be185d,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-family:'Space Grotesk',sans-serif}
+.inv-from p{font-size:12px;color:#6b7280;margin-top:2px}
+.inv-meta p{font-size:12px;color:#6b7280;text-align:right;margin-bottom:3px}
+.inv-meta p strong{color:#111}
+.inv-table{width:100%;border-collapse:collapse;margin-bottom:20px}
+.inv-table th{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;padding:6px 8px;border-bottom:1px solid #e5e7eb;text-left}
+.inv-table td{font-size:13px;padding:8px;border-bottom:1px solid #f3f4f6}
+.inv-table .num{text-align:right}
+.inv-total-section{display:flex;justify-content:flex-end}
+.inv-totals{width:220px}
+.inv-t-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:#6b7280}
+.inv-t-row span:last-child{color:#111;font-weight:500}
+.inv-t-grand{display:flex;justify-content:space-between;font-size:16px;font-weight:700;padding:10px 0;border-top:2px solid #111;margin-top:8px}
+.inv-footer{margin-top:24px;padding-top:14px;border-top:1px solid #e5e7eb;font-size:11px;color:#9ca3af}
+.print-btn{display:none;margin-top:12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 18px;color:var(--text);font-size:13px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="brand-row"><span style="font-size:22px">✦</span><div class="brand-name">Whetū Digital</div></div>
+  <h1>Invoice Generator</h1>
+  <p class="sub">Create professional invoices — fills in automatically, generates a printable PDF.</p>
+
+  <div class="card">
+    <div class="sec">From (Your Details)</div>
+    <div class="g2">
+      <div class="field"><label>Your name / Business name</label><input id="fromName" value="Whetū Digital"></div>
+      <div class="field"><label>Email</label><input type="email" id="fromEmail" value="hello@whetudigital.co.nz"></div>
+    </div>
+    <div class="g2">
+      <div class="field"><label>Phone</label><input id="fromPhone" placeholder="+64 ..."></div>
+      <div class="field"><label>GST number (if registered)</label><input id="fromGST" placeholder="Leave blank if not GST registered"></div>
+    </div>
+    <div class="field"><label>Bank account (for payment)</label><input id="fromBank" placeholder="XX-XXXX-XXXXXXX-XX"></div>
+  </div>
+
+  <div class="card">
+    <div class="sec">Bill To (Client)</div>
+    <div class="g2">
+      <div class="field"><label>Client name / Company</label><input id="toName" placeholder="Jane Smith Ltd"></div>
+      <div class="field"><label>Client email</label><input type="email" id="toEmail" placeholder="jane@client.co.nz"></div>
+    </div>
+    <div class="field"><label>Client address</label><input id="toAddr" placeholder="Billing address"></div>
+  </div>
+
+  <div class="card">
+    <div class="sec">Invoice Details</div>
+    <div class="g2">
+      <div class="field"><label>Invoice number</label><input id="invNo" placeholder="WD-001"></div>
+      <div class="field"><label>Invoice date</label><input type="date" id="invDate"></div>
+    </div>
+    <div class="g2">
+      <div class="field"><label>Due date</label><input type="date" id="dueDate"></div>
+      <div class="field"><label>GST treatment</label>
+        <select id="gstMode">
+          <option value="incl">GST inclusive (15% included in price)</option>
+          <option value="excl">GST exclusive (add 15% on top)</option>
+          <option value="none">No GST (not GST registered)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec">Line Items</div>
+    <div class="line-header">
+      <span>Description</span><span>Qty</span><span>Unit price</span><span>Amount</span><span></span>
+    </div>
+    <div id="linesContainer">
+      <div class="line-item">
+        <input placeholder="Service or product description" oninput="calc(this)">
+        <input type="number" value="1" min="0" step="0.01" oninput="calc(this)">
+        <input type="number" value="0" min="0" step="0.01" oninput="calc(this)">
+        <input type="number" readonly tabindex="-1">
+        <button class="del-btn" type="button" onclick="delLine(this)" title="Remove">✕</button>
+      </div>
+    </div>
+    <button class="add-line" type="button" onclick="addLine()">+ Add line item</button>
+    <div class="totals">
+      <div class="total-row">Subtotal <span id="subtotalDisplay">$0.00</span></div>
+      <div class="total-row" id="gstRow">GST (15%) <span id="gstDisplay">$0.00</span></div>
+      <div class="grand-total">Total <span id="totalDisplay">$0.00</span></div>
+      <div class="gst-note" id="gstNote"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec">Notes</div>
+    <div class="field"><label>Payment instructions / Notes</label><textarea id="notes" style="min-height:72px" placeholder="e.g. Please pay via bank transfer within 14 days. Account: XX-XXXX-XXXXXXX-XX. Thank you for your business!"></textarea></div>
+  </div>
+
+  <button class="btn" onclick="generateInvoice()">Generate Invoice</button>
+
+  <div class="inv-preview" id="invPreview">
+    <div class="inv-top">
+      <div class="inv-from"><h2 id="p-from"></h2><p id="p-from-contact"></p><p id="p-from-gst"></p><p id="p-from-bank"></p></div>
+      <div class="inv-meta"><p><strong>INVOICE</strong></p><p>No: <strong id="p-no"></strong></p><p>Date: <strong id="p-date"></strong></p><p>Due: <strong id="p-due"></strong></p></div>
+    </div>
+    <div style="margin-bottom:20px;padding:14px;background:#f9fafb;border-radius:8px">
+      <div style="font-size:11px;color:#9ca3af;margin-bottom:4px">BILL TO</div>
+      <div style="font-size:14px;font-weight:600" id="p-to"></div>
+      <div style="font-size:12px;color:#6b7280" id="p-to-addr"></div>
+      <div style="font-size:12px;color:#6b7280" id="p-to-email"></div>
+    </div>
+    <table class="inv-table">
+      <thead><tr><th>Description</th><th class="num">Qty</th><th class="num">Unit price</th><th class="num">Amount</th></tr></thead>
+      <tbody id="p-lines"></tbody>
+    </table>
+    <div class="inv-total-section">
+      <div class="inv-totals">
+        <div class="inv-t-row"><span>Subtotal</span><span id="p-sub"></span></div>
+        <div class="inv-t-row" id="p-gst-row"><span>GST (15%)</span><span id="p-gst"></span></div>
+        <div class="inv-t-grand"><span>Total</span><span id="p-total"></span></div>
+      </div>
+    </div>
+    <div class="inv-footer" id="p-notes"></div>
+  </div>
+  <button class="print-btn" id="printBtn" onclick="window.print()">Print / Save as PDF</button>
+</div>
+<script>
+const fmt = n => '$' + parseFloat(n||0).toLocaleString('en-NZ',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+// Set default dates
+const today = new Date();
+document.getElementById('invDate').value = today.toISOString().split('T')[0];
+const due = new Date(today); due.setDate(due.getDate()+14);
+document.getElementById('dueDate').value = due.toISOString().split('T')[0];
+document.getElementById('invNo').value = 'WD-' + String(today.getFullYear()).slice(-2) + String(today.getMonth()+1).padStart(2,'0') + '-001';
+
+function calc(input) {
+  const row = input.closest('.line-item');
+  const inputs = row.querySelectorAll('input');
+  const qty = parseFloat(inputs[1].value)||0;
+  const price = parseFloat(inputs[2].value)||0;
+  inputs[3].value = (qty*price).toFixed(2);
+  updateTotals();
+}
+
+function updateTotals() {
+  let sub = 0;
+  document.querySelectorAll('#linesContainer .line-item').forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    sub += parseFloat(inputs[3].value)||0;
+  });
+  const mode = document.getElementById('gstMode').value;
+  let gstAmt = 0, total = sub;
+  if (mode === 'excl') { gstAmt = sub * 0.15; total = sub + gstAmt; }
+  else if (mode === 'incl') { gstAmt = sub * 15/115; total = sub; }
+  document.getElementById('subtotalDisplay').textContent = fmt(sub);
+  document.getElementById('gstDisplay').textContent = fmt(gstAmt);
+  document.getElementById('totalDisplay').textContent = fmt(total);
+  document.getElementById('gstRow').style.display = mode==='none' ? 'none' : '';
+  document.getElementById('gstNote').textContent = mode==='incl' ? `GST (15%) included: ${fmt(gstAmt)}` : '';
+}
+document.getElementById('gstMode').addEventListener('change', updateTotals);
+
+function addLine() {
+  const div = document.createElement('div'); div.className='line-item';
+  div.innerHTML = '<input placeholder="Description" oninput="calc(this)"><input type="number" value="1" min="0" step="0.01" oninput="calc(this)"><input type="number" value="0" min="0" step="0.01" oninput="calc(this)"><input type="number" readonly tabindex="-1"><button class="del-btn" type="button" onclick="delLine(this)">&#x2715;</button>';
+  document.getElementById('linesContainer').appendChild(div);
+}
+
+function delLine(btn) {
+  const rows = document.querySelectorAll('#linesContainer .line-item');
+  if (rows.length > 1) { btn.closest('.line-item').remove(); updateTotals(); }
+}
+
+function generateInvoice() {
+  const g = id => document.getElementById(id).value;
+  document.getElementById('p-from').textContent = g('fromName');
+  document.getElementById('p-from-contact').textContent = [g('fromEmail'),g('fromPhone')].filter(Boolean).join(' | ');
+  document.getElementById('p-from-gst').textContent = g('fromGST') ? 'GST: '+g('fromGST') : '';
+  document.getElementById('p-from-bank').textContent = g('fromBank') ? 'Bank: '+g('fromBank') : '';
+  document.getElementById('p-no').textContent = g('invNo');
+  document.getElementById('p-date').textContent = g('invDate');
+  document.getElementById('p-due').textContent = g('dueDate');
+  document.getElementById('p-to').textContent = g('toName');
+  document.getElementById('p-to-addr').textContent = g('toAddr');
+  document.getElementById('p-to-email').textContent = g('toEmail');
+
+  const tbody = document.getElementById('p-lines'); tbody.innerHTML='';
+  let sub=0;
+  document.querySelectorAll('#linesContainer .line-item').forEach(row => {
+    const inputs=row.querySelectorAll('input');
+    const desc=inputs[0].value, qty=parseFloat(inputs[1].value)||0, price=parseFloat(inputs[2].value)||0, amt=parseFloat(inputs[3].value)||0;
+    if (!desc && !amt) return;
+    sub+=amt;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${desc}</td><td class="num">${qty}</td><td class="num">${fmt(price)}</td><td class="num">${fmt(amt)}</td>`;
+    tbody.appendChild(tr);
+  });
+  const mode=g('gstMode'); let gstAmt=0,total=sub;
+  if(mode==='excl'){gstAmt=sub*.15;total=sub+gstAmt;}
+  else if(mode==='incl'){gstAmt=sub*15/115;}
+  document.getElementById('p-sub').textContent=fmt(sub);
+  document.getElementById('p-gst').textContent=fmt(gstAmt);
+  document.getElementById('p-total').textContent=fmt(total);
+  document.getElementById('p-gst-row').style.display=mode==='none'?'none':'';
+  document.getElementById('p-notes').textContent=g('notes');
+  document.getElementById('invPreview').style.display='block';
+  document.getElementById('printBtn').style.display='inline-block';
+  document.getElementById('invPreview').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>

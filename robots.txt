@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://whetudigital.co.nz/sitemap.xml
