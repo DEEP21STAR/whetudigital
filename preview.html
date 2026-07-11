@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Whetū Digital · Logo Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--cyan:#10d8ff;--purple:#c040ff;--green:#00ff99;--bg:#05050e;--panel:#08081a;--border:rgba(16,216,255,.1);}
+body{background:var(--bg);color:#d0d0f0;font-family:'Space Grotesk',sans-serif;min-height:100vh;padding:40px 20px 60px;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,.012) 1px,transparent 1px);background-size:44px 44px;}
+
+header{text-align:center;margin-bottom:44px;}
+header h1{font-size:.65rem;letter-spacing:.4em;text-transform:uppercase;color:var(--cyan);font-family:'JetBrains Mono',monospace;opacity:.7;}
+header p{margin-top:10px;font-size:.7rem;letter-spacing:.18em;color:rgba(255,255,255,.25);font-family:'JetBrains Mono',monospace;}
+
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:28px;max-width:780px;margin:0 auto;}
+
+.card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:28px 20px 24px;display:flex;flex-direction:column;align-items:center;gap:16px;transition:border-color .35s,box-shadow .35s;cursor:default;}
+.card:hover{border-color:rgba(16,216,255,.28);}
+.card.selected{border-color:var(--cyan);box-shadow:0 0 40px rgba(16,216,255,.12);}
+
+canvas{display:block;border-radius:10px;background:transparent;}
+.card-label{font-size:.52rem;letter-spacing:.36em;text-transform:uppercase;color:var(--cyan);font-family:'JetBrains Mono',monospace;opacity:.7;}
+.card-name{font-size:1.08rem;font-weight:700;color:#fff;letter-spacing:.05em;text-align:center;}
+.card-desc{font-size:.7rem;color:rgba(200,200,240,.45);text-align:center;letter-spacing:.02em;line-height:1.65;max-width:260px;}
+
+.pick-btn{padding:9px 26px;background:linear-gradient(135deg,rgba(16,216,255,.1),rgba(192,64,255,.07));border:1px solid rgba(16,216,255,.22);border-radius:100px;color:var(--cyan);font-size:.65rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:all .2s;}
+.pick-btn:hover{background:linear-gradient(135deg,rgba(16,216,255,.24),rgba(192,64,255,.16));border-color:rgba(16,216,255,.55);box-shadow:0 0 18px rgba(16,216,255,.22);}
+.pick-btn.selected{background:linear-gradient(135deg,rgba(16,216,255,.38),rgba(192,64,255,.28));border-color:var(--cyan);color:#fff;box-shadow:0 0 22px rgba(16,216,255,.45);}
+
+@media(max-width:600px){.grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Whetū Digital · Logo Preview</h1>
+  <p>Hover to interact with each · click Pick to choose</p>
+</header>
+
+<div class="grid">
+  <div class="card" id="cardA">
+    <canvas id="cvA" width="300" height="300"></canvas>
+    <div class="card-label">Option A</div>
+    <div class="card-name">Stellar Core</div>
+    <div class="card-desc">A living plasma star — animated noise surface, solar corona, deep space energy. Literally what Whetū means.</div>
+    <button class="pick-btn" id="btnA" onclick="pick('A')">Pick This</button>
+  </div>
+  <div class="card" id="cardB">
+    <canvas id="cvB" width="300" height="300"></canvas>
+    <div class="card-label">Option B</div>
+    <div class="card-name">Crystal Whetū</div>
+    <div class="card-desc">Faceted gem — each face refracts a different colour as it rotates. Premium, jewellery-brand energy. Unique to you.</div>
+    <button class="pick-btn" id="btnB" onclick="pick('B')">Pick This</button>
+  </div>
+  <div class="card" id="cardC">
+    <canvas id="cvC" width="300" height="300"></canvas>
+    <div class="card-label">Option C</div>
+    <div class="card-name">Particle Constellation</div>
+    <div class="card-desc">3,000 glowing particles form the star. Move your mouse over it — they scatter. Always alive, always moving.</div>
+    <button class="pick-btn" id="btnC" onclick="pick('C')">Pick This</button>
+  </div>
+  <div class="card" id="cardD">
+    <canvas id="cvD" width="300" height="300"></canvas>
+    <div class="card-label">Option D</div>
+    <div class="card-name">Matariki</div>
+    <div class="card-desc">Chrome orb + 7 orbital stars — the Pleiades / Matariki constellation. NZ identity built into the mark.</div>
+    <button class="pick-btn" id="btnD" onclick="pick('D')">Pick This</button>
+  </div>
+</div>
+
+<script>
+function pick(opt){
+  ['A','B','C','D'].forEach(o=>{
+    document.getElementById('card'+o).classList.remove('selected');
+    document.getElementById('btn'+o).classList.remove('selected');
+  });
+  document.getElementById('card'+opt).classList.add('selected');
+  document.getElementById('btn'+opt).classList.add('selected');
+}
+</script>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+const S=300;
+
+/* ══════════════════════════════════════════════════
+   A — STELLAR CORE  (Plasma Star)
+══════════════════════════════════════════════════ */
+function initA(){
+  const cv=document.getElementById('cvA');
+  const r=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});
+  r.setPixelRatio(Math.min(devicePixelRatio,2)); r.setSize(S,S);
+  r.setClearColor(0,0); r.toneMapping=THREE.ACESFilmicToneMapping; r.toneMappingExposure=1.4;
+  const sc=new THREE.Scene(), cam=new THREE.PerspectiveCamera(45,1,0.1,1000);
+  cam.position.z=220;
+
+  const NOISE_GLSL=`
+    float _h(float n){return fract(sin(n)*43758.5453);}
+    float _n(vec3 x){vec3 p=floor(x),f=fract(x);f=f*f*(3.-2.*f);float n=p.x+p.y*57.+113.*p.z;return mix(mix(mix(_h(n),_h(n+1.),f.x),mix(_h(n+57.),_h(n+58.),f.x),f.y),mix(mix(_h(n+113.),_h(n+114.),f.x),mix(_h(n+170.),_h(n+171.),f.x),f.y),f.z);}
+    float fbm(vec3 p){return .5*_n(p)+.25*_n(p*2.1)+.125*_n(p*4.2)+.0625*_n(p*8.5);}`;
+
+  const mat=new THREE.ShaderMaterial({
+    uniforms:{uT:{value:0}},
+    vertexShader:`precision highp float;uniform float uT;varying vec3 vP;varying vec3 vN;
+      ${NOISE_GLSL}
+      void main(){vN=normal;float d=fbm(normalize(position)*2.6+uT*.13)*10.;vec3 np=position+normal*d;vP=np;gl_Position=projectionMatrix*modelViewMatrix*vec4(np,1.);}`,
+    fragmentShader:`precision highp float;varying vec3 vP;varying vec3 vN;uniform float uT;
+      ${NOISE_GLSL}
+      void main(){
+        float n=fbm(vP*.026+uT*.065);
+        vec3 col;
+        if(n<.30)      col=mix(vec3(.25,.0,.60),vec3(.05,.72,1.0),n/.30);
+        else if(n<.52) col=mix(vec3(.05,.72,1.0),vec3(1.,.42,.04),(n-.30)/.22);
+        else if(n<.76) col=mix(vec3(1.,.42,.04),vec3(1.,.88,.45),(n-.52)/.24);
+        else           col=mix(vec3(1.,.88,.45),vec3(1.,1.,.96),(n-.76)/.24);
+        gl_FragColor=vec4(col*2.4,1.);
+      }`,
+  });
+  sc.add(new THREE.Mesh(new THREE.SphereGeometry(68,128,128),mat));
+  const star=sc.children[0];
+
+  // Corona particles
+  const NP=700,pp=new Float32Array(NP*3),ph=new Float32Array(NP);
+  for(let i=0;i<NP;i++){const t2=Math.random()*Math.PI*2,p2=Math.acos(2*Math.random()-1),rd=72+Math.random()*24;pp[i*3]=rd*Math.sin(p2)*Math.cos(t2);pp[i*3+1]=rd*Math.sin(p2)*Math.sin(t2);pp[i*3+2]=rd*Math.cos(p2);ph[i]=Math.random()*Math.PI*2;}
+  const pg=new THREE.BufferGeometry();
+  pg.setAttribute('position',new THREE.BufferAttribute(pp,3));
+  pg.setAttribute('ph',new THREE.BufferAttribute(ph,1));
+  const pm=new THREE.ShaderMaterial({
+    uniforms:{uT:{value:0}},
+    vertexShader:`attribute float ph;uniform float uT;void main(){float s=.5+.5*sin(uT*2.2+ph);gl_PointSize=s*5.5;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`void main(){vec2 uv=gl_PointCoord-.5;float d=length(uv);if(d>.5)discard;gl_FragColor=vec4(1.,.65,.2,(1.-d*2.)*.9);}`,
+    transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,
+  });
+  sc.add(new THREE.Points(pg,pm));
+  sc.add(new THREE.Mesh(new THREE.SphereGeometry(36,16,16),new THREE.MeshBasicMaterial({color:0xfff8e0,transparent:true,opacity:.5})));
+
+  let mx=0,my=0;
+  cv.addEventListener('mousemove',e=>{const b=cv.getBoundingClientRect();mx=(e.clientX-b.left)/S*2-1;my=-((e.clientY-b.top)/S*2-1);});
+
+  return {update(dt,t){
+    mat.uniforms.uT.value=t; pm.uniforms.uT.value=t;
+    star.rotation.y+=.003;
+    star.rotation.x+=(my*.24-star.rotation.x)*.05;
+    star.rotation.z+=(mx*.08-star.rotation.z)*.05;
+    r.render(sc,cam);
+    const p=Math.sin(t*1.7)*.5+.5;
+    cv.style.filter=`drop-shadow(0 0 ${12+p*24}px rgba(255,150,30,${.5+p*.45})) drop-shadow(0 0 ${28+p*52}px rgba(16,216,255,${.2+p*.28}))`;
+  }};
+}
+
+/* ══════════════════════════════════════════════════
+   B — CRYSTAL WHETŪ  (Faceted Gem)
+══════════════════════════════════════════════════ */
+function initB(){
+  const cv=document.getElementById('cvB');
+  const r=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});
+  r.setPixelRatio(Math.min(devicePixelRatio,2)); r.setSize(S,S);
+  r.setClearColor(0,0); r.toneMapping=THREE.ACESFilmicToneMapping; r.toneMappingExposure=1.6;
+  const sc=new THREE.Scene(), cam=new THREE.PerspectiveCamera(45,1,0.1,1000);
+  cam.position.z=220;
+
+  // Gem: octahedron stretched into crown+pavilion
+  const geo=new THREE.OctahedronGeometry(72,0);
+  const pos=geo.attributes.position;
+  for(let i=0;i<pos.count;i++){
+    const y=pos.getY(i);
+    pos.setY(i, y>0 ? y*1.55 : y*.95);
+    pos.setX(i, pos.getX(i)*.9);
+    pos.setZ(i, pos.getZ(i)*.9);
+  }
+  geo.computeVertexNormals();
+
+  const HSL_GLSL=`vec3 hsl(float h,float s,float l){float c=(1.-abs(2.*l-1.))*s,x=c*(1.-abs(mod(h*6.,2.)-1.)),m=l-c*.5;if(h<.1667)return vec3(c,x,0)+m;if(h<.3333)return vec3(x,c,0)+m;if(h<.5)return vec3(0,c,x)+m;if(h<.6667)return vec3(0,x,c)+m;if(h<.8333)return vec3(x,0,c)+m;return vec3(c,0,x)+m;}`;
+
+  const mat=new THREE.ShaderMaterial({
+    uniforms:{uT:{value:0},uM:{value:new THREE.Vector2()}},
+    transparent:true, side:THREE.DoubleSide,
+    vertexShader:`varying vec3 vN,vV,vWN;void main(){vN=normalize(normalMatrix*normal);vec4 mv=modelViewMatrix*vec4(position,1.);vV=normalize(-mv.xyz);vWN=normalize((modelMatrix*vec4(normal,0.)).xyz);gl_Position=projectionMatrix*mv;}`,
+    fragmentShader:`
+      varying vec3 vN,vV,vWN;uniform float uT;uniform vec2 uM;
+      ${HSL_GLSL}
+      void main(){
+        float fr=1.-max(0.,dot(vN,vV));
+        float fh=mod(vWN.x*.6+vWN.y*.5+vWN.z*.4+uT*.055+uM.x*.32,1.);
+        vec3 fc=hsl(fh,.98,.54);
+        vec3 interior=mix(vec3(.0,.04,.14),fc*.35,pow(fr,.45));
+        vec3 edge=hsl(mod(fh+.38,1.),.92,.62)*pow(fr,1.4);
+        vec3 col=interior+edge;
+        col+=pow(max(0.,dot(reflect(-vV,vN),vV)),90.)*1.4;
+        col+=pow(max(0.,dot(reflect(-vV,vN),vV)),16.)*.3;
+        gl_FragColor=vec4(col,mix(.5,1.,pow(fr,.75)));
+      }`,
+  });
+  const gem=new THREE.Mesh(geo,mat);
+  sc.add(gem);
+
+  const L1=new THREE.PointLight(0x10d8ff,14,320); L1.position.set(110,90,130); sc.add(L1);
+  const L2=new THREE.PointLight(0xc040ff,11,280); L2.position.set(-95,-65,100); sc.add(L2);
+  const L3=new THREE.PointLight(0x00ff88,5,200);  L3.position.set(0,-110,85);  sc.add(L3);
+  sc.add(new THREE.AmbientLight(0x080814,5));
+
+  let mx=0,my=0;
+  cv.addEventListener('mousemove',e=>{const b=cv.getBoundingClientRect();mx=(e.clientX-b.left)/S*2-1;my=-((e.clientY-b.top)/S*2-1);});
+
+  return {update(dt,t){
+    mat.uniforms.uT.value=t; mat.uniforms.uM.value.set(mx,my);
+    gem.rotation.y+=.004;
+    gem.rotation.x+=(my*.28-gem.rotation.x)*.05;
+    gem.rotation.z+=(mx*.1 +Math.sin(t*.5)*.18-gem.rotation.z)*.05;
+    gem.position.y=Math.sin(t*.8)*5;
+    L1.intensity=11+Math.sin(t*1.3)*4; L2.intensity=9+Math.cos(t*.9)*3;
+    r.render(sc,cam);
+    const p=Math.sin(t*1.5)*.5+.5;
+    cv.style.filter=`drop-shadow(0 0 ${10+p*18}px rgba(16,216,255,${.42+p*.46})) drop-shadow(0 0 ${22+p*40}px rgba(192,64,255,${.2+p*.36}))`;
+  }};
+}
+
+/* ══════════════════════════════════════════════════
+   C — PARTICLE CONSTELLATION
+══════════════════════════════════════════════════ */
+function initC(){
+  const cv=document.getElementById('cvC');
+  const r=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});
+  r.setPixelRatio(Math.min(devicePixelRatio,2)); r.setSize(S,S);
+  r.setClearColor(0,0);
+  const sc=new THREE.Scene(), cam=new THREE.PerspectiveCamera(45,1,0.1,1000);
+  cam.position.z=220;
+
+  // Star shape sample function
+  function starXY(a,OR,IR,n){
+    const step=Math.PI/n, seg=Math.floor(a/step);
+    const t=(a%step)/step;
+    const r=seg%2===0 ? OR-t*(OR-IR) : IR+t*(OR-IR);
+    return [Math.cos(a)*r, Math.sin(a)*r];
+  }
+
+  const N=3000;
+  const base=new Float32Array(N*3), phase=new Float32Array(N), col=new Float32Array(N);
+  for(let i=0;i<N;i++){
+    let x,y,z;
+    const roll=Math.random();
+    if(roll<.62){
+      const [sx,sy]=starXY(Math.random()*Math.PI*2, 68, 26, 8);
+      x=sx+(Math.random()-.5)*11; y=sy+(Math.random()-.5)*11; z=(Math.random()-.5)*20;
+    } else if(roll<.84){
+      const a2=Math.random()*Math.PI*2, rr=Math.random()*24;
+      x=Math.cos(a2)*rr+(Math.random()-.5)*10; y=Math.sin(a2)*rr+(Math.random()-.5)*10; z=(Math.random()-.5)*14;
+    } else {
+      const a2=Math.random()*Math.PI*2, rr=72+Math.random()*32;
+      x=Math.cos(a2)*rr; y=Math.sin(a2)*rr; z=(Math.random()-.5)*35;
+    }
+    base[i*3]=x; base[i*3+1]=y; base[i*3+2]=z;
+    phase[i]=Math.random()*Math.PI*2;
+    col[i]=Math.random();
+  }
+
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.BufferAttribute(base,3));
+  geo.setAttribute('aP',new THREE.BufferAttribute(phase,1));
+  geo.setAttribute('aC',new THREE.BufferAttribute(col,1));
+
+  const mat=new THREE.ShaderMaterial({
+    uniforms:{uT:{value:0},uM:{value:new THREE.Vector2(999,999)}},
+    vertexShader:`
+      attribute float aP; attribute float aC;
+      uniform float uT; uniform vec2 uM;
+      varying float vC; varying float vBr;
+      void main(){
+        vec3 p=position;
+        float orb=sin(uT*.75+aP)*.6;
+        p.x+=cos(aP+uT*.28)*orb; p.y+=sin(aP+uT*.38)*orb;
+        // Mouse repel (world space)
+        vec2 mw=uM*92.;
+        vec2 d2=p.xy-mw; float dist=length(d2);
+        if(dist<55.){float f=(1.-dist/55.)*32.;p.xy+=normalize(d2)*f;}
+        vC=aC; vBr=.75+.25*sin(uT*1.4+aP);
+        gl_PointSize=(.6+vBr*.9)*3.2*(220./length((modelViewMatrix*vec4(p,1.)).xyz));
+        gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);
+      }`,
+    fragmentShader:`
+      varying float vC; varying float vBr;
+      void main(){
+        vec2 uv=gl_PointCoord-.5; float d=length(uv);
+        if(d>.5)discard;
+        float a=(1.-d*2.)*vBr;
+        vec3 c=mix(vec3(.08,.82,1.),vec3(.72,.18,1.),vC);
+        c=mix(c,vec3(1.),pow(1.-d*2.,.6)*.45);
+        gl_FragColor=vec4(c,a*.95);
+      }`,
+    transparent:true, blending:THREE.AdditiveBlending, depthWrite:false,
+  });
+  const pts=new THREE.Points(geo,mat);
+  sc.add(pts);
+
+  let mx=999,my=999;
+  cv.addEventListener('mousemove',e=>{const b=cv.getBoundingClientRect();mx=(e.clientX-b.left)/S*2-1;my=-((e.clientY-b.top)/S*2-1);});
+  cv.addEventListener('mouseleave',()=>{mx=999;my=999;});
+
+  return {update(dt,t){
+    mat.uniforms.uT.value=t; mat.uniforms.uM.value.set(mx,my);
+    pts.rotation.y+=.0025;
+    pts.rotation.x=Math.sin(t*.32)*.10;
+    pts.position.y=Math.sin(t*.7)*4;
+    r.render(sc,cam);
+    const p=Math.sin(t*1.4)*.5+.5;
+    cv.style.filter=`drop-shadow(0 0 ${7+p*12}px rgba(16,216,255,${.32+p*.4})) drop-shadow(0 0 ${16+p*28}px rgba(140,30,255,${.14+p*.24}))`;
+  }};
+}
+
+/* ══════════════════════════════════════════════════
+   D — MATARIKI  (Chrome Orb + 7 Orbital Stars)
+══════════════════════════════════════════════════ */
+function initD(){
+  const cv=document.getElementById('cvD');
+  const r=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});
+  r.setPixelRatio(Math.min(devicePixelRatio,2)); r.setSize(S,S);
+  r.setClearColor(0,0);
+  const sc=new THREE.Scene(), cam=new THREE.PerspectiveCamera(45,1,0.1,1000);
+  cam.position.z=220;
+
+  // Matcap: programmatic chrome with brand colours
+  function mkMatcap(){
+    const W=256, mc=document.createElement('canvas'); mc.width=mc.height=W;
+    const x=mc.getContext('2d');
+    x.fillStyle='#000'; x.fillRect(0,0,W,W);
+    const g1=x.createRadialGradient(W*.30,W*.26,0,W*.5,W*.5,W*.54);
+    g1.addColorStop(0,'rgba(210,252,255,.99)'); g1.addColorStop(.16,'rgba(16,216,255,.88)');
+    g1.addColorStop(.52,'rgba(50,10,140,.45)'); g1.addColorStop(1,'rgba(0,0,0,.96)');
+    x.fillStyle=g1; x.fillRect(0,0,W,W);
+    const g2=x.createRadialGradient(W*.74,W*.74,0,W*.5,W*.5,W*.5);
+    g2.addColorStop(0,'rgba(192,64,255,.62)'); g2.addColorStop(.42,'rgba(80,0,170,.18)');
+    g2.addColorStop(1,'rgba(0,0,0,0)');
+    x.fillStyle=g2; x.fillRect(0,0,W,W);
+    const g3=x.createRadialGradient(W*.12,W*.60,0,W*.28,W*.5,W*.24);
+    g3.addColorStop(0,'rgba(0,255,130,.25)'); g3.addColorStop(1,'rgba(0,0,0,0)');
+    x.fillStyle=g3; x.fillRect(0,0,W,W);
+    // Clip to circle
+    x.globalCompositeOperation='destination-in';
+    x.beginPath(); x.arc(W/2,W/2,W/2,0,Math.PI*2); x.fill();
+    return new THREE.CanvasTexture(mc);
+  }
+
+  const orb=new THREE.Mesh(
+    new THREE.SphereGeometry(62,64,64),
+    new THREE.MeshMatcapMaterial({matcap:mkMatcap()})
+  );
+  sc.add(orb);
+
+  // 7 Matariki orbital stars
+  const orbData=[
+    {R:92,sp:.30,ph:0,   sz:5.5, h:.55},
+    {R:82,sp:.46,ph:1.0, sz:4,   h:.75},
+    {R:98,sp:.24,ph:2.1, sz:6,   h:.33},
+    {R:76,sp:.52,ph:3.2, sz:3.5, h:.62},
+    {R:104,sp:.19,ph:4.3,sz:5,   h:.92},
+    {R:88,sp:.38,ph:5.4, sz:3.5, h:.14},
+    {R:94,sp:.28,ph:.52, sz:4.5, h:.50},
+  ];
+  const orbitals=orbData.map((o,i)=>{
+    // Orbital ring (very faint)
+    const tilt=i*.44;
+    const rpts=[];
+    for(let j=0;j<=80;j++){const a=j/80*Math.PI*2;rpts.push(new THREE.Vector3(Math.cos(a)*o.R,Math.sin(a)*o.R*Math.cos(tilt),Math.sin(a)*o.R*Math.sin(tilt)));}
+    const rLine=new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(rpts),
+      new THREE.LineBasicMaterial({color:new THREE.Color().setHSL(o.h,.8,.5),transparent:true,opacity:.07})
+    );
+    sc.add(rLine);
+    const mesh=new THREE.Mesh(
+      new THREE.SphereGeometry(o.sz,12,12),
+      new THREE.MeshBasicMaterial({color:new THREE.Color().setHSL(o.h,.9,.6)})
+    );
+    sc.add(mesh);
+    return {mesh,o,tilt};
+  });
+
+  let mx=0,my=0;
+  cv.addEventListener('mousemove',e=>{const b=cv.getBoundingClientRect();mx=(e.clientX-b.left)/S*2-1;my=-((e.clientY-b.top)/S*2-1);});
+
+  return {update(dt,t){
+    orb.rotation.y+=.004;
+    orb.rotation.x+=(my*.18-orb.rotation.x)*.04;
+    orb.rotation.z+=(mx*.07-orb.rotation.z)*.04;
+    orb.position.y=Math.sin(t*.6)*4;
+
+    orbitals.forEach(({mesh,o,tilt})=>{
+      const a=t*o.sp+o.ph;
+      mesh.position.set(
+        Math.cos(a)*o.R,
+        Math.sin(a)*o.R*Math.cos(tilt),
+        Math.sin(a)*o.R*Math.sin(tilt)
+      );
+      const pulse=.55+.45*Math.sin(t*2.4+o.ph);
+      mesh.material.color.setHSL(o.h,.9,pulse*.65);
+    });
+
+    r.render(sc,cam);
+    const p=Math.sin(t*1.5)*.5+.5;
+    cv.style.filter=`drop-shadow(0 0 ${10+p*18}px rgba(16,216,255,${.4+p*.44})) drop-shadow(0 0 ${22+p*40}px rgba(192,64,255,${.18+p*.3}))`;
+  }};
+}
+
+/* ══════════════════════════════════════════════════
+   SHARED LOOP
+══════════════════════════════════════════════════ */
+const A=initA(), B=initB(), C=initC(), D=initD();
+let prev=performance.now(), elapsed=0;
+(function loop(now){
+  requestAnimationFrame(loop);
+  const dt=Math.min((now-prev)/1000,.05);
+  prev=now; elapsed+=dt;
+  A.update(dt,elapsed);
+  B.update(dt,elapsed);
+  C.update(dt,elapsed);
+  D.update(dt,elapsed);
+})(prev);
+</script>
+</body>
+</html>

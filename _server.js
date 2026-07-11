@@ -1,0 +1,3 @@
+const http=require('http'),fs=require('fs'),path=require('path');
+const R='C:\\WHETU';const M={'.html':'text/html','.js':'application/javascript','.css':'text/css','.json':'application/json','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg'};
+http.createServer((q,r)=>{let u=decodeURIComponent(q.url.split('?')[0]);if(u==='/'||u==='')u='/index.html';const f=path.join(R,u);if(!f.startsWith(R)){r.writeHead(403);return r.end()}fs.stat(f,(e,s)=>{if(e){r.writeHead(404);return r.end()}r.writeHead(200,{'Content-Type':M[path.extname(f).toLowerCase()]||'application/octet-stream','Content-Length':s.size});fs.createReadStream(f).pipe(r)})}).listen(8126,()=>console.log('WHETU on 8126'));

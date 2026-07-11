@@ -1,0 +1,10 @@
+{
+  "name": "Whetū Digital — Aotearoa",
+  "short_name": "Whetū",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0a0612",
+  "theme_color": "#a78bfa",
+  "icons": [{"src":"favicon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}

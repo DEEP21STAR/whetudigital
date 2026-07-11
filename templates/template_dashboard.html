@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<!--
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  WHETŪ DIGITAL — GOD MODE DASHBOARD TEMPLATE v1.0               ║
+  ║  WDS-SGM SCORE: 7.5/10 (baseline — retrofit to 9.0+ per brief)  ║
+  ║  © 2026 Whetū Digital. All rights reserved.                      ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  CUSTOMIZE CHECKLIST:
+  1. Find all <!-- CUSTOMIZE: --> comments below
+  2. Set your product variables in the CONFIG block
+  3. Replace placeholder stats, panels, data
+  4. Set data-product="" on .whetu-parallax-bg to match product presets
+  5. Run WDS-SGM audit before shipping
+
+  REQUIRED EXTERNAL FILES (from C:\WHETU\lib\):
+  - whetu-intro.js      (cinematic intro engine)
+  - whetu-grain.css     (texture system)
+  - whetu-depth.css     (parallax aurora)
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- CUSTOMIZE: product name -->
+  <title>PRODUCT NAME — Whetū Digital</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Whetū Design System -->
+  <link rel="stylesheet" href="../lib/whetu-grain.css">
+  <link rel="stylesheet" href="../lib/whetu-depth.css">
+
+  <style>
+    /* ── CUSTOMIZE: Product CSS vars ──────────────────────────────────── */
+    :root {
+      --accent:       #7B61FF;          /* primary brand colour */
+      --accent-light: #A78BFA;          /* lighter shade */
+      --accent-pale:  rgba(123,97,255,0.15);
+      --accent-glow:  rgba(123,97,255,0.55);
+      --bg:           #05050F;
+      --bg2:          #08071A;
+      --card:         rgba(14,10,30,0.88);
+      --card-border:  rgba(123,97,255,0.28);
+      --text:         #EDE9FF;
+      --text-dim:     rgba(237,233,255,0.55);
+      --green:        #00FFB3;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── PIN GATE ─────────────────────────────────────────────────────── */
+    #pin-gate {
+      display: none; position: fixed; inset: 0; z-index: 9000;
+      background:
+        radial-gradient(ellipse 60% 55% at 50% 50%, rgba(123,97,255,0.13) 0%, transparent 70%),
+        var(--bg);
+      align-items: center; justify-content: center; flex-direction: column; gap: 24px;
+    }
+    #pin-gate.visible { display: flex; }
+
+    .pin-logo {
+      font-family: 'Bebas Neue', sans-serif; font-size: 3rem;
+      color: var(--accent); letter-spacing: 0.12em;
+      text-shadow: 0 0 20px var(--accent), 0 0 50px var(--accent-glow);
+      animation: logoGlow 3s ease-in-out infinite alternate;
+    }
+    @keyframes logoGlow {
+      from { text-shadow: 0 0 20px var(--accent), 0 0 50px var(--accent-glow); }
+      to   { text-shadow: 0 0 30px var(--accent), 0 0 80px var(--accent-glow); }
+    }
+    .pin-sub { font-size: 0.8rem; letter-spacing: 0.28em; color: var(--text-dim); text-transform: uppercase; }
+
+    .pin-box {
+      background: rgba(14,10,30,0.92); border: 1px solid rgba(123,97,255,0.45);
+      border-radius: 20px; padding: 40px 52px; backdrop-filter: blur(32px);
+      display: flex; flex-direction: column; align-items: center; gap: 22px;
+      box-shadow: 0 0 40px rgba(123,97,255,0.18), 0 0 90px rgba(123,97,255,0.10),
+                  inset 0 1px 0 rgba(255,255,255,0.06);
+      animation: boxPulse 3.5s ease-in-out infinite alternate;
+    }
+    @keyframes boxPulse {
+      from { box-shadow: 0 0 40px rgba(123,97,255,0.18), inset 0 1px 0 rgba(255,255,255,0.06); }
+      to   { box-shadow: 0 0 70px rgba(123,97,255,0.32), inset 0 1px 0 rgba(255,255,255,0.08); }
+    }
+
+    .pin-dots { display: flex; gap: 14px; }
+    .pin-dot {
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 2px solid rgba(123,97,255,0.5);
+      transition: all 0.2s;
+    }
+    .pin-dot.filled { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 16px var(--accent); }
+
+    .pin-keypad { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+    .pin-key {
+      width: 64px; height: 64px; border-radius: 50%;
+      border: 1px solid rgba(123,97,255,0.2); background: rgba(123,97,255,0.05);
+      color: var(--text); font-size: 1.3rem; font-weight: 600;
+      cursor: pointer; transition: all 0.18s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pin-key:hover { background: rgba(123,97,255,0.14); border-color: rgba(123,97,255,0.7); box-shadow: 0 0 20px rgba(123,97,255,0.35); color: #fff; }
+    .pin-key:active { transform: scale(0.90); }
+    .pin-key.wide { border-radius: 32px; }
+    .pin-error { color: #ff4d6d; font-size: 0.8rem; letter-spacing: 0.1em; opacity: 0; transition: opacity 0.3s; }
+    .pin-error.show { opacity: 1; }
+
+    /* ── APP WRAPPER ──────────────────────────────────────────────────── */
+    #app { display: none; min-height: 100vh; position: relative; }
+    #app.visible { display: block; }
+    .app-inner { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 0 1.5rem 4rem; }
+
+    /* ── HEADER ───────────────────────────────────────────────────────── */
+    .app-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.5rem 0 1rem; margin-bottom: 2rem;
+      border-bottom: 1px solid rgba(123,97,255,0.2); position: relative;
+    }
+    .app-header::after {
+      content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent) 40%, var(--accent-light) 60%, transparent);
+      filter: blur(1px);
+    }
+    .header-brand { display: flex; align-items: center; gap: 16px; }
+    /* CUSTOMIZE: replace with product logo SVG */
+    .header-logo-mark {
+      width: 54px; height: 54px; border-radius: 14px;
+      background: var(--accent-pale); border: 1px solid rgba(123,97,255,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+      box-shadow: 0 0 20px var(--accent-glow);
+      animation: logoOrbit 4s ease-in-out infinite alternate;
+    }
+    @keyframes logoOrbit {
+      from { box-shadow: 0 0 12px var(--accent-glow); }
+      to   { box-shadow: 0 0 32px var(--accent-glow), 0 0 55px rgba(123,97,255,0.2); }
+    }
+    .header-name {
+      font-family: 'Bebas Neue', sans-serif; font-size: 1.9rem;
+      letter-spacing: 0.06em; color: #fff;
+      text-shadow: 0 0 20px var(--accent-glow), 0 0 50px rgba(123,97,255,0.3);
+    }
+    .header-tagline { font-size: 0.7rem; color: var(--accent-light); letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.8; }
+    .header-actions { display: flex; gap: 12px; align-items: center; }
+    .header-pill {
+      padding: 6px 16px; border-radius: 20px;
+      border: 1px solid var(--card-border); background: var(--accent-pale);
+      font-size: 0.75rem; color: var(--accent-light); cursor: pointer; transition: all 0.2s;
+    }
+    .header-pill:hover { background: rgba(123,97,255,0.25); }
+
+    /* ── HERO STATS ───────────────────────────────────────────────────── */
+    .hero-stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 1rem; margin-bottom: 2rem; }
+
+    .stat-card {
+      background: var(--card); border: 1px solid var(--card-border);
+      border-radius: 16px; padding: 1.4rem 1.6rem;
+      backdrop-filter: blur(20px); position: relative; overflow: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 24px rgba(123,97,255,0.07);
+    }
+    .stat-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+      transform: scaleX(0.3); transform-origin: left; opacity: 0.4; transition: transform 0.35s ease, opacity 0.35s ease;
+    }
+    .stat-card:hover { transform: translateY(-5px); box-shadow: 0 16px 50px rgba(123,97,255,0.25); border-color: rgba(123,97,255,0.55); }
+    .stat-card:hover::before { transform: scaleX(1); opacity: 1; }
+    .stat-card.whetu-grain::after { border-radius: 16px; }
+
+    .stat-icon  { font-size: 1.5rem; margin-bottom: 8px; }
+    .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; line-height: 1; color: #fff; text-shadow: 0 0 20px var(--accent-glow); }
+    .stat-label { font-size: 0.72rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px; }
+    .stat-delta { font-size: 0.75rem; color: var(--green); margin-top: 6px; }
+
+    /* ── SECTION TITLE ────────────────────────────────────────────────── */
+    .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 0.1em; margin-bottom: 1rem; color: #fff; }
+    .section-title span { color: var(--accent); }
+
+    /* ── PANEL ────────────────────────────────────────────────────────── */
+    .panel {
+      background: var(--card); border: 1px solid var(--card-border);
+      border-radius: 20px; padding: 1.8rem; backdrop-filter: blur(20px);
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 32px rgba(123,97,255,0.07);
+    }
+    .panel.whetu-grain::after { border-radius: 20px; }
+    .panel-title {
+      font-size: 0.8rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 1.2rem; font-weight: 600;
+    }
+
+    /* ── DATA TABLE ───────────────────────────────────────────────────── */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th {
+      font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--text-dim); padding: 0.6rem 1rem; text-align: left;
+      border-bottom: 1px solid rgba(123,97,255,0.15);
+    }
+    .data-table td {
+      padding: 0.9rem 1rem; font-size: 0.85rem;
+      border-bottom: 1px solid rgba(123,97,255,0.08);
+      transition: background 0.2s;
+    }
+    .data-table tr:hover td { background: rgba(123,97,255,0.05); }
+    .data-table tr:last-child td { border-bottom: none; }
+
+    /* ── STATUS BADGE ─────────────────────────────────────────────────── */
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 12px;
+      font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700;
+    }
+    .badge-green  { background: rgba(0,255,179,0.12); color: #00FFB3; border: 1px solid rgba(0,255,179,0.3); }
+    .badge-yellow { background: rgba(255,215,0,0.12); color: #FFD700; border: 1px solid rgba(255,215,0,0.3); }
+    .badge-red    { background: rgba(255,77,109,0.12); color: #FF4D6D; border: 1px solid rgba(255,77,109,0.3); }
+    .badge-accent { background: var(--accent-pale); color: var(--accent-light); border: 1px solid rgba(123,97,255,0.3); }
+
+    /* ── TWO-COLUMN GRID ──────────────────────────────────────────────── */
+    .two-col { display: grid; grid-template-columns: repeat(auto-fit,minmax(340px,1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+
+    /* ── FOOTER ───────────────────────────────────────────────────────── */
+    .app-footer {
+      margin-top: 4rem; padding: 2rem 0; border-top: 1px solid rgba(123,97,255,0.15);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: 0.1em; color: var(--accent); }
+    .footer-logo span { color: var(--text-dim); font-size: 0.8rem; }
+    .footer-copy { font-size: 0.7rem; color: var(--text-dim); letter-spacing: 0.08em; }
+    .footer-badge {
+      font-size: 0.65rem; color: rgba(123,97,255,0.6); letter-spacing: 0.12em;
+      text-transform: uppercase; border: 1px solid rgba(123,97,255,0.2);
+      padding: 4px 10px; border-radius: 8px;
+    }
+
+    /* ── RIPPLE ───────────────────────────────────────────────────────── */
+    .ripple {
+      position: absolute; border-radius: 50%; background: rgba(123,97,255,0.25);
+      transform: scale(0); animation: rippleAnim 0.55s linear; pointer-events: none;
+    }
+    @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
+
+    /* ── TOOLTIP ──────────────────────────────────────────────────────── */
+    [data-tip] { position: relative; }
+    [data-tip]::after {
+      content: attr(data-tip); position: absolute; bottom: calc(100% + 10px); left: 50%;
+      transform: translateX(-50%) translateY(6px);
+      background: rgba(14,10,30,0.96); color: var(--accent-light);
+      font-size: 0.72rem; letter-spacing: 0.06em; padding: 6px 12px;
+      border-radius: 8px; white-space: nowrap;
+      border: 1px solid rgba(123,97,255,0.3); box-shadow: 0 4px 20px rgba(123,97,255,0.2);
+      opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; z-index: 100;
+    }
+    [data-tip]:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+  <!-- ── PARALLAX AURORA (Phase 1 depth system) ──────────────────────────── -->
+  <!-- CUSTOMIZE: set data-product to match your product (mimi/arcline/vigil/clarity/bullrun/lifeline/eventspace) -->
+  <div class="whetu-parallax-bg" data-product="clarity">
+    <div class="whetu-aurora-l1"></div>
+    <div class="whetu-aurora-l2"></div>
+    <div class="whetu-aurora-l3"></div>
+  </div>
+
+  <!-- ── PIN GATE ─────────────────────────────────────────────────────────── -->
+  <div id="pin-gate">
+    <!-- CUSTOMIZE: product name in pin-logo -->
+    <div class="pin-logo">PRODUCT</div>
+    <div class="pin-sub">Enter your PIN to continue</div>
+    <div class="pin-box">
+      <div class="pin-dots">
+        <div class="pin-dot" id="d0"></div>
+        <div class="pin-dot" id="d1"></div>
+        <div class="pin-dot" id="d2"></div>
+        <div class="pin-dot" id="d3"></div>
+      </div>
+      <div class="pin-keypad">
+        <button class="pin-key" onclick="pinPress('1')">1</button>
+        <button class="pin-key" onclick="pinPress('2')">2</button>
+        <button class="pin-key" onclick="pinPress('3')">3</button>
+        <button class="pin-key" onclick="pinPress('4')">4</button>
+        <button class="pin-key" onclick="pinPress('5')">5</button>
+        <button class="pin-key" onclick="pinPress('6')">6</button>
+        <button class="pin-key" onclick="pinPress('7')">7</button>
+        <button class="pin-key" onclick="pinPress('8')">8</button>
+        <button class="pin-key" onclick="pinPress('9')">9</button>
+        <button class="pin-key wide" onclick="pinPress('clear')">CLR</button>
+        <button class="pin-key" onclick="pinPress('0')">0</button>
+        <button class="pin-key wide" onclick="pinPress('del')">⌫</button>
+      </div>
+      <div class="pin-error" id="pin-error">Incorrect PIN</div>
+    </div>
+  </div>
+
+  <!-- ── APP ──────────────────────────────────────────────────────────────── -->
+  <div id="app">
+    <div class="app-inner">
+
+      <!-- HEADER -->
+      <header class="app-header">
+        <div class="header-brand">
+          <!-- CUSTOMIZE: replace emoji with product logo SVG -->
+          <div class="header-logo-mark">✦</div>
+          <div>
+            <!-- CUSTOMIZE: product name + tagline -->
+            <div class="header-name">PRODUCT NAME</div>
+            <div class="header-tagline">Powered by Whetū Digital</div>
+          </div>
+        </div>
+        <div class="header-actions">
+          <!-- CUSTOMIZE: action pills -->
+          <button class="header-pill" data-tip="Refresh data">↻ Sync</button>
+          <button class="header-pill" data-tip="Export report">⬇ Export</button>
+        </div>
+      </header>
+
+      <!-- HERO STATS — CUSTOMIZE: 4 key metrics -->
+      <div class="hero-stats">
+        <div class="stat-card whetu-grain" data-tip="CUSTOMIZE: tooltip">
+          <div class="stat-icon">📊</div>
+          <div class="stat-value" id="stat1">—</div>
+          <div class="stat-label">Metric One</div>
+          <div class="stat-delta">↑ 0%</div>
+        </div>
+        <div class="stat-card whetu-grain" data-tip="CUSTOMIZE: tooltip">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-value" id="stat2">—</div>
+          <div class="stat-label">Metric Two</div>
+          <div class="stat-delta">↑ 0%</div>
+        </div>
+        <div class="stat-card whetu-grain" data-tip="CUSTOMIZE: tooltip">
+          <div class="stat-icon">✅</div>
+          <div class="stat-value" id="stat3">—</div>
+          <div class="stat-label">Metric Three</div>
+          <div class="stat-delta">On track</div>
+        </div>
+        <div class="stat-card whetu-grain" data-tip="CUSTOMIZE: tooltip">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-value" id="stat4">—</div>
+          <div class="stat-label">Metric Four</div>
+          <div class="stat-delta">This period</div>
+        </div>
+      </div>
+
+      <!-- MAIN CONTENT — CUSTOMIZE: 2-column panels -->
+      <div class="two-col">
+
+        <div class="panel whetu-grain">
+          <div class="panel-title">📋 SECTION ONE</div>
+          <!-- CUSTOMIZE: add your first panel content here -->
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Value</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Item A</td><td>Value A</td><td><span class="badge badge-green">Active</span></td></tr>
+              <tr><td>Item B</td><td>Value B</td><td><span class="badge badge-yellow">Pending</span></td></tr>
+              <tr><td>Item C</td><td>Value C</td><td><span class="badge badge-accent">Scheduled</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="panel whetu-grain">
+          <div class="panel-title">📈 SECTION TWO</div>
+          <!-- CUSTOMIZE: add your second panel content here -->
+          <p style="color:var(--text-dim);font-size:0.85rem;line-height:1.7">
+            Add charts, progress bars, or metric cards here.<br>
+            Use ApexCharts or Anime.js for animated data viz.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- FULL-WIDTH PANEL — CUSTOMIZE -->
+      <h2 class="section-title">SECTION <span>THREE</span></h2>
+      <div class="panel whetu-grain">
+        <div class="panel-title">📋 FULL WIDTH TABLE</div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Column A</th>
+              <th>Column B</th>
+              <th>Column C</th>
+              <th>Column D</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <!-- CUSTOMIZE: populated via JS or static HTML -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- FOOTER — DO NOT REMOVE (Whetū copyright requirement) -->
+      <footer class="app-footer">
+        <!-- CUSTOMIZE: product name in footer -->
+        <div class="footer-logo">PRODUCT NAME <span>· By Whetū Digital</span></div>
+        <div class="footer-copy">© 2026 Whetū Digital · All rights reserved</div>
+        <div class="footer-badge">WDS-SGM v1.0</div>
+      </footer>
+
+    </div>
+  </div>
+
+  <!-- ── CDN STACK (canonical versions — do not change) ─────────────────── -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <script type="module">
+    import { WhetuIntro } from '../lib/whetu-intro.js';
+    import { animate, stagger } from 'https://cdn.jsdelivr.net/npm/animejs@4.0.0/lib/anime.esm.min.js';
+
+    // ── CUSTOMIZE: Intro config ─────────────────────────────────────────
+    WhetuIntro({
+      word:     'PRODUCT',          // word to assemble via particles
+      accent:   '#7B61FF',          // match --accent var above
+      bg:       '#05050F',          // match --bg var above
+      subtitle: 'POWERED BY WHETŪ', // typewriter text
+      onEnter:  enterDashboard
+    });
+
+    // ── CUSTOMIZE: PIN ──────────────────────────────────────────────────
+    const CORRECT_PIN = '0000';  // change this
+    const SESSION_KEY = 'wetu_auth_PRODUCT';
+
+    function enterDashboard() {
+      if (sessionStorage.getItem(SESSION_KEY) === '1') {
+        showApp();
+      } else {
+        document.getElementById('pin-gate').classList.add('visible');
+      }
+    }
+
+    window.pinPress = function(key) {
+      if (key === 'clear') { pinBuf = ''; }
+      else if (key === 'del') { pinBuf = pinBuf.slice(0, -1); }
+      else if (pinBuf.length < 4) { pinBuf += key; }
+      for (let i = 0; i < 4; i++)
+        document.getElementById('d'+i).classList.toggle('filled', i < pinBuf.length);
+      if (pinBuf.length === 4) {
+        if (pinBuf === CORRECT_PIN) {
+          sessionStorage.setItem(SESSION_KEY, '1');
+          document.getElementById('pin-gate').classList.remove('visible');
+          showApp();
+        } else {
+          document.getElementById('pin-error').classList.add('show');
+          animate('#pin-gate .pin-dots', { translateX:[0,-10,10,-10,10,0], duration:400 });
+          setTimeout(() => { pinBuf = ''; document.getElementById('pin-error').classList.remove('show'); for(let i=0;i<4;i++)document.getElementById('d'+i).classList.remove('filled'); }, 800);
+        }
+      }
+    };
+    let pinBuf = '';
+
+    // ── Show app ────────────────────────────────────────────────────────
+    function showApp() {
+      const app = document.getElementById('app');
+      app.classList.add('visible');
+      // Staggered entrance
+      animate(['.stat-card','.panel'], {
+        opacity:[0,1], translateY:[24,0], scale:[0.96,1],
+        delay: stagger(80), duration: 600, easing: 'easeOutExpo'
+      });
+      // Wire ripple clicks
+      document.querySelectorAll('.stat-card').forEach(card => {
+        card.addEventListener('click', e => {
+          const r = document.createElement('div');
+          r.className = 'ripple';
+          const rect = card.getBoundingClientRect();
+          const size = Math.max(rect.width, rect.height);
+          r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+          card.appendChild(r);
+          setTimeout(() => r.remove(), 560);
+        });
+      });
+      // CUSTOMIZE: populate stats
+      countUp('stat1', 0, 128, '%');
+      countUp('stat2', 0, 47,  '');
+      countUp('stat3', 0, 12,  '');
+      countUp('stat4', 0, 99,  '%');
+    }
+
+    // ── Utility: count-up animation ─────────────────────────────────────
+    function countUp(id, from, to, suffix) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const dur = 1200, start = performance.now();
+      function step(now) {
+        const p = Math.min((now - start) / dur, 1);
+        const ease = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(from + (to - from) * ease) + suffix;
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    // ── Mouse parallax ──────────────────────────────────────────────────
+    document.addEventListener('mousemove', e => {
+      const mx = (e.clientX/innerWidth  - 0.5) * 2;
+      const my = (e.clientY/innerHeight - 0.5) * 2;
+      document.querySelector('.whetu-aurora-l1')?.style.setProperty('transform', `translate(${mx*22}px,${my*22}px)`);
+      document.querySelector('.whetu-aurora-l2')?.style.setProperty('transform', `translate(${mx*11}px,${my*11}px)`);
+      document.querySelector('.whetu-aurora-l3')?.style.setProperty('transform', `translate(${mx*5}px,${my*5}px)`);
+    });
+
+  </script>
+
+</body>
+</html>

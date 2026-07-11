@@ -1,0 +1,39 @@
+/*!
+ * whetu-grain.css — Whetū Digital Grain Texture System v1.0
+ * © 2026 Whetū Digital
+ *
+ * Drop class="whetu-grain" on any card, panel, or surface.
+ * Adds physical film-grain depth. Zero JS. Zero cost.
+ *
+ * Variants:
+ *   .whetu-grain        — standard (opacity 0.04)
+ *   .whetu-grain-heavy  — intense  (opacity 0.065) for hero cards
+ *   .whetu-grain-light  — subtle   (opacity 0.022) for backgrounds
+ *   .whetu-grain-none   — disable grain on a child element
+ */
+
+.whetu-grain,
+.whetu-grain-heavy,
+.whetu-grain-light {
+  position: relative;
+  isolation: isolate;
+}
+
+.whetu-grain::after,
+.whetu-grain-heavy::after,
+.whetu-grain-light::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 10;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='1'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+.whetu-grain::after       { opacity: 0.040; }
+.whetu-grain-heavy::after { opacity: 0.065; }
+.whetu-grain-light::after { opacity: 0.022; }
+
+.whetu-grain-none::after  { display: none !important; }
