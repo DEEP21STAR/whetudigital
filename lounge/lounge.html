@@ -10404,6 +10404,15 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             return 'https://www.whetudigital.co.nz/api/lounge';
         }
 
+        // Real-Debrid sub-path travels as ?path=, not as URL segments -- Vercel's
+        // catch-all route only matched a single path segment here, 404ing at the
+        // platform level on anything with a slash in it (torrents/addMagnet).
+        // Verified live 2026-08-10. api/lounge/rd.js is the single static
+        // endpoint this hits.
+        function rdUrl(subpath) {
+            return `${getContentBase()}/rd?path=${encodeURIComponent(subpath)}`;
+        }
+
         function getRemotePin() {
             return localStorage.getItem('nexus_remote_pin') || '5591';
         }
@@ -15177,7 +15186,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const body = document.getElementById('stream-picker-body');
             if (body) body.innerHTML = '<div class="stream-picker-empty">Cancelling...</div>';
             try {
-                await fetch(`${getContentBase()}/rd/torrents/delete/${torrentId}`, {
+                await fetch(rdUrl(`torrents/delete/${torrentId}`), {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${rdKey}` },
                     signal: AbortSignal.timeout(15000)
@@ -15197,7 +15206,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             body.innerHTML = '<div class="stream-picker-empty">Adding to Real-Debrid...</div>';
 
             try {
-                const addRes = await fetch(`${getContentBase()}/rd/torrents/addMagnet`, {
+                const addRes = await fetch(rdUrl('torrents/addMagnet'), {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${rdKey}`,
@@ -15227,7 +15236,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
                 let selectBody = 'files=all';
                 try {
-                    const filesInfoRes = await fetch(`${getContentBase()}/rd/torrents/info/${torrentId}`, {
+                    const filesInfoRes = await fetch(rdUrl(`torrents/info/${torrentId}`), {
                         headers: { 'Authorization': `Bearer ${rdKey}` },
                         signal: AbortSignal.timeout(30000)
                     });
@@ -15244,7 +15253,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     console.error('largest-file lookup failed, falling back to files=all:', e);
                 }
 
-                const selectRes = await fetch(`${getContentBase()}/rd/torrents/selectFiles/${torrentId}`, {
+                const selectRes = await fetch(rdUrl(`torrents/selectFiles/${torrentId}`), {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${rdKey}`,
@@ -15264,7 +15273,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
                 let info = null;
                 for (let attempt = 0; attempt < 30; attempt++) {
-                    const infoRes = await fetch(`${getContentBase()}/rd/torrents/info/${torrentId}`, {
+                    const infoRes = await fetch(rdUrl(`torrents/info/${torrentId}`), {
                         headers: { 'Authorization': `Bearer ${rdKey}` },
                         signal: AbortSignal.timeout(30000)
                     });
@@ -15292,7 +15301,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 }
 
                 const fileLink = info.links[0];
-                const unrestrictRes = await fetch(`${getContentBase()}/rd/unrestrict/link`, {
+                const unrestrictRes = await fetch(rdUrl('unrestrict/link'), {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${rdKey}`,
