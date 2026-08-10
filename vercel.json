@@ -1,0 +1,29 @@
+{
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "lounge.whetudigital.co.nz" }],
+      "destination": "/lounge/lounge.html"
+    },
+    {
+      "source": "/lounge.html",
+      "has": [{ "type": "host", "value": "lounge.whetudigital.co.nz" }],
+      "destination": "/lounge/lounge.html"
+    },
+    {
+      "source": "/manifest.json",
+      "has": [{ "type": "host", "value": "lounge.whetudigital.co.nz" }],
+      "destination": "/lounge/manifest.json"
+    },
+    {
+      "source": "/sw.js",
+      "has": [{ "type": "host", "value": "lounge.whetudigital.co.nz" }],
+      "destination": "/lounge/sw.js"
+    },
+    {
+      "source": "/icons/:path*",
+      "has": [{ "type": "host", "value": "lounge.whetudigital.co.nz" }],
+      "destination": "/lounge/icons/:path*"
+    }
+  ]
+}
