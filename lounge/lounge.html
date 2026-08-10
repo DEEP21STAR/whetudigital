@@ -7032,6 +7032,14 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             <p id="pt-fallback-msg"></p>
             <div id="pt-fallback-detail" class="pt-fallback-detail"></div>
             <div class="pt-fallback-actions">
+                <!-- Hidden by default; shown by showPlaybackFallback() only when
+                     window.LoungeNative is present AND the failure wasn't the
+                     native player itself. mpv defeats the point of tonight's
+                     PC-independence fix when a local decoder that actually
+                     handles this file already exists on the device (Deep,
+                     2026-08-10 -- landed on 'Play on Laptop' after browser
+                     playback failed, even though native VLC was available). -->
+                <button class="lp-action" id="pt-fallback-tv-btn" onclick="playbackFallbackToTv()" style="display:none"><i class="fas fa-tv"></i> Play on this device (VLC)</button>
                 <button class="lp-action" onclick="playbackFallbackToMpv()"><i class="fas fa-laptop"></i> Play on Laptop (mpv)</button>
                 <button class="lp-action alt" onclick="dismissPlaybackFallback()"><i class="fas fa-xmark"></i> Not now</button>
             </div>
@@ -12932,6 +12940,11 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             document.getElementById('pt-fallback-msg').textContent =
                 `This file’s format isn’t supported for ${where} playback. Play on Laptop (mpv) instead?`;
             document.getElementById('pt-fallback-detail').textContent = detail || '';
+            // Offer the native VLC player when it's actually available and it
+            // wasn't the thing that just failed (no point re-offering it after
+            // dispatchPlayback's own 'tv' branch already tried and refused).
+            const tvBtn = document.getElementById('pt-fallback-tv-btn');
+            if (tvBtn) tvBtn.style.display = (where !== 'TV' && nativeTvAvailable()) ? '' : 'none';
             document.getElementById('pt-fallback').classList.add('is-open');
         }
 
@@ -12945,6 +12958,15 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             dismissPlaybackFallback();
             closeDevicePlayer();
             if (a) launchPlayback(a.videoUrl, a.subUrl, a.startPos);
+        }
+
+        function playbackFallbackToTv() {
+            const a = pendingFallback;
+            dismissPlaybackFallback();
+            closeDevicePlayer();
+            if (!a) return;
+            const ok = nativeReelPlay(a.videoUrl, a.subUrl, a.startPos, a.title);
+            if (!ok) showPlaybackFallback('TV', 'The native player refused the link.', a);
         }
 
         // ----- "This device" (in-browser) -----
@@ -12978,7 +13000,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         function openDevicePlayer(videoUrl, subUrl, startPos, title) {
             const wrap = document.getElementById('device-player');
             const video = document.getElementById('dv-video');
-            const args = { videoUrl, subUrl, startPos };
+            const args = { videoUrl, subUrl, startPos, title };
 
             // Title is passed in, not read from currentPickerItem: the caller
             // closes the picker (clearing it) before dispatching.
