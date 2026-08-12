@@ -33,10 +33,24 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v76"
+      "cacheName": "lounge-shell-v77"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.18",
+      "versionCode": 16,
+      "web": "lounge-shell-v77",
+      "date": "2026-08-12",
+      "title": "Surprise Me, idle screensaver, shortcuts, playback stats, watchlist backup",
+      "changes": [
+        "New \"Surprise Me\" shuffle -- a dice button (or the S key) picks a random title from whatever's already loaded on screen and opens it straight away, for when you don't know what to watch.",
+        "Idle ambient mode: leave Lounge open and untouched for 5 minutes and it fades into a slow crossfade of posters instead of sitting on a static screen. Any key, click, or touch brings it straight back.",
+        "Keyboard shortcuts cheatsheet -- press ? (or tap the new keyboard icon) to see every shortcut in one place instead of having to remember them.",
+        "Playback stats overlay (I key) for anyone who wants to see what's actually happening under the hood -- resolution, buffer health, playback state -- while something is playing.",
+        "My List can now be exported to a JSON file and re-imported -- a real backup before a device wipe or reinstall, since watchlist data lives only in this browser's storage."
+      ]
+    },
     {
       "version": "0.1.18",
       "versionCode": 16,
