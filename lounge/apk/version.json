@@ -33,10 +33,23 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v77"
+      "cacheName": "lounge-shell-v78"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.18",
+      "versionCode": 16,
+      "web": "lounge-shell-v78",
+      "date": "2026-08-12",
+      "title": "Cloud EPG + watch-history, Proton VPN swap, PC-independence complete",
+      "changes": [
+        "Program guide (EPG) and Continue Watching/resume now work with your PC fully off, the same way Real-Debrid/Sky Sport/subtitles already did -- completing the migration started 2026-08-10. Both still prefer your PC's relay first when it's reachable (lower latency), falling back to the cloud automatically.",
+        "One-time setup needed on the Vercel side before the cloud paths activate -- see CLOUD_STORAGE_SETUP.md. Nothing changes for you until that's done; everything keeps working through your PC exactly as it does today in the meantime.",
+        "VPN recommendation for Android switched from Windscribe (10GB/month cap) to Proton VPN (no cap) -- same per-app routing mechanism, just a different app, after checking that Proton's free-tier \"streaming block\" reputation is specifically about Netflix-style IP-blocklisting and doesn't apply to Real-Debrid/DaddyLive traffic.",
+        "Fixed a stale claim in the VPN guide's Android TV panel that said no Lounge TV app existed yet -- it's existed since the versionCode 10 rename, this just hadn't been updated to say so."
+      ]
+    },
     {
       "version": "0.1.18",
       "versionCode": 16,

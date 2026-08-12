@@ -9743,33 +9743,32 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             android: {
                 icon: 'fa-android',
                 iconBrand: true,
-                title: 'Android Mobile — Windscribe per-app VPN',
-                verdict: 'Android genuinely supports per-app VPN routing, and the Windscribe Android app exposes it directly. This is a real OS feature, not a workaround.',
+                title: 'Android Mobile — Proton VPN per-app routing',
+                verdict: 'Switched from Windscribe 2026-08-12 (Deep\'s call) -- Windscribe\'s free tier caps at 10GB/month, which a Real-Debrid/live-sports habit burns through fast. Proton VPN\'s free tier has NO data cap. Android\'s per-app VPN routing is an OS-level feature independent of which VPN app provides it, so split tunnelling works exactly the same way, just through Proton\'s app instead.',
                 steps: [
-                    'Install the <strong>Windscribe</strong> app from the Play Store and sign in.',
-                    'Open the app → <strong>Preferences</strong> → <strong>Connection</strong> → <strong>Split Tunneling</strong>.',
-                    'Set mode to <strong>Inclusive</strong>, then tick the apps you want tunnelled.',
-                    'Right now, tick your <strong>browser</strong> — that\'s the app Lounge runs inside on a phone.',
+                    'Install the <strong>Proton VPN</strong> app from the Play Store and sign in (a free account works, no card required).',
+                    'Open the app → <strong>☰ menu</strong> → <strong>Settings</strong> → scroll to <strong>Split Tunneling</strong> and turn it on.',
+                    'Tap <strong>Included apps</strong> (not Excluded), then add the apps you want tunnelled.',
+                    'Right now, add your <strong>browser</strong> — that\'s the app Lounge runs inside on a phone.',
                     'Connect, then load Lounge and confirm playback and posters still work.'
                 ],
-                note: 'Honest limit: you access Lounge through a browser on Android, and browsers can\'t route a single tab differently from the rest. So selecting your browser puts <em>all</em> your browsing behind the VPN, not just this page. Tab-level VPN routing does not exist on any platform. Until Lounge ships as its own installed APK, this is the practical floor.',
+                note: 'Honest limit, unchanged from before: you access Lounge through a browser on Android, and browsers can\'t route a single tab differently from the rest. So selecting your browser puts <em>all</em> your browsing behind the VPN, not just this page. Tab-level VPN routing does not exist on any platform. Until Lounge ships as its own installed APK, this is the practical floor. Also honest: Proton\'s free tier is limited to a handful of server locations (typically US/NL/JP) -- Windscribe had more free locations. For Lounge\'s traffic (Real-Debrid, DaddyLive) that trade rarely matters; it would if you specifically needed to appear in a country Proton\'s free tier doesn\'t offer.',
                 noteClass: '',
-                links: [{ href: 'https://play.google.com/store/apps/details?id=com.windscribe.vpn', label: 'Windscribe on Play Store', icon: 'fa-arrow-up-right-from-square' }]
+                links: [{ href: 'https://play.google.com/store/apps/details?id=ch.protonvpn.android', label: 'Proton VPN on Play Store', icon: 'fa-arrow-up-right-from-square' }]
             },
             androidtv: {
                 icon: 'fa-tv',
-                title: 'Android TV — same mechanism, app not built yet',
-                verdict: 'Android TV runs the same Android per-app VPN mechanism as a phone, so the approach below will work — but there is no dedicated Lounge TV app to point it at yet.',
+                title: 'Android TV — Proton VPN, Lounge TV app now exists',
+                verdict: 'Android TV runs the same Android per-app VPN mechanism as a phone. Updated 2026-08-12: the Lounge Android TV app (nz.whetu.lounge) now exists and ships real APKs from C:\\NEXUS\\apk\\ -- this section previously said "no dedicated app yet," which stopped being true weeks ago and was only caught during a routine accuracy pass.',
                 steps: [
-                    'Install <strong>Windscribe</strong> from the Play Store on your Android TV device and sign in.',
-                    'Open <strong>Preferences</strong> → <strong>Connection</strong> → <strong>Split Tunneling</strong> and switch it on.',
-                    'Set mode to <strong>Inclusive</strong>.',
-                    'Once a Lounge Android TV app exists, tick it here and it alone goes through the VPN.',
-                    'Until then, if you reach Lounge via a browser on the TV, tick that browser instead — with the same whole-browser caveat as Android mobile.'
+                    'Install <strong>Proton VPN</strong> from the Play Store on your Android TV device (or Fire TV, via sideload) and sign in.',
+                    'Open <strong>☰ menu</strong> → <strong>Settings</strong> → <strong>Split Tunneling</strong> and turn it on.',
+                    'Tap <strong>Included apps</strong>, then add <strong>Lounge</strong> directly -- it now exists as its own app, not just a browser tab.',
+                    'Connect, then open Lounge and confirm live TV/sports and Real-Debrid playback both still work.'
                 ],
-                note: 'A dedicated Lounge Android TV app does not exist yet — it\'s a future project, not something shipping tonight. This panel is preparatory: the steps are correct in advance, and the last one becomes actionable when that app lands.',
+                note: 'Because Lounge is a real installed app here (unlike the phone/browser case above), this is the one platform where VPN routing can be scoped to Lounge ALONE with nothing else on the device affected -- no whole-browser caveat.',
                 noteClass: '',
-                links: [{ href: 'https://play.google.com/store/apps/details?id=com.windscribe.vpn', label: 'Windscribe on Play Store', icon: 'fa-arrow-up-right-from-square' }]
+                links: [{ href: 'https://play.google.com/store/apps/details?id=ch.protonvpn.android', label: 'Proton VPN on Play Store', icon: 'fa-arrow-up-right-from-square' }]
             },
             iphone: {
                 icon: 'fa-apple',
@@ -9893,7 +9892,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v77';
+        const LOUNGE_BUILD = 'lounge-shell-v78';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -10403,10 +10402,11 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // live on Deep's PC -- unlike mpv control (getRelayBase(), below),
         // which genuinely has to run wherever the TV screen is. Moved to
         // Vercel (Deep, 2026-08-10) so watching something works whether or
-        // not the PC/relay is on. EPG and channel-guide data are NOT moved
-        // here yet -- those do multi-minute background XML parsing with
-        // hour-long caches that don't fit a stateless function; they still go
-        // through getRelayBase() for now.
+        // not the PC/relay is on. EPG (api/lounge/epg.js) and Reel/watch-
+        // history (api/lounge/reel.js) joined 2026-08-12 -- both needed
+        // Upstash Redis as a cache/store to make sense as stateless
+        // functions first (EPG's source feeds are tens of MB per country;
+        // Reel needs real cross-device persistence, not just a proxy).
         function getContentBase() {
             const stored = (localStorage.getItem('nexus_content_host') || '').trim();
             if (stored) return stored.replace(/\/+$/, '');
@@ -10424,6 +10424,22 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // endpoint this hits.
         function rdUrl(subpath) {
             return `${getContentBase()}/rd?path=${encodeURIComponent(subpath)}`;
+        }
+
+        // Cloud fallback for Reel (watch-history/resume) -- added 2026-08-12,
+        // completing the PC-independence started 2026-08-10 for RD/Sky
+        // Sport/subtitles. api/lounge/reel.js on Vercel is wire-compatible
+        // with the local relay's /reel/progress (same items/tombstones
+        // shape, position_seconds/duration_seconds), so reelMerge() below
+        // needs no changes regardless of which one answered. Same 501
+        // contract as everything else here: if Deep hasn't connected an
+        // Upstash Redis store yet, this fails the same way an unreachable
+        // relay does, and Continue Watching just stays local-only.
+        function reelCloudListUrl() {
+            return `${getContentBase()}/reel`;
+        }
+        function reelCloudItemUrl(itemId) {
+            return `${getContentBase()}/reel?id=${encodeURIComponent(itemId)}`;
         }
 
         function getRemotePin() {
@@ -11130,12 +11146,18 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const last = reelLastPush.get(entry.itemId) || 0;
             if (!force && now - last < REEL_PUSH_MIN_MS) return;
             reelLastPush.set(entry.itemId, now);
+            const body = JSON.stringify(localToReel(entry));
             fetch(`${getRelayBase()}/reel/progress`, {
-                method: 'POST',
-                headers: reelHeaders(),
-                body: JSON.stringify(localToReel(entry)),
-                signal: AbortSignal.timeout(6000)
-            }).catch(() => { /* offline / relay down -- local state still stands */ });
+                method: 'POST', headers: reelHeaders(), body, signal: AbortSignal.timeout(6000)
+            }).catch(() => {
+                // PC relay unreachable -- try the cloud fallback so a resume
+                // point still syncs cross-device with the PC off. Same
+                // fire-and-forget contract: local storage is already the
+                // source of truth for this device either way.
+                fetch(reelCloudListUrl(), {
+                    method: 'POST', headers: reelHeaders(), body, signal: AbortSignal.timeout(6000)
+                }).catch(() => { /* both unreachable -- local state still stands */ });
+            });
         }
 
         // Server-side removal for the per-tile X and for "clear watch history".
@@ -11144,10 +11166,12 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             if (!itemId) return;
             reelLastPush.delete(itemId);
             fetch(`${getRelayBase()}/reel/progress/${encodeURIComponent(itemId)}`, {
-                method: 'DELETE',
-                headers: reelHeaders(),
-                signal: AbortSignal.timeout(6000)
-            }).catch(() => { /* same contract as reelPush */ });
+                method: 'DELETE', headers: reelHeaders(), signal: AbortSignal.timeout(6000)
+            }).catch(() => {
+                fetch(reelCloudItemUrl(itemId), {
+                    method: 'DELETE', headers: reelHeaders(), signal: AbortSignal.timeout(6000)
+                }).catch(() => { /* same contract as reelPush */ });
+            });
         }
 
         // Union by id, newest timestamp wins -- NOT a blind overwrite with the
@@ -11193,10 +11217,21 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     headers: { 'X-Nexus-Pin': getRemotePin() },
                     signal: AbortSignal.timeout(8000)
                 });
-                if (!res.ok) return false;
+                if (!res.ok) throw new Error('relay http ' + res.status);
                 return reelMerge(await res.json());
             } catch (e) {
-                return false;   // relay unreachable this tick; local state stands
+                // PC relay unreachable this tick -- try the cloud copy before
+                // giving up, same fallback chain as reelPush/reelDelete.
+                try {
+                    const res = await fetch(reelCloudListUrl(), {
+                        headers: { 'X-Nexus-Pin': getRemotePin() },
+                        signal: AbortSignal.timeout(8000)
+                    });
+                    if (!res.ok) return false;
+                    return reelMerge(await res.json());
+                } catch (e2) {
+                    return false;   // both unreachable this tick; local state stands
+                }
             }
         }
 
@@ -11842,23 +11877,31 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const ccs = Object.keys(counts).sort((a, b) => counts[b] - counts[a]).slice(0, 12);
             if (!ccs.length) return null;
 
-            try {
-                const res = await fetch(`${getRelayBase()}/epg?cc=${ccs.join(',')}`,
-                    { signal: AbortSignal.timeout(12000) });
+            async function tryEpgSource(url) {
+                const res = await fetch(url, { signal: AbortSignal.timeout(12000) });
                 if (!res.ok) return null;
                 const data = await res.json();
-                if (!data.channels || !Object.keys(data.channels).length) {
-                    // Relay is warming a cold country in the background; it'll be
-                    // there on a later visit. Nothing to show, nothing to report.
-                    return null;
-                }
-                epgData = data.channels;
-                localStorage.setItem('nexus_epg_cache_v2',
-                    JSON.stringify({ channels: epgData, fetchedAt: Date.now() }));
-                return epgData;
-            } catch (e) {
-                return null;
+                if (!data.channels || !Object.keys(data.channels).length) return null;
+                return data.channels;
             }
+
+            // PC relay first (matches every other still-local surface's
+            // preference order), cloud second -- api/lounge/epg.js added
+            // 2026-08-12, completing what getContentBase()'s comment used to
+            // call out as the one thing still requiring the PC. Both sides
+            // cache for 3h server-side, so a cold miss on one doesn't mean a
+            // cold miss on the other.
+            let guideData = null;
+            try { guideData = await tryEpgSource(`${getRelayBase()}/epg?cc=${ccs.join(',')}`); } catch (e) { /* relay unreachable */ }
+            if (!guideData) {
+                try { guideData = await tryEpgSource(`${getContentBase()}/epg?cc=${ccs.join(',')}`); } catch (e) { /* cloud unreachable or not set up yet */ }
+            }
+            if (!guideData) return null;
+
+            epgData = guideData;
+            localStorage.setItem('nexus_epg_cache_v2',
+                JSON.stringify({ channels: epgData, fetchedAt: Date.now() }));
+            return epgData;
         }
 
         // ===== Sky NZ official guide (Sky Sport channels only) =====
