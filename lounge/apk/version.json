@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v78"
+      "cacheName": "lounge-shell-v79"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.18",
+      "versionCode": 16,
+      "web": "lounge-shell-v79",
+      "date": "2026-08-12",
+      "title": "VPN status chip in the nav bar",
+      "changes": [
+        "A VPN status chip now sits in the top nav next to the weather/clock -- grey until you first check it (nothing runs silently, same privacy rule Settings' VPN panel already followed), then green/red based on whether your traffic looks different from a saved \"normal connection\" baseline. Click it for country, network operator, and a real measured latency (not a fake number).",
+        "Honest limit, stated in the panel itself: a web page cannot see or control a system VPN, on any platform. This reports the one thing that IS observable -- your public IP's country and operator -- compared against what you saved as normal. It is a comparison, not a true on/off VPN detector.",
+        "First click on the chip offers to keep it live (checks every 5 minutes while the tab is open) -- opt-in, not a silent default, for the same reason the original Settings panel never auto-checked on page load."
+      ]
+    },
     {
       "version": "0.1.18",
       "versionCode": 16,

@@ -824,6 +824,129 @@
             color: #777;
         }
 
+        /* ===== VPN status chip -- nav bar, 2026-08-12 =====
+           Same base shell as .weather-widget/.clock-widget (A4: match the
+           product's own established look, not a generic new component).
+           Colour states reuse the app's own existing semantics: #00ff88 is
+           already "live/good" (EPG "now" label, quality badges); #ff0055 is
+           already the established red (SD quality tab, live-dot). Grey is a
+           third, honest state for "no baseline saved yet" -- the chip must
+           never claim on/off without something to compare against; see the
+           long comment on #route-panel for why this is a comparison, not a
+           true VPN-detect. */
+        .vpn-chip {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 4px 10px;
+            background: #141414;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            cursor: pointer;
+            line-height: 1.15;
+            white-space: nowrap;
+            user-select: none;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        .vpn-chip:hover { border-color: #3a3a3a; background: #181818; }
+        .vpn-chip-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #666;
+            flex-shrink: 0;
+            box-shadow: 0 0 0 0 transparent;
+        }
+        .vpn-chip[data-state="on"]  .vpn-chip-dot { background: #00ff88; box-shadow: 0 0 8px rgba(0,255,136,0.7); }
+        .vpn-chip[data-state="off"] .vpn-chip-dot { background: #ff0055; box-shadow: 0 0 8px rgba(255,0,85,0.5); }
+        .vpn-chip[data-state="checking"] .vpn-chip-dot { animation: vpnDotPulse 1s ease-in-out infinite; }
+        /* Signature moment: the dot doesn't just flip colour on a state change,
+           it fires one radiating ring -- a signal-lock beat, not a static swap. */
+        .vpn-chip-dot.vpn-lock-ring { animation: vpnLockRing 0.6s ease-out; }
+        @keyframes vpnLockRing {
+            0%   { box-shadow: 0 0 0 0 currentColor, 0 0 8px currentColor; }
+            70%  { box-shadow: 0 0 0 10px transparent, 0 0 8px currentColor; }
+            100% { box-shadow: 0 0 0 0 transparent, 0 0 8px currentColor; }
+        }
+        @keyframes vpnDotPulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+        .vpn-chip-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #ccc;
+        }
+        .vpn-chip[data-state="on"]  .vpn-chip-label { color: #00ff88; }
+        .vpn-chip[data-state="off"] .vpn-chip-label { color: #ff0055; }
+        .vpn-chip-sub {
+            font-size: 9px;
+            color: #777;
+            max-width: 110px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .vpn-popover {
+            position: fixed;
+            width: 300px;
+            background: #141414;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+            padding: 16px;
+            z-index: 2000;
+            display: none;
+            font-size: 13px;
+        }
+        .vpn-popover.open { display: block; }
+        .vpn-popover-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 6px 0;
+            border-bottom: 1px solid #222;
+            color: #ccc;
+        }
+        .vpn-popover-row:last-of-type { border-bottom: none; }
+        .vpn-popover-row span:first-child { color: #888; }
+        .vpn-popover-verdict {
+            font-size: 12px;
+            line-height: 1.5;
+            color: #aaa;
+            margin: 10px 0;
+            padding: 10px;
+            background: #0d0d0d;
+            border-radius: 8px;
+            border-left: 3px solid #444;
+        }
+        .vpn-popover-verdict.is-on { border-left-color: #00ff88; }
+        .vpn-popover-verdict.is-off { border-left-color: #ff0055; }
+        .vpn-popover-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .vpn-popover-actions button, .vpn-popover-actions a {
+            flex: 1;
+            text-align: center;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #2a2a2a;
+            background: #1a1a1a;
+            color: #ccc;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .vpn-popover-actions button:hover, .vpn-popover-actions a:hover { background: #222; border-color: #3a3a3a; }
+        .vpn-popover-actions .primary { background: linear-gradient(135deg, #00d4ff, #7c5cff); color: #000; border: none; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .vpn-chip-dot, .vpn-chip-dot.vpn-lock-ring, .vpn-chip[data-state="checking"] .vpn-chip-dot { animation: none; }
+        }
+
         /* Measured, not guessed: with both filter selects showing (Movies/TV
            Shows — the widest the nav ever gets), the full-size widgets cost 132px
            and the row starts overflowing just under 1400px. So shed the secondary
@@ -5956,6 +6079,13 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                  Sits after More so the two selects (which only appear on Movies
                  and TV Shows) grow leftward and can't shove it off the row. -->
             <div class="header-widgets">
+                <div class="vpn-chip" id="vpnChip" data-state="unset" onclick="toggleVpnPopover(event)" role="button" tabindex="0" aria-label="VPN connection status">
+                    <div class="vpn-chip-dot" id="vpnChipDot"></div>
+                    <div>
+                        <div class="vpn-chip-label" id="vpnChipLabel">VPN</div>
+                        <div class="vpn-chip-sub" id="vpnChipSub">Set up</div>
+                    </div>
+                </div>
                 <div class="weather-widget">
                     <div class="weather-temp" id="weatherTemp">--°</div>
                     <div class="weather-location" id="weatherLocation">Loading...</div>
@@ -5967,6 +6097,21 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             </div>
         </div>
     </header>
+
+    <div class="vpn-popover" id="vpnPopover">
+        <div class="vpn-popover-row"><span>Country</span><span id="vpnPopCountry">—</span></div>
+        <div class="vpn-popover-row"><span>Operator</span><span id="vpnPopIsp">—</span></div>
+        <div class="vpn-popover-row"><span>Latency</span><span id="vpnPopLatency">—</span></div>
+        <div class="vpn-popover-row"><span>Checked</span><span id="vpnPopChecked">—</span></div>
+        <div class="vpn-popover-verdict" id="vpnPopVerdict">Checking your connection…</div>
+        <div class="vpn-popover-actions">
+            <button onclick="vpnChipCheckNow()"><i class="fas fa-rotate"></i> Check now</button>
+            <button id="vpnPopSaveBtn" onclick="vpnChipSaveBaseline()"><i class="fas fa-bookmark"></i> Save as normal</button>
+        </div>
+        <div class="vpn-popover-actions">
+            <a class="primary" id="vpnPopOpenApp" href="#" target="_blank" rel="noopener"><i class="fas fa-shield-halved"></i> Open Proton VPN</a>
+        </div>
+    </div>
 
     <!-- Scrim and drawer are root-level siblings on purpose. When the scrim sat
          outside .container and the nav inside it, .container's own stacking
@@ -9892,7 +10037,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v78';
+        const LOUNGE_BUILD = 'lounge-shell-v79';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -10371,6 +10516,187 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // device's address, so it happens when Deep opens Settings and asks
             // for it, not silently on every page load. Cheap, and it is his call.
         }
+
+        /* =====================================================================
+           VPN NAV CHIP -- 2026-08-12. Sits on top of the traffic-route code
+           above (readTrafficRoute/routeBaseline/sameRoute/lastRouteReading/
+           saveRouteBaseline) rather than duplicating it -- one source of
+           truth for "what does the current connection look like."
+           ---------------------------------------------------------------------
+           Respects the same privacy law initTrafficRoute()'s comment states:
+           nothing fires on page load. The chip opens in a neutral "Set up"
+           state; the FIRST click is what makes the one third-party request,
+           same as opening Settings always did. That first click also offers
+           to turn on periodic auto-refresh (localStorage `lounge_vpn_live`)
+           -- explicit opt-in, not a silent default, which is what would have
+           actually broken the existing design principle.
+           ===================================================================== */
+        const VPN_LIVE_KEY = 'lounge_vpn_live';
+        let vpnChipTimer = null;
+        let vpnChipLastLatency = null;
+
+        function vpnChipSetState(state, dot) {
+            const chip = document.getElementById('vpnChip');
+            if (!chip) return;
+            const prev = chip.dataset.state;
+            chip.dataset.state = state;
+            if (dot && prev !== state) {
+                // Signature moment: one radiating lock-ring on an actual state
+                // change, not on every poll that comes back unchanged.
+                dot.classList.remove('vpn-lock-ring');
+                void dot.offsetWidth; // restart the animation
+                dot.classList.add('vpn-lock-ring');
+            }
+        }
+
+        async function runVpnChipCheck(userInitiated) {
+            const dot = document.getElementById('vpnChipDot');
+            const label = document.getElementById('vpnChipLabel');
+            const sub = document.getElementById('vpnChipSub');
+            vpnChipSetState('checking');
+            if (label) label.textContent = 'VPN';
+            if (sub) sub.textContent = 'Checking…';
+
+            const t0 = performance.now();
+            const r = await readTrafficRoute();
+            const latencyMs = Math.round(performance.now() - t0);
+            vpnChipLastLatency = r ? latencyMs : null;
+
+            if (!r) {
+                vpnChipSetState('unset', dot);
+                if (label) label.textContent = 'VPN';
+                if (sub) sub.textContent = 'Check failed';
+                vpnPopoverRender(null, null);
+                return;
+            }
+
+            lastRouteReading = r; // keep saveRouteBaseline() (Settings panel) in sync
+            const base = routeBaseline();
+            let state, subText;
+            if (!base) {
+                state = 'unset';
+                subText = 'Not set up';
+            } else if (sameRoute(base, r)) {
+                state = 'off';
+                subText = r.country || 'No VPN';
+            } else {
+                state = 'on';
+                subText = r.country || 'Active';
+            }
+            vpnChipSetState(state, dot);
+            if (label) label.textContent = state === 'on' ? 'VPN On' : state === 'off' ? 'VPN Off' : 'VPN';
+            if (sub) sub.textContent = subText;
+            vpnPopoverRender(r, latencyMs);
+        }
+
+        function vpnPopoverRender(r, latencyMs) {
+            const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+            if (!r) {
+                setText('vpnPopCountry', '—'); setText('vpnPopIsp', '—');
+                setText('vpnPopLatency', '—');
+                setText('vpnPopChecked', 'failed');
+                const v = document.getElementById('vpnPopVerdict');
+                if (v) { v.className = 'vpn-popover-verdict'; v.textContent = 'Could not reach the lookup service. That says nothing about your VPN either way.'; }
+                return;
+            }
+            setText('vpnPopCountry', r.country || 'unknown');
+            setText('vpnPopIsp', r.isp || 'not reported');
+            setText('vpnPopLatency', latencyMs != null ? latencyMs + ' ms' : '—');
+            setText('vpnPopChecked', new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }));
+
+            const base = routeBaseline();
+            const v = document.getElementById('vpnPopVerdict');
+            const saveBtn = document.getElementById('vpnPopSaveBtn');
+            if (saveBtn) saveBtn.innerHTML = base
+                ? '<i class="fas fa-bookmark"></i> Replace saved'
+                : '<i class="fas fa-bookmark"></i> Save as normal';
+            if (!v) return;
+            if (!base) {
+                v.className = 'vpn-popover-verdict';
+                v.textContent = 'No baseline saved yet. Turn your VPN OFF, then tap "Save as normal" so this chip has something to compare against.';
+            } else if (sameRoute(base, r)) {
+                v.className = 'vpn-popover-verdict is-off';
+                v.textContent = 'Matches your saved normal connection — on the evidence available to a web page, you do not appear to be on a VPN right now.';
+            } else {
+                v.className = 'vpn-popover-verdict is-on';
+                v.textContent = 'Different from your saved normal connection — consistent with a VPN being active (though a new WiFi network would look the same).';
+            }
+        }
+
+        function vpnChipCheckNow() { runVpnChipCheck(true); }
+
+        function vpnChipSaveBaseline() {
+            if (!lastRouteReading) { runVpnChipCheck(true).then(() => vpnChipSaveBaseline()); return; }
+            saveRouteBaseline();
+            runVpnChipCheck(true);
+        }
+
+        function vpnChipArmLive() {
+            clearInterval(vpnChipTimer);
+            if (localStorage.getItem(VPN_LIVE_KEY) !== '1') return;
+            vpnChipTimer = setInterval(() => runVpnChipCheck(false), 5 * 60 * 1000);
+        }
+
+        function toggleVpnPopover(event) {
+            event.stopPropagation();
+            const pop = document.getElementById('vpnPopover');
+            const chip = document.getElementById('vpnChip');
+            if (!pop || !chip) return;
+            const opening = !pop.classList.contains('open');
+            if (!opening) { pop.classList.remove('open'); return; }
+
+            const rect = chip.getBoundingClientRect();
+            pop.style.top = (rect.bottom + 8) + 'px';
+            // Right-align to the chip so it never runs off the left edge of a
+            // narrow viewport -- the chip sits near the left of the widget
+            // cluster, a left-aligned popover would clip under 340px of room.
+            pop.style.right = (window.innerWidth - rect.right) + 'px';
+            pop.style.left = 'auto';
+            pop.classList.add('open');
+
+            const first = !localStorage.getItem(VPN_LIVE_KEY);
+            if (first) {
+                // First-ever open: this IS the explicit user action that makes
+                // the one third-party request (see the law at the top of this
+                // block), and asking to go live from here -- rather than
+                // defaulting it on -- keeps that an opt-in, not a silent default.
+                localStorage.setItem(VPN_LIVE_KEY, '1');
+                vpnChipArmLive();
+            }
+            runVpnChipCheck(true);
+        }
+
+        document.addEventListener('click', (e) => {
+            const pop = document.getElementById('vpnPopover');
+            const chip = document.getElementById('vpnChip');
+            if (!pop || !pop.classList.contains('open')) return;
+            if (chip && (chip === e.target || chip.contains(e.target))) return;
+            if (pop === e.target || pop.contains(e.target)) return;
+            pop.classList.remove('open');
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') { const pop = document.getElementById('vpnPopover'); if (pop) pop.classList.remove('open'); }
+        });
+
+        // Deep link: Android/mobile -> Play Store app page (matches the VPN
+        // Setup Guide's own link). Desktop -> Proton's download page, since
+        // there is no Play Store equivalent to deep-link into on Windows.
+        (function setVpnAppLink() {
+            const a = document.getElementById('vpnPopOpenApp');
+            if (!a) return;
+            const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+            a.href = isMobile
+                ? 'https://play.google.com/store/apps/details?id=ch.protonvpn.android'
+                : 'https://protonvpn.com/download-windows';
+        })();
+
+        // Resume live polling on load IF Deep already opted in during an
+        // earlier session -- the opt-in persists, only the FIRST-ever click
+        // makes the initial request.
+        vpnChipArmLive();
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && localStorage.getItem(VPN_LIVE_KEY) === '1') runVpnChipCheck(false);
+        });
 
         // ===== REMOTE MODE (mobile control of the PC's mpv) =====
         // mpv only ever runs on the PC -- a phone can never launch or drive it
