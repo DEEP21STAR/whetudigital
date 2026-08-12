@@ -6334,6 +6334,11 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <i class="fas fa-bookmark"></i> My List
                     </div>
                     <div class="section-sub">Saved for later — newest first. Nothing here expires or auto-clears.</div>
+                    <div style="margin-top:10px;display:flex;gap:8px;">
+                        <button class="btn" onclick="loungeExportWatchlist()" title="Download My List as a JSON backup" aria-label="Export My List as a JSON backup"><i class="fas fa-download"></i> Export</button>
+                        <button class="btn" onclick="document.getElementById('loungeImportFile').click()" title="Restore My List from a JSON backup" aria-label="Import My List from a JSON backup"><i class="fas fa-upload"></i> Import</button>
+                        <input type="file" id="loungeImportFile" accept="application/json" style="display:none" onchange="loungeImportWatchlist(this.files[0])" aria-label="Choose a Lounge watchlist JSON file to import">
+                    </div>
                 </div>
                 <div class="content-grid" id="watchlistGrid"></div>
             </section>
@@ -9888,7 +9893,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v75';
+        const LOUNGE_BUILD = 'lounge-shell-v76';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -16080,6 +16085,244 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 container.scrollTop = container.scrollHeight;
             }
         }
+
+        // ===== 2026-08-12 additions: Surprise Me, Idle Ambient, Shortcuts cheatsheet,
+        // Playback stats overlay, Watchlist export/import. Self-contained and
+        // defensively wrapped -- a failure in one must never break the app that
+        // was already live before this landed. Deletable as a single block if any
+        // one of these needs to come back out. =====
+        (function loungeExtras() {
+            const style = document.createElement('style');
+            style.textContent = `
+                #lounge-fab { position: fixed; right: 20px; bottom: 90px; z-index: 500;
+                    display: flex; flex-direction: column; gap: 10px; }
+                #lounge-fab button { width: 46px; height: 46px; border-radius: 50%; border: none;
+                    background: rgba(20,20,24,0.85); color: #fff; font-size: 18px; cursor: pointer;
+                    backdrop-filter: blur(6px); box-shadow: 0 2px 10px rgba(0,0,0,0.4); }
+                #lounge-fab button:hover { background: rgba(255,255,255,0.15); }
+                #lounge-ambient { position: fixed; inset: 0; z-index: 9000; background: #000;
+                    opacity: 0; pointer-events: none; transition: opacity 1.2s ease; }
+                #lounge-ambient.on { opacity: 1; pointer-events: auto; }
+                #lounge-ambient img { position: absolute; inset: 0; width: 100%; height: 100%;
+                    object-fit: cover; opacity: 0; transition: opacity 2s ease, transform 12s linear; }
+                #lounge-ambient img.show { opacity: 0.85; transform: scale(1.08); }
+                #lounge-ambient .hint { position: absolute; bottom: 30px; width: 100%; text-align: center;
+                    color: rgba(255,255,255,0.6); font-size: 13px; letter-spacing: 0.05em; }
+                #lounge-shortcuts, #lounge-stats { position: fixed; z-index: 9500; background: rgba(15,15,18,0.95);
+                    color: #eee; border-radius: 12px; padding: 18px 22px; font-size: 14px; backdrop-filter: blur(8px);
+                    box-shadow: 0 8px 30px rgba(0,0,0,0.5); display: none; }
+                #lounge-shortcuts { top: 50%; left: 50%; transform: translate(-50%,-50%); min-width: 300px; z-index: 9600; }
+                #lounge-shortcuts h3 { margin: 0 0 10px; font-size: 16px; }
+                #lounge-shortcuts .row { display: flex; justify-content: space-between; gap: 20px; padding: 4px 0; opacity: 0.9; }
+                #lounge-shortcuts kbd { background: #333; padding: 2px 7px; border-radius: 4px; font-family: monospace; }
+                #lounge-stats { top: 70px; right: 20px; font-family: monospace; font-size: 12px; line-height: 1.6; min-width: 200px; }
+            `;
+            document.head.appendChild(style);
+
+            // ---- 1. Surprise Me ----
+            // Picks a random already-rendered card out of cardRegistry (populated by
+            // createCard() every time any grid renders). Not a fresh API call -- it
+            // is deliberately scoped to what has already loaded on screen, so it
+            // never needs its own TMDB key check or network round trip.
+            window.loungeSurpriseMe = function () {
+                try {
+                    const ids = Object.keys(cardRegistry).filter(id => cardRegistry[id] && !cardRegistry[id].comingSoon);
+                    if (!ids.length) { showRemoteToast('Browse a section first, then Surprise Me'); return; }
+                    const pick = ids[Math.floor(Math.random() * ids.length)];
+                    openDetail(pick);
+                } catch (e) { console.error('loungeSurpriseMe failed:', e); }
+            };
+
+            // ---- 2. Idle ambient / screensaver ----
+            // Only arms once the app has actually loaded posters (same cardRegistry
+            // as above), only while no player/modal is visibly open, and any
+            // key/pointer/touch input both wakes it and resets the idle clock.
+            let ambientTimer = null;
+            let ambientEl = null;
+            const AMBIENT_IDLE_MS = 5 * 60 * 1000;
+
+            function ambientBusy() {
+                const livePlayer = document.getElementById('live-player');
+                const devicePlayer = document.getElementById('device-player');
+                return (livePlayer && livePlayer.classList.contains('active')) ||
+                    (devicePlayer && getComputedStyle(devicePlayer).display !== 'none') ||
+                    currentSection === 'detail' || LoungeBridge?.videoPlaying;
+            }
+
+            function ambientShow() {
+                if (ambientBusy()) { armAmbient(); return; }
+                const posters = Object.values(cardRegistry).map(i => i.backdrop || i.poster).filter(Boolean);
+                if (posters.length < 3) return;
+                if (!ambientEl) {
+                    ambientEl = document.createElement('div');
+                    ambientEl.id = 'lounge-ambient';
+                    ambientEl.innerHTML = '<div class="hint">Press any key to return</div>';
+                    document.body.appendChild(ambientEl);
+                    ambientEl.addEventListener('click', ambientHide);
+                }
+                ambientEl.classList.add('on');
+                let idx = 0;
+                const shown = new Set();
+                function nextSlide() {
+                    if (!ambientEl.classList.contains('on')) return;
+                    ambientEl.querySelectorAll('img.show').forEach(im => im.classList.remove('show'));
+                    const src = posters[Math.floor(Math.random() * posters.length)];
+                    const img = document.createElement('img');
+                    img.src = src;
+                    ambientEl.appendChild(img);
+                    requestAnimationFrame(() => img.classList.add('show'));
+                    // Cap DOM growth -- an idle TV left overnight must not accumulate images forever.
+                    const imgs = ambientEl.querySelectorAll('img');
+                    if (imgs.length > 6) imgs[0].remove();
+                    ambientEl._nextTimer = setTimeout(nextSlide, 9000);
+                }
+                nextSlide();
+            }
+
+            function ambientHide() {
+                if (!ambientEl) return;
+                ambientEl.classList.remove('on');
+                clearTimeout(ambientEl._nextTimer);
+            }
+
+            function armAmbient() {
+                clearTimeout(ambientTimer);
+                ambientTimer = setTimeout(ambientShow, AMBIENT_IDLE_MS);
+            }
+
+            ['keydown', 'mousemove', 'mousedown', 'touchstart', 'wheel'].forEach(evt => {
+                document.addEventListener(evt, () => {
+                    if (ambientEl && ambientEl.classList.contains('on')) { ambientHide(); }
+                    armAmbient();
+                }, { passive: true });
+            });
+            armAmbient();
+
+            // ---- 3. Keyboard shortcuts cheatsheet ----
+            const SHORTCUTS = [
+                ['Arrow keys', 'Move focus (D-pad on TV)'],
+                ['Enter / OK', 'Select'],
+                ['/', 'Focus search'],
+                ['S', 'Surprise Me'],
+                ['?', 'Toggle this cheatsheet'],
+                ['Esc / Back', 'Close overlay / go back'],
+                ['Space', 'Play / pause (in player)'],
+                ['M', 'Mute (in player)'],
+                ['F', 'Fullscreen (in player)']
+            ];
+            let shortcutsEl = null;
+            function toggleShortcuts() {
+                if (!shortcutsEl) {
+                    shortcutsEl = document.createElement('div');
+                    shortcutsEl.id = 'lounge-shortcuts';
+                    shortcutsEl.innerHTML = '<h3><i class="fas fa-keyboard"></i> Shortcuts</h3>' +
+                        SHORTCUTS.map(([k, v]) => `<div class="row"><kbd>${k}</kbd><span>${v}</span></div>`).join('');
+                    shortcutsEl.addEventListener('click', () => { shortcutsEl.style.display = 'none'; });
+                    document.body.appendChild(shortcutsEl);
+                }
+                shortcutsEl.style.display = shortcutsEl.style.display === 'block' ? 'none' : 'block';
+            }
+
+            // ---- 4. Playback stats-for-nerds overlay ----
+            let statsEl = null;
+            let statsTimer = null;
+            function statsTargetVideo() {
+                const lp = document.getElementById('lp-video');
+                const dv = document.getElementById('dv-video');
+                if (lp && !lp.paused && lp.readyState > 0) return lp;
+                if (dv && !dv.paused && dv.readyState > 0) return dv;
+                return lp || dv;
+            }
+            function toggleStats() {
+                if (!statsEl) {
+                    statsEl = document.createElement('div');
+                    statsEl.id = 'lounge-stats';
+                    document.body.appendChild(statsEl);
+                }
+                const on = statsEl.style.display !== 'block';
+                statsEl.style.display = on ? 'block' : 'none';
+                clearInterval(statsTimer);
+                if (!on) return;
+                statsTimer = setInterval(() => {
+                    const v = statsTargetVideo();
+                    if (!v) { statsEl.textContent = 'No active player'; return; }
+                    let buffered = 0;
+                    try {
+                        if (v.buffered.length) buffered = (v.buffered.end(v.buffered.length - 1) - v.currentTime).toFixed(1);
+                    } catch (e) {}
+                    statsEl.innerHTML = [
+                        `res: ${v.videoWidth || '?'}x${v.videoHeight || '?'}`,
+                        `time: ${v.currentTime.toFixed(1)}s / ${(v.duration || 0).toFixed(1)}s`,
+                        `buffer ahead: ${buffered}s`,
+                        `paused: ${v.paused}`,
+                        `ready state: ${v.readyState}/4`,
+                        `network state: ${v.networkState}`,
+                        `volume: ${Math.round(v.volume * 100)}%${v.muted ? ' (muted)' : ''}`
+                    ].join('<br>');
+                }, 1000);
+            }
+
+            document.addEventListener('keydown', (e) => {
+                const activeTag = document.activeElement && document.activeElement.tagName;
+                if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
+                if (e.key === '?') { toggleShortcuts(); }
+                else if (e.key === 's' || e.key === 'S') { window.loungeSurpriseMe(); }
+                else if (e.key === 'i' || e.key === 'I') { toggleStats(); }
+            });
+
+            // ---- 5. Watchlist export / import ----
+            window.loungeExportWatchlist = function () {
+                try {
+                    const list = readWatchlist();
+                    if (!list.length) { showRemoteToast('My List is empty — nothing to export'); return; }
+                    const blob = new Blob([JSON.stringify({ exported: new Date().toISOString(), items: list }, null, 2)],
+                        { type: 'application/json' });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `lounge-watchlist-${new Date().toISOString().slice(0, 10)}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(a.href);
+                    showRemoteToast(`Exported ${list.length} title${list.length === 1 ? '' : 's'}`);
+                } catch (e) { console.error('loungeExportWatchlist failed:', e); showRemoteToast('Export failed'); }
+            };
+
+            window.loungeImportWatchlist = function (file) {
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    try {
+                        const parsed = JSON.parse(reader.result);
+                        const items = Array.isArray(parsed) ? parsed : parsed.items;
+                        if (!Array.isArray(items)) throw new Error('not a Lounge watchlist file');
+                        const existing = readWatchlist();
+                        const existingIds = new Set(existing.map(e => e.tmdbId || e.title));
+                        const merged = existing.concat(items.filter(i => !existingIds.has(i.tmdbId || i.title)));
+                        writeWatchlist(merged);
+                        syncWatchlistUi();
+                        if (currentSection === 'watchlist') populateWatchlist();
+                        showRemoteToast(`Imported — My List now has ${merged.length} title${merged.length === 1 ? '' : 's'}`);
+                    } catch (e) {
+                        console.error('loungeImportWatchlist failed:', e);
+                        showRemoteToast('That file is not a valid Lounge watchlist export');
+                    } finally {
+                        document.getElementById('loungeImportFile').value = '';
+                    }
+                };
+                reader.readAsText(file);
+            };
+
+            // ---- FAB ----
+            const fab = document.createElement('div');
+            fab.id = 'lounge-fab';
+            fab.innerHTML = `
+                <button title="Surprise Me (S)" aria-label="Surprise Me — open a random title" onclick="loungeSurpriseMe()"><i class="fas fa-dice"></i></button>
+                <button title="Keyboard shortcuts (?)" aria-label="Show keyboard shortcuts"><i class="fas fa-keyboard"></i></button>
+            `;
+            document.body.appendChild(fab);
+            fab.querySelectorAll('button')[1].onclick = toggleShortcuts;
+        })();
     </script>
 </body>
 </html>

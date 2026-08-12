@@ -1,0 +1,188 @@
+{
+  "_readme": [
+    "Lounge version manifest. Served by serve_nocache.py from C:\\NEXUS on port 8899,",
+    "so both the web app and the Android app fetch it from the SAME host they were",
+    "loaded from: http://<host>:8899/apk/version.json  (web uses the relative path).",
+    "",
+    "Not a relay endpoint on purpose. This is public, read-only, non-personal data --",
+    "gating it behind X-Nexus-Pin would add a CORS preflight and a failure mode to a",
+    "poll that must work on a TV that may never have had the relay configured. The",
+    "PIN-gated relay stays for /play, /control and /reel (real actions, personal data).",
+    "",
+    "serve_nocache.py sends Cache-Control: no-store on everything, so an update check",
+    "can never be answered from a stale browser cache. That is the whole reason this",
+    "file lives here rather than beside a CDN.",
+    "",
+    "WHEN YOU SHIP: bump latest.android.* to match build.gradle.kts, bump",
+    "latest.web.cacheName to match CACHE_NAME in sw.js, and prepend a changelog entry.",
+    "The web app compares latest.web.cacheName against its own LOUNGE_BUILD constant;",
+    "the Android app compares latest.android.versionCode against BuildConfig.VERSION_CODE."
+  ],
+  "manifestVersion": 1,
+  "generated": "2026-08-10",
+  "latest": {
+    "android": {
+      "versionCode": 16,
+      "versionName": "0.1.18",
+      "minSdk": 23,
+      "certSha256": "082961c7cc1097dfb4f76239947becb18cd98f88eca3da6585e504d6f523352f",
+      "apk": {
+        "arm64-v8a": "/apk/Lounge-arm64.apk",
+        "armeabi-v7a": "/apk/Lounge-armeabi-v7a.apk"
+      },
+      "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
+    },
+    "web": {
+      "cacheName": "lounge-shell-v76"
+    }
+  },
+  "changelog": [
+    {
+      "version": "0.1.18",
+      "versionCode": 16,
+      "web": "lounge-shell-v76",
+      "date": "2026-08-10",
+      "title": "PC-independent playback, and touch controls for the native player",
+      "changes": [
+        "Real-Debrid, Sky Sport live TV, and subtitle fetching no longer need your PC on. Those calls used to go through nexus_control_relay.py running at home; they now go through a cloud relay, so watching works from anywhere, PC on or off.",
+        "The app itself (lounge.html) can now be loaded straight from the internet too, not just from your PC's local server -- so opening Lounge away from home no longer needs the PC reachable at all, for either the page or playback.",
+        "Fixed a routing bug found while testing the above: the cloud Real-Debrid proxy 404'd on any call with more than one path segment (adding a magnet, checking status, unrestricting a link) -- so live TV worked but movies silently failed with \"Something went wrong resolving this stream\" every time. Real-Debrid playback is now confirmed working end-to-end with the PC off.",
+        "The format-not-supported fallback (shown when a file's codec can't play in-browser) now offers \"Play on this device (VLC)\" ahead of \"Play on Laptop (mpv)\" when the native player is available -- previously it only ever suggested the PC, even on a device that could already play the file itself.",
+        "The native VLC player (used for MKV/AC3/HEVC files the browser can't decode) had no on-screen controls at all -- every control only worked via a TV remote's D-pad, so on a phone there was nothing to tap and the only way out was the Android BACK key. It now has a tap-to-show transport overlay: play/pause, +-10s skip, a seek bar with a time readout, and a close button. The TV remote's D-pad controls are unchanged."
+      ]
+    },
+    {
+      "version": "0.1.17",
+      "versionCode": 15,
+      "web": "lounge-shell-v75",
+      "date": "2026-08-08",
+      "title": "Real fix for movies not playing",
+      "changes": [
+        "Traced the \"Something went wrong resolving this stream\" error reported live today. Real-Debrid now rejects a magnet link that has no filename attached to it as a copyright violation - regardless of what the content actually is. This app always built magnets without a filename, so this had likely been silently breaking some fraction of plays for a while, not just tonight and not just Bollywood titles - proven by testing the exact same torrent hash both ways: bare hash was blocked even for a decades-old, completely uncontroversial film; the identical hash with a filename attached went through immediately.",
+        "Magnets built by this app now carry a filename and a small set of trackers, the same way a normal torrent file would.",
+        "Honest limit: this does not make every title playable. A handful of very new, high-profile releases are genuinely blocked by Real-Debrid on purpose, filename or not - that's Real-Debrid's own policy, not something this app can route around. If one source on a title fails, try another - they're graded independently."
+      ]
+    },
+    {
+      "version": "0.1.16",
+      "versionCode": 15,
+      "web": "lounge-shell-v74",
+      "date": "2026-08-08",
+      "title": "A way back when the page crashes, not just when it fails to load",
+      "changes": [
+        "The black screen with just a small Android icon in the corner, reported live today, was not the app failing to reach the server - it's what the system shows when the page's own renderer process dies. None of the app's previous recovery screens could appear for this, because they all needed the page to still be alive to trigger them.",
+        "The app now catches that specific crash, rebuilds the page fresh, and shows a real message with the same tap-to-open-Settings option as a normal connection failure - instead of a silent black screen with nothing to press.",
+        "Honest limit: this does not explain why the renderer crashed in the first place. That needs a device log this app can't collect on its own. It guarantees there's always a way back to Settings when it happens, not that it won't happen again."
+      ]
+    },
+    {
+      "version": "0.1.15",
+      "versionCode": 14,
+      "web": "lounge-shell-v74",
+      "date": "2026-08-08",
+      "title": "Fresh installs now just work, home or away",
+      "changes": [
+        "0.1.13's fix (tap the error message to reach Settings) still needed the page to fail first and needed that tap to actually be found and to work - and a real test away from home still did not open. Rather than add a third recovery path, the app no longer needs one: a brand new install now points at the internet address (the same Cloudflare Tunnel used for the APK downloads) instead of the PC's local network address by default.",
+        "This means installing the app away from home now works immediately, with no Settings step. At home, it's one extra hop out to the internet and back instead of talking to the PC directly on the LAN - a small tradeoff for an install that just opens.",
+        "The old local-network address is still available - open Settings and enter it there for anyone who wants the more direct path while on the home WiFi."
+      ]
+    },
+    {
+      "version": "0.1.14",
+      "versionCode": 13,
+      "web": "lounge-shell-v74",
+      "date": "2026-08-08",
+      "title": "Real-Debrid is now optional, and Plex can be signed in",
+      "changes": [
+        "Real-Debrid is no longer treated as a requirement. Opening any film or episode used to check for a Real-Debrid key first and stop dead with \"Add your Real-Debrid API key in Settings first\" if it was missing, so letting the subscription lapse would have taken the whole app down with it. Playback sources are now a list: if one is missing, the rest still get used.",
+        "Clearing the Real-Debrid box in Settings and pressing Save now actually removes the key. It previously ignored an empty box, so there was no way to switch Real-Debrid off from the screen.",
+        "Without a debrid service, the torrent scrapers are skipped instead of searched. They only ever return magnet links, which need a debrid to become something a player can open, so listing them would have filled the screen with results that cannot play.",
+        "New \"Playback Sources\" panel in Settings shows, with a dot per source, which ones are set up and what each one can resolve. Live TV and Live Sports need none of them and are noted as such.",
+        "You can sign in to Plex from Settings. It shows a 4-character code to enter at plex.tv/link and picks up the sign-in on its own once you do. Plex's free Movies & Shows catalogue does not need Plex Pass, but it does need a free Plex account - there is no anonymous access.",
+        "Not done yet: signing in stores the token, but Lounge does not search or play Plex titles yet. That part is unbuilt and untested.",
+        "Checked and rejected: ThreeNow cannot be added. Every stream it serves is DRM-locked (FairPlay, Widevine and PlayReady on all 8 variants of the episode tested), so this app's player physically cannot open one. TVNZ+ has no reachable public API - every address tried was refused by their gateway."
+      ]
+    },
+    {
+      "version": "0.1.13",
+      "versionCode": 13,
+      "web": "lounge-shell-v73",
+      "date": "2026-08-08",
+      "title": "Fixed: a fresh install away from home had no way in",
+      "changes": [
+        "A phone installing this app for the first time away from home WiFi loaded the PC's local address by default, couldn't reach it, and the error screen's only advice was \"Press MENU on the remote\" - which doesn't exist on a phone. There was no way to reach Settings at all in that state.",
+        "That error message is now tappable and opens Settings directly.",
+        "Settings has a new \"Use Lounge Cloud\" button that fills in the internet address for both the app and the control relay in one tap, instead of typing two long addresses on a phone keyboard."
+      ]
+    },
+    {
+      "version": "0.1.12",
+      "versionCode": 12,
+      "web": "lounge-shell-v73",
+      "date": "2026-08-08",
+      "title": "Six country tabs, and a PIN-locked section",
+      "changes": [
+        "Live TV now loads five countries instead of two. New Zealand and Australia were already there; India, the USA and the UK have been added, which takes the channel list from 92 to roughly 2,500.",
+        "One-tap country buttons sit above the grid: NZ, AUS, INDIA, USA and UK. Tap one to see only that country, tap it again to go back to everything.",
+        "Programme guide data now loads for India, the USA and the UK as well, so the genre filters and the Now/Next strip work on those channels the same way they already did for NZ and Australia.",
+        "Fiji was asked for and is wired up, but no Fiji button appears yet. The free channel source lists nine Fiji channels and publishes no working stream for any of them, so there is nothing that would actually play. The app checks for them every few hours and the button will appear on its own if that ever changes.",
+        "New Restricted section. Each channel card has a padlock in its top corner; press it to move that channel out of the normal grid. Restricted channels are hidden from both Live TV and Live Sports until you tap the Restricted button and enter the PIN. It starts empty — you choose what goes in it.",
+        "The Restricted PIN keeps people from stumbling into those channels on a shared TV. It is not real security: anyone who knows their way around a browser can get past it."
+      ]
+    },
+    {
+      "version": "0.1.11",
+      "versionCode": 12,
+      "web": "lounge-shell-v72",
+      "date": "2026-08-08",
+      "title": "It tells you when there's an update",
+      "changes": [
+        "Every device now checks for updates on its own: phone, PC, Google TV, Android TV and Fire Stick all read the same version file, so none of them can quietly sit on an old build again.",
+        "When something newer exists you get an Update badge on Settings, and this panel opens with the actual list of what changed and a button that fetches it.",
+        "Settings now shows exactly which build you are running — app version and version code on Android, web build number in a browser.",
+        "New \"What's New\" section in Settings so you can re-read any release, not just the newest one.",
+        "New \"Where your traffic leaves from\" panel in Settings: it reads the public address the internet actually sees you from and names the network operator behind it. Save your normal connection once and it will tell you when the current one looks different — which is the honest limit of what a web page can know about a VPN."
+      ]
+    },
+    {
+      "version": "0.1.10",
+      "versionCode": 11,
+      "web": "lounge-shell-v71",
+      "date": "2026-08-08",
+      "title": "Picture-in-picture, a real player bar, and Australian channels",
+      "changes": [
+        "Picture-in-picture: press HOME while something is playing and it shrinks to a floating window that keeps playing while you use other apps. Works for both the built-in player and the native one, and the little window has its own play/pause button.",
+        "The \"This device\" player got its own transport bar. The browser's stock white play button and its complete absence of a subtitle control are gone — seek, play/pause and subtitles are the app's own now.",
+        "Australian Live TV channels. Lounge only ever loaded New Zealand's channel list, so there was no filter that could have found an Australian channel — they were never fetched. Both lists now load (31 NZ + 79 AU entries, merged by stream address into 92 unique channels because 18 were the same feed listed twice).",
+        "NZ and AUS quick-filter buttons on Live TV and Live Sports.",
+        "Coming Soon stopped after the first page of results and said it could not load more, while the source still had 167 more pages for the same search. Fixed.",
+        "The highlight capsule under the Live TV filter buttons was invisible until you tapped one. It is now in the right place the moment the page opens."
+      ]
+    },
+    {
+      "version": "0.1.3",
+      "versionCode": 4,
+      "date": "2026-08-07",
+      "title": "The round from your phone screenshots",
+      "changes": [
+        "The top bar no longer hides under your phone's status bar. The hamburger menu button was being rendered underneath the system clock, which is why it looked missing — it was there, just untappable.",
+        "BACK works properly. It used to close the whole app from anywhere, including mid-film. It now closes whatever is actually on top: the format warning, the player, live TV, the source picker, the menu drawer, then the detail page.",
+        "BACK twice to leave. One press warns, a second within two seconds exits, so you cannot lose your place by accident.",
+        "New app icon. The launcher was still showing the old Nexus \"N\"; it is now the couch-and-popcorn mark, drawn at every screen density.",
+        "\"Watch Now\" and \"Resume\" now use the popcorn play button like the rest of the app instead of a plain triangle."
+      ]
+    },
+    {
+      "version": "0.1.2",
+      "date": "2026-08-07",
+      "title": "One app for phone, Google TV and Fire Stick",
+      "changes": [
+        "The app would not install on a phone at all. It declared itself TV-only, which made the Play services filter it off phone hardware entirely. One build now covers phone, Google TV, Android TV and Fire Stick.",
+        "Added a normal app-drawer icon. The TV-launcher entry alone gave no icon on a phone.",
+        "The screen stays in portrait while you browse, and flips to landscape only for video.",
+        "The remote works. Every tile and menu item in this app is a plain div, which a TV remote physically cannot move focus between — arrow keys used to reach nothing. Lounge now works out which tile is nearest in the direction you pressed and highlights it.",
+        "The app is signed with a permanent key, so future updates install over the top instead of asking you to uninstall first."
+      ]
+    }
+  ]
+}

@@ -5,13 +5,7 @@
 // Kept in lockstep with LOUNGE_BUILD in lounge.html and with
 // latest.web.cacheName in apk/version.json -- the update checker compares those
 // two, so all three move together or the app reports a phantom update.
-//
-// This is the cloud-hosted copy (C:\WHETU\lounge\, deployed behind Vercel
-// host-based rewrites at lounge.whetudigital.co.nz -- see vercel.json). Paths
-// are root-relative and unchanged from the PC-hosted original at
-// C:\NEXUS\sw.js because the rewrite makes this origin's root behave the same
-// way the PC's :8899 root did.
-const CACHE_NAME = 'lounge-shell-v75';
+const CACHE_NAME = 'lounge-shell-v76';
 const SHELL_ASSETS = [
     '/lounge.html',
     '/manifest.json'
