@@ -397,8 +397,10 @@
             /* Now sits BEFORE #intro-title-wrap in the column flow (arc above
                the mark, not tucked under it) -- so this pulls it DOWN to tuck
                its underside against the couch mark's shoulders, mirroring the
-               old margin-top logic in the opposite direction. */
-            margin-bottom: -22px;
+               old margin-top logic in the opposite direction. Was -22px --
+               Deep found that too tight 2026-08-14, opened to -6px for real
+               breathing room between the arc and the couch mark. */
+            margin-bottom: -6px;
             line-height: 0;
         }
         /* Width is capped by the viewport so the arc shrinks as one piece on a
@@ -437,7 +439,7 @@
         }
 
         #intro-enter {
-            margin-top: 16px;
+            margin-top: 30px; /* was 16px -- Deep found the couch mark and this button too close 2026-08-14 */
             padding: 12px 34px;
             max-width: 92vw;
             background: transparent;
@@ -4756,6 +4758,20 @@
 
         .route-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
+        /* Proton VPN shortcut. Sits under the route readout as a quieter,
+           secondary affordance -- it is a launcher, not a status. */
+        .proton-quick {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .proton-quick-row { display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+        .proton-quick-row > i { font-size: 18px; margin-top: 3px; }
+        .proton-quick-body { flex: 1; min-width: 200px; }
+        .proton-quick-title { font-weight: 700; font-size: 14px; color: #fff; margin-bottom: 4px; }
+        .proton-quick-note { font-size: 12px; line-height: 1.55; color: #9aa0aa; }
+        .proton-quick .btn { align-self: center; white-space: nowrap; }
+
         @media (max-width: 620px) {
             .wn-gate { gap: 14px; padding: 22px 4px 16px; }
             .wn-leader { width: 64px; height: 64px; }
@@ -5364,6 +5380,66 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         /* Actionable toasts must be tappable; the default toast is a passive
            notice and stays pointer-events:none so it can't eat card taps. */
         #remote-toast.actionable { pointer-events: auto; cursor: pointer; max-width: min(88vw, 420px); text-align: center; line-height: 1.45; }
+
+        /* Stale-build nudge. Louder than the nav dot, quieter than a modal: it
+           does not cover the golden path, does not steal focus, and never
+           returns for a version gap it has already been dismissed for. Only
+           appears when the device is >=2 builds behind (Android) or the web
+           cache name no longer matches the server's. */
+        #update-nudge {
+            position: fixed;
+            right: 20px;
+            bottom: 100px;
+            max-width: min(90vw, 340px);
+            display: none;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: rgba(14, 14, 18, 0.92);
+            border: 1px solid rgba(0, 212, 255, 0.45);
+            box-shadow: 0 10px 34px rgba(0, 0, 0, 0.6), 0 0 22px rgba(0, 212, 255, 0.18);
+            backdrop-filter: blur(14px);
+            z-index: 6001;
+            opacity: 0;
+            transform: translateY(14px);
+            transition: opacity 0.35s, transform 0.35s;
+        }
+        #update-nudge.is-on { display: flex; }
+        #update-nudge.is-shown { opacity: 1; transform: translateY(0); }
+        #update-nudge .un-body { flex: 1; min-width: 0; }
+        #update-nudge .un-title {
+            font-weight: 800;
+            font-size: 13px;
+            letter-spacing: 0.2px;
+            color: #00d4ff;
+            margin-bottom: 4px;
+        }
+        #update-nudge .un-text { font-size: 12.5px; line-height: 1.5; color: #cfd3da; }
+        #update-nudge .un-act {
+            margin-top: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 7px 14px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            color: #000;
+            background: linear-gradient(135deg, #00d4ff, #9d4edd);
+        }
+        #update-nudge .un-close {
+            background: none;
+            border: none;
+            color: #7d828c;
+            font-size: 18px;
+            line-height: 1;
+            cursor: pointer;
+            padding: 2px 4px;
+        }
+        #update-nudge .un-close:hover { color: #fff; }
+        @media (max-width: 600px) {
+            #update-nudge { right: 12px; left: 12px; max-width: none; bottom: 88px; }
+        }
 
         #remote-transport-bar {
             position: fixed;
@@ -6202,6 +6278,10 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     <i class="fas fa-circle-question"></i>
                     <span>Help Guide</span>
                 </div>
+                <div class="nav-item" onclick="openRestrictedArea()" id="navRestrictedArea" style="display:none;">
+                    <i class="fas fa-lock"></i>
+                    <span>Restricted Area</span>
+                </div>
             </div>
 
             <div class="nav-section">
@@ -6600,18 +6680,27 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <tbody>
                             <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Movies / TV / Anime / Bollywood</td><td style="padding:10px 12px;">Live, current catalogs pulled from TMDB — not static demo lists</td><td style="padding:10px 12px;opacity:0.7;">Needs TMDB key</td></tr>
                             <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Search</td><td style="padding:10px 12px;">Instant local library match, then live TMDB results as you type</td><td style="padding:10px 12px;opacity:0.7;">Needs TMDB key</td></tr>
-                            <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Play a movie</td><td style="padding:10px 12px;">Real Real-Debrid resolve → quality-filtered, colour-badged stream picker → plays in mpv</td><td style="padding:10px 12px;opacity:0.7;">Needs RD key; must launch via Launch Nexus.vbs</td></tr>
+                            <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Play a movie</td><td style="padding:10px 12px;">Real Real-Debrid resolve → quality-filtered, colour-badged stream picker → plays in mpv, native VLC, or right in the browser</td><td style="padding:10px 12px;opacity:0.7;">Needs RD key. Works with the PC off — resolves via the cloud relay</td></tr>
                             <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Play a TV show</td><td style="padding:10px 12px;">Season → Episode → same real stream picker as movies</td><td style="padding:10px 12px;opacity:0.7;">Needs TMDB + RD keys</td></tr>
-                            <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Subtitles</td><td style="padding:10px 12px;">Real OpenSubtitles search, language dropdown before you press play</td><td style="padding:10px 12px;opacity:0.7;">Needs OpenSubtitles key — optional</td></tr>
-                            <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Corner-window playback</td><td style="padding:10px 12px;">mpv opens top-right, always-on-top, so the dashboard stays usable behind it</td><td style="padding:10px 12px;opacity:0.7;">Live</td></tr>
+                            <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Subtitles</td><td style="padding:10px 12px;">Real OpenSubtitles search, language dropdown before you press play</td><td style="padding:10px 12px;opacity:0.7;">Needs OpenSubtitles key — optional. Works with the PC off</td></tr>
+                            <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Corner-window / native playback</td><td style="padding:10px 12px;">mpv opens top-right always-on-top on PC; the Android app uses native VLC with full touch transport controls for files the browser can't decode</td><td style="padding:10px 12px;opacity:0.7;">Live on both platforms</td></tr>
+                            <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Picture-in-picture</td><td style="padding:10px 12px;">Shrink live TV/sports or a movie to a small floating window and keep browsing</td><td style="padding:10px 12px;opacity:0.7;">Android app + supporting browsers</td></tr>
                             <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Live Sports channels</td><td style="padding:10px 12px;">Free-to-air/legal sports channel list with search + logos</td><td style="padding:10px 12px;opacity:0.7;">Sky Sport NZ / club-branded channels not on the free legal list</td></tr>
-                            <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Live TV (NZ channels)</td><td style="padding:10px 12px;">Free-to-air NZ channel list with search + logos</td><td style="padding:10px 12px;opacity:0.7;">Live</td></tr>
+                            <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Live TV (multi-country)</td><td style="padding:10px 12px;">Free-to-air channel lists across several countries with search + logos</td><td style="padding:10px 12px;opacity:0.7;">Live</td></tr>
+                            <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Program guide (EPG)</td><td style="padding:10px 12px;">Now/Next schedule data on live channels, genre-filterable</td><td style="padding:10px 12px;opacity:0.7;">Works with the PC off (cloud-cached) once the one-time cloud storage step is done</td></tr>
                             <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Favourites (channels)</td><td style="padding:10px 12px;">Star any Sports/TV channel — favourites always sort to the top</td><td style="padding:10px 12px;opacity:0.7;">Channels only — movies and TV use My List instead (below)</td></tr>
-                            <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">My List (watchlist)</td><td style="padding:10px 12px;">Bookmark any movie or show for later — from the poster corner, or the button on its page. Open it from More → My List.</td><td style="padding:10px 12px;opacity:0.7;">Saved on this device only — no account, no sync between devices</td></tr>
+                            <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">My List (watchlist)</td><td style="padding:10px 12px;">Bookmark any movie or show for later — from the poster corner, or the button on its page. Open it from More → My List. Export/import as a JSON backup</td><td style="padding:10px 12px;opacity:0.7;">Saved on this device only — no account, no sync between devices</td></tr>
+                            <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Continue Watching</td><td style="padding:10px 12px;">Resumes where you left off, synced across PC/phone/TV app</td><td style="padding:10px 12px;opacity:0.7;">Works with the PC off once the one-time cloud storage step is done</td></tr>
                             <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">AI Assistant</td><td style="padding:10px 12px;">Real Groq-powered chat, grounded in your library, for recommendations/help</td><td style="padding:10px 12px;opacity:0.7;">Needs Groq key</td></tr>
                             <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Cinema Finder</td><td style="padding:10px 12px;">Type a postcode, opens a Google search for nearby cinema showtimes</td><td style="padding:10px 12px;opacity:0.7;">Opens external tab — no free in-app showtimes API exists</td></tr>
                             <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Scrapers</td><td style="padding:10px 12px;">Torrentio + MediaFusion — source the streams behind Real-Debrid resolves</td><td style="padding:10px 12px;opacity:0.7;">Live, no config needed</td></tr>
-                            <tr><td style="padding:10px 12px;font-weight:600;">Install as an app</td><td style="padding:10px 12px;">"Add to Home Screen" / install prompt works via the PWA manifest — icon + offline shell</td><td style="padding:10px 12px;opacity:0.7;">Foundation for the planned Android TV build</td></tr>
+                            <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Surprise Me</td><td style="padding:10px 12px;">Dice icon (or press S) picks a random title from what's already on screen</td><td style="padding:10px 12px;opacity:0.7;">Live</td></tr>
+                            <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Keyboard shortcuts</td><td style="padding:10px 12px;">Press ? for a cheatsheet of every shortcut</td><td style="padding:10px 12px;opacity:0.7;">Keyboard/remote — not touch</td></tr>
+                            <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Idle ambient mode</td><td style="padding:10px 12px;">Left untouched 5 minutes, the screen fades into a slow poster crossfade instead of sitting static</td><td style="padding:10px 12px;opacity:0.7;">Any key/click/touch wakes it instantly</td></tr>
+                            <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Playback stats overlay</td><td style="padding:10px 12px;">Press I during playback for resolution, buffer health, and playback state</td><td style="padding:10px 12px;opacity:0.7;">For troubleshooting a laggy stream</td></tr>
+                            <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">VPN status chip</td><td style="padding:10px 12px;">Nav-bar indicator (green/red) comparing your current connection against a saved "normal" baseline, with country/operator/latency on click</td><td style="padding:10px 12px;opacity:0.7;">Honest limit: a comparison, not a true VPN detector — no web page can see a system VPN directly</td></tr>
+                            <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Remote Control Mode</td><td style="padding:10px 12px;">Turn your phone into a remote for playback running on your PC</td><td style="padding:10px 12px;opacity:0.7;">Needs your PC's Lounge running, same WiFi or the same PIN over the cloud relay</td></tr>
+                            <tr><td style="padding:10px 12px;font-weight:600;">Android TV / Fire TV app</td><td style="padding:10px 12px;">A real installed app (nz.whetu.lounge) — D-pad navigation, picture-in-picture, native VLC for files the browser can't play, no browser needed</td><td style="padding:10px 12px;opacity:0.7;">APK download in Settings → What's New, or lounge.whetudigital.co.nz/apk/</td></tr>
                         </tbody>
                     </table>
                     </div>
@@ -6883,6 +6972,25 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <button class="btn btn-primary" onclick="checkTrafficRoute(true)"><i class="fas fa-rotate"></i> Check now</button>
                         <button class="btn btn-primary" id="routeSaveBtn" onclick="saveRouteBaseline()"><i class="fas fa-bookmark"></i> Save as my normal connection</button>
                         <button class="btn btn-primary" id="routeForgetBtn" onclick="forgetRouteBaseline()" style="display:none;"><i class="fas fa-xmark"></i> Forget saved connection</button>
+                    </div>
+
+                    <!-- Proton VPN quick access. Hidden entirely outside the
+                         Android app, because a web page has no way to see or
+                         launch an installed app. This is a shortcut, NOT an
+                         embedded VPN: see the note it renders below. -->
+                    <div class="proton-quick" id="protonQuick" style="display:none;">
+                        <div class="proton-quick-row">
+                            <i class="fas fa-shield-halved" style="color:#6d4aff;"></i>
+                            <div class="proton-quick-body">
+                                <div class="proton-quick-title" id="protonQuickTitle">Proton VPN</div>
+                                <div class="proton-quick-note">
+                                    Proton VPN runs as its own app &mdash; Android doesn&rsquo;t allow a VPN engine to run inside
+                                    another app&rsquo;s process. This is the fastest path in and out of it without leaving Lounge
+                                    for the settings hunt.
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" id="protonQuickBtn" onclick="openProtonVpn()"></button>
+                        </div>
                     </div>
                 </div>
 
@@ -8053,6 +8161,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // Initialize
         window.onload = async function() {
             await bootstrapKeysFromLocalConfig();
+            initRestrictedAreaNav();
             // Update clock
             updateClock();
             setInterval(updateClock, 1000);
@@ -10037,7 +10146,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v79';
+        const LOUNGE_BUILD = 'lounge-shell-v81';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -10312,6 +10421,86 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             return cs.display !== 'none' && cs.visibility !== 'hidden' && parseFloat(cs.opacity || '1') > 0.01;
         }
 
+        // Identity of the version gap already nudged for. Storing the gap rather
+        // than a boolean is what makes this fire once PER GAP: dismiss it at
+        // build 12-vs-14 and it stays gone, but a later 12-vs-17 is a new fact
+        // and earns one more nudge.
+        const STALE_NUDGE_KEY = 'lounge_stale_nudge';
+
+        /**
+         * How far behind this device is, and whether that is far enough to say
+         * something beyond the passive badge.
+         *
+         * Android: a numeric gap, so "more than one build behind" is measurable.
+         * Web: the build id is an opaque cache name with no ordering (see
+         * checkForUpdate), so the only honest test is "different from the
+         * server's" -- there is no such thing as 2 versions behind on web.
+         */
+        function staleNudgeGap(st) {
+            if (!st || !st.newer) return null;
+            if (st.platform === 'android') {
+                if (typeof st.currentCode !== 'number' || typeof st.latestCode !== 'number') return null;
+                const behind = st.latestCode - st.currentCode;
+                if (behind < 2) return null;
+                return { id: `a:${st.currentCode}->${st.latestCode}`, behind, platform: 'android' };
+            }
+            return { id: `w:${LOUNGE_BUILD}->${st.latest}`, behind: null, platform: 'web' };
+        }
+
+        function showStaleNudge(gap, st) {
+            let seen = null;
+            try { seen = localStorage.getItem(STALE_NUDGE_KEY); } catch (e) {}
+            if (seen === gap.id) return;   // already shown and dismissed for this exact gap
+
+            let el = document.getElementById('update-nudge');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'update-nudge';
+                el.innerHTML =
+                    '<div class="un-body">' +
+                    '<div class="un-title">Update waiting</div>' +
+                    '<div class="un-text" id="un-text"></div>' +
+                    '<button type="button" class="un-act" id="un-act"></button>' +
+                    '</div>' +
+                    '<button type="button" class="un-close" id="un-close" aria-label="Dismiss">&times;</button>';
+                document.body.appendChild(el);
+            }
+
+            const dismiss = () => {
+                el.classList.remove('is-shown');
+                setTimeout(() => el.classList.remove('is-on'), 400);
+                try { localStorage.setItem(STALE_NUDGE_KEY, gap.id); } catch (e) {}
+            };
+
+            el.querySelector('#un-text').innerHTML = gap.platform === 'android'
+                ? `This device is <strong>${gap.behind} builds behind</strong> — running ${escapeUpdateHtml(st.current)}, latest is <strong>${escapeUpdateHtml(st.latest)}</strong>.`
+                : `A newer web build is on the server (<strong>${escapeUpdateHtml(st.latest)}</strong>). A reload picks it up.`;
+
+            const act = el.querySelector('#un-act');
+            act.textContent = gap.platform === 'android' ? "See what's new" : 'Reload now';
+            act.onclick = () => {
+                dismiss();
+                if (gap.platform === 'android') openWhatsNew('nudge');
+                else location.reload();
+            };
+            el.querySelector('#un-close').onclick = dismiss;
+
+            el.classList.add('is-on');
+            requestAnimationFrame(() => el.classList.add('is-shown'));
+        }
+
+        function maybeStaleNudge(st) {
+            const gap = staleNudgeGap(st);
+            if (!gap) return;
+            // Same rule the auto-changelog follows: never over the intro.
+            const openWhenClear = (tries) => {
+                if (!introStillUp()) { showStaleNudge(gap, st); return; }
+                if (tries <= 0) return;
+                setTimeout(() => openWhenClear(tries - 1), 700);
+            };
+            openWhenClear(40);
+        }
+
         function initUpdates() {
             const run = () => checkForUpdate({ silent: true }).then((st) => {
                 let seen = null;
@@ -10333,7 +10522,9 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         setTimeout(() => openWhenClear(tries - 1), 700);
                     };
                     openWhenClear(40);            // ~28s of patience, then drop it
+                    return;   // the changelog is already opening -- one interruption, not two
                 }
+                maybeStaleNudge(st);
             });
 
             // 6s after load: behind the first content paint, so an update check
@@ -10351,6 +10542,83 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
            -- the public address and the operator that owns it -- and compares it
            against a baseline the user saves themselves.
            ===================================================================== */
+
+        /* ---------------------------------------------------------------------
+           Proton VPN quick access.
+
+           NOT an embedded VPN, and the UI must never imply one. Proton publishes
+           no third-party SDK (business partner programme, direct contact only),
+           and Android would not permit it regardless: a VPN tunnel runs inside
+           the process of the app declaring the VpnService, so it cannot be
+           hosted by Lounge. What IS possible is removing the settings hunt --
+           one tap to Proton if it is installed, one tap to its Play listing if
+           it is not. That is the whole feature, and the copy says so.
+           --------------------------------------------------------------------- */
+        const PROTON_VPN_PKG = 'ch.protonvpn.android';
+
+        function protonBridge() {
+            const n = window.LoungeNative;
+            return (n && typeof n.openVpnApp === 'function') ? n : null;
+        }
+
+        // The native Restricted Area (RestrictedSectionActivity, PIN "69") has
+        // existed since it was first added to the Android project but was never
+        // reachable -- no menu item ever called it. Found live 2026-08-14. It is
+        // Android-app-only (no web equivalent, unlike the Live TV Restricted
+        // channel lock elsewhere in this file), so the nav item stays hidden
+        // outside the APK's WebView rather than showing a dead link in a browser.
+        function initRestrictedAreaNav() {
+            const n = window.LoungeNative;
+            const item = document.getElementById('navRestrictedArea');
+            if (!item) return;
+            item.style.display = (n && typeof n.openRestrictedSection === 'function') ? '' : 'none';
+        }
+
+        function openRestrictedArea() {
+            const n = window.LoungeNative;
+            if (!n || typeof n.openRestrictedSection !== 'function') {
+                showRemoteToast('Only available in the Lounge Android app');
+                return;
+            }
+            try { n.openRestrictedSection(); } catch (e) { showRemoteToast('Could not open Restricted Area'); }
+        }
+
+        function initProtonQuick() {
+            const wrap = document.getElementById('protonQuick');
+            if (!wrap) return;
+            const n = protonBridge();
+            // Browser (or an APK older than this build): no bridge, so there is
+            // nothing truthful to offer. Stay hidden rather than showing a
+            // button that cannot work.
+            if (!n) { wrap.style.display = 'none'; return; }
+
+            let installed = false;
+            try {
+                installed = (typeof n.isVpnAppInstalled === 'function') && !!n.isVpnAppInstalled(PROTON_VPN_PKG);
+            } catch (e) { installed = false; }
+
+            const btn = document.getElementById('protonQuickBtn');
+            const title = document.getElementById('protonQuickTitle');
+            if (title) title.textContent = installed ? 'Proton VPN — installed' : 'Proton VPN — not installed';
+            if (btn) {
+                btn.innerHTML = installed
+                    ? '<i class="fas fa-arrow-up-right-from-square"></i> Open Proton VPN'
+                    : '<i class="fas fa-download"></i> Install Proton VPN';
+            }
+            wrap.style.display = 'block';
+        }
+
+        function openProtonVpn() {
+            const n = protonBridge();
+            if (!n) { showRemoteToast('Only available in the Lounge Android app'); return; }
+            let result = 'failed';
+            try { result = String(n.openVpnApp(PROTON_VPN_PKG)); } catch (e) { result = 'failed'; }
+            if (result === 'launched') showRemoteToast('Opening Proton VPN');
+            else if (result === 'store' || result === 'store-web') showRemoteToast('Opening the Play Store listing');
+            else showRemoteToast('Could not open Proton VPN or the Play Store on this device');
+            // The app may have been installed since the panel was painted.
+            setTimeout(initProtonQuick, 1200);
+        }
 
         const ROUTE_BASELINE_KEY = 'lounge_route_baseline';
 
@@ -10485,6 +10753,10 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // note at the bottom of initTrafficRoute() for why not on page load.
         let routeCheckedThisSession = false;
         function onSettingsOpened() {
+            // Re-run every open, not once per session: Proton may have been
+            // installed since the last look, and this is a local call with no
+            // network cost.
+            initProtonQuick();
             if (routeCheckedThisSession) return;
             routeCheckedThisSession = true;
             checkTrafficRoute(false);
@@ -13352,6 +13624,15 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // season/episode/tmdbId-bearing record Continue Watching stores.
         let currentPlaybackMeta = null;
 
+        // How the URL now in each player was obtained. The stats overlay (I key)
+        // reports this: a link that came back from Real-Debrid's unrestrict call
+        // and a channel URL played straight off the source behave very
+        // differently when they stall, and nothing on screen used to say which
+        // one you were looking at. Set at the moment the URL is decided, per
+        // player, because the two players can hold different sources at once.
+        let dvStreamOrigin = null;   // in-browser "this device" player
+        let lpStreamOrigin = null;   // live TV player
+
         // The in-browser player is the one surface that knows its own position
         // without asking anything: <video>.currentTime is right there. It just
         // never reported it anywhere before Lounge Reel, which is why watching on
@@ -14535,6 +14816,9 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             }
             if (gen !== lpGen) return;
             lpSrc = src;
+            lpStreamOrigin = (channel.externalWatch && channel.dlhdId)
+                ? { kind: 'Relay-resolved', detail: 'cloud relay walked the source chain' }
+                : { kind: 'Direct play', detail: 'channel URL, no resolver' };
             lpSetStatus('BUFFERING');
 
             // If nothing is actually decoding after 25s, say so rather than
@@ -15713,6 +15997,13 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 }
                 const unrestrictData = await unrestrictRes.json();
                 const directUrl = unrestrictData.download;
+                // Everything that reaches here came off Real-Debrid's
+                // unrestrict/link call -- recorded so the I-key stats overlay can
+                // say so rather than leaving the source ambiguous.
+                dvStreamOrigin = {
+                    kind: 'Real-Debrid',
+                    detail: `unrestricted${unrestrictData.host ? ' via ' + unrestrictData.host : ''}`
+                };
 
                 if (myGeneration !== pickerGeneration || !currentPickerItem) return;
                 currentRdTorrentId = null;
@@ -16619,7 +16910,15 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     try {
                         if (v.buffered.length) buffered = (v.buffered.end(v.buffered.length - 1) - v.currentTime).toFixed(1);
                     } catch (e) {}
+                    // Which resolver produced the URL this player is holding.
+                    // Read off the player actually on screen, not a single
+                    // global -- live TV and the device player can differ.
+                    const origin = (v.id === 'lp-video') ? lpStreamOrigin : dvStreamOrigin;
+                    const originLine = origin
+                        ? `source: ${origin.kind}${origin.detail ? ` (${origin.detail})` : ''}`
+                        : 'source: unknown';
                     statsEl.innerHTML = [
+                        originLine,
                         `res: ${v.videoWidth || '?'}x${v.videoHeight || '?'}`,
                         `time: ${v.currentTime.toFixed(1)}s / ${(v.duration || 0).toFixed(1)}s`,
                         `buffer ahead: ${buffered}s`,

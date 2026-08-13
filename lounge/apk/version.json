@@ -19,11 +19,11 @@
     "the Android app compares latest.android.versionCode against BuildConfig.VERSION_CODE."
   ],
   "manifestVersion": 1,
-  "generated": "2026-08-10",
+  "generated": "2026-08-14",
   "latest": {
     "android": {
-      "versionCode": 16,
-      "versionName": "0.1.18",
+      "versionCode": 18,
+      "versionName": "0.1.20",
       "minSdk": 23,
       "certSha256": "082961c7cc1097dfb4f76239947becb18cd98f88eca3da6585e504d6f523352f",
       "apk": {
@@ -33,10 +33,36 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v79"
+      "cacheName": "lounge-shell-v81"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.20",
+      "versionCode": 18,
+      "web": "lounge-shell-v81",
+      "date": "2026-08-14",
+      "title": "Restricted Area was unreachable, intro spacing opened up",
+      "changes": [
+        "The Restricted Area (RestrictedSectionActivity, PIN 69) was fully built but had no way to open it -- no menu item and no bridge call ever launched it, since whenever it was first added. Found live when Deep looked for it in a fresh install. Added a menu item under Tools (Android app only -- it has no web equivalent) and the missing native bridge call.",
+        "The intro's tagline arc sat almost flush against the couch mark, and the couch mark sat close above the 'Press Any Key to Take a Seat' button -- both opened up.",
+        "Looked into the 'Press Any Key' prompt not responding to a keypress on some device: the native/JS bridge that lets D-pad and keyboard events through during the intro is wired correctly on inspection. Not reproduced from source -- if this was tested on the phone build, there is no physical key to press and the click is the intentional fallback for that case, not a bug. Flagging rather than guessing at a fix for a mechanism that already looks correct."
+      ]
+    },
+    {
+      "version": "0.1.19",
+      "versionCode": 17,
+      "web": "lounge-shell-v80",
+      "date": "2026-08-14",
+      "title": "Restricted section icons fixed, Proton VPN shortcut, stream source in the stats overlay",
+      "changes": [
+        "The Restricted section's icons were rendering as replacement-character garbage on every tile, and the PIN dialog's title and input hint with them. Cause was an encoding fault in two source files, not the fonts: each icon had a duplicate emoji whose leading byte had been lost, leaving three orphan bytes the renderer drew as boxes. Both files re-saved as clean UTF-8 without a BOM so it does not come back.",
+        "Settings' VPN panel can now open Proton VPN in one tap, or its Play Store listing if it is not installed yet. To be exact about what this is: it is a shortcut, not an embedded VPN. Proton has no SDK anyone can build against (business partner programme, direct contact only), and Android would not allow it either -- a VPN tunnel only runs inside the process of the app that declares it, so no app can host another app's VPN. This removes the settings hunt and nothing more. It only appears in the Android app; a web page cannot see or launch an installed app.",
+        "The playback stats overlay (press I during playback) now names the source that resolved the stream you are watching -- Real-Debrid, a direct channel URL, or the cloud relay. Previously a stalled Real-Debrid link and a dead channel URL looked identical on screen.",
+        "A device two or more builds behind now gets one dismissible reminder on open instead of only the small badge, which was easy to never notice. It does not block anything, and it does not come back for a version gap you have already dismissed.",
+        "Picture-in-picture was checked on both players (the built-in one and the native VLC one) after the recent PC-independence rewrite. Both paths are still wired -- no changes were needed, and none were made."
+      ]
+    },
     {
       "version": "0.1.18",
       "versionCode": 16,
