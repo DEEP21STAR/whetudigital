@@ -22,8 +22,8 @@
   "generated": "2026-08-14",
   "latest": {
     "android": {
-      "versionCode": 18,
-      "versionName": "0.1.20",
+      "versionCode": 19,
+      "versionName": "0.1.21",
       "minSdk": 23,
       "certSha256": "082961c7cc1097dfb4f76239947becb18cd98f88eca3da6585e504d6f523352f",
       "apk": {
@@ -37,6 +37,17 @@
     }
   },
   "changelog": [
+    {
+      "version": "0.1.21",
+      "versionCode": 19,
+      "web": "lounge-shell-v81",
+      "date": "2026-08-14",
+      "title": "Restricted Area really was broken this time -- crash on unlock, and the title mojibake was never actually fixed",
+      "changes": [
+        "Entering the correct PIN in the Restricted Area crashed the screen outright. Cause: the category colours are written as 0xFF###### literals, which are bigger than Kotlin's Int range, so Kotlin silently treats them as Long -- and the code force-cast them to Int, which throws every single time. Android has no visible crash screen for this in a release build, so it just looked like the app bounced back to the intro. Fixed with an explicit Long-to-Int conversion, which is the correct way to read a 32-bit ARGB colour out of a literal like this.",
+        "The Restricted PIN dialog's title and PIN-box hint were still showing corrupted boxes -- the previous fix only touched the icons inside the screen itself, not this dialog, and the check used at the time could not have caught it (it scanned the wrong part of the build for this kind of text). Verified properly this time by reading the actual compiled screen inside the built file, not just the source."
+      ]
+    },
     {
       "version": "0.1.20",
       "versionCode": 18,
