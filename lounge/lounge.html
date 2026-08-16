@@ -11849,8 +11849,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 return;
             }
             const v = dvVideo();
-            const wrap = document.getElementById('device-player');
-            const canHost = v && (v.currentSrc || v.src) && wrap && wrap.classList.contains('is-open') && currentPlaybackMeta && currentPlaybackMeta.title;
+            const deviceWrap = document.getElementById('device-player');
+            const canHost = v && (v.currentSrc || v.src) && deviceWrap && deviceWrap.classList.contains('is-open') && currentPlaybackMeta && currentPlaybackMeta.title;
             wrap.innerHTML =
                 (canHost ? `<div class="vpn-popover-actions"><button class="primary" onclick="wtStartHost()"><i class="fas fa-tower-broadcast"></i> Start hosting this</button></div>` :
                     `<div class="vpn-popover-verdict">Play something in the "This device" player first to host a room.</div>`) +
