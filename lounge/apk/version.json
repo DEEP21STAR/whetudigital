@@ -19,11 +19,11 @@
     "the Android app compares latest.android.versionCode against BuildConfig.VERSION_CODE."
   ],
   "manifestVersion": 1,
-  "generated": "2026-08-14",
+  "generated": "2026-08-16",
   "latest": {
     "android": {
-      "versionCode": 19,
-      "versionName": "0.1.21",
+      "versionCode": 22,
+      "versionName": "0.1.24",
       "minSdk": 23,
       "certSha256": "082961c7cc1097dfb4f76239947becb18cd98f88eca3da6585e504d6f523352f",
       "apk": {
@@ -33,10 +33,49 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v81"
+      "cacheName": "lounge-shell-v84"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.24",
+      "versionCode": 22,
+      "web": "lounge-shell-v84",
+      "date": "2026-08-16",
+      "title": "Trakt.tv sync, Skip Intro, multi-profile, offline download, watch-together",
+      "changes": [
+        "Trakt.tv sync -- every movie/episode played pushes to your real Trakt watch history (device-code OAuth, no browser popup needed). Settings > Trakt.tv Sync. Requires your own free Trakt app (app.trakt.tv/oauth/applications).",
+        "Skip Intro -- mark where a show's intro ends once, every future episode of that show offers a Skip Intro button during the marked window. 'This device' player only.",
+        "Multi-profile ('Who's watching', header icon) -- watch history, favourite channels, intro marks and Continue Watching are now scoped per profile. Everything else (API keys, VPN/Trakt accounts, playback target) stays shared, on purpose. Existing data was migrated into a default 'Main' profile, nothing was lost.",
+        "Offline download -- download icon next to every stream-picker result, resolves through Real-Debrid same as playback then hands the file to Android's own DownloadManager (background transfer, retry, a real progress notification). Saves to Downloads/Lounge. Android app only.",
+        "Watch Together (header icon) -- share a 5-letter room code, someone else's Lounge mirrors your playback (position/pause state, polled every few seconds). 'This device' player only. Needs the cloud sync endpoint deployed -- ask Deep if this doesn't connect.",
+        "New LoungeNative.downloadMovie() bridge method backing offline download; WRITE_EXTERNAL_STORAGE permission added (API 28 and below only -- not needed or grantable on newer Android)."
+      ]
+    },
+    {
+      "version": "0.1.23",
+      "versionCode": 21,
+      "web": "lounge-shell-v83",
+      "date": "2026-08-16",
+      "title": "Proton VPN one-tap header button, sleep timer, HDR badge/filter",
+      "changes": [
+        "Proton VPN launch moved out of a nested Settings popover into a one-tap button in the header, next to the VPN status chip -- same working launch call, just reachable in one tap instead of several plus a scroll.",
+        "New sleep timer (header clock icon) -- 15/30/45/60/90 min presets, stops the in-page player, mpv on the PC, or an active Cast session when it expires. Does not reach the native TV player (a separate Activity this page's JS can't see into while it's on top) -- stated in the timer's own popover, not silently unsupported.",
+        "Stream picker now detects and badges HDR releases (HDR/HDR10/HDR10+/Dolby Vision) separately from resolution -- a 2160p release can be SDR or HDR, they're independent attributes. New 'HDR only' filter chip alongside the existing (already-working) resolution tabs.",
+        "New LoungeNative.stopCast() bridge method, needed for the sleep timer to actually be able to stop a Cast session (castMedia() only ever loaded new media, there was no way to end one)."
+      ]
+    },
+    {
+      "version": "0.1.22",
+      "versionCode": 20,
+      "web": "lounge-shell-v82",
+      "date": "2026-08-16",
+      "title": "External Settings links + Restricted Area category links no longer dead taps in the app",
+      "changes": [
+        "The Proton VPN button (Setup Guide + VPN popover) and 5 Settings links -- TMDB, Real-Debrid, Groq, OpenSubtitles, Plex -- all silently did nothing when tapped inside the packaged app. Root cause: MainActivity's shouldOverrideUrlLoading blocks any navigation off the configured Lounge host (correct, for JS-bridge security) but never launched an external Intent for what it blocks, so a plain link to an outside site just went nowhere -- it worked fine in a normal browser, which is why this wasn't caught earlier. Proton VPN now reuses the existing openVpnApp bridge; the other 5 route through a new general LoungeNative.openExternalBrowser(url), added specifically for this. Both fall back to a normal link tap outside the app, so nothing changes for browser/PWA use.",
+        "Restricted Area category tiles now open inside the app (embedded WebView with in-app Back navigation) instead of launching the system browser -- carried over from a completed but unshipped 2026-08-14 build."
+      ]
+    },
     {
       "version": "0.1.21",
       "versionCode": 19,

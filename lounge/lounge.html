@@ -3900,6 +3900,11 @@
         .quality-badge.quality-720p { background: rgba(0, 255, 136, 0.18); color: #00ff88; border: 1px solid rgba(0, 255, 136, 0.4); }
         .quality-badge.quality-480p { background: rgba(255, 153, 0, 0.18); color: #ff9900; border: 1px solid rgba(255, 153, 0, 0.4); }
         .quality-badge.quality-SD { background: rgba(136, 136, 136, 0.18); color: #999; border: 1px solid rgba(136, 136, 136, 0.4); }
+        /* Distinct hue from every resolution tier above -- HDR is an
+           orthogonal attribute (a 2160p release can be SDR or HDR), not
+           another rung on the same ladder, so it needed its own colour
+           rather than borrowing one already meaning something else. */
+        .quality-badge.quality-hdr { background: rgba(255, 46, 196, 0.18); color: #ff2ec4; border: 1px solid rgba(255, 46, 196, 0.45); min-width: auto; padding: 4px 8px; }
 
         .stream-picker-empty {
             text-align: center;
@@ -6155,11 +6160,61 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                  Sits after More so the two selects (which only appear on Movies
                  and TV Shows) grow leftward and can't shove it off the row. -->
             <div class="header-widgets">
+                <!-- Proton VPN one-tap launch, added 2026-08-16. The existing
+                     way to reach this (vpn-chip below -> popover -> scroll
+                     past Country/Operator/Latency/Checked rows -> "Open
+                     Proton VPN" at the very bottom) technically worked but
+                     needed too many steps to count as "embedded" -- Deep's
+                     own word for what he wanted. This is the same
+                     openProtonVpn() call, one tap, always visible next to
+                     the VPN status chip instead of nested inside it.
+                     Android-app-only, same reasoning as protonQuickBtn in
+                     Settings: a browser has no way to launch an installed
+                     app, so showing this there would be a dead button. -->
+                <button class="btn neon-actionable" id="protonHeaderBtn" onclick="openProtonVpn()"
+                    style="display:none;padding:4px 12px;font-size:12px;gap:6px;" title="Launch Proton VPN">
+                    <i class="fas fa-shield-halved"></i> VPN
+                </button>
                 <div class="vpn-chip" id="vpnChip" data-state="unset" onclick="toggleVpnPopover(event)" role="button" tabindex="0" aria-label="VPN connection status">
                     <div class="vpn-chip-dot" id="vpnChipDot"></div>
                     <div>
                         <div class="vpn-chip-label" id="vpnChipLabel">VPN</div>
                         <div class="vpn-chip-sub" id="vpnChipSub">Set up</div>
+                    </div>
+                </div>
+                <!-- Multi-profile ("Who's watching"), added 2026-08-16. -->
+                <div class="vpn-chip" id="profileChip" onclick="toggleProfilePopover(event)" role="button" tabindex="0" aria-label="Switch profile">
+                    <div id="profileChipEmoji" style="font-size:16px;">👤</div>
+                    <div>
+                        <div class="vpn-chip-label">Profile</div>
+                        <div class="vpn-chip-sub" id="profileChipName">Main</div>
+                    </div>
+                </div>
+                <!-- Watch Together, added 2026-08-16. Works with the "This
+                     device" browser player only -- honestly scoped the same
+                     way the sleep timer's Cast/native-TV limits are, rather
+                     than implying it covers every surface. -->
+                <div class="vpn-chip" id="wtChip" data-state="off" onclick="toggleWtPopover(event)" role="button" tabindex="0" aria-label="Watch Together">
+                    <div class="vpn-chip-dot" id="wtDot" style="background:#555;"></div>
+                    <div>
+                        <div class="vpn-chip-label">Together</div>
+                        <div class="vpn-chip-sub" id="wtSub">Off</div>
+                    </div>
+                </div>
+                <!-- Sleep timer, added 2026-08-16. Reachable surfaces only,
+                     stated honestly rather than implied to cover everything:
+                     the in-page video/live player (video.pause() directly),
+                     mpv on the PC (existing sendRemoteControl('stop') relay
+                     call, same one the remote's own stop button uses), and
+                     an active Cast session. NOT the native TV player
+                     (PlayerActivity) -- that's a separate Android Activity;
+                     this page's JS timer does not keep running once it's on
+                     top, so there is nothing honest this could do there. -->
+                <div class="vpn-chip" id="sleepTimerChip" data-state="off" onclick="toggleSleepTimerPopover(event)" role="button" tabindex="0" aria-label="Sleep timer">
+                    <div class="vpn-chip-dot" id="sleepTimerDot" style="background:#555;"></div>
+                    <div>
+                        <div class="vpn-chip-label">Sleep</div>
+                        <div class="vpn-chip-sub" id="sleepTimerSub">Off</div>
                     </div>
                 </div>
                 <div class="weather-widget">
@@ -6185,7 +6240,40 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             <button id="vpnPopSaveBtn" onclick="vpnChipSaveBaseline()"><i class="fas fa-bookmark"></i> Save as normal</button>
         </div>
         <div class="vpn-popover-actions">
-            <a class="primary" id="vpnPopOpenApp" href="#" target="_blank" rel="noopener"><i class="fas fa-shield-halved"></i> Open Proton VPN</a>
+            <a class="primary" id="vpnPopOpenApp" href="#" target="_blank" rel="noopener" onclick="return vpnPopOpenAppClick(event)"><i class="fas fa-shield-halved"></i> Open Proton VPN</a>
+        </div>
+    </div>
+
+    <div class="vpn-popover" id="wtPopover">
+        <div class="vpn-popover-verdict" id="wtVerdict" style="margin-top:0;">
+            Share a room code so someone else's Lounge (on any device) mirrors your playback --
+            works with the "This device" browser player only. Position sync checks every few
+            seconds, so a small lag between screens is normal, not a bug.
+        </div>
+        <div id="wtBody"></div>
+    </div>
+
+    <div class="vpn-popover" id="profilePopover">
+        <div id="profileList"></div>
+        <div class="vpn-popover-actions">
+            <button onclick="addProfile()"><i class="fas fa-plus"></i> Add profile</button>
+        </div>
+    </div>
+
+    <div class="vpn-popover" id="sleepTimerPopover">
+        <div class="vpn-popover-verdict" id="sleepTimerVerdict" style="margin-top:0;">
+            Stops the in-page player, mpv on the PC, or an active Cast session after the time you pick.
+            Does not reach the native TV player (VLC) -- that runs in its own screen this page can't see.
+        </div>
+        <div class="vpn-popover-actions">
+            <button onclick="sleepTimerSet(15)">15 min</button>
+            <button onclick="sleepTimerSet(30)">30 min</button>
+            <button onclick="sleepTimerSet(45)">45 min</button>
+        </div>
+        <div class="vpn-popover-actions">
+            <button onclick="sleepTimerSet(60)">1 hour</button>
+            <button onclick="sleepTimerSet(90)">90 min</button>
+            <button onclick="sleepTimerSet(0)"><i class="fas fa-xmark"></i> Off</button>
         </div>
     </div>
 
@@ -6837,7 +6925,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 <div class="settings-row">
                     <div class="settings-row-text">
                         <h4>Movie Poster API (TMDB)</h4>
-                        <p>Free key from <a href="https://www.themoviedb.org/settings/api" target="_blank" style="color:#00d4ff;">themoviedb.org/settings/api</a> (2-min signup, no card) — enables real posters instead of icons. Poster data provided by TMDB.</p>
+                        <p>Free key from <a href="https://www.themoviedb.org/settings/api" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">themoviedb.org/settings/api</a> (2-min signup, no card) — enables real posters instead of icons. Poster data provided by TMDB.</p>
                     </div>
                     <div style="display:flex;gap:10px;align-items:center;">
                         <input type="password" id="tmdbKeyInput" placeholder="TMDB API key" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:260px;">
@@ -6848,7 +6936,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 <div class="settings-row">
                     <div class="settings-row-text">
                         <h4>Real-Debrid API Key</h4>
-                        <p>From <a href="https://real-debrid.com/apitoken" target="_blank" style="color:#00d4ff;">real-debrid.com/apitoken</a> (requires an active premium subscription) — resolves scraped torrents into direct playable links.</p>
+                        <p>From <a href="https://real-debrid.com/apitoken" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">real-debrid.com/apitoken</a> (requires an active premium subscription) — resolves scraped torrents into direct playable links.</p>
                     </div>
                     <div style="display:flex;gap:10px;align-items:center;">
                         <input type="password" id="rdKeyInput" placeholder="Real-Debrid API key" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:260px;">
@@ -6879,10 +6967,35 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     </div>
                 </div>
 
+                <!-- Trakt.tv sync, added 2026-08-16. API confirmed free (an
+                     app registration + API key, no VIP needed) before
+                     building this. Uses the device-code OAuth flow (show a
+                     short code, user enters it at trakt.tv/activate on any
+                     device, this page polls until approved) -- the right
+                     choice here specifically because it needs no redirect
+                     URL and no in-app browser popup, which the packaged
+                     Android app's WebView doesn't support cleanly anyway. -->
+                <div class="settings-row">
+                    <div class="settings-row-text">
+                        <h4>Trakt.tv Sync</h4>
+                        <p>Real watch-history sync, separate from the local "Continue Watching" list. Every movie/episode played from Lounge is pushed to your Trakt profile, viewable and tracked from any device. Free account, no VIP needed. Create an app at <a href="https://app.trakt.tv/oauth/applications" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">app.trakt.tv/oauth/applications</a> (Redirect URI can be anything, e.g. <code>urn:ietf:wg:oauth:2.0:oob</code> — the device flow below never uses it) to get a Client ID and Secret.</p>
+                        <div style="display:flex;gap:10px;align-items:center;margin-top:10px;">
+                            <input type="password" id="traktClientIdInput" placeholder="Client ID" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:220px;">
+                            <input type="password" id="traktClientSecretInput" placeholder="Client Secret" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:220px;">
+                            <button class="btn btn-primary" onclick="saveTraktKeys()">Save</button>
+                        </div>
+                        <div id="traktStatus" style="margin-top:10px;color:#9fb3c0;font-size:13px;"></div>
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:center;">
+                        <button class="btn btn-primary" id="traktConnectBtn" onclick="traktConnect()">Connect Trakt</button>
+                        <button class="btn" id="traktDisconnectBtn" onclick="traktDisconnect()" style="display:none;">Disconnect</button>
+                    </div>
+                </div>
+
                 <div class="settings-row">
                     <div class="settings-row-text">
                         <h4>Groq API Key (AI Assistant)</h4>
-                        <p>From <a href="https://console.groq.com" target="_blank" style="color:#00d4ff;">console.groq.com</a> (free tier) — powers the AI Assistant chat.</p>
+                        <p>From <a href="https://console.groq.com" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">console.groq.com</a> (free tier) — powers the AI Assistant chat.</p>
                     </div>
                     <div style="display:flex;gap:10px;align-items:center;">
                         <input type="password" id="groqKeyInput" placeholder="Groq API key" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:260px;">
@@ -6893,7 +7006,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 <div class="settings-row">
                     <div class="settings-row-text">
                         <h4>OpenSubtitles API Key</h4>
-                        <p>From <a href="https://www.opensubtitles.com/en/consumers" target="_blank" style="color:#00d4ff;">opensubtitles.com/en/consumers</a> (free — sign up, create an API consumer) — enables real subtitle search/download for playback.</p>
+                        <p>From <a href="https://www.opensubtitles.com/en/consumers" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">opensubtitles.com/en/consumers</a> (free — sign up, create an API consumer) — enables real subtitle search/download for playback.</p>
                     </div>
                     <div style="display:flex;gap:10px;align-items:center;">
                         <input type="password" id="osubKeyInput" placeholder="OpenSubtitles API key" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:260px;">
@@ -7196,6 +7309,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 <div class="lp-actions">
                     <button class="lp-action" onclick="retryLivePlayer()"><i class="fas fa-rotate-right"></i> Try again</button>
                     <button class="lp-action alt" onclick="livePlayerFallbackToMpv()"><i class="fas fa-desktop"></i> Play on PC (mpv)</button>
+                    <button id="lp-diagnose-btn" class="lp-action alt" onclick="diagnoseSkyStream()" style="display:none;"><i class="fas fa-stethoscope"></i> Diagnose</button>
                 </div>
             </div>
         </div>
@@ -7248,6 +7362,14 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 <i class="fas fa-circle-notch fa-spin"></i>
                 <div class="lp-msg">Opening the file…</div>
             </div>
+            <!-- Skip Intro, added 2026-08-16. No third-party intro-detection
+                 API involved (they're unreliable/paid) -- this is Deep's own
+                 one-time mark, reused for every future episode of the same
+                 show. Positioned bottom-right, same convention as every
+                 major streaming platform. -->
+            <button id="dv-skip-intro" class="lp-action alt" style="display:none;position:absolute;right:24px;bottom:80px;z-index:5;" onclick="dvSkipIntro()">
+                <i class="fas fa-forward"></i> Skip Intro
+            </button>
         </div>
         <div class="live-player-transport">
             <button id="dv-play" class="dt-btn" onclick="dvTogglePlay()" title="Play / pause" aria-label="Play or pause"><i class="fas fa-play"></i></button>
@@ -7272,6 +7394,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 <div id="dv-speed-menu" class="dv-menu" role="menu" aria-label="Playback speed"></div>
             </div>
 
+            <button id="dv-mark-intro" class="dt-btn" onclick="dvMarkIntroEnd()" title="Mark where this show's intro ends (used to Skip Intro on future episodes)" aria-label="Mark intro end" hidden><i class="fas fa-bookmark"></i></button>
             <button id="dv-pip" class="dt-btn" onclick="dvTogglePip()" title="Mini player (picture-in-picture)" aria-label="Mini player (picture-in-picture)" hidden><i class="fas fa-clone"></i></button>
             <button id="dv-fs" class="dt-btn" onclick="dvToggleFullscreen()" title="Fullscreen" aria-label="Toggle fullscreen"><i class="fas fa-expand"></i></button>
             <button class="lp-action alt" style="padding:7px 14px;font-size:12px;" onclick="devicePlayerToMpv()"><i class="fas fa-laptop"></i> <span class="dv-mpv-label">Switch to Laptop (mpv)</span></button>
@@ -10048,9 +10171,18 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             if (!g || !panel) return;
             const iconClass = `${g.iconBrand ? 'fab' : 'fas'} ${g.icon}`;
             const steps = g.steps.map(s => `<li>${s}</li>`).join('');
-            const links = g.links.map(l =>
-                `<a class="vpn-link-btn" href="${l.href}" target="_blank" rel="noopener noreferrer"><i class="fas ${l.icon}"></i> ${l.label}</a>`
-            ).join('');
+            // Same bug/fix as vpnPopOpenAppClick above: a plain href to the
+            // Proton VPN Play Store listing is dead inside the packaged
+            // Android app (shouldOverrideUrlLoading swallows it with no
+            // external Intent). Route those specific links through the
+            // working LoungeNative.openVpnApp bridge when it's available;
+            // every other guide link (windscribe.com, protonvpn.com,
+            // Apple App Store) is unaffected and stays a plain href.
+            const links = g.links.map(l => {
+                const isProtonPlayStore = l.href.indexOf('play.google.com/store/apps/details?id=ch.protonvpn.android') !== -1;
+                const click = isProtonPlayStore ? ' onclick="return vpnGuideLinkClick(event)"' : '';
+                return `<a class="vpn-link-btn" href="${l.href}" target="_blank" rel="noopener noreferrer"${click}><i class="fas ${l.icon}"></i> ${l.label}</a>`;
+            }).join('');
             panel.innerHTML = `
                 <h4><i class="${iconClass}"></i> ${g.title}</h4>
                 <p class="vpn-verdict">${g.verdict}</p>
@@ -10146,7 +10278,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v81';
+        const LOUNGE_BUILD = 'lounge-shell-v84';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -10585,12 +10717,18 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
         function initProtonQuick() {
             const wrap = document.getElementById('protonQuick');
+            const headerBtn = document.getElementById('protonHeaderBtn');
             if (!wrap) return;
             const n = protonBridge();
             // Browser (or an APK older than this build): no bridge, so there is
             // nothing truthful to offer. Stay hidden rather than showing a
             // button that cannot work.
-            if (!n) { wrap.style.display = 'none'; return; }
+            if (!n) {
+                wrap.style.display = 'none';
+                if (headerBtn) headerBtn.style.display = 'none';
+                return;
+            }
+            if (headerBtn) headerBtn.style.display = '';
 
             let installed = false;
             try {
@@ -10757,6 +10895,9 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // installed since the last look, and this is a local call with no
             // network cost.
             initProtonQuick();
+            renderTraktStatus();
+            renderProfileChip();
+            wtRenderChip();
             if (routeCheckedThisSession) return;
             routeCheckedThisSession = true;
             checkTrafficRoute(false);
@@ -10915,6 +11056,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const chip = document.getElementById('vpnChip');
             if (!pop || !chip) return;
             const opening = !pop.classList.contains('open');
+            document.getElementById('sleepTimerPopover')?.classList.remove('open');
+            document.getElementById('profilePopover')?.classList.remove('open');
             if (!opening) { pop.classList.remove('open'); return; }
 
             const rect = chip.getBoundingClientRect();
@@ -10936,6 +11079,212 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 vpnChipArmLive();
             }
             runVpnChipCheck(true);
+        }
+
+        // ===== MULTI-PROFILE ("Who's watching"), added 2026-08-16 =====
+        // Scopes only genuinely per-person state: watch history, intro
+        // marks, favourite channels, channel play counts. Everything else
+        // (API keys, VPN/relay config, Trakt account, playback target) stays
+        // global on purpose -- those are device/household settings, not
+        // things two people watching the same TV would want to duplicate
+        // or fight over. pk() is the single seam between the two: call it
+        // on a per-user key before touching localStorage, leave every
+        // other key exactly as it already was.
+        const PROFILE_SCOPED_KEYS = ['nexus_watch_history', 'nexus_intro_marks', 'nexus_favourite_channels', 'nexus_channel_plays', 'nexusContinueWatching'];
+
+        function pk(baseKey) {
+            return `${baseKey}::${activeProfileId()}`;
+        }
+
+        function loadProfiles() {
+            try { return JSON.parse(localStorage.getItem('nexus_profiles') || '[]'); }
+            catch (e) { return []; }
+        }
+
+        function activeProfileId() {
+            let id = localStorage.getItem('nexus_active_profile');
+            const profiles = loadProfiles();
+            if (profiles.length === 0) {
+                // First-ever run with this feature: migrate any existing
+                // unscoped data into a real default profile rather than
+                // orphaning it -- Deep's actual watch history must not
+                // silently vanish just because this shipped.
+                id = 'p1';
+                localStorage.setItem('nexus_profiles', JSON.stringify([{ id, name: 'Main', emoji: '👤' }]));
+                localStorage.setItem('nexus_active_profile', id);
+                PROFILE_SCOPED_KEYS.forEach(k => {
+                    const existing = localStorage.getItem(k);
+                    if (existing !== null) {
+                        localStorage.setItem(`${k}::${id}`, existing);
+                        localStorage.removeItem(k);
+                    }
+                });
+                return id;
+            }
+            if (!id || !profiles.some(p => p.id === id)) {
+                id = profiles[0].id;
+                localStorage.setItem('nexus_active_profile', id);
+            }
+            return id;
+        }
+
+        function currentProfile() {
+            const id = activeProfileId();
+            return loadProfiles().find(p => p.id === id) || { id, name: 'Main', emoji: '👤' };
+        }
+
+        function renderProfileChip() {
+            const chip = document.getElementById('profileChip');
+            if (!chip) return;
+            const p = currentProfile();
+            chip.querySelector('#profileChipEmoji').textContent = p.emoji;
+            chip.querySelector('#profileChipName').textContent = p.name;
+        }
+
+        function toggleProfilePopover(event) {
+            event.stopPropagation();
+            const pop = document.getElementById('profilePopover');
+            const chip = document.getElementById('profileChip');
+            if (!pop || !chip) return;
+            const opening = !pop.classList.contains('open');
+            document.getElementById('vpnPopover')?.classList.remove('open');
+            document.getElementById('sleepTimerPopover')?.classList.remove('open');
+            if (!opening) { pop.classList.remove('open'); return; }
+            renderProfileList();
+            const rect = chip.getBoundingClientRect();
+            pop.style.top = (rect.bottom + 8) + 'px';
+            pop.style.right = (window.innerWidth - rect.right) + 'px';
+            pop.style.left = 'auto';
+            pop.classList.add('open');
+        }
+
+        function renderProfileList() {
+            const wrap = document.getElementById('profileList');
+            if (!wrap) return;
+            const profiles = loadProfiles();
+            const activeId = activeProfileId();
+            wrap.innerHTML = profiles.map(p => `
+                <div class="vpn-popover-row" style="cursor:pointer;${p.id === activeId ? 'color:#00ff88;' : ''}" onclick="switchProfile('${p.id}')">
+                    <span>${escapeHtml(p.emoji)} ${escapeHtml(p.name)}</span>
+                    ${profiles.length > 1 ? `<span onclick="event.stopPropagation();deleteProfile('${p.id}')" title="Delete"><i class="fas fa-trash" style="color:#ff5470;"></i></span>` : ''}
+                </div>`).join('');
+        }
+
+        function switchProfile(id) {
+            localStorage.setItem('nexus_active_profile', id);
+            document.getElementById('profilePopover')?.classList.remove('open');
+            // A full reload is the honest choice here, not an attempt to
+            // hot-swap dozens of already-rendered sections (watchlist,
+            // continue watching, favourites, intro marks) live -- this app
+            // has no central state-refresh function that touches all of
+            // them, and faking one for a profile switch risks leaving a
+            // stale section showing the PREVIOUS profile's data.
+            location.reload();
+        }
+
+        function addProfile() {
+            const name = (prompt('Profile name?') || '').trim();
+            if (!name) return;
+            const EMOJI = ['👤', '🧑', '👩', '👨', '🧒', '👧', '👦', '🐱', '🐶', '⭐'];
+            const profiles = loadProfiles();
+            const emoji = EMOJI[profiles.length % EMOJI.length];
+            const id = 'p' + Date.now();
+            profiles.push({ id, name, emoji });
+            localStorage.setItem('nexus_profiles', JSON.stringify(profiles));
+            switchProfile(id);
+        }
+
+        function deleteProfile(id) {
+            let profiles = loadProfiles();
+            if (profiles.length <= 1) return; // always at least one
+            if (!confirm(`Delete "${profiles.find(p => p.id === id)?.name}"? Their watch history and favourites go with them.`)) return;
+            profiles = profiles.filter(p => p.id !== id);
+            localStorage.setItem('nexus_profiles', JSON.stringify(profiles));
+            PROFILE_SCOPED_KEYS.forEach(k => localStorage.removeItem(`${k}::${id}`));
+            if (activeProfileId() === id) switchProfile(profiles[0].id);
+            else renderProfileList();
+        }
+
+        // ===== SLEEP TIMER, added 2026-08-16 =====
+        // Ephemeral by design -- not persisted to localStorage. A sleep timer
+        // that silently reactivates on the next launch because it remembered
+        // last night's setting is a worse bug than one that resets; a fresh
+        // pick every session is the honest default for what this is.
+        let sleepTimerDeadline = 0; // epoch ms, 0 = off
+        let sleepTimerTickHandle = null;
+
+        function toggleSleepTimerPopover(event) {
+            event.stopPropagation();
+            const pop = document.getElementById('sleepTimerPopover');
+            const chip = document.getElementById('sleepTimerChip');
+            if (!pop || !chip) return;
+            const opening = !pop.classList.contains('open');
+            document.getElementById('vpnPopover')?.classList.remove('open');
+            document.getElementById('profilePopover')?.classList.remove('open');
+            if (!opening) { pop.classList.remove('open'); return; }
+            const rect = chip.getBoundingClientRect();
+            pop.style.top = (rect.bottom + 8) + 'px';
+            pop.style.right = (window.innerWidth - rect.right) + 'px';
+            pop.style.left = 'auto';
+            pop.classList.add('open');
+        }
+
+        function sleepTimerSet(minutes) {
+            document.getElementById('sleepTimerPopover')?.classList.remove('open');
+            if (sleepTimerTickHandle) { clearInterval(sleepTimerTickHandle); sleepTimerTickHandle = null; }
+            if (!minutes) {
+                sleepTimerDeadline = 0;
+                sleepTimerRender();
+                showRemoteToast('Sleep timer off');
+                return;
+            }
+            sleepTimerDeadline = Date.now() + minutes * 60000;
+            sleepTimerRender();
+            showRemoteToast(`Sleep timer set — stopping in ${minutes} min`);
+            sleepTimerTickHandle = setInterval(sleepTimerTick, 1000);
+        }
+
+        function sleepTimerTick() {
+            if (!sleepTimerDeadline) return;
+            if (Date.now() >= sleepTimerDeadline) { sleepTimerExpire(); return; }
+            sleepTimerRender();
+        }
+
+        function sleepTimerRender() {
+            const dot = document.getElementById('sleepTimerDot');
+            const sub = document.getElementById('sleepTimerSub');
+            if (!dot || !sub) return;
+            if (!sleepTimerDeadline) {
+                dot.style.background = '#555';
+                dot.style.boxShadow = 'none';
+                sub.textContent = 'Off';
+                return;
+            }
+            const remainingMs = Math.max(0, sleepTimerDeadline - Date.now());
+            const mins = Math.ceil(remainingMs / 60000);
+            dot.style.background = '#00d4ff';
+            dot.style.boxShadow = '0 0 8px #00d4ff, 0 0 16px rgba(0,212,255,0.6)';
+            sub.textContent = mins >= 1 ? `${mins} min left` : '<1 min';
+        }
+
+        function sleepTimerExpire() {
+            if (sleepTimerTickHandle) { clearInterval(sleepTimerTickHandle); sleepTimerTickHandle = null; }
+            sleepTimerDeadline = 0;
+            sleepTimerRender();
+
+            // Every reachable surface, honestly scoped per the popover's own
+            // note: in-page video (live TV/sports/browser movie playback),
+            // mpv on the PC, and an active Cast session. Not the native TV
+            // player -- see the comment on the header button.
+            const lpVideo = document.getElementById('lp-video');
+            if (lpVideo && !lpVideo.paused) { try { lpVideo.pause(); } catch (e) {} }
+            const dvVideo = document.getElementById('dv-video') || document.querySelector('video');
+            if (dvVideo && dvVideo !== lpVideo && !dvVideo.paused) { try { dvVideo.pause(); } catch (e) {} }
+            sendRemoteControl('stop');
+            if (window.LoungeNative && typeof LoungeNative.stopCast === 'function') {
+                try { LoungeNative.stopCast(); } catch (e) {}
+            }
+            showRemoteToast('Sleep timer: playback stopped');
         }
 
         document.addEventListener('click', (e) => {
@@ -10961,6 +11310,53 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 ? 'https://play.google.com/store/apps/details?id=ch.protonvpn.android'
                 : 'https://protonvpn.com/download-windows';
         })();
+
+        // BUG FOUND 2026-08-16: inside the packaged Android app, MainActivity's
+        // shouldOverrideUrlLoading blocks ALL navigation to any URL that isn't
+        // the Lounge host, and never launches an external Intent for what it
+        // blocks -- so a plain <a href> to the Play Store just silently does
+        // nothing when tapped in the app (it looks fine in a normal desktop/
+        // mobile browser, which is why this went unnoticed -- there's no
+        // shouldOverrideUrlLoading guard outside the packaged app). This is
+        // what "Proton VPN button doesn't open the app store" was. Route
+        // through the same LoungeNative.openVpnApp bridge the working
+        // protonQuickBtn already uses (launches the app if installed, else
+        // Play Store via market:// then https fallback) when it's available;
+        // fall back to the plain href for real browser contexts, where it
+        // already works.
+        function vpnPopOpenAppClick(e) {
+            const n = protonBridge();
+            if (!n) return true; // browser context: let the href navigate normally
+            e.preventDefault();
+            openProtonVpn();
+            return false;
+        }
+
+        // Same fix, for the VPN Setup Guide's own "Proton VPN on Play Store"
+        // link (Android Mobile / Android TV panels) -- see the bug note above.
+        function vpnGuideLinkClick(e) {
+            const n = protonBridge();
+            if (!n) return true;
+            e.preventDefault();
+            openProtonVpn();
+            return false;
+        }
+
+        // General-purpose version of the same fix, added 2026-08-16, for the
+        // 5 "get your API key" links in Settings (TMDB, Real-Debrid, Groq,
+        // OpenSubtitles, Plex) -- all dead taps inside the packaged app for
+        // the same shouldOverrideUrlLoading reason. Unlike Proton VPN, these
+        // had no existing single-purpose bridge method, so this calls the
+        // new general LoungeNative.openExternalBrowser(url) instead.
+        function externalLinkClick(e) {
+            const n = window.LoungeNative;
+            if (!n || typeof n.openExternalBrowser !== 'function') return true; // browser context: let the href navigate normally
+            const href = e.currentTarget && e.currentTarget.href;
+            if (!href) return true;
+            e.preventDefault();
+            try { n.openExternalBrowser(href); } catch (err) { /* nothing more to do */ }
+            return false;
+        }
 
         // Resume live polling on load IF Deep already opted in during an
         // earlier session -- the opt-in persists, only the FIRST-ever click
@@ -11323,7 +11719,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 return;
             }
 
-            statusEl.innerHTML = 'Open <a href="https://plex.tv/link" target="_blank" style="color:#00d4ff;">plex.tv/link</a> and enter this code:'
+            statusEl.innerHTML = 'Open <a href="https://plex.tv/link" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">plex.tv/link</a> and enter this code:'
                 + `<div style="font-size:30px;letter-spacing:7px;font-weight:700;color:#e9faff;margin:10px 0;">${pin.code}</div>`
                 + '<span id="plexPinCountdown" style="color:#9fb3c0;">Waiting for you to enter it...</span>';
 
@@ -11403,6 +11799,306 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const val = document.getElementById('groqKeyInput').value.trim();
             if (!val) return;
             localStorage.setItem('nexus_groq_key', val);
+        }
+
+        // ===== TRAKT.TV SYNC, added 2026-08-16 =====
+        // Endpoints/fields verified against Trakt's own current API docs
+        // (docs.trakt.tv/reference/postoauthdevicecode,
+        // postoauthdevicetoken, getsyncwatched, postsynchistoryadd) before
+        // writing this, not guessed. Device-code flow: auth.trakt.tv only
+        // for the two oauth/device/* calls, api.trakt.tv for everything
+        // else, with trakt-api-version:2 + trakt-api-key + Bearer token.
+        // ===== WATCH TOGETHER, added 2026-08-16 =====
+        // Backed by C:\WHETU\api\lounge\watchtogether.js (same Vercel/
+        // Upstash-Redis pattern as the existing Reel cross-device sync).
+        // Polling, not a real push channel -- see that file's own comment
+        // for why. Host and viewer both use the "This device" (dv-video)
+        // browser player only; mpv/native-TV/Cast are not reachable the
+        // same way the sleep timer's docs already explain for those paths.
+        const WT_API = `${getContentBase().replace(/\/api\/lounge$/, '')}/api/lounge/watchtogether`;
+        let wtRole = null;      // null | 'host' | 'viewer'
+        let wtCode = null;
+        let wtInterval = null;
+        let wtLastAppliedAt = 0;
+
+        function toggleWtPopover(event) {
+            event.stopPropagation();
+            const pop = document.getElementById('wtPopover');
+            const chip = document.getElementById('wtChip');
+            if (!pop || !chip) return;
+            const opening = !pop.classList.contains('open');
+            document.getElementById('vpnPopover')?.classList.remove('open');
+            document.getElementById('sleepTimerPopover')?.classList.remove('open');
+            document.getElementById('profilePopover')?.classList.remove('open');
+            if (!opening) { pop.classList.remove('open'); return; }
+            renderWtPopoverBody();
+            const rect = chip.getBoundingClientRect();
+            pop.style.top = (rect.bottom + 8) + 'px';
+            pop.style.right = (window.innerWidth - rect.right) + 'px';
+            pop.style.left = 'auto';
+            pop.classList.add('open');
+        }
+
+        function renderWtPopoverBody() {
+            const wrap = document.getElementById('wtBody');
+            if (!wrap) return;
+            if (wtRole) {
+                wrap.innerHTML = `<div class="vpn-popover-row"><span>Room code</span><span style="font-weight:700;letter-spacing:2px;">${escapeHtml(wtCode)}</span></div>` +
+                    `<div class="vpn-popover-row"><span>Role</span><span>${wtRole === 'host' ? 'Hosting' : 'Watching'}</span></div>` +
+                    `<div class="vpn-popover-actions"><button onclick="wtLeave()"><i class="fas fa-xmark"></i> Leave</button></div>`;
+                return;
+            }
+            const v = dvVideo();
+            const wrap = document.getElementById('device-player');
+            const canHost = v && (v.currentSrc || v.src) && wrap && wrap.classList.contains('is-open') && currentPlaybackMeta && currentPlaybackMeta.title;
+            wrap.innerHTML =
+                (canHost ? `<div class="vpn-popover-actions"><button class="primary" onclick="wtStartHost()"><i class="fas fa-tower-broadcast"></i> Start hosting this</button></div>` :
+                    `<div class="vpn-popover-verdict">Play something in the "This device" player first to host a room.</div>`) +
+                `<div class="vpn-popover-row" style="margin-top:10px;"><input id="wtJoinCode" placeholder="5-letter code" maxlength="5" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;text-transform:uppercase;"></div>` +
+                `<div class="vpn-popover-actions"><button onclick="wtJoin()"><i class="fas fa-right-to-bracket"></i> Join room</button></div>`;
+        }
+
+        function wtRenderChip() {
+            const dot = document.getElementById('wtDot');
+            const sub = document.getElementById('wtSub');
+            if (!dot || !sub) return;
+            if (!wtRole) { dot.style.background = '#555'; dot.style.boxShadow = 'none'; sub.textContent = 'Off'; return; }
+            dot.style.background = '#00ff88';
+            dot.style.boxShadow = '0 0 8px #00ff88, 0 0 16px rgba(0,255,136,0.6)';
+            sub.textContent = wtRole === 'host' ? `Hosting ${wtCode}` : `Watching ${wtCode}`;
+        }
+
+        async function wtStartHost() {
+            const v = dvVideo();
+            if (!v || !currentPlaybackMeta) return;
+            try {
+                const r = await fetch(WT_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: currentPlaybackMeta.title, url: v.currentSrc || v.src, position: v.currentTime, paused: v.paused })
+                });
+                const data = await r.json();
+                if (!r.ok || !data.code) { showRemoteToast(data.error || 'Could not start a room'); return; }
+                wtRole = 'host'; wtCode = data.code;
+                wtRenderChip();
+                document.getElementById('wtPopover')?.classList.remove('open');
+                showRemoteToast(`Room ${data.code} — share this code`);
+                wtInterval = setInterval(() => {
+                    const vv = dvVideo();
+                    if (!vv) return;
+                    fetch(`${WT_API}?code=${wtCode}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ title: currentPlaybackMeta.title, url: vv.currentSrc || vv.src, position: vv.currentTime, paused: vv.paused })
+                    }).catch(() => {});
+                }, 4000);
+            } catch (e) {
+                showRemoteToast('Could not reach the sync server');
+            }
+        }
+
+        async function wtJoin() {
+            const codeInput = document.getElementById('wtJoinCode');
+            const code = (codeInput?.value || '').trim().toUpperCase();
+            if (code.length !== 5) { showRemoteToast('Enter the 5-letter room code'); return; }
+            try {
+                const r = await fetch(`${WT_API}?code=${code}`);
+                const data = await r.json();
+                if (!r.ok) { showRemoteToast(data.error || 'Room not found'); return; }
+                wtRole = 'viewer'; wtCode = code;
+                wtRenderChip();
+                document.getElementById('wtPopover')?.classList.remove('open');
+                showRemoteToast(`Joined room ${code}`);
+                wtApplyState(data);
+                wtInterval = setInterval(async () => {
+                    try {
+                        const rr = await fetch(`${WT_API}?code=${wtCode}`);
+                        if (!rr.ok) { showRemoteToast('Room ended'); wtLeave(); return; }
+                        wtApplyState(await rr.json());
+                    } catch (e) {}
+                }, 4000);
+            } catch (e) {
+                showRemoteToast('Could not reach the sync server');
+            }
+        }
+
+        function wtApplyState(state) {
+            if (state.updatedAt === wtLastAppliedAt) return;
+            wtLastAppliedAt = state.updatedAt;
+            const v = dvVideo();
+            if (!v) return;
+            const wrap = document.getElementById('device-player');
+            if (!wrap || !wrap.classList.contains('is-open') || (v.currentSrc || v.src) !== state.url) {
+                // Not already watching the right thing -- load it, same
+                // entry point normal playback uses, so subtitle wiring/
+                // transport bar all still work identically.
+                openDevicePlayer(state.url, state.subUrl || '', state.position, state.title);
+            }
+            // Small drift is normal (poll interval, network jitter) --
+            // only correct a real desync, so a Skip Intro or a scrub on
+            // the HOST's side doesn't fight the viewer's own tiny buffering
+            // hiccups every 4 seconds.
+            if (Math.abs(v.currentTime - state.position) > 3) v.currentTime = state.position;
+            if (state.paused && !v.paused) v.pause();
+            if (!state.paused && v.paused) v.play().catch(() => {});
+        }
+
+        function wtLeave() {
+            if (wtInterval) { clearInterval(wtInterval); wtInterval = null; }
+            if (wtRole === 'host' && wtCode) {
+                fetch(`${WT_API}?code=${wtCode}`, { method: 'DELETE' }).catch(() => {});
+            }
+            wtRole = null; wtCode = null;
+            wtRenderChip();
+            document.getElementById('wtPopover')?.classList.remove('open');
+            showRemoteToast('Left the room');
+        }
+
+        const TRAKT_API = 'https://api.trakt.tv';
+        const TRAKT_AUTH = 'https://auth.trakt.tv';
+
+        function traktCreds() {
+            const clientId = localStorage.getItem('nexus_trakt_client_id');
+            const clientSecret = localStorage.getItem('nexus_trakt_client_secret');
+            return (clientId && clientSecret) ? { clientId, clientSecret } : null;
+        }
+
+        function traktToken() {
+            return localStorage.getItem('nexus_trakt_access_token') || null;
+        }
+
+        function saveTraktKeys() {
+            const id = document.getElementById('traktClientIdInput').value.trim();
+            const secret = document.getElementById('traktClientSecretInput').value.trim();
+            if (!id || !secret) return;
+            localStorage.setItem('nexus_trakt_client_id', id);
+            localStorage.setItem('nexus_trakt_client_secret', secret);
+            renderTraktStatus();
+        }
+
+        function renderTraktStatus() {
+            const statusEl = document.getElementById('traktStatus');
+            const connectBtn = document.getElementById('traktConnectBtn');
+            const disconnectBtn = document.getElementById('traktDisconnectBtn');
+            if (!statusEl) return;
+            const creds = traktCreds();
+            const token = traktToken();
+            if (token) {
+                statusEl.textContent = 'Connected — playback is being synced to your Trakt profile.';
+                statusEl.style.color = '#00ff88';
+                if (connectBtn) connectBtn.style.display = 'none';
+                if (disconnectBtn) disconnectBtn.style.display = '';
+            } else {
+                statusEl.textContent = creds ? 'Client ID/Secret saved — click Connect Trakt to finish.' : '';
+                statusEl.style.color = '#9fb3c0';
+                if (connectBtn) connectBtn.style.display = '';
+                if (disconnectBtn) disconnectBtn.style.display = 'none';
+            }
+        }
+
+        function traktDisconnect() {
+            localStorage.removeItem('nexus_trakt_access_token');
+            localStorage.removeItem('nexus_trakt_refresh_token');
+            renderTraktStatus();
+            showRemoteToast('Trakt disconnected');
+        }
+
+        async function traktConnect() {
+            const creds = traktCreds();
+            const statusEl = document.getElementById('traktStatus');
+            if (!creds) { if (statusEl) { statusEl.textContent = 'Save your Client ID and Secret first.'; statusEl.style.color = '#ff5470'; } return; }
+
+            let codeRes;
+            try {
+                const r = await fetch(`${TRAKT_AUTH}/oauth/device/code`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ client_id: creds.clientId })
+                });
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                codeRes = await r.json();
+            } catch (e) {
+                if (statusEl) { statusEl.textContent = `Could not start Trakt sign-in: ${e.message || e}`; statusEl.style.color = '#ff5470'; }
+                return;
+            }
+
+            if (statusEl) {
+                statusEl.innerHTML = `Go to <a href="${codeRes.verification_url}" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">${escapeHtml(codeRes.verification_url)}</a> and enter this code: ` +
+                    `<div style="font-size:24px;letter-spacing:5px;font-weight:700;color:#e9faff;margin:8px 0;">${escapeHtml(codeRes.user_code)}</div>` +
+                    `<span id="traktPollStatus">Waiting for you to authorize…</span>`;
+                statusEl.style.color = '#9fb3c0';
+            }
+
+            // Polling loop per Trakt's own documented status codes: 400 =
+            // still pending (keep polling), 410 = expired (stop, tell the
+            // user to retry), 418 = user denied (stop), 200 = done.
+            const deadline = Date.now() + codeRes.expires_in * 1000;
+            const intervalMs = Math.max(1000, codeRes.interval * 1000);
+            const poll = async () => {
+                if (Date.now() > deadline) {
+                    const pollEl = document.getElementById('traktPollStatus');
+                    if (pollEl) pollEl.textContent = 'Code expired — click Connect Trakt to try again.';
+                    return;
+                }
+                let res;
+                try {
+                    res = await fetch(`${TRAKT_AUTH}/oauth/device/token`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code: codeRes.device_code, client_id: creds.clientId, client_secret: creds.clientSecret })
+                    });
+                } catch (e) {
+                    setTimeout(poll, intervalMs);
+                    return;
+                }
+                if (res.status === 200) {
+                    const tok = await res.json();
+                    localStorage.setItem('nexus_trakt_access_token', tok.access_token);
+                    localStorage.setItem('nexus_trakt_refresh_token', tok.refresh_token);
+                    renderTraktStatus();
+                    showRemoteToast('Trakt connected');
+                    return;
+                }
+                if (res.status === 410) {
+                    const pollEl = document.getElementById('traktPollStatus');
+                    if (pollEl) pollEl.textContent = 'Code expired — click Connect Trakt to try again.';
+                    return;
+                }
+                if (res.status === 418) {
+                    const pollEl = document.getElementById('traktPollStatus');
+                    if (pollEl) pollEl.textContent = 'Sign-in was denied.';
+                    return;
+                }
+                // 400 (pending) and anything else transient: keep polling.
+                setTimeout(poll, intervalMs);
+            };
+            setTimeout(poll, intervalMs);
+        }
+
+        // Fire-and-forget: sync failures must never block or interrupt
+        // actual playback, which is why every path here is wrapped and
+        // silent (console-only) on failure. item mirrors currentPickerItem's
+        // shape (title, type, tmdbId); episode is null for a movie.
+        async function traktSyncPlayback(item, episode) {
+            const creds = traktCreds();
+            const token = traktToken();
+            if (!creds || !token || !item || !item.tmdbId) return;
+            const headers = {
+                'Content-Type': 'application/json',
+                'trakt-api-version': '2',
+                'trakt-api-key': creds.clientId,
+                'Authorization': `Bearer ${token}`
+            };
+            const watchedAt = new Date().toISOString();
+            const body = (item.type === 'tv' && episode)
+                ? { episodes: [{ ids: { tmdb: episode.tmdbId || item.tmdbId }, watched_at: watchedAt }] }
+                : { movies: [{ ids: { tmdb: item.tmdbId }, watched_at: watchedAt }] };
+            try {
+                const r = await fetch(`${TRAKT_API}/sync/history`, { method: 'POST', headers, body: JSON.stringify(body) });
+                if (!r.ok) console.warn('Trakt sync failed:', r.status);
+            } catch (e) {
+                console.warn('Trakt sync failed:', e);
+            }
         }
 
         function saveOsubKey() {
@@ -11851,7 +12547,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // browser never sees the video, so nothing here can be inferred from the
         // page; if the relay is unreachable, we simply record nothing rather
         // than guessing a position.
-        const CW_KEY = 'nexusContinueWatching';
+        function CW_KEY() { return pk('nexusContinueWatching'); }
         const CW_POLL_MS = 18000;        // ~18s: fine-grained enough to survive a hard mpv kill
         const CW_MIN_SECONDS = 90;       // below this it was a misfire, not "watching"
         const CW_DONE_RATIO = 0.92;      // past this it's finished, not "continue"
@@ -11860,16 +12556,16 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
         function readContinueWatching() {
             try {
-                const v = JSON.parse(localStorage.getItem(CW_KEY) || '[]');
+                const v = JSON.parse(localStorage.getItem(CW_KEY()) || '[]');
                 return Array.isArray(v) ? v : [];
             } catch (e) {
-                console.error('Failed to parse ' + CW_KEY + ':', e);
+                console.error('Failed to parse ' + CW_KEY() + ':', e);
                 return [];
             }
         }
 
         function writeContinueWatching(list) {
-            localStorage.setItem(CW_KEY, JSON.stringify(list.slice(0, 20)));
+            localStorage.setItem(CW_KEY(), JSON.stringify(list.slice(0, 20)));
         }
 
         // TV dedupes on the series, not the episode, so a show occupies one tile
@@ -12171,8 +12867,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // would be the app lying about what the button does.
             if (!confirm(`Clear your watch history? This also clears ${REEL_NAME} on your other devices and can't be undone.`)) return;
             const list = readContinueWatching();
-            localStorage.removeItem('nexus_watch_history');
-            localStorage.removeItem(CW_KEY);
+            localStorage.removeItem(pk('nexus_watch_history'));
+            localStorage.removeItem(CW_KEY());
             stopPlaybackTracking();
             reelActiveId = null;
             // One DELETE per title rather than a bulk endpoint: each one writes a
@@ -12724,9 +13420,9 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // playChannel() -- so the counter below is added here. It starts empty
         // and the UI says so rather than pretending to know Deep's habits on
         // day one.
-        const EPG_PLAYS_KEY = 'nexus_channel_plays';
+        function EPG_PLAYS_KEY() { return pk('nexus_channel_plays'); }
         function readChannelPlays() {
-            try { return JSON.parse(localStorage.getItem(EPG_PLAYS_KEY) || '{}') || {}; }
+            try { return JSON.parse(localStorage.getItem(EPG_PLAYS_KEY()) || '{}') || {}; }
             catch (e) { return {}; }
         }
         function recordChannelPlay(channel) {
@@ -12736,7 +13432,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 const k = channel.url;
                 const prev = plays[k] || { n: 0, name: channel.name };
                 plays[k] = { n: prev.n + 1, name: channel.name, at: Date.now() };
-                localStorage.setItem(EPG_PLAYS_KEY, JSON.stringify(plays));
+                localStorage.setItem(EPG_PLAYS_KEY(), JSON.stringify(plays));
             } catch (e) { /* quota/private-mode: play must never fail over stats */ }
         }
         function channelPlayCount(channel) {
@@ -13227,7 +13923,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // ===== FAVOURITE CHANNELS =====
         function getFavouriteChannelUrls() {
             try {
-                return JSON.parse(localStorage.getItem('nexus_favourite_channels') || '[]');
+                return JSON.parse(localStorage.getItem(pk('nexus_favourite_channels')) || '[]');
             } catch (e) {
                 return [];
             }
@@ -13243,7 +13939,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             let favs = getFavouriteChannelUrls();
             const wasActive = favs.includes(url);
             favs = wasActive ? favs.filter(u => u !== url) : [...favs, url];
-            localStorage.setItem('nexus_favourite_channels', JSON.stringify(favs));
+            localStorage.setItem(pk('nexus_favourite_channels'), JSON.stringify(favs));
             evt.currentTarget.classList.toggle('active', !wasActive);
             evt.currentTarget.title = wasActive ? 'Add to Favourites' : 'Remove from Favourites';
         }
@@ -13497,7 +14193,21 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             renderPlayTargets();
         }
 
-        function castTargetAvailable() { return castFrameworkReady && castDevicesPresent; }
+        // Real native Chromecast, added 2026-08-16: castFrameworkReady/
+        // castDevicesPresent only ever get set true by the Chrome-only
+        // chrome.cast JS API (see __nexusInitCast above), which a plain
+        // WebView -- what the packaged app runs -- never receives. Inside
+        // the app, LoungeNative.isCastSessionActive exists as a function
+        // whether or not a device is currently connected (it's a real
+        // Cast SDK call, not a JS shim), so its mere presence is what
+        // "cast could work here" means for that context -- whether a
+        // route is actually nearby is what MainActivity's own
+        // MediaRouteButton (top-right) shows/hides itself.
+        function nativeCastAvailable() {
+            return !!(window.LoungeNative && typeof LoungeNative.isCastSessionActive === 'function');
+        }
+
+        function castTargetAvailable() { return (castFrameworkReady && castDevicesPresent) || nativeCastAvailable(); }
 
         function renderPlayTargets() {
             const wrap = document.getElementById('stream-picker-target');
@@ -13662,6 +14372,13 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             document.getElementById('dv-title').textContent = title || 'Now playing';
             document.getElementById('dv-note').textContent = '';
             document.getElementById('dv-loading').classList.add('is-shown');
+            // Skip Intro only makes sense for a TV show (a movie has no
+            // "next episode" to reuse the mark on). currentPlaybackMeta is
+            // set as a global immediately before dispatchPlayback() calls in
+            // here, same pattern upsertContinueWatching() below already relies on.
+            const markBtn = document.getElementById('dv-mark-intro');
+            if (markBtn) markBtn.hidden = !(currentPlaybackMeta && currentPlaybackMeta.type === 'tv');
+            document.getElementById('dv-skip-intro').style.display = 'none';
             wrap.classList.add('is-open');
             // is-loading suppresses the centre popcorn button while the file is
             // still opening; is-paused drives its visibility from then on.
@@ -13777,6 +14494,45 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         function dvEl(id) { return document.getElementById(id); }
         function dvWrap() { return document.getElementById('device-player'); }
         function dvVideo() { return document.getElementById('dv-video'); }
+
+        // ===== SKIP INTRO, added 2026-08-16 =====
+        // Keyed by show title (not per-episode) -- the whole point is that
+        // marking it once on the first episode of a season carries forward
+        // to every episode after. No intro-detection API involved (they're
+        // unreliable and mostly paid); this is Deep's own one-time mark.
+        function introMarksStore() {
+            try { return JSON.parse(localStorage.getItem(pk('nexus_intro_marks')) || '{}'); }
+            catch (e) { return {}; }
+        }
+
+        function dvMarkIntroEnd() {
+            const v = dvVideo();
+            if (!v || !currentPlaybackMeta || currentPlaybackMeta.type !== 'tv') return;
+            const marks = introMarksStore();
+            marks[currentPlaybackMeta.title] = v.currentTime;
+            localStorage.setItem(pk('nexus_intro_marks'), JSON.stringify(marks));
+            showRemoteToast(`Intro end marked at ${dvFmtTime(v.currentTime)} — future episodes of this show will offer Skip Intro`);
+        }
+
+        function dvSkipIntro() {
+            const v = dvVideo();
+            if (!v || !currentPlaybackMeta) return;
+            const marks = introMarksStore();
+            const mark = marks[currentPlaybackMeta.title];
+            if (typeof mark === 'number') v.currentTime = mark;
+            document.getElementById('dv-skip-intro').style.display = 'none';
+        }
+
+        function dvUpdateSkipIntroVisibility(currentTime) {
+            const btn = document.getElementById('dv-skip-intro');
+            if (!btn) return;
+            if (!currentPlaybackMeta || currentPlaybackMeta.type !== 'tv') { btn.style.display = 'none'; return; }
+            const mark = introMarksStore()[currentPlaybackMeta.title];
+            // A few seconds of headroom before the mark so it doesn't flash
+            // on and immediately off again for a mark set only a moment
+            // earlier in the video's very first second.
+            btn.style.display = (typeof mark === 'number' && currentTime < mark - 1) ? '' : 'none';
+        }
 
         function dvFmtTime(s) {
             if (!isFinite(s) || s < 0) s = 0;
@@ -13908,6 +14664,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const dur = isFinite(v.duration) && v.duration > 0 ? v.duration : 0;
             const label = dvEl('dv-time');
             if (label) label.textContent = dvFmtTime(v.currentTime) + ' / ' + dvFmtTime(dur);
+
+            dvUpdateSkipIntroVisibility(v.currentTime);
 
             const seek = dvEl('dv-seek');
             if (!seek) return;
@@ -14460,6 +15218,24 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 showPlaybackFallback('TV', 'No Chromecast is reachable from this browser right now.', args);
                 return;
             }
+
+            // Native app path: no chrome.cast JS API here (see
+            // nativeCastAvailable above), so this goes through the real Cast
+            // SDK bridge instead. isCastSessionActive is false until the user
+            // has tapped the native Cast icon (top-right) and picked a
+            // device from the system dialog -- JS cannot open that picker
+            // itself, only Google's own MediaRouteButton can.
+            if (nativeCastAvailable() && !(castFrameworkReady && castDevicesPresent)) {
+                if (!LoungeNative.isCastSessionActive()) {
+                    showRemoteToast('Tap the Cast icon (top-right) to pick a device first');
+                    return;
+                }
+                const ok = LoungeNative.castMedia(videoUrl, subUrl || '', startPos || 0, title || 'Lounge');
+                if (ok) showRemoteToast('Playing on TV');
+                else showPlaybackFallback('TV', 'Chromecast rejected the file. Its receiver only decodes H.264/VP8/VP9 in MP4 or WebM.', args);
+                return;
+            }
+
             const ctx = cast.framework.CastContext.getInstance();
             try {
                 if (!ctx.getCurrentSession()) await ctx.requestSession();
@@ -14521,6 +15297,11 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 lpEl('lp-error-msg').textContent = msg || "This channel wouldn't play in the browser.";
                 lpEl('lp-error-detail').textContent = detail || '';
                 lpSetStatus('FAILED');
+                // Only DaddyLive/Sky Sport channels go through the resolver
+                // this button re-checks -- a plain direct-URL channel has
+                // nothing for it to diagnose.
+                const diagBtn = lpEl('lp-diagnose-btn');
+                if (diagBtn) diagBtn.style.display = (lpChannel && lpChannel.externalWatch && lpChannel.dlhdId) ? '' : 'none';
             }
         }
 
@@ -14799,11 +15580,25 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 const relayUrl = `${getContentBase()}/skystream?id=${encodeURIComponent(channel.dlhdId)}`;
                 try {
                     const res = await fetch(relayUrl, { signal: AbortSignal.timeout(20000) });
-                    const body = res.ok ? await res.text() : '';
+                    // BUG FIXED 2026-08-16 (Deep: "cannot play SPORTS"): this
+                    // used to only read the body when res.ok, so on the
+                    // relay's own 502 failure -- which api/lounge/skystream.js
+                    // ALREADY returns as {"error":"<exact reason, e.g. 'player
+                    // frame not found on stream page'>"} -- body was thrown
+                    // away as '' before ever being looked at. The generic
+                    // "chain changes often" message below was covering for
+                    // real, specific, already-computed diagnostic info the
+                    // whole time.
+                    const body = await res.text();
                     if (gen !== lpGen) return;   // user switched channels mid-resolve
                     if (!body.includes('#EXTM3U')) {
+                        let reason = null;
+                        try { reason = JSON.parse(body).error; } catch (e) { /* not JSON, e.g. a network edge error */ }
                         lpShowState('error', 'Sky Sport stream could not be resolved right now.',
-                            'The cloud relay reached DaddyLive but got no playlist back. Their player chain changes often — try again, or open the source page.');
+                            (reason
+                                ? `DaddyLive's chain broke at: ${reason}`
+                                : 'The cloud relay reached DaddyLive but got no playlist back. Their player chain changes often.')
+                            + ' — try again, or open the source page.');
                         return;
                     }
                     src = relayUrl;
@@ -14927,10 +15722,65 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 video.muted = true;
                 lpEl('lp-mute').querySelector('i').className = 'fas fa-volume-xmark';
                 video.play().catch((e) => {
-                    lpShowState('error', 'Playback was blocked by the browser.',
-                        e.message || 'Try pressing play in the transport bar.');
+                    // Found live 2026-08-16 (Deep: "cannot play SPORTS"): this
+                    // rejection is frequently a false negative, not a real
+                    // block. hls.js's own error recovery (recoverMediaError/
+                    // startLoad, both of which pause() the element) can land
+                    // between the two play() calls above on a flaky relay
+                    // stream, producing exactly this DOMException
+                    // ("interrupted by a call to pause()") even though the
+                    // element goes on to actually play a moment later.
+                    // Two guards before showing an error the user can't act on:
+                    // (1) if it's already playing despite the rejection, there
+                    // is nothing wrong -- just clear any stale error state;
+                    // (2) otherwise, one retry after a short delay, since the
+                    // race that caused this is transient by nature.
+                    if (!video.paused && video.readyState >= 2) { lpShowState(null); return; }
+                    setTimeout(() => {
+                        if (!video.paused && video.readyState >= 2) { lpShowState(null); return; }
+                        video.play().catch((e2) => {
+                            lpShowState('error', 'Playback was blocked by the browser.',
+                                (e2 || e).message || 'Try pressing play in the transport bar.');
+                        });
+                    }, 800);
                 });
             });
+        }
+
+        // Manual re-check of the DaddyLive/Sky Sport resolver for the channel
+        // that's currently showing an error, added 2026-08-16 (Deep asked for
+        // an "in-app resolve links" tool after Sky Sport 1 NZ failed). Lighter
+        // than "Try again" -- it only re-runs the server-side chain-walk and
+        // reports what happened, without touching hls.js or the video element
+        // at all, so repeat troubleshooting doesn't also restart playback.
+        async function diagnoseSkyStream() {
+            if (!lpChannel || !lpChannel.dlhdId) return;
+            const btn = lpEl('lp-diagnose-btn');
+            const detailEl = lpEl('lp-error-detail');
+            const originalBtnHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Checking…';
+            const relayUrl = `${getContentBase()}/skystream?id=${encodeURIComponent(lpChannel.dlhdId)}`;
+            const startedAt = performance.now();
+            try {
+                const res = await fetch(relayUrl, { signal: AbortSignal.timeout(20000) });
+                const ms = Math.round(performance.now() - startedAt);
+                const body = await res.text();
+                if (body.includes('#EXTM3U')) {
+                    detailEl.textContent = `Resolver check: OK — got a real playlist in ${ms}ms (id ${lpChannel.dlhdId}). Try again should work now.`;
+                    return;
+                }
+                let reason = null;
+                try { reason = JSON.parse(body).error; } catch (e) { /* not JSON */ }
+                detailEl.textContent = `Resolver check: HTTP ${res.status} in ${ms}ms — ` +
+                    (reason || 'no playlist and no error detail returned') + ` (id ${lpChannel.dlhdId}).`;
+            } catch (e) {
+                const ms = Math.round(performance.now() - startedAt);
+                detailEl.textContent = `Resolver check: could not reach ${getContentBase()} after ${ms}ms — ${e.message || e}.`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalBtnHtml;
+            }
         }
 
         document.addEventListener('keydown', (e) => {
@@ -15444,12 +16294,23 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             'MediaFusion': 'https://mediafusion.elfhosted.com'
         };
 
+        // HDR detection added 2026-08-16. Resolution filtering (2160p/1080p/
+        // etc, the QUALITY_RANK tabs below) already existed and works well --
+        // this is the genuinely missing piece: a 2160p release can be SDR or
+        // HDR, and the two look very different on an actual HDR display.
+        // Matches the common release-name markers: HDR / HDR10 / HDR10+ /
+        // "Dolby Vision" / DV / DoVi. 10bit alone is deliberately NOT treated
+        // as HDR -- plenty of SDR encodes use a 10-bit colour depth purely
+        // for compression efficiency, it doesn't imply an HDR-graded master.
+        const HDR_RX = /\b(HDR10\+?|HDR|DV|DoVi|Dolby[\s.]?Vision)\b/i;
+
         function parseStreamTitle(rawTitle) {
             const qualityMatch = rawTitle.match(/\b(2160p|1080p|720p|480p)\b/i);
             const sizeMatch = rawTitle.match(/([\d.]+)\s?GB/i);
             const seedersMatch = rawTitle.match(/👤\s?(\d+)/);
             return {
                 quality: qualityMatch ? qualityMatch[1] : 'SD',
+                hdr: HDR_RX.test(rawTitle),
                 sizeGB: sizeMatch ? parseFloat(sizeMatch[1]) : null,
                 seeders: seedersMatch ? parseInt(seedersMatch[1], 10) : 0
             };
@@ -15609,33 +16470,58 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 <div class="stream-picker-row" onclick="resolveAndPlay(${idx})">
                     <div style="display:flex;align-items:center;">
                         <span class="quality-badge quality-${s.quality}">${escapeHtml(s.quality)}</span>
+                        ${s.hdr ? '<span class="quality-badge quality-hdr">HDR</span>' : ''}
                         <div>
                             <div>${escapeHtml(s.title)}</div>
                             <div class="stream-picker-meta">${s.sizeGB ? s.sizeGB + ' GB' : '? GB'} · ${s.seeders} seeders · ${escapeHtml(s.source)}</div>
                         </div>
                     </div>
-                    <i class="fas fa-play"></i>
+                    <div style="display:flex;align-items:center;gap:16px;">
+                        <i class="fas fa-download" title="Download for offline (Android app only)" onclick="event.stopPropagation();resolveAndPlay(${idx}, true)" style="opacity:0.7;"></i>
+                        <i class="fas fa-play"></i>
+                    </div>
                 </div>
             `).join('');
             window.__currentStreams = streams;
         }
 
+        // Independent of the quality tier tabs (a resolution AND an HDR
+        // toggle can both be active at once), so it's tracked separately
+        // rather than folded into the same single-select 'all'/'2160p'/etc
+        // state filterStreamsByQuality already used.
+        let hdrOnlyFilter = false;
+
         function filterStreamsByQuality(quality, evt) {
             document.querySelectorAll('.quality-filter-tab').forEach(t => t.classList.remove('active'));
             if (evt && evt.target) evt.target.classList.add('active');
-            const filtered = quality === 'all' ? allStreamsForPicker : allStreamsForPicker.filter(s => s.quality === quality);
+            applyStreamFilters(quality);
+        }
+
+        function toggleHdrOnlyFilter(evt) {
+            hdrOnlyFilter = !hdrOnlyFilter;
+            if (evt && evt.target) evt.target.classList.toggle('active', hdrOnlyFilter);
+            const activeTab = document.querySelector('.quality-filter-tab.active');
+            applyStreamFilters(activeTab ? (activeTab.dataset.quality || 'all') : 'all');
+        }
+
+        function applyStreamFilters(quality) {
+            let filtered = quality === 'all' ? allStreamsForPicker : allStreamsForPicker.filter(s => s.quality === quality);
+            if (hdrOnlyFilter) filtered = filtered.filter(s => s.hdr);
             renderStreamRows(filtered);
         }
 
         function showStreamResults(streams) {
             allStreamsForPicker = streams;
+            hdrOnlyFilter = false;
             const tabsWrap = document.getElementById('stream-picker-quality-tabs');
             const available = QUALITY_ORDER.filter(q => streams.some(s => s.quality === q));
+            const hdrCount = streams.filter(s => s.hdr).length;
             // Per-tier class => per-tier colour, plus the shared .neon-actionable
             // glow, so the row reads as a live filter set rather than static chrome.
             tabsWrap.innerHTML = `<div class="quality-filter-tabs">` +
-                `<button class="quality-filter-tab neon-actionable active" onclick="filterStreamsByQuality('all', event)">All (${streams.length})</button>` +
-                available.map(q => `<button class="quality-filter-tab neon-actionable q-${q.toLowerCase()}" onclick="filterStreamsByQuality('${q}', event)">${q} (${streams.filter(s => s.quality === q).length})</button>`).join('') +
+                `<button class="quality-filter-tab neon-actionable active" data-quality="all" onclick="filterStreamsByQuality('all', event)">All (${streams.length})</button>` +
+                available.map(q => `<button class="quality-filter-tab neon-actionable q-${q.toLowerCase()}" data-quality="${q}" onclick="filterStreamsByQuality('${q}', event)">${q} (${streams.filter(s => s.quality === q).length})</button>`).join('') +
+                (hdrCount ? `<button class="quality-filter-tab neon-actionable" style="color:#ff2ec4;border-color:rgba(255,46,196,0.55);" onclick="toggleHdrOnlyFilter(event)">HDR only (${hdrCount})</button>` : '') +
                 `<button type="button" class="sp-guide-btn" id="sp-guide-btn" aria-expanded="false" aria-controls="sp-guide-panel" onclick="toggleQualityGuide(this)"><i class="fas fa-circle-info" aria-hidden="true"></i>What do these mean?</button>` +
                 `</div>` +
                 `<div id="sp-device-hint"></div>` +
@@ -15877,13 +16763,15 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             if (body) body.innerHTML = '<div class="stream-picker-empty">Download cancelled.</div>';
         }
 
-        async function resolveAndPlay(streamIdx) {
+        async function resolveAndPlay(streamIdx, downloadInstead) {
             const myGeneration = pickerGeneration;
             const stream = window.__currentStreams[streamIdx];
             const rdKey = localStorage.getItem('nexus_rd_key');
             const body = document.getElementById('stream-picker-body');
             currentRdTorrentId = null;
-            body.innerHTML = '<div class="stream-picker-empty">Adding to Real-Debrid...</div>';
+            body.innerHTML = downloadInstead
+                ? '<div class="stream-picker-empty">Adding to Real-Debrid for download...</div>'
+                : '<div class="stream-picker-empty">Adding to Real-Debrid...</div>';
 
             try {
                 const addRes = await fetch(rdUrl('torrents/addMagnet'), {
@@ -16007,6 +16895,29 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
                 if (myGeneration !== pickerGeneration || !currentPickerItem) return;
                 currentRdTorrentId = null;
+
+                // Offline download, added 2026-08-16. Android-app-only --
+                // there's no meaningful "download to device" in a browser
+                // tab beyond what the browser's own download manager
+                // already offers on a raw link, and this needs real
+                // background-transfer + storage-write plumbing that only
+                // exists on the native side (LoungeBridge.downloadMovie,
+                // backed by Android's own DownloadManager).
+                if (downloadInstead) {
+                    const n = window.LoungeNative;
+                    if (!n || typeof n.downloadMovie !== 'function') {
+                        body.innerHTML = '<div class="stream-picker-empty">Offline download is only available in the Lounge Android app.</div>';
+                        return;
+                    }
+                    const dlName = `${currentPickerItem.title}${currentPickerEpisode ? ` S${currentPickerEpisode.season}E${currentPickerEpisode.episode}` : ''}`;
+                    let result = 'failed';
+                    try { result = String(n.downloadMovie(directUrl, dlName, dlName)); } catch (e) { result = 'failed'; }
+                    if (result === 'started') body.innerHTML = '<div class="stream-picker-empty">Download started — check your notification shade for progress.</div>';
+                    else if (result === 'permission-needed') body.innerHTML = '<div class="stream-picker-empty">Storage permission needed — grant it in Android Settings, then try again.</div>';
+                    else body.innerHTML = '<div class="stream-picker-empty">Could not start the download.</div>';
+                    return;
+                }
+
                 const playedItem = currentPickerItem;
                 const playedEpisode = currentPickerEpisode;   // capture before closeStreamPicker() clears it
                 const subUrlForPlayback = selectedSubtitleUrl; // capture before closeStreamPicker() clears it
@@ -16043,9 +16954,10 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     startedAt: Date.now(),
                     lastPlayedAt: Date.now()
                 };
-                const history = JSON.parse(localStorage.getItem('nexus_watch_history') || '[]');
+                const history = JSON.parse(localStorage.getItem(pk('nexus_watch_history')) || '[]');
                 history.unshift(historyEntry);
-                localStorage.setItem('nexus_watch_history', JSON.stringify(history.slice(0, 50)));
+                localStorage.setItem(pk('nexus_watch_history'), JSON.stringify(history.slice(0, 50)));
+                traktSyncPlayback(playedItem, playedEpisode);
 
                 // Ask the relay where mpv actually gets to. Applies to BOTH launch
                 // paths: the relay runs locally at all times (launch-nexus.ps1
