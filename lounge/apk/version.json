@@ -33,10 +33,21 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v84"
+      "cacheName": "lounge-shell-v86"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.24",
+      "versionCode": 22,
+      "web": "lounge-shell-v86",
+      "date": "2026-08-17",
+      "title": "Web-only: Trakt link fix + public-deploy PIN gate (no Android changes, still 0.1.24/22)",
+      "changes": [
+        "Fixed the Trakt.tv Sync settings link -- it pointed at a dead legacy URL (app.trakt.tv/oauth/applications) that redirects to a blank apps list. Now points at app.trakt.tv/settings/apps/api/new, the current create-app form. Noted that an ad-blocker extension can leave that page blank (client-rendered SPA) -- try Incognito if so.",
+        "Added an access PIN gate for the public lounge.whetudigital.co.nz deploy only -- the LAN server has always relied on 'only reachable on your own WiFi', which the public mirror doesn't have. Same PIN as the Restricted section. Automatically skipped on any LAN/localhost hostname, so home use is unaffected."
+      ]
+    },
     {
       "version": "0.1.24",
       "versionCode": 22,

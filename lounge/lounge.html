@@ -5299,7 +5299,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             font-size: 16px;
             text-align: center;
         }
-        #remote-pin-icon, #restricted-pin-icon {
+        #remote-pin-icon, #restricted-pin-icon, #access-pin-icon {
             font-size: 42px;
             background: linear-gradient(135deg, #00d4ff, #ff006e);
             -webkit-background-clip: text;
@@ -5308,9 +5308,9 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             margin-bottom: 10px;
             display: block;
         }
-        #remote-pin-box h2, #restricted-pin-box h2 { font-size: 26px; margin-bottom: 6px; }
-        #remote-pin-box p, #restricted-pin-box p { color: #888; font-size: 13px; margin-bottom: 24px; }
-        #remote-pin-display, #restricted-pin-display {
+        #remote-pin-box h2, #restricted-pin-box h2, #access-pin-box h2 { font-size: 26px; margin-bottom: 6px; }
+        #remote-pin-box p, #restricted-pin-box p, #access-pin-box p { color: #888; font-size: 13px; margin-bottom: 24px; }
+        #remote-pin-display, #restricted-pin-display, #access-pin-display {
             font-size: 32px;
             letter-spacing: 12px;
             height: 40px;
@@ -5318,19 +5318,19 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             color: #00d4ff;
             text-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
         }
-        #remote-pin-display.shake, #restricted-pin-display.shake { animation: pinShake 0.4s; color: #ff006e; }
+        #remote-pin-display.shake, #restricted-pin-display.shake, #access-pin-display.shake { animation: pinShake 0.4s; color: #ff006e; }
         @keyframes pinShake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-10px); }
             75% { transform: translateX(10px); }
         }
-        #remote-pin-keypad, #restricted-pin-keypad {
+        #remote-pin-keypad, #restricted-pin-keypad, #access-pin-keypad {
             display: grid;
             grid-template-columns: repeat(3, 72px);
             gap: 16px;
             justify-content: center;
         }
-        #remote-pin-keypad button, #restricted-pin-keypad button {
+        #remote-pin-keypad button, #restricted-pin-keypad button, #access-pin-keypad button {
             width: 72px;
             height: 72px;
             border-radius: 50%;
@@ -5357,8 +5357,22 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             padding: 12px 16px;   /* keeps the touch target >= 44px tall */
         }
         .gate-escape:active { color: #00d4ff; }
-        #pin-backspace, #restricted-pin-backspace { font-size: 20px; color: #888; }
-        #remote-pin-keypad button:active, #restricted-pin-keypad button:active {
+        #pin-backspace, #restricted-pin-backspace, #access-pin-backspace { font-size: 20px; color: #888; }
+        #access-pin-gate {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 6000;
+            /* Opaque, unlike the Remote/Restricted gates above -- this one is a
+               real access boundary for the public deploy, not in-app friction,
+               so nothing behind it should be visible or reachable. */
+            background: #050505;
+            align-items: center;
+            justify-content: center;
+        }
+        #access-pin-gate.show { display: flex; }
+        #access-pin-box { text-align: center; padding: 30px; }
+        #remote-pin-keypad button:active, #restricted-pin-keypad button:active, #access-pin-keypad button:active {
             background: linear-gradient(135deg, #00d4ff, #9d4edd);
             transform: scale(0.92);
             box-shadow: 0 0 24px rgba(0, 212, 255, 0.5);
@@ -5942,6 +5956,76 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
     </script>
 </head>
 <body>
+    <!-- Public-deploy access gate, added 2026-08-17. The LAN server (serve_nocache.py)
+         has always relied on "only reachable on your own WiFi" as the trust boundary --
+         that assumption breaks the moment this same file is pushed to the public
+         lounge.whetudigital.co.nz mirror, which has no gate of its own. This blocks
+         entry on any non-LAN hostname until the same PIN as the Restricted section
+         ('69') is entered. Placed as the very first thing in <body> with its own
+         synchronous script (not the big inline script further down) so it decides
+         to show/hide itself before anything else paints -- no flash of real content. -->
+    <div id="access-pin-gate">
+        <div id="access-pin-box">
+            <i class="fas fa-lock" id="access-pin-icon"></i>
+            <h2>Lounge</h2>
+            <p>Enter PIN</p>
+            <div id="access-pin-display"></div>
+            <div id="access-pin-keypad">
+                <button onclick="accessPinPress('1')">1</button>
+                <button onclick="accessPinPress('2')">2</button>
+                <button onclick="accessPinPress('3')">3</button>
+                <button onclick="accessPinPress('4')">4</button>
+                <button onclick="accessPinPress('5')">5</button>
+                <button onclick="accessPinPress('6')">6</button>
+                <button onclick="accessPinPress('7')">7</button>
+                <button onclick="accessPinPress('8')">8</button>
+                <button onclick="accessPinPress('9')">9</button>
+                <span></span>
+                <button onclick="accessPinPress('0')">0</button>
+                <button id="access-pin-backspace" onclick="accessPinBackspace()" aria-label="Delete last digit"><i class="fas fa-delete-left"></i></button>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function () {
+            var ACCESS_PIN = '69'; // keep in sync with RESTRICTED_PIN further down this file
+            var STORE_KEY = 'lounge_access_ok';
+            var h = location.hostname;
+            var isLan = h === 'localhost' || h === '127.0.0.1' || h === '' ||
+                /^192\.168\./.test(h) || /^10\./.test(h) || /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(h);
+            if (isLan) { return; }
+            try {
+                if (sessionStorage.getItem(STORE_KEY) === '1') { return; }
+            } catch (e) { return; } // sessionStorage unavailable (rare) -- fail open rather than lock out
+            var gate = document.getElementById('access-pin-gate');
+            gate.classList.add('show');
+            var buf = '';
+            var displayEl;
+            function refresh() {
+                displayEl = displayEl || document.getElementById('access-pin-display');
+                displayEl.textContent = buf.replace(/./g, '•');
+            }
+            window.accessPinPress = function (d) {
+                if (buf.length >= 4) { return; }
+                buf += d;
+                refresh();
+                if (buf.length === ACCESS_PIN.length) {
+                    if (buf === ACCESS_PIN) {
+                        try { sessionStorage.setItem(STORE_KEY, '1'); } catch (e) {}
+                        gate.classList.remove('show');
+                    } else {
+                        displayEl.classList.add('shake');
+                        setTimeout(function () { displayEl.classList.remove('shake'); buf = ''; refresh(); }, 400);
+                    }
+                }
+            };
+            window.accessPinBackspace = function () {
+                buf = buf.slice(0, -1);
+                refresh();
+            };
+        })();
+    </script>
+
     <canvas id="ambient-canvas"></canvas>
     <div class="grain"></div>
     <div class="c-dot" id="cDot"></div>
@@ -6978,7 +7062,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 <div class="settings-row">
                     <div class="settings-row-text">
                         <h4>Trakt.tv Sync</h4>
-                        <p>Real watch-history sync, separate from the local "Continue Watching" list. Every movie/episode played from Lounge is pushed to your Trakt profile, viewable and tracked from any device. Free account, no VIP needed. Create an app at <a href="https://app.trakt.tv/oauth/applications" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">app.trakt.tv/oauth/applications</a> (Redirect URI can be anything, e.g. <code>urn:ietf:wg:oauth:2.0:oob</code> — the device flow below never uses it) to get a Client ID and Secret.</p>
+                        <p>Real watch-history sync, separate from the local "Continue Watching" list. Every movie/episode played from Lounge is pushed to your Trakt profile, viewable and tracked from any device. Free account, no VIP needed. Create an app at <a href="https://app.trakt.tv/settings/apps/api/new" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">app.trakt.tv/settings/apps/api/new</a> (Redirect URI can be anything, e.g. <code>urn:ietf:wg:oauth:2.0:oob</code> — the device flow below never uses it) to get a Client ID and Secret. If that page loads blank, try an Incognito window — an ad-blocker extension can prevent Trakt's settings page from rendering.</p>
                         <div style="display:flex;gap:10px;align-items:center;margin-top:10px;">
                             <input type="password" id="traktClientIdInput" placeholder="Client ID" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:220px;">
                             <input type="password" id="traktClientSecretInput" placeholder="Client Secret" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:220px;">
@@ -10278,7 +10362,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v84';
+        const LOUNGE_BUILD = 'lounge-shell-v86';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
