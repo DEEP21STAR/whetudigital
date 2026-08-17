@@ -33,10 +33,21 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v113"
+      "cacheName": "lounge-shell-v114"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v114",
+      "date": "2026-08-18",
+      "title": "Parallax tilt on Hover Break-Out + real scrub-preview thumbnails",
+      "changes": [
+        "Hover Break-Out's enlarged card now tilts a few degrees toward the cursor (GSAP quickTo, restrained +-6deg) -- a holographic-case feel without leaving the existing scale/glow vocabulary.",
+        "This Device player: dragging the seek bar now shows a real video frame preview above the scrubber, not just the time. Cheap version of scrub-thumbnails -- a hidden second <video> pointed at the same src is seeked independently (debounced, 110ms), no server-side sprite-sheet infra. Degrades honestly: a slow/failed seek just leaves the time-only tip, never a broken thumbnail box. Verified live against a real CORS-enabled test video -- captured canvas confirmed to hold real non-black frame data, not a blank box."
+      ]
+    },
     {
       "version": "0.1.25",
       "versionCode": 23,

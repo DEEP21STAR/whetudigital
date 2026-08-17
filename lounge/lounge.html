@@ -4156,6 +4156,23 @@
 
         .dv-scrub-tip.is-shown { opacity: 1; }
 
+        .dv-scrub-thumb {
+            position: absolute;
+            bottom: calc(100% + 38px);
+            transform: translateX(-50%);
+            width: 128px;
+            height: 72px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 212, 255, 0.5);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+            background: #0a0a0e;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.14s ease;
+        }
+        .dv-scrub-thumb.is-shown { opacity: 1; }
+        @media (max-width: 480px) { .dv-scrub-thumb { display: none; } }
+
         /* Captions / speed popover. Anchored to its button, opening UPWARD --
            the transport bar is the bottom row of a full-height overlay, so a
            downward menu would open off-screen. */
@@ -8780,6 +8797,14 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             <div class="dv-seek-wrap">
                 <input id="dv-seek" class="dv-seek" type="range" min="0" max="1000" step="1" value="0"
                        aria-label="Seek" aria-valuetext="0:00 of 0:00">
+                <!-- Scrub thumbnail preview (DESIGN_DNA elevation, Medium
+                     tier, 2026-08-18) -- real frames from a hidden second
+                     <video> pointed at the same src, not a sprite-sheet
+                     (that's the Major-tier version, needs server infra).
+                     Canvas only shown once a frame actually draws -- see
+                     dvScrubPreviewSeek() -- so a slow/failed seek degrades
+                     to the time-only tip, never a blank/broken box. -->
+                <canvas id="dv-scrub-thumb" class="dv-scrub-thumb" width="160" height="90" aria-hidden="true"></canvas>
                 <span id="dv-scrub-tip" class="dv-scrub-tip" aria-hidden="true">0:00</span>
             </div>
             <button id="dv-mute" class="dt-btn" onclick="dvToggleMute()" title="Mute / unmute" aria-label="Mute or unmute"><i class="fas fa-volume-high"></i></button>
@@ -10382,6 +10407,27 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 </div>
             `;
             overlay.addEventListener('click', () => { chbTeardown(true); openDetail(cardId); });
+
+            // Parallax tilt (DESIGN_DNA elevation, Medium tier, 2026-08-18):
+            // the enlarged preview tilts a few degrees toward the cursor,
+            // "holographic case" feel without leaving the existing scale/
+            // glow vocabulary. quickTo for a performant per-frame tween
+            // instead of a fresh gsap.to() on every mousemove tick. Element
+            // is rebuilt fresh per hover (see chbTriggerExpand), so this
+            // listener is garbage-collected with it on teardown -- no
+            // explicit removeEventListener needed.
+            gsap.set(overlay, { transformPerspective: 700, transformStyle: 'preserve-3d' });
+            const tiltX = gsap.quickTo(overlay, 'rotateX', { duration: 0.4, ease: 'power2.out' });
+            const tiltY = gsap.quickTo(overlay, 'rotateY', { duration: 0.4, ease: 'power2.out' });
+            overlay.addEventListener('mousemove', (e) => {
+                const r = overlay.getBoundingClientRect();
+                const px = (e.clientX - r.left) / r.width - 0.5;
+                const py = (e.clientY - r.top) / r.height - 0.5;
+                tiltX(py * -6);
+                tiltY(px * 6);
+            });
+            overlay.addEventListener('mouseleave', () => { tiltX(0); tiltY(0); });
+
             const muteBtn = overlay.querySelector('.chb-mute-toggle');
             muteBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -12559,7 +12605,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v113';
+        const LOUNGE_BUILD = 'lounge-shell-v114';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -17111,6 +17157,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const video = document.getElementById('dv-video');
             if (dvWatchdog) { clearTimeout(dvWatchdog); dvWatchdog = null; }
             dvUpnextHide();
+            dvTeardownScrubPreview();
             const recap = document.getElementById('dv-recap');
             if (recap) { recap.hidden = true; recap.classList.remove('is-active'); }
             if (video) {
@@ -17368,11 +17415,15 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 // drifts off the thumb at the ends.
                 const w = seek.clientWidth || 1;
                 const half = 6.5;
-                tip.style.left = (half + pct * (w - half * 2)) + 'px';
+                const tipLeft = half + pct * (w - half * 2);
+                tip.style.left = tipLeft + 'px';
                 tip.classList.add('is-shown');
+                const thumb = dvEl('dv-scrub-thumb');
+                if (thumb) thumb.style.left = tipLeft + 'px';
             }
             const label = dvEl('dv-time');
             if (label && dur) label.textContent = dvFmtTime(pct * dur) + ' / ' + dvFmtTime(dur);
+            if (dur) dvScrubPreviewRequest(pct * dur);
         }
 
         function dvCommitSeek() {
@@ -17382,6 +17433,75 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             if (!dur) return;
             v.currentTime = (Number(seek.value) / 1000) * dur;
             dvEl('dv-scrub-tip').classList.remove('is-shown');
+            const thumb = dvEl('dv-scrub-thumb');
+            if (thumb) thumb.classList.remove('is-shown');
+        }
+
+        // ===== SCRUB THUMBNAIL PREVIEW (cheap version, no sprite-sheet server
+        // infra -- DESIGN_DNA elevation, Medium tier, 2026-08-18) =====
+        // A hidden second <video> pointed at the SAME src, seeked independently
+        // of the visible player so dragging the scrubber never disturbs actual
+        // playback. Real frames, not a placeholder -- but degrades honestly:
+        // a slow or failed seek (some relay/HLS sources don't like being
+        // seeked rapidly) just leaves the time-only tip showing, never a
+        // broken/blank thumbnail box.
+        let dvScrubPreviewVideo = null;
+        let dvScrubDebounceTimer = null;
+        let dvScrubSeekToken = 0;
+
+        function dvEnsureScrubPreviewVideo(src) {
+            if (dvScrubPreviewVideo && dvScrubPreviewVideo.dataset.src === src) return dvScrubPreviewVideo;
+            if (dvScrubPreviewVideo) dvScrubPreviewVideo.remove();
+            const v = document.createElement('video');
+            // Not display:none -- some engines throttle/skip decode on a
+            // display:none video. 1x1 and fully transparent keeps it out of
+            // the way without that risk.
+            v.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;';
+            v.muted = true;
+            v.preload = 'auto';
+            v.crossOrigin = 'anonymous';
+            v.dataset.src = src;
+            v.src = src;
+            document.body.appendChild(v);
+            dvScrubPreviewVideo = v;
+            return v;
+        }
+
+        function dvScrubPreviewRequest(time) {
+            clearTimeout(dvScrubDebounceTimer);
+            // Debounced -- only the last position the pointer rests on for
+            // 110ms actually triggers a seek, not every pixel of drag.
+            dvScrubDebounceTimer = setTimeout(() => dvScrubPreviewSeek(time), 110);
+        }
+
+        function dvScrubPreviewSeek(time) {
+            const mainVideo = dvVideo();
+            const src = mainVideo && mainVideo.currentSrc;
+            if (!src) return;
+            const pv = dvEnsureScrubPreviewVideo(src);
+            const myToken = ++dvScrubSeekToken;
+            const canvas = dvEl('dv-scrub-thumb');
+            if (!canvas) return;
+
+            const onSeeked = () => {
+                pv.removeEventListener('seeked', onSeeked);
+                if (myToken !== dvScrubSeekToken) return; // a newer scrub position superseded this one
+                try {
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(pv, 0, 0, canvas.width, canvas.height);
+                    canvas.classList.add('is-shown');
+                } catch (e) { /* tainted/unready frame -- time tip alone still shows */ }
+            };
+            pv.addEventListener('seeked', onSeeked);
+            // A stuck/slow seek on some sources must not leave a stale
+            // listener piling up -- give up quietly after 400ms.
+            setTimeout(() => pv.removeEventListener('seeked', onSeeked), 400);
+            try { pv.currentTime = time; } catch (e) { pv.removeEventListener('seeked', onSeeked); }
+        }
+
+        function dvTeardownScrubPreview() {
+            clearTimeout(dvScrubDebounceTimer);
+            if (dvScrubPreviewVideo) { dvScrubPreviewVideo.remove(); dvScrubPreviewVideo = null; }
         }
 
         function dvSetVolume(val) {
