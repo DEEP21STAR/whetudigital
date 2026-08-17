@@ -13794,22 +13794,31 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 }
             } catch (e) { /* corrupt cache = cache miss */ }
 
-            try {
-                const res = await fetch(`${getRelayBase()}/epg-skysport`,
-                    { signal: AbortSignal.timeout(15000) });
+            // Relay first (matches every other still-local surface's preference
+            // order), cloud second. Added 2026-08-17: this function used to have
+            // NO cloud fallback at all -- found while investigating a report from
+            // Deep while away from home, where Sky Sport's Now/Next strip and
+            // "What's Live Now" were silently dark despite the app itself working
+            // fine (relay unreachable off-LAN, and nothing picked up the slack).
+            // /api/lounge/epg-skysport mirrors the relay's fetch_sky_sport_epg()
+            // exactly, so either source produces the same {channels} shape.
+            async function tryOne(base) {
+                const res = await fetch(`${base}/epg-skysport`, { signal: AbortSignal.timeout(15000) });
                 if (!res.ok) return null;
                 const data = await res.json();
                 const out = data.channels || {};
-                if (!Object.keys(out).length) return null;
-                skyEpgData = out;
-                localStorage.setItem('nexus_sky_epg_cache',
-                    JSON.stringify({ channels: out, date: today, fetchedAt: Date.now() }));
-                return skyEpgData;
-            } catch (e) {
-                // Sky down / offline / schema moved -- fall back to the general
-                // source silently, exactly like a channel with no guide data.
-                return null;
+                return Object.keys(out).length ? out : null;
             }
+            let out = null;
+            try { out = await tryOne(getRelayBase()); } catch (e) { /* relay unreachable */ }
+            if (!out) {
+                try { out = await tryOne(getContentBase()); } catch (e) { /* cloud unreachable */ }
+            }
+            if (!out) return null;
+            skyEpgData = out;
+            localStorage.setItem('nexus_sky_epg_cache',
+                JSON.stringify({ channels: out, date: today, fetchedAt: Date.now() }));
+            return skyEpgData;
         }
 
         // Now/next derived at render time from the day's slot list, so the strip
