@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v112"
+      "cacheName": "lounge-shell-v113"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v113",
+      "date": "2026-08-18",
+      "title": "Poster layout toggle: grid is now default, one switch flips every rail",
+      "changes": [
+        "Deep's ask: poster tiles should consistently go one way or the other. Every horizontal rail (Continue Watching, For You, and every genre-discovery row across Home/Movies/TV/Anime/Bollywood) now defaults to a top-to-bottom grid -- the same grid layout the filterable Discovery views already used, not a new visual language. One global toggle (header, next to Sleep) switches ALL of them back to the original left-to-right scroll rows at once. Choice persists across sessions.",
+        "Signature moment: every visible poster fluidly reflows to its new position when the toggle fires (GSAP Flip), instead of an instant reflow snap -- gated behind prefers-reduced-motion like every other flourish in this app. Rail arrows only render in row mode, where they're actually meaningful.",
+        "Verified live both directions: default grid confirmed, toggle-to-rows confirmed (display, arrows, label all update correctly), persistence across a reload confirmed, toggle-back-to-grid confirmed. Floor 10.0/0 defects."
+      ]
+    },
     {
       "version": "0.1.25",
       "versionCode": 23,

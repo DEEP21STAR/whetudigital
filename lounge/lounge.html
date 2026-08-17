@@ -20,6 +20,11 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Righteous&display=swap">
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js"></script>
+    <!-- Rail layout toggle's signature moment (2026-08-18): every visible
+         poster fluidly reflows position when Deep switches grid<->rail,
+         instead of an instant reflow snap. Same pinned 3.15.0 as the other
+         two GSAP scripts above -- never bump casually (UI_STANDARD §7). -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.3/dist/lenis.min.js"></script>
     <!-- hls.js 1.6.17 — NEW pinned dependency (2026-08-06). Not in UI_STANDARD.md §7's
          table yet; version taken from the npm registry dist-tags "latest" on the day
@@ -1556,13 +1561,17 @@
             margin-bottom: 28px;
         }
 
-        /* ===== Horizontal rail (2026-08-17, Home only) =====
-           .content-grid's auto-fill wrap reads as a static wall of posters --
-           real streaming apps snap-scroll each row horizontally instead, so
-           browsing feels like moving through shelves, not scrolling one long
-           page. Opt-in: only trendingGrid/continueWatchingGrid get this class
-           added in the HTML, every other .content-grid (genre pages, search,
-           etc) is untouched. */
+        /* ===== Rail layout toggle (2026-08-18, Deep's ask) =====
+           Default is now VERTICAL: .content-rail elements (Continue
+           Watching, For You, every genre-discovery rail across every
+           section) simply inherit .content-grid's own grid layout with NO
+           overrides -- same top-to-bottom wrap the filterable Discovery
+           grids already use, not a new visual language. body.rail-layout-
+           horizontal (toggled by #railLayoutToggle, see toggleRailLayout())
+           switches every rail on the page back to the original 2026-08-17
+           horizontal scroll-snap behaviour in one flip. GSAP Flip animates
+           every visible card's reposition when the toggle fires -- see
+           applyRailLayoutMode(). */
         .rail-wrap {
             position: relative;
             margin-bottom: 28px;
@@ -1570,7 +1579,7 @@
         .rail-wrap .content-rail {
             margin-bottom: 0;
         }
-        .content-rail {
+        body.rail-layout-horizontal .content-rail {
             display: flex;
             gap: 12px;
             overflow-x: auto;
@@ -1586,12 +1595,15 @@
             mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
             -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
         }
-        .content-rail::-webkit-scrollbar { display: none; }
-        .content-rail .card {
+        body.rail-layout-horizontal .content-rail::-webkit-scrollbar { display: none; }
+        body.rail-layout-horizontal .content-rail .card {
             flex: 0 0 150px;
             scroll-snap-align: start;
         }
-        .rail-arrow {
+        /* Arrows only make sense against a scrolling rail -- hidden entirely
+           in the (now default) vertical grid mode. */
+        .rail-arrow { display: none; }
+        body.rail-layout-horizontal .rail-arrow {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
@@ -1610,21 +1622,26 @@
             opacity: 0;
             transition: opacity 0.2s ease, background 0.2s ease;
         }
-        .rail-wrap:hover .rail-arrow, .rail-arrow:focus-visible { opacity: 1; }
-        .rail-arrow:hover { background: rgba(20,20,28,0.92); color: #fff; }
-        .rail-arrow-prev { left: -6px; }
-        .rail-arrow-next { right: -6px; }
+        body.rail-layout-horizontal .rail-wrap:hover .rail-arrow,
+        body.rail-layout-horizontal .rail-arrow:focus-visible { opacity: 1; }
+        body.rail-layout-horizontal .rail-arrow:hover { background: rgba(20,20,28,0.92); color: #fff; }
+        body.rail-layout-horizontal .rail-arrow-prev { left: -6px; }
+        body.rail-layout-horizontal .rail-arrow-next { right: -6px; }
         @media (hover: none) {
             /* No hover on touch/TV remote -- arrows would otherwise be
                permanently invisible and unreachable there. Native swipe
                already works on touch, so this only really matters for TV. */
-            .rail-arrow { opacity: 1; }
+            body.rail-layout-horizontal .rail-arrow { opacity: 1; }
         }
         @media (max-width: 720px) {
-            .content-rail .card { flex-basis: 118px; }
-            .rail-arrow { display: none; }
+            body.rail-layout-horizontal .content-rail .card { flex-basis: 118px; }
+            body.rail-layout-horizontal .rail-arrow { display: none; }
         }
-        html.tv-mode .content-rail .card { flex-basis: 118px; }
+        html.tv-mode body.rail-layout-horizontal .content-rail .card { flex-basis: 118px; }
+
+        /* Layout toggle button itself -- lives in the header widgets row,
+           same vpn-chip visual family as the icons right next to it. */
+        #railLayoutToggle .vpn-chip-label { min-width: 46px; }
 
         /* Posters-only by default: no card chrome, no panel background, no
            border. The title/rating live in .card-spotlight on hover (pointer
@@ -7398,6 +7415,17 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <div class="vpn-chip-sub" id="sleepTimerSub">Off</div>
                     </div>
                 </div>
+                <!-- Rail layout toggle, 2026-08-18 (Deep's ask). One global
+                     switch, not per-rail -- a control on every rail would be
+                     visual clutter and inconsistent state across a page with
+                     a dozen rails on it. -->
+                <div class="vpn-chip" id="railLayoutToggle" onclick="toggleRailLayout()" role="button" tabindex="0" aria-label="Switch poster layout to horizontal rows" title="Poster layout: top-to-bottom (click for left-to-right rows)">
+                    <div class="vpn-chip-icon"><i class="fas fa-table-cells-large" id="railLayoutIcon"></i></div>
+                    <div>
+                        <div class="vpn-chip-label">Layout</div>
+                        <div class="vpn-chip-sub" id="railLayoutSub">Grid</div>
+                    </div>
+                </div>
                 <div class="weather-widget">
                     <div class="weather-temp" id="weatherTemp">--°</div>
                     <div class="weather-location" id="weatherLocation">Loading...</div>
@@ -9859,6 +9887,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             initCustomCursor();
             initMagneticButtons();
             initTimeAwareTheming();
+            applyRailLayoutMode(getRailLayoutMode(), false);
             initScrollEffects();
             registerServiceWorker();
             initWindscribeToggle();
@@ -10012,6 +10041,60 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             }
             apply();
             setInterval(apply, 30 * 60 * 1000);
+        }
+
+        // ===== RAIL LAYOUT TOGGLE (2026-08-18, Deep's ask) =====
+        // Default is vertical top-to-bottom; one global toggle switches
+        // EVERY poster rail on the page (Continue Watching, For You, every
+        // genre-discovery rail in every section) back to the original
+        // horizontal scroll-snap rows. Persisted so the choice sticks
+        // across sessions -- this is a standing preference, not a one-off.
+        const RAIL_LAYOUT_KEY = 'nexus_rail_layout';
+
+        function getRailLayoutMode() {
+            const v = localStorage.getItem(RAIL_LAYOUT_KEY);
+            return v === 'horizontal' ? 'horizontal' : 'vertical';
+        }
+
+        function applyRailLayoutMode(mode, animate) {
+            const horizontal = mode === 'horizontal';
+            const icon = document.getElementById('railLayoutIcon');
+            const sub = document.getElementById('railLayoutSub');
+            const chip = document.getElementById('railLayoutToggle');
+
+            // Signature moment: every currently-visible card fluidly
+            // reflows into its new position instead of snapping. GSAP Flip
+            // captures First state, the class toggle changes layout
+            // (Last), Flip.from() plays the difference. Skipped on first
+            // load (animate=false) and under reduced-motion -- motion is
+            // offered, never forced, same gate every other flourish in
+            // this file uses.
+            const doFlip = animate && typeof Flip !== 'undefined'
+                && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            let state = null;
+            if (doFlip) {
+                if (gsap.registerPlugin) gsap.registerPlugin(Flip);
+                // Only .content-rail cards actually change layout when this
+                // toggle fires -- the main filterable .content-grid views
+                // are unaffected, so they're excluded rather than captured
+                // and wastefully diffed to a zero delta.
+                state = Flip.getState('.content-rail .card');
+            }
+
+            document.body.classList.toggle('rail-layout-horizontal', horizontal);
+            localStorage.setItem(RAIL_LAYOUT_KEY, mode);
+            if (icon) icon.className = horizontal ? 'fas fa-grip-lines' : 'fas fa-table-cells-large';
+            if (sub) sub.textContent = horizontal ? 'Rows' : 'Grid';
+            if (chip) chip.setAttribute('aria-label', horizontal ? 'Switch poster layout to top-to-bottom grid' : 'Switch poster layout to horizontal rows');
+            if (chip) chip.title = horizontal ? 'Poster layout: left-to-right rows (click for top-to-bottom)' : 'Poster layout: top-to-bottom (click for left-to-right rows)';
+
+            if (doFlip && state) {
+                Flip.from(state, { duration: 0.55, ease: 'power3.inOut', stagger: 0.008, absolute: true });
+            }
+        }
+
+        function toggleRailLayout() {
+            applyRailLayoutMode(getRailLayoutMode() === 'horizontal' ? 'vertical' : 'horizontal', true);
         }
 
         // ===== CUSTOM CURSOR (adapted from whetudigital.co.nz) =====
@@ -12476,7 +12559,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v112';
+        const LOUNGE_BUILD = 'lounge-shell-v113';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
