@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v91"
+      "cacheName": "lounge-shell-v92"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v92",
+      "date": "2026-08-17",
+      "title": "The actual root cause of the missing-posters saga -- a card frozen at 7.5% opacity",
+      "changes": [
+        "Found via Deep's own DevTools inspection (real evidence, not another guess): a poster card was stuck at opacity: 0.0754 -- 25+ minutes after loading, confirmed not a network/loading issue. Cause: the intro's one-shot entrance animation (gsap.from on '.section.active .card', fading cards in from opacity 0) targets whatever cards exist the instant the intro finishes -- but card population is async, so a backgrounded tab (pausing GSAP's animation ticker mid-tween) or an overlapping re-render can freeze that fade-in permanently, with no way for it to ever recover on its own.",
+        "Added a deterministic safety net: 2 seconds after the intro completes, every card's GSAP-controlled opacity/transform is force-cleared back to its real CSS state, regardless of whether the entrance animation finished cleanly or got stuck. A stuck tween can now never leave a poster invisible again.",
+        "This was the actual bug behind everything reported in this thread tonight (posters missing on load, gaps while scrolling, one dimmed card that looked like slow loading) -- the earlier hydratePosters (v90) and skeleton-placeholder (v91) fixes were real improvements but neither was the root cause; this is."
+      ]
+    },
     {
       "version": "0.1.25",
       "versionCode": 23,

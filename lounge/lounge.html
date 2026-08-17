@@ -6534,7 +6534,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     style="display:none;padding:4px 12px;font-size:12px;gap:6px;" title="Launch Proton VPN">
                     <i class="fas fa-shield-halved"></i> VPN
                 </button>
-                <div class="vpn-chip" id="vpnChip" data-state="unset" onclick="toggleVpnPopover(event)" role="button" tabindex="0" aria-label="VPN connection status">
+                <div class="vpn-chip" id="vpnChip" data-state="unset" onclick="toggleVpnPopover(event)" role="button" tabindex="0" aria-label="VPN connection status" title="VPN connection status -- click to check">
                     <div class="vpn-chip-dot" id="vpnChipDot"></div>
                     <div>
                         <div class="vpn-chip-label" id="vpnChipLabel">VPN</div>
@@ -6542,7 +6542,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     </div>
                 </div>
                 <!-- Multi-profile ("Who's watching"), added 2026-08-16. -->
-                <div class="vpn-chip" id="profileChip" onclick="toggleProfilePopover(event)" role="button" tabindex="0" aria-label="Switch profile">
+                <div class="vpn-chip" id="profileChip" onclick="toggleProfilePopover(event)" role="button" tabindex="0" aria-label="Switch profile" title="Switch profile (Who's watching)">
                     <div id="profileChipEmoji" style="font-size:16px;">👤</div>
                     <div>
                         <div class="vpn-chip-label">Profile</div>
@@ -6553,7 +6553,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                      device" browser player only -- honestly scoped the same
                      way the sleep timer's Cast/native-TV limits are, rather
                      than implying it covers every surface. -->
-                <div class="vpn-chip" id="wtChip" data-state="off" onclick="toggleWtPopover(event)" role="button" tabindex="0" aria-label="Watch Together">
+                <div class="vpn-chip" id="wtChip" data-state="off" onclick="toggleWtPopover(event)" role="button" tabindex="0" aria-label="Watch Together" title="Watch Together -- share a room code to sync playback">
                     <div class="vpn-chip-dot" id="wtDot" style="background:#555;"></div>
                     <div>
                         <div class="vpn-chip-label">Together</div>
@@ -6569,7 +6569,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                      (PlayerActivity) -- that's a separate Android Activity;
                      this page's JS timer does not keep running once it's on
                      top, so there is nothing honest this could do there. -->
-                <div class="vpn-chip" id="sleepTimerChip" data-state="off" onclick="toggleSleepTimerPopover(event)" role="button" tabindex="0" aria-label="Sleep timer">
+                <div class="vpn-chip" id="sleepTimerChip" data-state="off" onclick="toggleSleepTimerPopover(event)" role="button" tabindex="0" aria-label="Sleep timer" title="Sleep timer -- auto-stop playback after a set time">
                     <div class="vpn-chip-dot" id="sleepTimerDot" style="background:#555;"></div>
                     <div>
                         <div class="vpn-chip-label">Sleep</div>
@@ -8236,6 +8236,26 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 intro.style.display = 'none';
                 onComplete();
                 gsap.from('.section.active .card', { y: 30, opacity: 0, duration: 0.5, stagger: 0.08, ease: 'power2.out' });
+                // Real bug found 2026-08-17 (Deep's DevTools inspection): a card
+                // element inspected live showed opacity: 0.0754, stuck for 25+
+                // minutes -- this ONE-SHOT tween targets whatever cards exist the
+                // instant the intro finishes, but card population is async and
+                // races against it (tab backgrounding pauses GSAP's rAF ticker
+                // mid-tween; a re-render can also touch a card GSAP still has an
+                // open tween on). When that happens there's no way for the tween
+                // to ever finish on its own -- gsap.from()'s onComplete never
+                // fires for an interrupted tween by definition, so nothing else
+                // in this codebase was ever going to notice or fix it.
+                // This is a deterministic safety net, independent of whether the
+                // tween above finished cleanly or not: 2s is generous headroom
+                // past the tween's own 0.5s duration + up to ~12 cards *0.08s
+                // stagger (~1.46s worst case), and clearProps removes GSAP's
+                // inline overrides entirely rather than setting opacity:1 by
+                // hand, so the element falls back to its real CSS/default state
+                // no matter what GSAP left behind.
+                setTimeout(() => {
+                    gsap.set('.section.active .card', { clearProps: 'opacity,y,transform' });
+                }, 2000);
             };
 
             const counter = { val: 0 };
@@ -10790,7 +10810,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v91';
+        const LOUNGE_BUILD = 'lounge-shell-v92';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
