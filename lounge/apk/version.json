@@ -33,10 +33,21 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v111"
+      "cacheName": "lounge-shell-v112"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v112",
+      "date": "2026-08-18",
+      "title": "Fix: Comedy/Animation rail duplication -- plus weather-reactive ambient sky",
+      "changes": [
+        "Real bug from Deep's Telegram report: Home's Comedy and Animation genre rails were showing near-identical movies. Both queries were individually correct -- an animated comedy blockbuster genuinely carries genre ids 16 AND 35 in TMDB's own data, so sorting each rail by pure popularity surfaced the same crossover hits at the top of both. Fixed with cross-rail de-duplication (each rail now excludes titles already claimed by an earlier rail in the same row), matching how Netflix/Disney+ avoid repeating a title across adjacent rails. Verified live: 0 overlapping titles between Comedy and Animation after the fix.",
+        "Weather-reactive ambient starfield (DESIGN_DNA elevation, Medium tier): Home's background starfield density now responds to real local weather (already being fetched for the header widget, no extra API call) -- fuller sky on a clear night, noticeably sparser and duller during rain/storm/fog. WMO weather-code mapped to a density multiplier."
+      ]
+    },
     {
       "version": "0.1.25",
       "versionCode": 23,

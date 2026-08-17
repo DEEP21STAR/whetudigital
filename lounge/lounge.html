@@ -9899,6 +9899,29 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         }
 
         // ===== AMBIENT STARFIELD (adapted from whetudigital.co.nz, recoloured cyan/violet) =====
+        // Weather-reactive ambience (DESIGN_DNA elevation, Medium tier,
+        // 2026-08-18). fetchWeather() below sets ambientWeatherMultiplier
+        // and calls ambientReinitStars once real weather data resolves --
+        // the starfield itself has no idea what weather is, it just reads a
+        // shared number so the two features stay decoupled.
+        let ambientWeatherMultiplier = 1;
+        let ambientReinitStars = null;
+
+        function weatherCodeToAmbientMultiplier(code) {
+            // WMO weather codes (open-meteo.com/en/docs). Clear/near-clear
+            // skies get a slightly FULLER starfield than the previous fixed
+            // density -- everything else scales down, reflecting how much of
+            // an actual sky you'd realistically see through it.
+            if (code === 0 || code === 1) return 1.15;       // clear / mostly clear
+            if (code === 2 || code === 3) return 0.85;        // partly cloudy / overcast
+            if (code >= 45 && code <= 48) return 0.55;        // fog
+            if (code >= 51 && code <= 67) return 0.4;         // drizzle / rain
+            if (code >= 71 && code <= 77) return 0.6;         // snow
+            if (code >= 80 && code <= 82) return 0.35;        // rain showers
+            if (code >= 95) return 0.3;                       // thunderstorm
+            return 1;
+        }
+
         function initAmbientStarfield() {
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
             const canvas = document.getElementById('ambient-canvas');
@@ -9911,7 +9934,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             }
             function initStars() {
                 stars = [];
-                const count = Math.floor((W * H) / 5000);
+                const count = Math.floor((W * H) / 5000 * ambientWeatherMultiplier);
                 for (let i = 0; i < count; i++) {
                     stars.push({
                         x: Math.random() * W, y: Math.random() * H,
@@ -9922,17 +9945,24 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             }
             resize(); initStars();
             window.addEventListener('resize', () => { resize(); initStars(); });
+            // fetchWeather() may resolve after this first pass (real network
+            // call) -- reruns star generation at the correct density once it
+            // does, rather than waiting for the next resize to ever notice.
+            ambientReinitStars = initStars;
 
             let streaks = [];
             function addStreak() {
                 const cyan = Math.random() > 0.5;
+                // Bad weather = a duller, less frequent sky, same reasoning
+                // as the star density above -- fewer clear-sky moments.
+                const gapScale = 1 / Math.max(ambientWeatherMultiplier, 0.3);
                 streaks.push({
                     x: Math.random() * W * 0.7, y: Math.random() * H * 0.4,
                     len: 80 + Math.random() * 120, a: 1,
                     dx: 4 + Math.random() * 3, dy: 2 + Math.random() * 2,
                     color: cyan ? '0, 212, 255' : '157, 78, 221'
                 });
-                setTimeout(addStreak, 8000 + Math.random() * 12000);
+                setTimeout(addStreak, (8000 + Math.random() * 12000) * gapScale);
             }
             addStreak();
 
@@ -10718,8 +10748,18 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             }).join('');
             picks.forEach(([id]) => showGridSkeleton(`genreRail-${section}-${id}`, 8));
 
-            await Promise.all(picks.map(async ([id]) => {
-                const rowId = `genreRail-${section}-${id}`;
+            // Fetched in parallel (unchanged), but rendered in a SEQUENTIAL
+            // second pass so each rail can be de-duplicated against every
+            // rail before it -- fixes a real bug Deep hit (Telegram,
+            // 2026-08-18): Comedy and Animation showing near-identical
+            // movies. Both queries were individually correct -- an animated
+            // comedy blockbuster genuinely carries genre ids 16 AND 35 in
+            // TMDB's own data, so sorting each rail by pure popularity.desc
+            // surfaces the exact same crossover hits at the top of both.
+            // Netflix/Disney+ don't repeat a title across adjacent rails
+            // either, even when it technically fits both; matching that
+            // here rather than shipping "technically correct, reads broken".
+            const fetched = await Promise.all(picks.map(async ([id]) => {
                 try {
                     const baseParams = cfg.base(railState[section]);
                     let results, itemType;
@@ -10752,14 +10792,26 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         const data = await tmdbFetch(endpoint, params, key);
                         results = data.results;
                     }
-                    const items = tmdbResultsToItems(results, itemType, 16);
-                    renderGrid(rowId, items);
+                    return { id, itemType, results: results || [] };
                 } catch (e) {
                     console.error('genre rail failed', section, id, e);
-                    const el = document.getElementById(rowId);
-                    if (el) el.innerHTML = '';
+                    return { id, itemType: null, results: [] };
                 }
             }));
+
+            const usedTmdbIds = new Set();
+            for (const { id, itemType, results } of fetched) {
+                const rowId = `genreRail-${section}-${id}`;
+                if (!itemType) { const el = document.getElementById(rowId); if (el) el.innerHTML = ''; continue; }
+                // Trending rails are a different axis (what's hot right now)
+                // and are expected to overlap with genre picks below them --
+                // only genre-vs-genre overlap reads as broken, so trend rows
+                // don't consume from or filter against usedTmdbIds.
+                const deduped = isTrend(id) ? results : results.filter(r => !usedTmdbIds.has(r.id));
+                const items = tmdbResultsToItems(deduped, itemType, 16);
+                if (!isTrend(id)) items.forEach(i => i.tmdbId && usedTmdbIds.add(i.tmdbId));
+                renderGrid(rowId, items);
+            }
         }
 
         const railState = {
@@ -12424,7 +12476,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v111';
+        const LOUNGE_BUILD = 'lounge-shell-v112';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -14500,11 +14552,20 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
                 const unit = localStorage.getItem('nexus_weather_unit') || 'C';
                 const tempUnit = unit === 'C' ? 'celsius' : 'fahrenheit';
-                const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m&temperature_unit=${tempUnit}`);
+                const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m,weather_code&temperature_unit=${tempUnit}`);
                 const wData = await wRes.json();
 
                 scrambleText(tempEl, `${Math.round(wData.current.temperature_2m)}°${unit}`);
                 locEl.textContent = [place.name, place.admin1 || place.country].filter(Boolean).join(', ');
+
+                // Weather-reactive ambient starfield (DESIGN_DNA elevation,
+                // 2026-08-18) -- real local weather, already being fetched
+                // for this exact header widget, now also drives the Home
+                // starfield's density instead of paying for a second API call.
+                if (typeof wData.current.weather_code === 'number') {
+                    ambientWeatherMultiplier = weatherCodeToAmbientMultiplier(wData.current.weather_code);
+                    if (ambientReinitStars) ambientReinitStars();
+                }
             } catch (e) {
                 console.error('Weather fetch failed:', e);
                 locEl.textContent = 'Weather unavailable';
