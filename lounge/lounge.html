@@ -8057,7 +8057,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                                     for the settings hunt.
                                 </div>
                             </div>
-                            <button class="btn btn-primary" id="protonQuickBtn" onclick="openProtonVpn()"></button>
+                            <button class="btn btn-primary" id="protonQuickBtn" onclick="openProtonVpn()" aria-label="Open or install Proton VPN"><i class="fas fa-download"></i> Install Proton VPN</button>
                         </div>
                     </div>
                 </div>
@@ -11872,7 +11872,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v106';
+        const LOUNGE_BUILD = 'lounge-shell-v107';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';

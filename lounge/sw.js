@@ -5,7 +5,7 @@
 // Kept in lockstep with LOUNGE_BUILD in lounge.html and with
 // latest.web.cacheName in apk/version.json -- the update checker compares those
 // two, so all three move together or the app reports a phantom update.
-const CACHE_NAME = 'lounge-shell-v106';
+const CACHE_NAME = 'lounge-shell-v107';
 const SHELL_ASSETS = [
     '/lounge.html',
     '/manifest.json'

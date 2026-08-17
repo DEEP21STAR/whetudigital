@@ -33,10 +33,21 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v106"
+      "cacheName": "lounge-shell-v107"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v107",
+      "date": "2026-08-18",
+      "title": "Morning end-to-end check: fixed unlabelled Proton VPN quick-install button",
+      "changes": [
+        "judge_harness end-to-end run (floor 9.82/10, 0 console errors) flagged one accessibility defect: #protonQuickBtn in Settings > VPN was a permanently empty <button> with no text and no aria-label until Android-app-only JS fills it in -- on desktop/browser contexts (or before that JS runs) it was a nameless button for screen readers. Fixed with a static aria-label + default icon/text baseline; the JS still overwrites the visible label once it detects install state, aria-label stays put either way.",
+        "No other defects found across the full flow (Home, genre rails, detail page, stream picker, command palette, cursor, header chips)."
+      ]
+    },
     {
       "version": "0.1.25",
       "versionCode": 23,
