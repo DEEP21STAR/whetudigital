@@ -17983,12 +17983,30 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             }
         }
 
+        // Real bug found 2026-08-17 (Deep's screenshot): a whole swath of
+        // posters missing on first paint, only appearing after a long wait
+        // (scrolling looked like the trigger, but was actually just enough
+        // elapsed time). Two real problems in the original version of this
+        // function, both fixed here:
+        //   1. Ran a full TMDB title-search per item SEQUENTIALLY (await
+        //      inside a for-loop) -- a 20-30 card grid could take many
+        //      seconds to finish, one item at a time, because each item
+        //      waited for the previous item's network round-trip.
+        //   2. Ran that search-and-hydrate for EVERY item unconditionally,
+        //      even ones that already had item.poster set from the initial
+        //      fetch and were already displaying fine via createCard()'s
+        //      inline <img> -- pure wasted work competing for the same
+        //      sequential slot as items that actually needed it.
+        // Promise.all now fires every item's fetch at once (TMDB's rate
+        // limit is per-key over time, not per-request-in-flight, so this
+        // is not a new risk), and items that already have a real poster
+        // skip the redundant search entirely.
         async function hydratePosters(items) {
             const key = localStorage.getItem('nexus_tmdb_key');
             if (!key) return;
 
-            for (const item of items) {
-                if (!item.__cardId || !item.title) continue;
+            await Promise.all(items.map(async (item) => {
+                if (!item.__cardId || !item.title || item.poster) return;
                 const type = item.type === 'tv' ? 'tv' : 'movie';
                 const cacheKey = `${type}:${item.title}`;
 
@@ -18004,7 +18022,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         el.style.backgroundImage = `url('${url}')`;
                     }
                 }
-            }
+            }));
         }
 
         // Render a grid of cards, then hydrate posters async on top
