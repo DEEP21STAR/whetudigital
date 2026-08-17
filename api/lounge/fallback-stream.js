@@ -127,9 +127,19 @@ async function resolveFallbackMaster(embedUrl) {
   }
 }
 
-export default async function handler(req) {
+// Named HTTP-method exports, not `export default function handler(req)`.
+// Confirmed live 2026-08-17: Vercel's Node.js runtime (unlike Edge) expects
+// this shape -- the default-export form silently discards any Response it
+// returns (Vercel logs: "default export returned a Response... returns are
+// ignored"), so the function ran to completion every time but never actually
+// sent anything back, hanging until the 60s maxDuration timeout regardless
+// of what the code did. This is the fix, not a stylistic choice.
+export function OPTIONS() {
+  return new Response(null, { status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+}
+
+export async function GET(req) {
   const headers = { 'Access-Control-Allow-Origin': '*' };
-  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers });
 
   // Unlike skystream.js's Edge runtime (where req.url is always absolute),
   // Vercel's Node.js runtime hands back a relative path here -- confirmed
