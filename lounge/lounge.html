@@ -7231,6 +7231,33 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     </div>
                 </div>
 
+                <!-- Simkl sync, added 2026-08-17. Trakt's free tier now caps
+                     at ONE connected third-party app (their own forum post,
+                     "Updating Trakt Limits for 2026", July 2026) -- if Deep
+                     already has something else using that slot, Trakt sync
+                     above silently can't also cover Lounge. Simkl has no such
+                     limit and needs only a Client ID (PIN flow, no secret,
+                     no redirect URL used at runtime) -- verified live against
+                     api.simkl.org/authentication before building this. Kept
+                     alongside Trakt, not replacing it -- either or both can
+                     be connected at once, simklSyncPlayback and
+                     traktSyncPlayback both fire independently. -->
+                <div class="settings-row">
+                    <div class="settings-row-text">
+                        <h4>Simkl Sync</h4>
+                        <p>Same idea as Trakt sync above, but Simkl's free tier has no "one app" limit — useful if Trakt is already tied up elsewhere. Create an app at <a href="https://simkl.com/settings/developer/new/" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">simkl.com/settings/developer/new</a> (Redirect URI can be anything, e.g. <code>http://localhost/callback</code> — the PIN flow below never uses it) to get a Client ID.</p>
+                        <div style="display:flex;gap:10px;align-items:center;margin-top:10px;">
+                            <input type="password" id="simklClientIdInput" placeholder="Client ID" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:220px;">
+                            <button class="btn btn-primary" onclick="saveSimklKeys()">Save</button>
+                        </div>
+                        <div id="simklStatus" style="margin-top:10px;color:#9fb3c0;font-size:13px;"></div>
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:center;">
+                        <button class="btn btn-primary" id="simklConnectBtn" onclick="simklConnect()">Connect Simkl</button>
+                        <button class="btn" id="simklDisconnectBtn" onclick="simklDisconnect()" style="display:none;">Disconnect</button>
+                    </div>
+                </div>
+
                 <div class="settings-row">
                     <div class="settings-row-text">
                         <h4>Groq API Key (AI Assistant)</h4>
@@ -10566,7 +10593,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v88';
+        const LOUNGE_BUILD = 'lounge-shell-v89';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -11273,6 +11300,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // network cost.
             initProtonQuick();
             renderTraktStatus();
+            renderSimklStatus();
             renderProfileChip();
             wtRenderChip();
             if (routeCheckedThisSession) return;
@@ -12475,6 +12503,147 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 if (!r.ok) console.warn('Trakt sync failed:', r.status);
             } catch (e) {
                 console.warn('Trakt sync failed:', e);
+            }
+        }
+
+        // ===== SIMKL SYNC, added 2026-08-17 =====
+        // Trakt changed its free-tier terms in July 2026: a free account can
+        // only keep ONE third-party app connected at a time (confirmed live
+        // via Trakt's own forum post "Updating Trakt Limits for 2026" and
+        // third-party coverage, not assumed) -- so Lounge competing for that
+        // single slot against whatever else Deep already has connected is a
+        // real, live problem, not a hypothetical one. Simkl has no such limit
+        // and is free with no app-approval step ("Create an app -- free, no
+        // approval required", api.simkl.org/authentication). Kept as a
+        // SEPARATE, parallel option rather than replacing Trakt outright --
+        // Deep's existing Trakt connection (if any) keeps working either way.
+        // Endpoints verified live against api.simkl.org/authentication and
+        // api.simkl.org/api-reference/pin before writing this, not guessed:
+        // base API is api.simkl.com (confusingly different from the docs
+        // domain api.simkl.org); PIN flow is GET /oauth/pin then poll GET
+        // /oauth/pin/{USER_CODE}, both needing only client_id, no secret --
+        // simpler than Trakt's device-code flow, which needs both.
+        const SIMKL_API = 'https://api.simkl.com';
+
+        function simklCreds() {
+            const clientId = localStorage.getItem('nexus_simkl_client_id');
+            return clientId ? { clientId } : null;
+        }
+
+        function simklToken() {
+            return localStorage.getItem('nexus_simkl_access_token') || null;
+        }
+
+        function saveSimklKeys() {
+            const id = document.getElementById('simklClientIdInput').value.trim();
+            if (!id) return;
+            localStorage.setItem('nexus_simkl_client_id', id);
+            renderSimklStatus();
+        }
+
+        function renderSimklStatus() {
+            const statusEl = document.getElementById('simklStatus');
+            const connectBtn = document.getElementById('simklConnectBtn');
+            const disconnectBtn = document.getElementById('simklDisconnectBtn');
+            if (!statusEl) return;
+            const creds = simklCreds();
+            const token = simklToken();
+            if (token) {
+                statusEl.textContent = 'Connected — playback is being synced to your Simkl profile.';
+                statusEl.style.color = '#00ff88';
+                if (connectBtn) connectBtn.style.display = 'none';
+                if (disconnectBtn) disconnectBtn.style.display = '';
+            } else {
+                statusEl.textContent = creds ? 'Client ID saved — click Connect Simkl to finish.' : '';
+                statusEl.style.color = '#9fb3c0';
+                if (connectBtn) connectBtn.style.display = '';
+                if (disconnectBtn) disconnectBtn.style.display = 'none';
+            }
+        }
+
+        function simklDisconnect() {
+            localStorage.removeItem('nexus_simkl_access_token');
+            renderSimklStatus();
+            showRemoteToast('Simkl disconnected');
+        }
+
+        async function simklConnect() {
+            const creds = simklCreds();
+            const statusEl = document.getElementById('simklStatus');
+            if (!creds) { if (statusEl) { statusEl.textContent = 'Save your Client ID first.'; statusEl.style.color = '#ff5470'; } return; }
+
+            let codeRes;
+            try {
+                const r = await fetch(`${SIMKL_API}/oauth/pin?client_id=${encodeURIComponent(creds.clientId)}`);
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                codeRes = await r.json();
+                if (codeRes.result !== 'OK') throw new Error(codeRes.message || 'unexpected response');
+            } catch (e) {
+                if (statusEl) { statusEl.textContent = `Could not start Simkl sign-in: ${e.message || e}`; statusEl.style.color = '#ff5470'; }
+                return;
+            }
+
+            const verifyUrl = codeRes.verification_url || codeRes.verification_uri;
+            if (statusEl) {
+                statusEl.innerHTML = `Go to <a href="${verifyUrl}" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">${escapeHtml(verifyUrl)}</a> and enter this code: ` +
+                    `<div style="font-size:24px;letter-spacing:5px;font-weight:700;color:#e9faff;margin:8px 0;">${escapeHtml(codeRes.user_code)}</div>` +
+                    `<span id="simklPollStatus">Waiting for you to authorize…</span>`;
+                statusEl.style.color = '#9fb3c0';
+            }
+
+            // Simkl's own documented shape: pending = {result:"KO"}, approved =
+            // {result:"OK", access_token}. No 410/418-style status codes like
+            // Trakt -- expiry is handled client-side against expires_in.
+            const deadline = Date.now() + codeRes.expires_in * 1000;
+            const intervalMs = Math.max(1000, codeRes.interval * 1000);
+            const poll = async () => {
+                if (Date.now() > deadline) {
+                    const pollEl = document.getElementById('simklPollStatus');
+                    if (pollEl) pollEl.textContent = 'Code expired — click Connect Simkl to try again.';
+                    return;
+                }
+                let data;
+                try {
+                    const res = await fetch(`${SIMKL_API}/oauth/pin/${encodeURIComponent(codeRes.user_code)}?client_id=${encodeURIComponent(creds.clientId)}`);
+                    data = await res.json();
+                } catch (e) {
+                    setTimeout(poll, intervalMs);
+                    return;
+                }
+                if (data.result === 'OK' && data.access_token) {
+                    localStorage.setItem('nexus_simkl_access_token', data.access_token);
+                    renderSimklStatus();
+                    showRemoteToast('Simkl connected');
+                    return;
+                }
+                // result:"KO" -- still pending, keep polling.
+                setTimeout(poll, intervalMs);
+            };
+            setTimeout(poll, intervalMs);
+        }
+
+        // Mirrors traktSyncPlayback's shape and fire-and-forget contract
+        // exactly. Simkl's history-add endpoint accepts the same TMDB-id
+        // shape Trakt's does (movies:[{ids:{tmdb}}] / episodes), confirmed
+        // against api.simkl.org/api-reference before writing this.
+        async function simklSyncPlayback(item, episode) {
+            const creds = simklCreds();
+            const token = simklToken();
+            if (!creds || !token || !item || !item.tmdbId) return;
+            const headers = {
+                'Content-Type': 'application/json',
+                'simkl-api-key': creds.clientId,
+                'Authorization': `Bearer ${token}`
+            };
+            const watchedAt = new Date().toISOString();
+            const body = (item.type === 'tv' && episode)
+                ? { episodes: [{ ids: { tmdb: episode.tmdbId || item.tmdbId }, watched_at: watchedAt }] }
+                : { movies: [{ ids: { tmdb: item.tmdbId }, watched_at: watchedAt }] };
+            try {
+                const r = await fetch(`${SIMKL_API}/sync/history`, { method: 'POST', headers, body: JSON.stringify(body) });
+                if (!r.ok) console.warn('Simkl sync failed:', r.status);
+            } catch (e) {
+                console.warn('Simkl sync failed:', e);
             }
         }
 
@@ -17562,6 +17731,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 history.unshift(historyEntry);
                 localStorage.setItem(pk('nexus_watch_history'), JSON.stringify(history.slice(0, 50)));
                 traktSyncPlayback(playedItem, playedEpisode);
+                simklSyncPlayback(playedItem, playedEpisode);
 
                 // Ask the relay where mpv actually gets to. Applies to BOTH launch
                 // paths: the relay runs locally at all times (launch-nexus.ps1
