@@ -992,8 +992,28 @@
             #windscribeToggleBtn { padding: 4px 9px; }
         }
 
+        /* Real bug found + fixed 2026-08-17 (Deep's live report: VPN status
+           chip never appeared on his phone, even connected to Proton). This
+           was unconditionally display:none below 1300px -- meaning VPN
+           status/launch, Profile switching, Watch Together and Sleep Timer
+           were ALL completely unreachable on any phone-width viewport,
+           including the Android app itself. Unlike the nav tabs (whose
+           destinations survive in navDrawer at 900px, per the comment
+           above), these widgets have NO other way to reach them -- checked
+           navDrawer's actual markup, confirmed it lists only nav
+           destinations, never these. Compact (icon/dot-only, same
+           established pattern as the nav tabs losing their text labels at
+           1580px) replaces hidden, so every one of these stays reachable
+           down to any width. [UNTESTED VISUALLY -- needs Deep's confirmation
+           on his actual phone; sizing/overflow at very narrow widths could
+           not be verified without the browser extension this session]. */
         @media (max-width: 1300px) {
-            .header-widgets { display: none; }
+            .header-widgets { gap: 6px; }
+            .vpn-chip { padding: 4px 6px; gap: 4px; }
+            .vpn-chip-label, .vpn-chip-sub { display: none; }
+            #profileChipEmoji { font-size: 14px; }
+            .weather-location { display: none; }
+            .weather-widget, .clock-widget { padding: 3px 6px; }
         }
 
         /* Sections */
@@ -5384,8 +5404,19 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             .topnav-more { display: none; }
             /* Dropped on phones rather than squeezed: the drawer layout verified in
                Phase 1 only has room for burger + logo + search, and the clock is
-               the one item the OS status bar already shows. */
-            .header-widgets { display: none; }
+               the one item the OS status bar already shows. Real bug found
+               2026-08-17: this dropped VPN status along with everything else,
+               with nowhere else in the UI to reach it -- unlike the nav links,
+               which survive in navDrawer, checked and confirmed there is no
+               drawer equivalent for VPN/Profile/Watch Together/Sleep Timer.
+               Keeping just the VPN dot (icon-only, ~20px) rather than reopening
+               the full widget row Phase 1 measured as not fitting.
+               [UNTESTED VISUALLY -- needs Deep's confirmation, sizing could
+               not be verified without the browser extension this session]. */
+            .header-widgets { display: flex; gap: 0; }
+            .header-widgets > *:not(#vpnChip) { display: none; }
+            .vpn-chip { padding: 3px 5px; gap: 0; }
+            .vpn-chip-label, .vpn-chip-sub { display: none; }
             #mobile-nav-toggle { display: flex; }
             .topnav { gap: 12px; padding: 0 12px; }
 
