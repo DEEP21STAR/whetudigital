@@ -33,10 +33,174 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v92"
+      "cacheName": "lounge-shell-v106"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v106",
+      "date": "2026-08-18",
+      "title": "Third Sky Sport fallback tier: alternate DaddyLive mirrors (daddylives.sbs, daddylivetv.sbs)",
+      "changes": [
+        "Two more DaddyLive-family domains (found and verified 2026-08-17) share dlhd.st's exact channel-ID scheme, but need a real browser click-through for a JS-generated token instead of a plain fetch. New server-side resolver (api/lounge/daddylive-mirror-stream.js, Playwright + @sparticuz/chromium, same pattern as the existing streamed.pk fallback) tries both mirrors in order using the SAME channel id -- no title-matching needed since it's the same catalogue.",
+        "Wired in as tier 3: primary dlhd.st chain -> streamed.pk by title (existing) -> these mirrors by channel id (new) -> honest error only if all three come up empty. Tried whenever the primary chain breaks for any reason, not just the CDN-down case, since a sibling domain can be up when dlhd.st itself is having a bad day.",
+        "NOT yet deployed to Vercel or live-tested against a real match (needs Deep's go per the same review pattern as the streamed.pk fallback) -- code-complete and syntax-checked only."
+      ]
+    },
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v105",
+      "date": "2026-08-18",
+      "title": "DESIGN_DNA 21 Extras, batch 4: a real easter egg + opt-in UI sound (§7b compliant)",
+      "changes": [
+        "Click the Lounge logo 5 times within 2 seconds -- popcorn rains down the screen (reuses the existing popcorn-cluster motif from the intro/CTAs, not new imagery). Also added a console greeting (Maker's Mark, D10) for anyone who opens devtools.",
+        "New 'UI Sound Effects' toggle in Settings, OFF by default per UI_STANDARD §7b -- when on, primary buttons get a soft Web-Audio-synthesized tone (zero asset download, no sample file). Deliberately does NOT touch the intro's own sting audio, which Deep set up separately and already works -- silently muting a feature he just built to satisfy a general rule would be the wrong call."
+      ]
+    },
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v104",
+      "date": "2026-08-18",
+      "title": "DESIGN_DNA 21 Extras, batch 3: hero parallax, ambient hue drift, chromatic-aberration card hover, live-data shimmer/scramble",
+      "changes": [
+        "Hero backdrop now drifts slightly on scroll (parallax depth) -- applied to the bed wrapper, not the image itself, so it doesn't fight the image's own Ken-Burns zoom animation.",
+        "The background starfield's hue now cycles very slowly with scroll position -- deliberately scoped to ONLY the ambient canvas, never real content, so no poster/text/accent colour ever loses chroma.",
+        "Card posters get a subtle chromatic-aberration (RGB split) flourish on hover.",
+        "Weather temperature now scrambles/decodes into its new value on refresh instead of an instant swap; VPN latency gets a quick shimmer sweep when a check completes. The Discovery Rail's title count already had a real roll animation built in from earlier -- left as-is rather than duplicating it."
+      ]
+    },
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v103",
+      "date": "2026-08-17",
+      "title": "DESIGN_DNA 21 Extras, batch 2: skeleton-to-content morph, card-to-detail View Transition, time-aware theming",
+      "changes": [
+        "New cards now fade+lift in instead of a hard instant swap when a skeleton placeholder resolves to real content (GSAP, same safety-cleared pattern as the v92 hero fix).",
+        "Clicking a poster now morphs it into the detail page's hero poster via the native View Transitions API (Chrome/Edge; every other browser gets the same instant open it always had, no functional loss).",
+        "A very subtle time-of-day wash (dawn/day/dusk/night, refreshes every 30 min) -- deliberately not a re-theme of the brand's cyan/violet accent colours, just a low-opacity soft-light overlay so the app's mood shifts across a long session without diluting any real content's chroma."
+      ]
+    },
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v102",
+      "date": "2026-08-17",
+      "title": "DESIGN_DNA 21 Extras, batch 1: magnetic buttons + click ripple + ambient cursor glow, and a real Command Palette (Ctrl+K)",
+      "changes": [
+        "Deep asked for all 21 of DESIGN_DNA's approved extras on Lounge overnight, with full autonomy on judgment calls. Found the custom cursor system (dot+ring, hover states) and film grain overlay already existed and were fully wired -- extras #4 and #20 were essentially done already. Added what UI_STANDARD §14/§15 still called for and was missing: magnetic pull on primary CTAs/rail arrows within 80px, a click ripple + scale-punch on the cursor dot, and a soft 400px ambient glow trailing the cursor.",
+        "New: Command Palette (Ctrl+K or Cmd+K from anywhere, or click the hint chip next to search) -- quick-jump to any section, or search movies/TV/anime/channels by typing (delegates to the existing real search, not a second implementation). Arrow-key navigation, Enter to select, Escape to close."
+      ]
+    },
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v101",
+      "date": "2026-08-17",
+      "title": "Two real bugs found and fixed via actual browser testing (judge_harness), not guessed -- Deep asked for full verification tonight regardless of quiet hours",
+      "changes": [
+        "Bug 1: every genre-discovery-rail on Home (Action/Comedy/Horror/etc) was 404ing -- RAIL_CONFIG.home has discover:null (its main grid is trending-only, correct), but the curated genre rails still called that same null endpoint. Fixed: those rails now fall back to discover/movie specifically when the section has no mixed-media discover endpoint.",
+        "Bug 2: Home's genre-discovery-rails silently never rendered AT ALL on page load. Every other section only renders them from inside showSection() (they start hidden, so visiting them triggers it) -- but Home's <section> is `active` in the static HTML, so showSection('home') never actually runs on first load. Added a direct call in the init sequence.",
+        "Verified via judge_harness against the live LAN server with a real TMDB key seeded: hero rotation, genre rails (Action/Comedy/Horror all correctly genre-filtered), mode/genre pill switching, hover-expand synopsis, rating dots/NEW badges, detail page + trailer, all confirmed rendering correctly with real data. Floor went 7.3 -> 9.37 across the fix. Two pre-existing, unrelated console warnings remain (OpenSubtitles CORS, one DNS resolution failure) -- not regressions from tonight's work, not investigated further tonight."
+      ]
+    },
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v100",
+      "date": "2026-08-17",
+      "title": "Home rebuilt onto the same Discovery Rail system as Movies -- genre rails, mode/genre pills, real filterable vertical grid",
+      "changes": [
+        "Deep's ask: Home should work like the Movies section (horizontal scroll for a quick browse, plus a real filter + top-to-bottom poster grid) instead of the horizontal-only Trending row from earlier tonight. Trending Now is now a full RAIL_CONFIG entry: genre discovery rails on top (Action/Comedy/Horror/Romance/Animation/Sci-Fi), then Trending Today/This Week mode pills + genre pills, driving a real paginated vertical grid below -- same infinite-scroll/Load-More machinery every other section already uses, not a new system.",
+        "Known, deliberate limitation: Home can ONLY offer Trending Today/This Week as modes, never Popular/Top Rated/New Releases like Movies -- TMDB's trending endpoint is the only one that returns mixed movie+tv results together; discover (which Popular/Top Rated need) requires picking movie OR tv, and merging two separate result sets client-side for every mode was a materially bigger, un-asked-for build. Flagging this rather than silently faking a 'Popular' tab that's secretly movies-only.",
+        "Also, per Deep's request: every section's genre-discovery-rails row (Movies/TV/Bollywood) now leads with 'Trending Today' and 'Trending This Week' before the curated genre list, using the real trending endpoint (not discover) -- Bollywood's Hindi/Tamil/Telugu language scope is applied client-side to those two rails since the trending endpoint itself has no language filter.",
+        "Fixed a related correctness bug found while building this: tmdbResultsToItems() used to stamp every item with one fixed type, which would have mislabeled every TV result on Home's mixed feed as a movie (breaking its detail page). Now resolves each item's real type from TMDB's own media_type field when the feed is mixed."
+      ]
+    },
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v99",
+      "date": "2026-08-17",
+      "title": "Fixed mouse-wheel scroll not working inside the stream picker (and 4 other overlays with the same bug)",
+      "changes": [
+        "Root cause: Lenis (the page's smooth-scroll library) hijacks wheel events globally and only skips elements marked data-lenis-prevent -- the nav drawer already had this fix (2026-08-something), the stream-picker modal never did, so scrolling inside it did nothing except dragging the native scrollbar thumb directly (which bypasses Lenis entirely -- exactly what Deep reported: 'click and hold to move' works, wheel scroll doesn't).",
+        "Same bug existed in 4 other places with internal scroll -- fixed all of them in one pass rather than waiting for each to get reported separately: the stream-picker modal (and its nested quality-guide panel), the AI Assistant chat log, the Watch Now reel, and both subtitle/speed player menus."
+      ]
+    },
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v98",
+      "date": "2026-08-17",
+      "title": "Genre discovery rails on Movies/TV/Bollywood -- final piece of the apexmovies.net SHOWPIECE pass",
+      "changes": [
+        "Added a curated set of horizontal genre rails (Action, Comedy, Horror, Romance, Animation, Sci-Fi on Movies; equivalents on TV/Bollywood) above the existing filtered grid -- Deep's explicit direction was rails ABOVE the grid, not replacing the working mode+genre+year+origin filter combo. Skipped on Anime: every title there is already genre 16 by definition, no genre axis left to slice by.",
+        "Lazy-loaded: only fires the first time a section is actually visited, cached after that, so this never burns TMDB quota on tabs Deep hasn't opened. One discover call per rail.",
+        "This closes the 6-task SHOWPIECE pass from tonight's apexmovies.net UI/UX conversation: rotating hero (v94), horizontal Home rails (v94), hover-expand synopsis (v95), rating dots + NEW badges (v95), genre pill-tabs (v96), genre discovery rails (v98). All code-complete; judge-loop + Deep's visual confirmation deferred to daylight per quiet hours."
+      ]
+    },
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v97",
+      "date": "2026-08-17",
+      "title": "Alternate Source button moved to where the RD-451 error actually shows (Deep: 'media does not play even though the option is there')",
+      "changes": [
+        "v95's Alternate Source button lived on the detail page's action row -- but the Real-Debrid legal-block error (HTTP 451) is shown inside the stream-picker modal, which sits ON TOP of the detail page at that exact moment. The button was there, just hidden behind the screen Deep was actually looking at. Moved: the 451 error message itself now shows a 'Watch via Alternate Source' button directly beneath it, only when one exists for that exact title -- closes the stream picker and opens the ok.ru embed in one click, no need to back out first."
+      ]
+    },
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v96",
+      "date": "2026-08-17",
+      "title": "Genre filter is now horizontal pill-tabs on Movies/TV/Anime/Bollywood (was a plain dropdown)",
+      "changes": [
+        "Replaced the genre <select> on every Discovery Rail (Movies/TV/Anime/Bollywood) with scrollable pill-tabs matching the apexmovies.net pattern Deep pointed at -- same travelling-ink signature moment the mode/language pills already had (moveRailInk() is generic, so this came for free rather than needing new motion code). Year stays a dropdown (15-19 genre options as pills makes sense to scroll through; 50+ years does not).",
+        "All existing filter combining (mode + genre + year + origin) is unchanged -- this is a visual/interaction upgrade to one control, not a data-model change."
+      ]
+    },
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v95",
+      "date": "2026-08-17",
+      "title": "Hover-expand synopsis, rating colour-dots, NEW badges, and a one-off ok.ru alternate source for an RD-blocked South Park episode",
+      "changes": [
+        "Cards now show a synopsis line inside the existing hover spotlight (no new hover system, metadata-only per Deep's call -- no autoplay video, stays light on old Fire Sticks). Applies everywhere createCard() is used, not just Home.",
+        "Every poster now carries a small always-visible rating colour-dot (green >=7 / yellow 5-7 / red <5, TMDB's own scale) so quality is scannable across a whole rail without hovering, plus a NEW ribbon badge for anything released in the last 14 days -- both using data already fetched, no extra requests.",
+        "Real Debrid legally blocks some releases outright (HTTP 451, confirmed via the actual stream-picker error, not a resolver bug) -- South Park 'Not Suitable for Children' is one. Added a small, honestly-scoped manual-override system (MANUAL_SOURCE_OVERRIDES, exact title match) with an 'Alternate Source' button on the detail page that opens an embedded ok.ru iframe player. One entry today; add more the same way as they come up."
+      ]
+    },
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v94",
+      "date": "2026-08-17",
+      "title": "Home gets a real flagship-app hero + horizontal rails (SHOWPIECE pass, part 1 of the apexmovies.net UI/UX ask)",
+      "changes": [
+        "The empty-state 'Welcome to Lounge' banner (plain text, no imagery -- the weakest first impression on the whole app, flagged back on 2026-08-14 and again tonight via apexmovies.net comparison) is replaced with a full-bleed rotating Trending hero: real TMDB backdrop art, slow Ken-Burns pan, crossfade between titles every 8s, synopsis, dot indicators, click-through to the real detail page. This is the pass's signature moment -- something breathes in that slot forever, not just once on load. Falls back to the old plain banner honestly if Trending has no backdrop art (offline / no TMDB key).",
+        "Trending Now and Continue Watching are no longer a wrapping grid -- they're true horizontal snap-scroll rails (edge fade masks, click arrows for mouse-only desktop, native swipe/trackpad elsewhere). Existing infinite-scroll pagination on Trending is untouched and still works (its sentinel triggers on vertical page scroll, independent of the rail's own horizontal scroll).",
+        "Continue Watching's per-card progress bar was already built (resume-bar) -- no change needed there, just carried into the new rail layout.",
+        "SHOWPIECE ambition, declared before code. Scope: Home done tonight; Movies/TV/Anime/Bollywood browse-page rail conversion + genre pill-tabs + rating colour-dot/NEW badge + hover-expand metadata cards are queued next, same session. Judge-loop verification deferred to daylight (quiet hours)."
+      ]
+    },
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v93",
+      "date": "2026-08-17",
+      "title": "Header icons redesigned -- VPN/Profile/Watch Together/Sleep Timer read at a glance now, no hover needed",
+      "changes": [
+        "Deep's real complaint: at any width under 1300px (every phone, including the app itself), the 4 header chips lost their text labels and were left as 4 nearly-identical bare colour dots -- 'look terrible with no purpose either'. Each chip now shows a real icon in a circular badge (shield = VPN, person = Profile, two people = Watch Together, moon = Sleep Timer) with the status colour/glow on the badge itself; the small dot survives as a corner accent instead of being the entire signal.",
+        "SURGICAL pass inside the existing chip system (A4 theme lock) -- same colours, same click targets, same JS state logic untouched. Judge-loop verification deferred to daylight per quiet-hours rule; this is code-complete, not yet visually confirmed on your phone."
+      ]
+    },
     {
       "version": "0.1.25",
       "versionCode": 23,

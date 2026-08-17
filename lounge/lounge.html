@@ -528,6 +528,82 @@
         @media (pointer: coarse) { .c-dot, .c-ring { display: none; } body { cursor: auto; } }
         @media (prefers-reduced-motion: reduce) { .c-dot, .c-ring { display: none; } body { cursor: auto; } }
 
+        /* Ambient cursor glow (UI_STANDARD §15, 2026-08-17) -- soft 400px
+           radial gradient trailing the cursor, separate from the hard-edge
+           c-ring outline above. Sits above the .grain/.ambient-canvas layers,
+           below real content. */
+        .c-glow {
+            position: fixed; top: 0; left: 0; width: 400px; height: 400px;
+            border-radius: 50%; pointer-events: none; z-index: 1;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.08) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+        }
+        @media (pointer: coarse), (prefers-reduced-motion: reduce) { .c-glow { display: none; } }
+
+        .live-shimmer {
+            position: relative;
+            display: inline-block;
+            overflow: hidden;
+        }
+        .live-shimmer::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(100deg, transparent 30%, rgba(0, 212, 255, 0.5) 50%, transparent 70%);
+            background-size: 200% 100%;
+            animation: liveShimmerSweep 0.6s ease-out;
+        }
+        @keyframes liveShimmerSweep {
+            0% { background-position: 150% 0; }
+            100% { background-position: -50% 0; }
+        }
+        @media (prefers-reduced-motion: reduce) { .live-shimmer::after { animation: none; content: none; } }
+
+        /* Time-aware theming (DESIGN_DNA 21 Extras #13 / D4 law, 2026-08-17).
+           Deliberately NOT a re-theme of accent colours (A1: never lower
+           chroma, and Lounge's cyan/violet brand identity shouldn't drift by
+           time of day) -- just a very low-opacity radial wash, soft-light
+           blended so it warms/cools the mood without desaturating anything
+           underneath. --time-wash is set per session by initTimeAwareTheming(). */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            background: radial-gradient(ellipse at top, var(--time-wash, transparent) 0%, transparent 65%);
+            mix-blend-mode: soft-light;
+        }
+
+        /* Card-to-detail View Transition morph (2026-08-17) -- custom timing
+           on the shared vt-poster element so it's a deliberate ease, not the
+           browser's flat default cross-fade. Chrome/Edge only; unsupported
+           browsers never define this pseudo-element, so this rule is
+           harmlessly inert there. */
+        ::view-transition-group(vt-poster) {
+            animation-duration: 0.45s;
+            animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+        }
+
+        /* Click ripple (UI_STANDARD §14's Click state, 2026-08-17) -- one-shot
+           ring that expands and fades from the click point, dot separately
+           gets a CSS scale(0.6) punch via .c-dot.is-click. */
+        .c-dot.is-click { transform: translate(-50%, -50%) scale(0.6); }
+        .c-ripple {
+            position: fixed; top: 0; left: 0; width: 30px; height: 30px;
+            border-radius: 50%; border: 1.5px solid rgba(0, 212, 255, 0.7);
+            pointer-events: none; z-index: 99998;
+            transform: translate(-50%, -50%) scale(1); opacity: 0.9;
+            animation: cRipple 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes cRipple {
+            to { transform: translate(-50%, -50%) scale(2.6); opacity: 0; }
+        }
+        @media (prefers-reduced-motion: reduce) { .c-ripple { animation: none; display: none; } }
+
         #ambient-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.55; }
 
         /* Layout */
@@ -853,11 +929,43 @@
             transition: border-color 0.2s ease, background 0.2s ease;
         }
         .vpn-chip:hover { border-color: #3a3a3a; background: #181818; }
+        /* Icon-badge redesign, 2026-08-17 (Deep: the 4 chips "look terrible
+           with no purpose either" -- at any width under 1300px, which is
+           every phone including the app itself, .vpn-chip-label/-sub were
+           already hidden, leaving nothing but a bare 8px colour dot per
+           chip. Four undifferentiated dots have no purpose legible at a
+           glance -- exactly Deep's complaint. Fix: each chip now carries a
+           real glyph (shield/person/users/moon) in a circular badge that
+           reads on its own; the coloured dot survives as a small corner
+           status accent instead of being the entire signal. Purpose is now
+           readable with zero hover, at any width -- A2 (3-second rule). */
+        .vpn-chip-icon {
+            position: relative;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: oklch(18% 0.008 240);
+            border: 1px solid oklch(100% 0 0 / 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #999;
+            flex-shrink: 0;
+            transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .vpn-chip[data-state="on"]  .vpn-chip-icon { color: #00ff88; border-color: rgba(0,255,136,0.4); box-shadow: 0 0 10px rgba(0,255,136,0.3); }
+        .vpn-chip[data-state="off"] .vpn-chip-icon { color: #ff0055; border-color: rgba(255,0,85,0.35); box-shadow: 0 0 10px rgba(255,0,85,0.2); }
+        .vpn-chip[data-state="checking"] .vpn-chip-icon { animation: vpnDotPulse 1s ease-in-out infinite; }
         .vpn-chip-dot {
+            position: absolute;
+            bottom: -1px;
+            right: -1px;
             width: 8px;
             height: 8px;
             border-radius: 50%;
             background: #666;
+            border: 2px solid #141414;
             flex-shrink: 0;
             box-shadow: 0 0 0 0 transparent;
         }
@@ -1009,8 +1117,9 @@
            not be verified without the browser extension this session]. */
         @media (max-width: 1300px) {
             .header-widgets { gap: 6px; }
-            .vpn-chip { padding: 4px 6px; gap: 4px; }
+            .vpn-chip { padding: 4px; gap: 0; }
             .vpn-chip-label, .vpn-chip-sub { display: none; }
+            .vpn-chip-icon { width: 26px; height: 26px; font-size: 13px; }
             #profileChipEmoji { font-size: 14px; }
             .weather-location { display: none; }
             .weather-widget, .clock-widget { padding: 3px 6px; }
@@ -1268,6 +1377,135 @@
             box-shadow: 0 0 8px rgba(0, 212, 255, 0.85);
         }
 
+        /* ===== Trending hero (replaces the plain "Welcome to Lounge" empty
+           state, 2026-08-17) =====
+           Deep's real complaint (apexmovies.net UI/UX thread): the first
+           thing a no-history user sees is flat text in a gradient box --
+           the least "grand app" moment on the whole page. Reuses
+           .resume-hero's bed/scrim/body language (already proven, A4) but
+           auto-rotates through the top Trending items with a crossfade +
+           slow Ken-Burns push, instead of being a static banner. This is
+           the pass's signature moment (DESIGN_DNA law) -- something
+           breathes in this slot forever, not just once on load. */
+        .trending-hero {
+            position: relative;
+            overflow: hidden;
+            min-height: 320px;
+            padding: 0;
+            display: flex;
+            align-items: flex-end;
+            text-align: left;
+        }
+        .trending-hero-slide {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 1.1s ease;
+            pointer-events: none;
+        }
+        .trending-hero-slide.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .trending-hero-bed {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .trending-hero-bed img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: 50% 22%;
+            filter: saturate(1.15) contrast(1.05);
+            transform: scale(1.02);
+            animation: trendingHeroKenBurns 9s ease-out forwards;
+        }
+        @keyframes trendingHeroKenBurns {
+            from { transform: scale(1.0); }
+            to   { transform: scale(1.09); }
+        }
+        .trending-hero-scrim {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background:
+                linear-gradient(90deg, rgba(5,6,10,0.94) 0%, rgba(5,6,10,0.82) 40%, rgba(5,6,10,0.3) 75%, rgba(5,6,10,0.05) 100%),
+                linear-gradient(0deg, rgba(5,6,10,0.7) 0%, rgba(5,6,10,0) 55%);
+        }
+        .trending-hero-body {
+            position: relative;
+            z-index: 1;
+            padding: 32px;
+            max-width: 640px;
+        }
+        .trending-hero-kicker {
+            font-size: 11px;
+            letter-spacing: 1.6px;
+            text-transform: uppercase;
+            color: #ffd700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .trending-hero-title {
+            font-size: 34px;
+            font-weight: 800;
+            line-height: 1.12;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.6);
+        }
+        .trending-hero-overview {
+            color: #ccc;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 18px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            max-width: 520px;
+        }
+        .trending-hero-dots {
+            position: absolute;
+            z-index: 1;
+            right: 26px;
+            bottom: 22px;
+            display: flex;
+            gap: 7px;
+        }
+        .trending-hero-dots span {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.28);
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+        .trending-hero-dots span.active {
+            background: #ffd700;
+            box-shadow: 0 0 8px rgba(255,215,0,0.7);
+            transform: scale(1.2);
+        }
+        @media (max-width: 720px) {
+            .trending-hero { min-height: 260px; }
+            .trending-hero-body { padding: 20px; max-width: 100%; }
+            .trending-hero-title { font-size: 24px; }
+            .trending-hero-overview { -webkit-line-clamp: 2; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .trending-hero-bed img { animation: none; }
+            .trending-hero-slide { transition: none; }
+        }
+        #trendingHeroFallback {
+            position: relative;
+            z-index: 1;
+            padding: 26px 30px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(157, 78, 221, 0.1));
+        }
+
         .btn {
             padding: 16px 35px;
             border-radius: 25px;
@@ -1317,6 +1555,76 @@
             gap: 12px;
             margin-bottom: 28px;
         }
+
+        /* ===== Horizontal rail (2026-08-17, Home only) =====
+           .content-grid's auto-fill wrap reads as a static wall of posters --
+           real streaming apps snap-scroll each row horizontally instead, so
+           browsing feels like moving through shelves, not scrolling one long
+           page. Opt-in: only trendingGrid/continueWatchingGrid get this class
+           added in the HTML, every other .content-grid (genre pages, search,
+           etc) is untouched. */
+        .rail-wrap {
+            position: relative;
+            margin-bottom: 28px;
+        }
+        .rail-wrap .content-rail {
+            margin-bottom: 0;
+        }
+        .content-rail {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x proximity;
+            scroll-behavior: smooth;
+            padding: 2px 2px 8px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            /* Fade the row edges so a partly-visible card reads as "more
+               content this way", not a hard cut. Same visual grammar as the
+               nav's own scroll masks elsewhere in this file. */
+            mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+            -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+        }
+        .content-rail::-webkit-scrollbar { display: none; }
+        .content-rail .card {
+            flex: 0 0 150px;
+            scroll-snap-align: start;
+        }
+        .rail-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(10,10,14,0.75);
+            backdrop-filter: blur(4px);
+            color: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease, background 0.2s ease;
+        }
+        .rail-wrap:hover .rail-arrow, .rail-arrow:focus-visible { opacity: 1; }
+        .rail-arrow:hover { background: rgba(20,20,28,0.92); color: #fff; }
+        .rail-arrow-prev { left: -6px; }
+        .rail-arrow-next { right: -6px; }
+        @media (hover: none) {
+            /* No hover on touch/TV remote -- arrows would otherwise be
+               permanently invisible and unreachable there. Native swipe
+               already works on touch, so this only really matters for TV. */
+            .rail-arrow { opacity: 1; }
+        }
+        @media (max-width: 720px) {
+            .content-rail .card { flex-basis: 118px; }
+            .rail-arrow { display: none; }
+        }
+        html.tv-mode .content-rail .card { flex-basis: 118px; }
 
         /* Posters-only by default: no card chrome, no panel background, no
            border. The title/rating live in .card-spotlight on hover (pointer
@@ -1380,6 +1688,18 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: filter 0.2s ease;
+        }
+        /* Chromatic-aberration hover flourish (DESIGN_DNA 21 Extras #14,
+           2026-08-17) -- two colour-offset drop-shadows read as an RGB
+           channel split at this subtle an offset/opacity, cheaper than
+           duplicating the image in pseudo-elements and still GPU-composited. */
+        @media (hover: hover) {
+            .card:hover .card-poster { filter: drop-shadow(-1.5px 0 0 rgba(255, 0, 60, 0.45)) drop-shadow(1.5px 0 0 rgba(0, 200, 255, 0.45)); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .card-poster { transition: none; }
+            .card:hover .card-poster { filter: none; }
         }
 
         .card-image i {
@@ -1427,6 +1747,25 @@
             color: #00d4ff;
         }
 
+        /* Hover-expand metadata (2026-08-17, apexmovies.net UI/UX ask). Deep
+           chose metadata-only over video-autoplay-on-hover -- old Fire Sticks
+           in the version.json apk note can't take autoplay video everywhere,
+           but a synopsis line costs nothing extra (data's already fetched).
+           Sits inside the existing GSAP spotlight overlay -- same hover
+           trigger, same fade, no new hover system, no card growing past its
+           own grid cell (which a horizontal rail's overflow-x:auto would
+           clip anyway -- checked before building this, not assumed). */
+        .card-spotlight-overview {
+            font-size: 11.5px;
+            line-height: 1.4;
+            color: #aaa;
+            margin: 6px 0 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
         .card-spotlight-meta .fa-play-circle {
             font-size: 20px;
         }
@@ -1464,6 +1803,42 @@
             font-weight: bold;
             letter-spacing: 0.5px;
             z-index: 2;
+        }
+
+        /* Rating colour-dot + NEW badge (2026-08-17, apexmovies.net UI/UX ask).
+           Always visible, not hover-gated -- the whole point is scanning
+           quality across a rail without hovering every card, same "purpose
+           at a glance" principle as the header-icon fix earlier tonight.
+           Tiers match TMDB's own vote_average scale, not an invented one. */
+        .card-rating-dot {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            z-index: 2;
+            box-shadow: 0 0 0 2px rgba(0,0,0,0.5);
+        }
+        .card-rating-dot.tier-green  { background: #00ff88; box-shadow: 0 0 6px rgba(0,255,136,0.7), 0 0 0 2px rgba(0,0,0,0.5); }
+        .card-rating-dot.tier-yellow { background: #ffd700; box-shadow: 0 0 6px rgba(255,215,0,0.6), 0 0 0 2px rgba(0,0,0,0.5); }
+        .card-rating-dot.tier-red    { background: #ff0055; box-shadow: 0 0 6px rgba(255,0,85,0.6), 0 0 0 2px rgba(0,0,0,0.5); }
+
+        /* Top-right, same slot as .card-badge -- mutually exclusive in
+           practice (a NEW title can't also be comingSoon: comingSoon means a
+           future release date, NEW means a real one in the last 14 days). */
+        .card-badge-new {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            padding: 2px 7px;
+            border-radius: 5px;
+            font-size: 9px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            z-index: 2;
+            background: linear-gradient(135deg, #00d4ff, #9d4edd);
+            color: #000;
         }
 
         .fav-star {
@@ -2075,6 +2450,34 @@
         /* Second group, so it reads as a different question ("which language?")
            rather than three more answers to the first one. */
         .drail-origins { margin-top: 10px; }
+
+        /* Genre pills (2026-08-17, apexmovies.net UI/UX ask -- replaces the
+           plain <select>). TMDB's genre list runs 15-19 items, too many to
+           wrap without the row growing tall, so this group scrolls
+           horizontally (nowrap) instead of wrapping like mode/origin do.
+           Reuses the exact same .drail-pill/.drail-ink components --
+           moveRailInk() already iterates every .drail-modes group generically,
+           so the travelling-ink signature moment works here for free. */
+        .drail-genres {
+            margin-top: 10px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 24px), transparent 100%);
+            -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 24px), transparent 100%);
+        }
+        .drail-genres::-webkit-scrollbar { display: none; }
+
+        /* Genre discovery rails container (2026-08-17) -- sits above the
+           filtered grid + its Discovery Rail controls, so a divider keeps
+           the two browse layers from visually blurring together. */
+        .genre-rails:not(:empty) {
+            padding-bottom: 10px;
+            margin-bottom: 18px;
+            border-bottom: 1px solid #1a1a1a;
+        }
 
         /* SIGNATURE MOMENT — "Rail Ink". A single capsule that TRAVELS between
            pills instead of each pill independently lighting up, so the active
@@ -3834,6 +4237,120 @@
         .ai-modal.active {
             display: flex;
         }
+
+        /* ===== Command Palette (Ctrl+K), 2026-08-17 -- DESIGN_DNA 21 Extras #10 =====
+           Deliberately its own overlay (not .stream-picker-modal reused) --
+           it needs top-anchored positioning (a palette centred vertically
+           looks wrong, real command palettes sit near the top) and arrow-key
+           row highlighting that .stream-picker-row never needed. */
+        .cmdk-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 6, 10, 0.75);
+            backdrop-filter: blur(6px);
+            z-index: 5000;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 12vh;
+        }
+        .cmdk-overlay.active { display: flex; }
+        .cmdk-box {
+            width: 92%;
+            max-width: 640px;
+            max-height: 60vh;
+            background: #101018;
+            border: 1px solid rgba(0, 212, 255, 0.25);
+            border-radius: 16px;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 212, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .cmdk-input-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 18px;
+            border-bottom: 1px solid #1e1e2a;
+            color: #666;
+        }
+        .cmdk-input-row input {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-size: 16px;
+            font-family: inherit;
+        }
+        .cmdk-input-row input::placeholder { color: #555; }
+        .cmdk-input-row kbd {
+            font-size: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            color: #888;
+            background: #1a1a24;
+            border: 1px solid #2a2a38;
+            border-radius: 4px;
+            padding: 2px 6px;
+        }
+        .cmdk-results {
+            overflow-y: auto;
+            padding: 8px;
+        }
+        .cmdk-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 12px;
+            border-radius: 9px;
+            cursor: pointer;
+            color: #ccc;
+            font-size: 14px;
+        }
+        .cmdk-row i { width: 16px; text-align: center; color: #666; }
+        .cmdk-row.active { background: rgba(0, 212, 255, 0.12); color: #fff; }
+        .cmdk-row.active i { color: #00d4ff; }
+        .cmdk-row-hint { margin-left: auto; font-size: 11px; color: #555; }
+        .cmdk-group-label {
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #555;
+            padding: 10px 12px 4px;
+        }
+        .cmdk-empty { padding: 24px; text-align: center; color: #666; font-size: 13px; }
+        @media (max-width: 640px) { .cmdk-overlay { padding-top: 8vh; } }
+
+        .cmdk-hint {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            background: #141414;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #777;
+            font-size: 11px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color 0.2s ease, color 0.2s ease;
+        }
+        .cmdk-hint:hover { border-color: #00d4ff; color: #00d4ff; }
+        .cmdk-hint kbd {
+            font-family: 'JetBrains Mono', monospace;
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 3px;
+            padding: 1px 5px;
+            font-size: 10px;
+        }
+        /* Icon-only below 1300px, same ladder every other topnav-tools item
+           already sheds detail at (see the tuned breakpoint comments above
+           .weather-widget/.clock-widget) -- text/kbd hints cost the most
+           width for the least function, so they go first. */
+        @media (max-width: 1300px) { .cmdk-hint kbd { display: none; } }
+        @media (max-width: 900px) { .cmdk-hint { display: none; } }
 
         .stream-picker-modal {
             display: none;
@@ -6284,6 +6801,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
     <div class="grain"></div>
     <div class="c-dot" id="cDot"></div>
     <div class="c-ring" id="cRing"></div>
+    <div class="c-glow" id="cGlow"></div>
 
     <!-- Remote Mode PIN Gate (mobile only -- gates entry into remote mode, not the PC session) -->
     <div id="remote-pin-gate">
@@ -6432,7 +6950,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
          left sidebar 2026-08-05 at Deep's explicit call for the full swap) ===== -->
     <header class="topnav">
         <button id="mobile-nav-toggle" onclick="toggleMobileNav()" aria-label="Open menu"><i class="fas fa-bars"></i></button>
-        <div class="logo" onclick="showSection('home')" style="cursor:pointer;">
+        <div class="logo" onclick="logoClickHandler()" style="cursor:pointer;">
             <!-- The standalone .logo-icon glyph (plain couch silhouette, no
                  popcorn) was removed 2026-08-07 -- Deep: "remove the left
                  logo... just have the one on the right everywhere". It really
@@ -6483,6 +7001,12 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 <i class="fas fa-search"></i>
                 <input type="text" placeholder="Search…" id="searchInput" aria-label="Search movies, shows, anime and channels" oninput="handleSearchInput()">
             </div>
+            <!-- Command palette trigger + discoverability hint (2026-08-17) --
+                 Ctrl+K works from anywhere already; this chip is the visible
+                 affordance for it (and a click target for touch/no-keyboard). -->
+            <button class="cmdk-hint" onclick="openCmdk()" title="Command palette" aria-label="Open command palette">
+                <i class="fas fa-bolt"></i> <kbd>Ctrl</kbd><kbd>K</kbd>
+            </button>
             <!-- Genre/Sort used to live here as two <select>s. They now live in
                  each section's own Discovery Rail (see .drail): they only ever
                  applied to 2 of 4 browse sections, they were display:none below
@@ -6535,7 +7059,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     <i class="fas fa-shield-halved"></i> VPN
                 </button>
                 <div class="vpn-chip" id="vpnChip" data-state="unset" onclick="toggleVpnPopover(event)" role="button" tabindex="0" aria-label="VPN connection status" title="VPN connection status -- click to check">
-                    <div class="vpn-chip-dot" id="vpnChipDot"></div>
+                    <div class="vpn-chip-icon"><i class="fas fa-shield-halved"></i><span class="vpn-chip-dot" id="vpnChipDot"></span></div>
                     <div>
                         <div class="vpn-chip-label" id="vpnChipLabel">VPN</div>
                         <div class="vpn-chip-sub" id="vpnChipSub">Set up</div>
@@ -6543,7 +7067,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 </div>
                 <!-- Multi-profile ("Who's watching"), added 2026-08-16. -->
                 <div class="vpn-chip" id="profileChip" onclick="toggleProfilePopover(event)" role="button" tabindex="0" aria-label="Switch profile" title="Switch profile (Who's watching)">
-                    <div id="profileChipEmoji" style="font-size:16px;">👤</div>
+                    <div class="vpn-chip-icon"><span id="profileChipEmoji" style="font-size:13px;">👤</span></div>
                     <div>
                         <div class="vpn-chip-label">Profile</div>
                         <div class="vpn-chip-sub" id="profileChipName">Main</div>
@@ -6554,7 +7078,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                      way the sleep timer's Cast/native-TV limits are, rather
                      than implying it covers every surface. -->
                 <div class="vpn-chip" id="wtChip" data-state="off" onclick="toggleWtPopover(event)" role="button" tabindex="0" aria-label="Watch Together" title="Watch Together -- share a room code to sync playback">
-                    <div class="vpn-chip-dot" id="wtDot" style="background:#555;"></div>
+                    <div class="vpn-chip-icon"><i class="fas fa-users"></i><span class="vpn-chip-dot" id="wtDot" style="background:#555;"></span></div>
                     <div>
                         <div class="vpn-chip-label">Together</div>
                         <div class="vpn-chip-sub" id="wtSub">Off</div>
@@ -6570,7 +7094,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                      this page's JS timer does not keep running once it's on
                      top, so there is nothing honest this could do there. -->
                 <div class="vpn-chip" id="sleepTimerChip" data-state="off" onclick="toggleSleepTimerPopover(event)" role="button" tabindex="0" aria-label="Sleep timer" title="Sleep timer -- auto-stop playback after a set time">
-                    <div class="vpn-chip-dot" id="sleepTimerDot" style="background:#555;"></div>
+                    <div class="vpn-chip-icon"><i class="fas fa-moon"></i><span class="vpn-chip-dot" id="sleepTimerDot" style="background:#555;"></span></div>
                     <div>
                         <div class="vpn-chip-label">Sleep</div>
                         <div class="vpn-chip-sub" id="sleepTimerSub">Off</div>
@@ -6765,26 +7289,26 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                      variant's interior, which needs the entry's data. -->
                 <div class="hero resume-hero" id="resumeHero" style="display:none;"></div>
 
-                <div class="hero" id="welcomeHero">
-                    <h2>Welcome to <span class="wordmark"><span>L</span><span>o</span><span>u</span><span>n</span><span>g</span><span>e</span></span></h2>
-                    <p>Your ultimate media center with Movies, TV, Anime, Bollywood, Live Sports & more</p>
-                    <!-- Popcorn replaces the play triangle on THIS button only
-                         (the home hero CTA). Same cluster geometry and warm gold
-                         as the intro KERNELS -- see popcornClusterSvg(). Note
-                         this is deliberately NOT the logo badge's shape: the
-                         badge became a bucket silhouette on 2026-08-06 because a
-                         cluster is unreadable at icon size, but here the cluster
-                         sits next to a text label that already says what the
-                         button does, so it works as a warm glyph. Kept as
-                         literal markup rather than JS-injected so the hero CTA
-                         never depends on script order to render its icon. -->
-                    <button class="btn btn-primary hero-cta" onclick="showSection('movies')">
-                        <svg class="cta-corn" viewBox="-17 -17 34 34" width="19" height="19" aria-hidden="true">
-                            <circle cx="0" cy="0" r="8.4"/><circle cx="7.6" cy="-5.6" r="6.6"/>
-                            <circle cx="-6.8" cy="-6" r="6"/><circle cx="2.2" cy="7.4" r="5.8"/>
-                            <circle cx="-5.8" cy="4.6" r="4.8"/>
-                        </svg> Start Watching
-                    </button>
+                <!-- Was a static "Welcome to Lounge" text banner -- the plain
+                     first impression Deep called out. JS-populated now (see
+                     renderTrendingHero) with a rotating Trending backdrop,
+                     same visual language as .resume-hero. Falls back to the
+                     plain welcome text below only if Trending has nothing
+                     (offline / no TMDB key) -- see #trendingHeroFallback. -->
+                <div class="hero trending-hero" id="welcomeHero">
+                    <div id="trendingHeroSlides"></div>
+                    <div class="trending-hero-dots" id="trendingHeroDots"></div>
+                    <div id="trendingHeroFallback" style="display:none;text-align:center;width:100%;">
+                        <h2>Welcome to <span class="wordmark"><span>L</span><span>o</span><span>u</span><span>n</span><span>g</span><span>e</span></span></h2>
+                        <p>Your ultimate media center with Movies, TV, Anime, Bollywood, Live Sports & more</p>
+                        <button class="btn btn-primary hero-cta" onclick="showSection('movies')">
+                            <svg class="cta-corn" viewBox="-17 -17 34 34" width="19" height="19" aria-hidden="true">
+                                <circle cx="0" cy="0" r="8.4"/><circle cx="7.6" cy="-5.6" r="6.6"/>
+                                <circle cx="-6.8" cy="-6" r="6"/><circle cx="2.2" cy="7.4" r="5.8"/>
+                                <circle cx="-5.8" cy="4.6" r="4.8"/>
+                            </svg> Start Watching
+                        </button>
+                    </div>
                 </div>
 
                 <div class="section-header" id="continueWatchingHeader" style="display:none;">
@@ -6792,10 +7316,27 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <i class="fas fa-history"></i> Continue Watching
                     </div>
                 </div>
-                <div class="content-grid" id="continueWatchingGrid"></div>
+                <div class="rail-wrap">
+                    <button class="rail-arrow rail-arrow-prev" onclick="railScroll('continueWatchingGrid',-1)" aria-label="Scroll left"><i class="fas fa-chevron-left"></i></button>
+                    <div class="content-grid content-rail" id="continueWatchingGrid"></div>
+                    <button class="rail-arrow rail-arrow-next" onclick="railScroll('continueWatchingGrid',1)" aria-label="Scroll right"><i class="fas fa-chevron-right"></i></button>
+                </div>
 
+                <!-- Trending, rebuilt 2026-08-17 to match the Movies section's
+                     structure (Deep's explicit ask): horizontal genre-discovery
+                     rails on top for a quick scroll, THEN the full Discovery
+                     Rail (mode + genre pills) driving a real filterable
+                     vertical grid below -- "posters top to bottom" the way it
+                     worked before trendingGrid became rail-only in tonight's
+                     earlier pass. media:'all' (mixed movie+tv) restricts
+                     RAIL_CONFIG.home to just trendDay/trendWeek -- TMDB's
+                     discover endpoint has no mixed-media equivalent for
+                     Popular/Top Rated/etc, so those modes don't exist here
+                     (see RAIL_CONFIG.home). -->
+                <div class="genre-rails" id="genreRails-home"></div>
+                <div class="drail" id="drail-home"></div>
                 <div class="section-header">
-                    <div class="section-title">
+                    <div class="section-title" id="trendingGridTitle">
                         <i class="fas fa-fire"></i> Trending Now
                     </div>
                 </div>
@@ -6803,7 +7344,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     <!-- Populated by JS -->
                 </div>
                 <div style="text-align:center;margin:10px 0 26px;">
-                    <button id="trendingLoadMoreBtn" class="btn btn-secondary neon-actionable" onclick="loadMoreTrending()" style="display:none;">Load More</button>
+                    <button id="homeLoadMoreBtn" class="btn btn-secondary neon-actionable" onclick="loadMoreHomeTrending()" style="display:none;">Load More</button>
                 </div>
             </section>
 
@@ -6855,6 +7396,13 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     </div>
                 </div>
                 
+                <!-- Genre discovery rails (2026-08-17) -- skipped for anime:
+                     every title in this section is already genre 16 by
+                     definition (see RAIL_CONFIG.anime), so there is no genre
+                     axis left to slice a row by. GENRE_RAIL_PICKS.anime is
+                     null and renderGenreDiscoveryRails() no-ops on that. -->
+                <div class="genre-rails" id="genreRails-anime"></div>
+
                 <!-- Discovery Rail mount. Built by renderRail('anime') from
                      RAIL_CONFIG so the pill set, the genre list and the year list
                      are all generated, never typed. The old row's "Action" pill is
@@ -6906,6 +7454,9 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                      everything else instead of replacing it -- "Telugu + Action +
                      2026" is now one query, where before it was three mutually
                      exclusive tabs. -->
+                <!-- Genre discovery rails (2026-08-17) -- see renderGenreDiscoveryRails. -->
+                <div class="genre-rails" id="genreRails-bollywood"></div>
+
                 <div class="drail" id="drail-bollywood"></div>
 
                 <div class="section-header">
@@ -6939,6 +7490,9 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <i class="fas fa-film"></i> Movies
                     </div>
                 </div>
+                <!-- Genre discovery rails (2026-08-17) -- see renderGenreDiscoveryRails. -->
+                <div class="genre-rails" id="genreRails-movies"></div>
+
                 <div class="drail" id="drail-movies"></div>
                 <div class="content-grid" id="moviesGrid"></div>
                 <div style="text-align:center;margin-top:10px;">
@@ -6957,6 +7511,9 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <i class="fas fa-tv"></i> TV Shows
                     </div>
                 </div>
+                <!-- Genre discovery rails (2026-08-17) -- see renderGenreDiscoveryRails. -->
+                <div class="genre-rails" id="genreRails-tv"></div>
+
                 <div class="drail" id="drail-tv"></div>
                 <div class="content-grid" id="tvGrid"></div>
                 <div style="text-align:center;margin-top:10px;">
@@ -7064,6 +7621,11 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                             <!-- Stays available on unreleased titles: saving a film
                                  you can't stream yet is exactly the point of a list. -->
                             <button id="detail-watchlist-btn" class="btn btn-watchlist" onclick="detailToggleWatchlist()"><i class="far fa-bookmark"></i> <span>Add to My List</span></button>
+                            <!-- Hidden unless MANUAL_SOURCE_OVERRIDES has an entry for
+                                 this exact title -- a rare per-title exception for
+                                 releases Real-Debrid legally blocks (HTTP 451), not a
+                                 general feature. See altSourceForItem(). -->
+                            <button id="detail-alt-source-btn" class="btn btn-watchlist" onclick="openAltSource()" style="display:none;"><i class="fas fa-external-link-alt"></i> <span>Alternate Source</span></button>
                         </div>
                         <div id="detail-cast-wrap" class="detail-cast-wrap" hidden>
                             <div class="detail-subhead">Cast</div>
@@ -7214,6 +7776,17 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     </div>
                     <label class="toggle-switch">
                         <input type="checkbox" id="kodiModeToggle" onchange="toggleKodiMode(this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-row-text">
+                        <h4>UI Sound Effects</h4>
+                        <p>Soft synthesized tones on primary buttons. Off by default (UI_STANDARD §7b). Doesn't affect the intro's own sting, which is a separate feature you already set up.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="uiSoundToggle" onchange="toggleUiSound(this.checked)">
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
@@ -7586,8 +8159,42 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         </div>
     </div>
 
+    <!-- Command Palette (Ctrl+K / Cmd+K), 2026-08-17 -- DESIGN_DNA 21 Extras
+         #10. Quick-jump to any section by typing; anything that doesn't
+         match a section falls through to the real search (handleSearchInput,
+         same TMDB+local+channels flow the nav search box already uses) --
+         this is a keyboard layer on top of existing search, not a second
+         search implementation. -->
+    <div class="cmdk-overlay" id="cmdkOverlay" onclick="if(event.target===this)closeCmdk();">
+        <div class="cmdk-box" data-lenis-prevent>
+            <div class="cmdk-input-row">
+                <i class="fas fa-search"></i>
+                <input type="text" id="cmdkInput" placeholder="Jump to a section, or search movies, TV, anime, channels…" autocomplete="off" oninput="cmdkFilter()" onkeydown="cmdkKeydown(event)">
+                <kbd>ESC</kbd>
+            </div>
+            <div class="cmdk-results" id="cmdkResults"></div>
+        </div>
+    </div>
+
+    <!-- Alternate Source Modal (2026-08-17) -- one-off iframe embed player for
+         titles Real-Debrid legally blocks (HTTP 451). Reuses the stream-picker
+         modal's own overlay/card CSS rather than duplicating it. -->
+    <div class="stream-picker-modal" id="altSourceModal">
+        <div class="stream-picker-content" style="max-width:900px;">
+            <div class="stream-picker-header">
+                <h3 id="altSourceTitle">Alternate Source</h3>
+                <button onclick="closeAltSource()" aria-label="Close" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;">&times;</button>
+            </div>
+            <div class="stream-picker-body" style="padding:0;">
+                <div style="position:relative;width:100%;aspect-ratio:16/9;background:#000;">
+                    <iframe id="altSourceFrame" src="" allowfullscreen loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;border:0;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Stream Picker Modal -->
-    <div class="stream-picker-modal" id="stream-picker-modal">
+    <div class="stream-picker-modal" id="stream-picker-modal" data-lenis-prevent>
         <div class="stream-picker-content">
             <div class="stream-picker-header">
                 <h3 id="stream-picker-title">Select a stream</h3>
@@ -7645,7 +8252,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     <div class="wn-date" id="wn-date"></div>
                 </div>
             </div>
-            <div class="wn-reel" id="wn-reel"></div>
+            <div class="wn-reel" id="wn-reel" data-lenis-prevent></div>
             <div class="wn-actions" id="wn-actions"></div>
         </div>
     </div>
@@ -7663,7 +8270,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <div class="ai-messages" id="ai-messages">
+        <div class="ai-messages" id="ai-messages" data-lenis-prevent>
             <div class="ai-message bot">
                 <strong>👋 Welcome!</strong><br><br>
                 I can help you find movies, anime, Bollywood films, fix streams, and more.<br><br>
@@ -7788,13 +8395,13 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             <div class="dv-menu-wrap">
                 <button id="dv-cc" class="dt-btn" onclick="dvToggleMenu('dv-cc-menu')" title="Subtitles"
                         aria-label="Subtitles" aria-haspopup="true" aria-expanded="false"><i class="fas fa-closed-captioning"></i></button>
-                <div id="dv-cc-menu" class="dv-menu" role="menu" aria-label="Subtitles"></div>
+                <div id="dv-cc-menu" class="dv-menu" role="menu" aria-label="Subtitles" data-lenis-prevent></div>
             </div>
 
             <div class="dv-menu-wrap">
                 <button id="dv-speed" class="dt-btn" onclick="dvToggleMenu('dv-speed-menu')" title="Playback speed"
                         aria-label="Playback speed" aria-haspopup="true" aria-expanded="false"><span class="dv-speed-tag">1x</span></button>
-                <div id="dv-speed-menu" class="dv-menu" role="menu" aria-label="Playback speed"></div>
+                <div id="dv-speed-menu" class="dv-menu" role="menu" aria-label="Playback speed" data-lenis-prevent></div>
             </div>
 
             <button id="dv-mark-intro" class="dt-btn" onclick="dvMarkIntroEnd()" title="Mark where this show's intro ends (used to Skip Intro on future episodes)" aria-label="Mark intro end" hidden><i class="fas fa-bookmark"></i></button>
@@ -7835,6 +8442,49 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const div = document.createElement('div');
             div.textContent = String(str);
             return div.innerHTML;
+        }
+
+        // Text decode/scramble entrance for live numbers (DESIGN_DNA 21
+        // Extras #2, 2026-08-17). Cycles random characters into place,
+        // left-to-right, settling into the real value -- applied only to
+        // numbers that change while genuinely being looked at (weather temp
+        // refresh, rail filter counts), never the clock (ticks every second,
+        // would be constant visual noise at that frequency).
+        // Live-data shimmer (DESIGN_DNA 21 Extras #6, 2026-08-17) -- a quick
+        // bright sweep across a value the instant it updates, for numbers
+        // that update in response to a real check (VPN latency) rather than
+        // rolling/scrambling into place. re-triggerable via the classList
+        // remove+reflow+add dance since a CSS animation won't replay just
+        // from re-adding the same class name.
+        function shimmerFlash(el) {
+            if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            el.classList.remove('live-shimmer');
+            void el.offsetWidth;
+            el.classList.add('live-shimmer');
+        }
+
+        const SCRAMBLE_CHARS = '0123456789%°CF';
+        function scrambleText(el, finalText, duration = 500) {
+            if (!el) return;
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                el.textContent = finalText;
+                return;
+            }
+            const chars = String(finalText).split('');
+            const start = performance.now();
+            function frame(now) {
+                const t = Math.min(1, (now - start) / duration);
+                el.textContent = chars.map((c, i) => {
+                    // Reveal left-to-right: a char "locks in" once t passes
+                    // its own position's threshold, scrambles before that.
+                    if (t >= (i + 1) / chars.length) return c;
+                    if (c === ' ') return ' ';
+                    return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+                }).join('');
+                if (t < 1) requestAnimationFrame(frame);
+                else el.textContent = finalText;
+            }
+            requestAnimationFrame(frame);
         }
 
         // ===== CINEMATIC INTRO (WHETŪ INTRO v2 — UI_STANDARD.md §11) =====
@@ -7900,6 +8550,54 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             { x: 62,  y: 78 }, { x: 96,  y: 76, b: true }, { x: 130, y: 79 },
             { x: 164, y: 76, b: true }, { x: 198, y: 78 }, { x: 228, y: 77, b: true }
         ];
+
+        // Easter egg (DESIGN_DNA D10 Maker's Mark, 2026-08-18): 5 clicks on
+        // the logo within 2s rains popcorn down the screen instead of the
+        // usual single showSection('home') jump -- reuses popcornClusterSvg()
+        // rather than inventing new imagery, so it stays on the same visual
+        // motif as the intro/CTAs instead of a random unrelated gimmick.
+        let logoClickCount = 0;
+        let logoClickTimer = null;
+        function logoClickHandler() {
+            showSection('home');
+            logoClickCount++;
+            clearTimeout(logoClickTimer);
+            logoClickTimer = setTimeout(() => { logoClickCount = 0; }, 2000);
+            if (logoClickCount >= 5) {
+                logoClickCount = 0;
+                popcornRain();
+            }
+        }
+        function popcornRain() {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const colors = ['#ffd700', '#ff9d00', '#ffe27a'];
+            for (let i = 0; i < 24; i++) {
+                setTimeout(() => {
+                    const k = document.createElement('div');
+                    k.style.cssText = `position:fixed;top:-30px;left:${Math.random() * 100}vw;width:18px;height:18px;z-index:100001;pointer-events:none;`;
+                    k.innerHTML = `<svg viewBox="-17 -17 34 34" width="18" height="18" style="fill:${colors[i % colors.length]};transform:rotate(${Math.random() * 360}deg)">${popcornClusterSvg()}</svg>`;
+                    document.body.appendChild(k);
+                    const duration = 2200 + Math.random() * 1200;
+                    const drift = (Math.random() - 0.5) * 120;
+                    if (typeof gsap !== 'undefined') {
+                        gsap.to(k, {
+                            y: window.innerHeight + 60, x: drift, rotation: 360 + Math.random() * 360,
+                            duration: duration / 1000, ease: 'power1.in',
+                            onComplete: () => k.remove()
+                        });
+                    } else {
+                        k.style.transition = `transform ${duration}ms linear`;
+                        requestAnimationFrame(() => { k.style.transform = `translate(${drift}px, ${window.innerHeight + 60}px) rotate(360deg)`; });
+                        setTimeout(() => k.remove(), duration);
+                    }
+                }, i * 60);
+            }
+        }
+
+        // Maker's mark console greeting (D10). Printed once on load -- the
+        // kind of thing only someone who opens devtools will ever see.
+        console.log('%c🍿 Lounge', 'font-size:20px;font-weight:bold;color:#00d4ff;');
+        console.log('%cA couch, a screen, a thousand doors —\nyou opened one tonight.\nBuilt by one person + AI, Aotearoa.', 'color:#888;font-style:italic;');
 
         // One cluster shape, used by BOTH the animated intro kernels and the
         // static corner badge, so the two popcorn treatments are visibly the
@@ -8749,11 +9447,21 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // Ink GEOMETRY is measured later, in showSection() -- offsetLeft and
             // offsetWidth inside a display:none section are both 0.
             initRails();
-            // trendingGrid/continueWatchingGrid aren't RAIL_CONFIG-driven, so
-            // initRails()'s own skeleton pass doesn't cover them -- same real
-            // gap, needs the same fix, shown before either populate call fires.
+            // trendingGrid IS now RAIL_CONFIG-driven (section 'home', added
+            // 2026-08-17) so initRails()'s own skeleton pass already covers
+            // it -- this call is now redundant but harmless (showGridSkeleton
+            // no-ops once a grid has real children). continueWatchingGrid
+            // still isn't RAIL_CONFIG-driven, so it still needs this.
             showGridSkeleton('trendingGrid', 12);
             showGridSkeleton('continueWatchingGrid', 6);
+            // Real bug found via judge_harness 2026-08-17: every OTHER
+            // RAIL_CONFIG section only calls renderGenreDiscoveryRails() from
+            // inside showSection() (they start display:none, so visiting them
+            // is the only way to trigger it). Home is the one exception --
+            // its <section> is `active` in the static HTML, so showSection
+            // ('home') never actually runs on first load, and its genre rails
+            // silently never rendered. Called directly here instead.
+            renderGenreDiscoveryRails('home');
 
             // Populate content
             populateTrending();
@@ -8782,6 +9490,9 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             initCardHoverGlow();
             initAmbientStarfield();
             initCustomCursor();
+            initMagneticButtons();
+            initTimeAwareTheming();
+            initScrollEffects();
             registerServiceWorker();
             initWindscribeToggle();
             // Was only called from onSettingsOpened() -- meant the header VPN
@@ -8886,13 +9597,34 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             draw();
         }
 
+        // Time-aware theming (2026-08-17). Four bands matched to how Deep's
+        // own two-shift model already talks about the day (dawn/day/dusk/
+        // night), refreshed periodically so a session left open overnight
+        // doesn't stay stuck on whatever band it opened in.
+        function initTimeAwareTheming() {
+            function apply() {
+                const hour = new Date().getHours();
+                let band, wash;
+                if (hour >= 5 && hour < 8) { band = 'dawn'; wash = 'rgba(255, 180, 120, 0.035)'; }
+                else if (hour >= 8 && hour < 17) { band = 'day'; wash = 'rgba(0, 212, 255, 0.02)'; }
+                else if (hour >= 17 && hour < 21) { band = 'dusk'; wash = 'rgba(255, 120, 60, 0.045)'; }
+                else { band = 'night'; wash = 'rgba(90, 60, 200, 0.04)'; }
+                document.documentElement.style.setProperty('--time-wash', wash);
+                document.body.classList.remove('time-dawn', 'time-day', 'time-dusk', 'time-night');
+                document.body.classList.add('time-' + band);
+            }
+            apply();
+            setInterval(apply, 30 * 60 * 1000);
+        }
+
         // ===== CUSTOM CURSOR (adapted from whetudigital.co.nz) =====
         function initCustomCursor() {
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
             if (window.matchMedia('(pointer: coarse)').matches) return;
             const cDot = document.getElementById('cDot');
             const cRing = document.getElementById('cRing');
-            let mx = 0, my = 0, rx = 0, ry = 0;
+            const cGlow = document.getElementById('cGlow');
+            let mx = 0, my = 0, rx = 0, ry = 0, gx = 0, gy = 0;
             document.addEventListener('mousemove', e => {
                 mx = e.clientX; my = e.clientY;
                 cDot.style.left = mx + 'px'; cDot.style.top = my + 'px';
@@ -8908,11 +9640,89 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     cRing.style.borderColor = 'rgba(0, 212, 255, 0.45)';
                 }
             });
+            // UI_STANDARD §14's Click state: instant scale(0.6) punch + a
+            // one-shot expanding ripple ring at the click point (2026-08-17).
+            document.addEventListener('mousedown', e => {
+                cDot.classList.add('is-click');
+                const ripple = document.createElement('div');
+                ripple.className = 'c-ripple';
+                ripple.style.left = e.clientX + 'px';
+                ripple.style.top = e.clientY + 'px';
+                document.body.appendChild(ripple);
+                ripple.addEventListener('animationend', () => ripple.remove());
+            });
+            document.addEventListener('mouseup', () => cDot.classList.remove('is-click'));
             (function loopCursor() {
                 rx += (mx - rx) * 0.11; ry += (my - ry) * 0.11;
                 cRing.style.left = rx + 'px'; cRing.style.top = ry + 'px';
+                // Glow trails looser/slower than the ring -- reads as a soft
+                // ambient bloom instead of tracking 1:1 with the pointer.
+                gx += (mx - gx) * 0.07; gy += (my - gy) * 0.07;
+                cGlow.style.left = gx + 'px'; cGlow.style.top = gy + 'px';
                 requestAnimationFrame(loopCursor);
             })();
+        }
+
+        // Hero parallax + scroll-linked ambient hue rotation (DESIGN_DNA 21
+        // Extras #7/#8, 2026-08-17), combined into one scroll listener to
+        // avoid two separate rAF-throttled handlers fighting for the same
+        // frame budget. Hue rotation ONLY ever touches #ambient-canvas (the
+        // background starfield) -- never real content -- so A1's "never
+        // lower chroma" holds for everything Deep actually looks at; the
+        // canvas's own cyan/violet palette just cycles hue while staying
+        // just as saturated. Parallax targets the hero BED wrapper divs, not
+        // the <img> inside them -- the img already owns its own Ken-Burns
+        // scale animation (trendingHeroKenBurns), and animating transform on
+        // the same element from two places would fight each other.
+        function initScrollEffects() {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const canvas = document.getElementById('ambient-canvas');
+            let ticking = false;
+            function onScroll() {
+                if (ticking) return;
+                ticking = true;
+                requestAnimationFrame(() => {
+                    const y = Math.min(window.scrollY * 0.12, 50);
+                    document.querySelectorAll('.trending-hero-bed, .resume-hero-bed').forEach(bed => {
+                        bed.style.transform = `translateY(${y}px)`;
+                    });
+                    if (canvas) canvas.style.filter = `hue-rotate(${(window.scrollY * 0.04) % 360}deg)`;
+                    ticking = false;
+                });
+            }
+            window.addEventListener('scroll', onScroll, { passive: true });
+        }
+
+        // Magnetic CTA pull (UI_STANDARD §14's Hover CTA state, 2026-08-17):
+        // within 80px of a primary button, the button itself drifts up to 6px
+        // toward the cursor. Scoped to mousemove-over-the-button rather than a
+        // page-wide loop checking every button's distance every frame -- the
+        // closest() check is cheap, getBoundingClientRect only runs for the
+        // element actually under the cursor.
+        function initMagneticButtons() {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            if (window.matchMedia('(pointer: coarse)').matches) return;
+            document.addEventListener('mousemove', e => {
+                // e.target is only ever non-Element (document itself) for
+                // synthetically dispatched events, never real user input --
+                // but the guard costs nothing and a hard TypeError here would
+                // silently kill every mousemove listener registered after it.
+                if (!(e.target instanceof Element)) return;
+                const btn = e.target.closest('.hero-cta, .rail-arrow');
+                if (!btn) return;
+                const r = btn.getBoundingClientRect();
+                const dx = e.clientX - (r.left + r.width / 2);
+                const dy = e.clientY - (r.top + r.height / 2);
+                const dist = Math.hypot(dx, dy);
+                if (dist > 80) return;
+                const pull = (1 - dist / 80) * 6;
+                const len = dist || 1;
+                btn.style.transform = `translate(${(dx / len) * pull}px, ${(dy / len) * pull}px)`;
+            }, { passive: true });
+            document.addEventListener('mouseout', e => {
+                const btn = e.target.closest('.hero-cta, .rail-arrow');
+                if (btn && !btn.contains(e.relatedTarget)) btn.style.transform = '';
+            });
         }
 
         // ===== LENIS SMOOTH SCROLL =====
@@ -9132,7 +9942,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // first moment its rail has real geometry to measure. Not animated:
             // the ink should already be in place when the section paints, not
             // slide in from 0,0 on every visit.
-            if (RAIL_CONFIG[section]) moveRailInk(section, false);
+            if (RAIL_CONFIG[section]) { moveRailInk(section, false); renderGenreDiscoveryRails(section); }
             // Same reason, for the two EPG rails -- they were missed here because
             // their rail key is not their section id ('channels' owns 'livetv'),
             // so RAIL_CONFIG never matched and the measure never ran. Caught by
@@ -9223,7 +10033,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             pulse:   '#00d4ff', // live signal   — TMDB /trending, recomputed continuously
             catalog: '#ffd700', // ranking       — popularity / rating / recency ordering
             window:  '#9d4edd', // time window   — Coming Soon
-            origin:  '#ff006e'  // origin/language
+            origin:  '#ff006e', // origin/language
+            genre:   '#00ff88'  // genre pills (2026-08-17, apexmovies.net UI/UX ask)
         };
 
         const RAIL_MODES = {
@@ -9285,14 +10096,128 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 genreExclude: ['16'],
                 base: () => ({ with_genres: '16', with_origin_country: 'JP' }),
                 reload: () => populateAnime()
+            },
+            // Home, added 2026-08-17 (Deep: give it the same rails+filter+grid
+            // structure Movies has). media:'all' is TMDB's real mixed movie+tv
+            // trending endpoint -- but discover has no mixed-media equivalent,
+            // so unlike every other section this one can ONLY offer the two
+            // trending modes, never Popular/Top Rated/etc (those would have to
+            // be two separate movie+tv discover calls merged client-side,
+            // which is a materially bigger, un-asked-for build -- flagged as a
+            // known limitation, not silently faked).
+            home: {
+                media: 'all', grid: 'trendingGrid', discover: null, genres: MOVIE_GENRES,
+                modes: ['trendDay', 'trendWeek'],
+                base: () => ({}),
+                reload: () => populateTrending()
             }
         };
+
+        // ===== Genre discovery rails (2026-08-17, apexmovies.net UI/UX ask) =====
+        // Deep's explicit call: rails ABOVE the existing filtered grid, not
+        // replacing it -- RAIL_CONFIG's mode+genre+year+origin filter combo
+        // on the grid below stays exactly as it works today. This is a
+        // separate, fixed browse-by-genre layer, one discover call per row.
+        // Curated subset (not all 15-19 TMDB genres) to keep the API volume
+        // sane -- these only fire once, lazily, the first time a section is
+        // actually visited (see showSection), never preloaded for all four.
+        // Trending Today/This Week (2026-08-17, Deep's explicit ask) sit first
+        // in every list, ahead of the curated genre picks -- special-cased
+        // ids ('trendDay'/'trendWeek') that renderGenreDiscoveryRails routes
+        // to the real trending/{media}/{window} endpoint instead of discover.
+        const GENRE_RAIL_PICKS = {
+            movies: [['trendDay', 'Trending Today'], ['trendWeek', 'Trending This Week'], ['28', 'Action'], ['35', 'Comedy'], ['27', 'Horror'], ['10749', 'Romance'], ['16', 'Animation'], ['878', 'Sci-Fi']],
+            tv: [['trendDay', 'Trending Today'], ['trendWeek', 'Trending This Week'], ['18', 'Drama'], ['35', 'Comedy'], ['10759', 'Action & Adventure'], ['9648', 'Mystery'], ['16', 'Animation'], ['10765', 'Sci-Fi & Fantasy']],
+            // Every anime title is already genre 16 by definition (RAIL_CONFIG.anime) -- no genre axis left to slice by.
+            anime: null,
+            bollywood: [['trendDay', 'Trending Today'], ['trendWeek', 'Trending This Week'], ['28', 'Action'], ['35', 'Comedy'], ['18', 'Drama'], ['10749', 'Romance']],
+            // Home's OWN grid below is already trending-driven (RAIL_CONFIG.home
+            // only has trendDay/trendWeek modes), so its rails go straight to
+            // genre picks -- Trending Today/Week up here would just duplicate
+            // what the filter row right below already offers.
+            home: [['28', 'Action'], ['35', 'Comedy'], ['27', 'Horror'], ['10749', 'Romance'], ['16', 'Animation'], ['878', 'Sci-Fi']]
+        };
+        const genreRailsLoaded = {};
+
+        async function renderGenreDiscoveryRails(section) {
+            if (genreRailsLoaded[section]) return;
+            const picks = GENRE_RAIL_PICKS[section];
+            const host = document.getElementById(`genreRails-${section}`);
+            if (!picks || !host) return;
+            const key = localStorage.getItem('nexus_tmdb_key');
+            if (!key) return;
+            genreRailsLoaded[section] = true;
+            const cfg = RAIL_CONFIG[section];
+
+            const isTrend = (id) => id === 'trendDay' || id === 'trendWeek';
+
+            host.innerHTML = picks.map(([id, label]) => {
+                const rowId = `genreRail-${section}-${id}`;
+                const icon = isTrend(id) ? 'fa-fire' : 'fa-layer-group';
+                return `
+                    <div class="section-header">
+                        <div class="section-title"><i class="fas ${icon}"></i> ${escapeHtml(label)}</div>
+                    </div>
+                    <div class="rail-wrap">
+                        <button class="rail-arrow rail-arrow-prev" onclick="railScroll('${rowId}',-1)" aria-label="Scroll left"><i class="fas fa-chevron-left"></i></button>
+                        <div class="content-grid content-rail" id="${rowId}"></div>
+                        <button class="rail-arrow rail-arrow-next" onclick="railScroll('${rowId}',1)" aria-label="Scroll right"><i class="fas fa-chevron-right"></i></button>
+                    </div>`;
+            }).join('');
+            picks.forEach(([id]) => showGridSkeleton(`genreRail-${section}-${id}`, 8));
+
+            await Promise.all(picks.map(async ([id]) => {
+                const rowId = `genreRail-${section}-${id}`;
+                try {
+                    const baseParams = cfg.base(railState[section]);
+                    let results, itemType;
+                    if (isTrend(id)) {
+                        const win = id === 'trendDay' ? 'day' : 'week';
+                        const data = await tmdbFetch(`trending/${cfg.media}/${win}`, {}, key);
+                        results = data.results;
+                        itemType = cfg.media;
+                        // TMDB's trending endpoint takes no language/region params
+                        // (unlike discover) -- Bollywood's own scope has to be
+                        // applied client-side here, or "Trending Today" under
+                        // Bollywood would show whatever's globally trending
+                        // instead of Hindi cinema specifically.
+                        if (baseParams.with_original_language) {
+                            results = results.filter(r => r.original_language === baseParams.with_original_language);
+                        }
+                    } else {
+                        // RAIL_CONFIG.home has discover:null (its main grid is
+                        // trending-only, media:'all' has no discover
+                        // equivalent -- see RAIL_CONFIG.home's own comment).
+                        // These curated genre rails still need a real
+                        // endpoint though, so they fall back to discover/movie
+                        // specifically -- movies only, not the full mixed
+                        // feed, same honestly-scoped tradeoff as the mode
+                        // limitation, not a silent 404 (real bug, found via
+                        // judge_harness console-error capture 2026-08-17).
+                        const endpoint = cfg.discover || 'discover/movie';
+                        itemType = cfg.discover ? cfg.media : 'movie';
+                        const params = { with_genres: id, sort_by: 'popularity.desc', ...baseParams };
+                        const data = await tmdbFetch(endpoint, params, key);
+                        results = data.results;
+                    }
+                    const items = tmdbResultsToItems(results, itemType, 16);
+                    renderGrid(rowId, items);
+                } catch (e) {
+                    console.error('genre rail failed', section, id, e);
+                    const el = document.getElementById(rowId);
+                    if (el) el.innerHTML = '';
+                }
+            }));
+        }
 
         const railState = {
             movies:    { mode: 'popular', genre: '', year: '', origin: '' },
             tv:        { mode: 'popular', genre: '', year: '', origin: '' },
             bollywood: { mode: 'popular', genre: '', year: '', origin: 'hi' },
-            anime:     { mode: 'popular', genre: '', year: '', origin: '' }
+            anime:     { mode: 'popular', genre: '', year: '', origin: '' },
+            // Defaults to trendWeek -- matches the endpoint Home's Trending
+            // row always used before this rebuild (trending/all/week).
+            home:      { mode: 'trendWeek', genre: '', year: '', origin: '' }
         };
 
         // Refinements a mode's endpoint can honestly answer. 'hot' and 'soon'
@@ -9455,8 +10380,10 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             ).join('');
 
             const genres = cfg.genres.filter(([v]) => !(cfg.genreExclude || []).includes(v));
-            const genreOpts = [['', 'All Genres'], ...genres]
-                .map(([v, l]) => `<option value="${v}"${st.genre === v ? ' selected' : ''}>${l}</option>`).join('');
+            const genrePills = [['', 'All Genres'], ...genres].map(([v, label]) =>
+                pill(v, label, 'genre', st.genre === v, false,
+                    `data-rail-genre="${v}" onclick="setRailGenre('${section}','${v}')"`)
+            ).join('');
             // In a mode that owns its own date window, the year select keeps its
             // slot (so the row does not reflow) but shows why it is inert instead
             // of a dimmed, stale-looking value. Blind review flagged the previous
@@ -9484,9 +10411,11 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     <span class="drail-ink" aria-hidden="true"></span>
                     ${originPills}
                 </div>` : ''}
+                <div class="drail-modes drail-genres" data-rail-group="genre" role="tablist" aria-label="${section} genre">
+                    <span class="drail-ink" aria-hidden="true"></span>
+                    ${genrePills}
+                </div>
                 <div class="drail-refine">
-                    <select class="drail-select${st.genre ? ' is-set' : ''}" aria-label="Filter by genre"
-                            onchange="setRailRefine('${section}','genre',this.value)">${genreOpts}</select>
                     <select class="drail-select${st.year && yearOn ? ' is-set' : ''}" aria-label="Filter by year"
                             ${yearOn ? '' : 'disabled'}
                             onchange="setRailRefine('${section}','year',this.value)">${yearOpts}</select>
@@ -9559,7 +10488,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             }
             if (st.genre) {
                 const g = cfg.genres.find(([v]) => v === st.genre);
-                if (g) segs.push({ text: g[1], colour: '#00d4ff' });
+                if (g) segs.push({ text: g[1], colour: RAIL_KIND_COLOUR.genre });
             }
             if (st.year && railYearApplies(st.mode)) {
                 // The readout wants the bare year, not the picker's "This Year ·
@@ -9621,6 +10550,27 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             if (host) {
                 host.querySelectorAll('[data-rail-origin]').forEach(p => {
                     const on = p.dataset.railOrigin === origin;
+                    p.classList.toggle('active', on);
+                    p.setAttribute('aria-selected', String(on));
+                });
+                moveRailInk(section);
+            }
+            syncRailChrome(section);
+            renderRailReadout(section);
+            RAIL_CONFIG[section].reload();
+        }
+
+        // Same in-place update as setRailOrigin (2026-08-17, genre <select> ->
+        // pills). setRailRefine below stays year-only now -- year is still a
+        // native <select>, which paints its own selected state for free.
+        function setRailGenre(section, genre) {
+            const st = railState[section];
+            if (st.genre === genre) return;
+            st.genre = genre;
+            const host = document.getElementById(`drail-${section}`);
+            if (host) {
+                host.querySelectorAll('[data-rail-genre]').forEach(p => {
+                    const on = p.dataset.railGenre === genre;
                     p.classList.toggle('active', on);
                     p.setAttribute('aria-selected', String(on));
                 });
@@ -9862,79 +10812,130 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             st.observer.observe(sentinel);
         }
 
+        // type === 'all' is Home's mixed-media trending (trending/all/...) --
+        // each result then carries its OWN media_type (TMDB can also return
+        // 'person' entries in /all, filtered out here), so the fixed-type
+        // fast path every other caller uses would be wrong: it would label
+        // every TV result as a movie, and openDetail() would then fetch the
+        // wrong TMDB endpoint for it (2026-08-17, needed for the Home rail).
         function tmdbResultsToItems(results, type, limit) {
-            return (results || []).slice(0, limit).map(r => ({
-                // tmdbId/backdrop are carried so the detail page can open without a
-                // second search round-trip (see openDetail).
-                tmdbId: r.id,
-                backdrop: r.backdrop_path || null,
-                title: r.title || r.name,
-                rating: r.vote_average ? r.vote_average.toFixed(1) : '?',
-                // Carried so a Coming Soon card can show a date immediately,
-                // before its per-region release_dates call comes back.
-                releaseDate: r.release_date || r.first_air_date || null,
-                type,
-                icon: type === 'tv' ? 'fa-tv' : 'fa-film',
-                poster: r.poster_path ? `https://image.tmdb.org/t/p/w342${r.poster_path}` : null
-            }));
-        }
-
-        // Populate Trending
-        // Home's Trending row previously had no paging at all (12 fixed items).
-        // Deep listed Home in the "keep clicking Load More" complaint, so it gets
-        // the same auto-append treatment -- trending/all/week does accept ?page.
-        let trendingPage = 1;
-
-        function trendingResultsToItems(results) {
-            return (results || [])
-                .filter(r => r.media_type === 'movie' || r.media_type === 'tv')
-                .map(r => ({
+            const filtered = type === 'all'
+                ? (results || []).filter(r => r.media_type === 'movie' || r.media_type === 'tv')
+                : (results || []);
+            return filtered.slice(0, limit).map(r => {
+                const itemType = type === 'all' ? r.media_type : type;
+                return {
+                    // tmdbId/backdrop are carried so the detail page can open without a
+                    // second search round-trip (see openDetail).
                     tmdbId: r.id,
                     backdrop: r.backdrop_path || null,
                     title: r.title || r.name,
+                    // Carried for the hover-expand card overlay (2026-08-17) --
+                    // TMDB already returns this on every list endpoint, costs no
+                    // extra request.
+                    overview: r.overview || '',
                     rating: r.vote_average ? r.vote_average.toFixed(1) : '?',
-                    type: r.media_type,
-                    icon: r.media_type === 'tv' ? 'fa-tv' : 'fa-film',
+                    // Carried so a Coming Soon card can show a date immediately,
+                    // before its per-region release_dates call comes back.
+                    releaseDate: r.release_date || r.first_air_date || null,
+                    type: itemType,
+                    icon: itemType === 'tv' ? 'fa-tv' : 'fa-film',
                     poster: r.poster_path ? `https://image.tmdb.org/t/p/w342${r.poster_path}` : null
-                }));
+                };
+            });
         }
 
-        async function loadMoreTrending() {
-            const st = ssec('trending');
-            if (st.inFlight || st.exhausted) return;
-            const key = localStorage.getItem('nexus_tmdb_key');
-            if (!key) return;
-            st.inFlight = true;
-            const btn = document.getElementById('trendingLoadMoreBtn');
-            if (btn) { btn.disabled = true; btn.textContent = 'Loading...'; }
-            setInfiniteStatus('trending', 'Loading more…', true);
-            try {
-                const items = [];
-                let page = trendingPage + 1;
-                let totalPages = Infinity;
-                for (let i = 0; i < PAGES_PER_BATCH; i++) {
-                    const data = await tmdbFetch('trending/all/week', { page }, key);
-                    if (typeof data.total_pages === 'number') totalPages = data.total_pages;
-                    const batch = trendingResultsToItems(data.results);
-                    items.push(...batch);
-                    page++;
-                    if (page > totalPages || batch.length === 0) break;
-                }
-                trendingPage = page - 1;
-                if (items.length) renderGrid('trendingGrid', items, false, false, true);
-                st.exhausted = page > totalPages || items.length === 0;
-                st.manualFallback = false;
-                setInfiniteStatus('trending', st.exhausted ? 'End of results' : '');
-            } catch (e) {
-                console.error('loadMoreTrending failed:', e);
-                st.manualFallback = true;
-                setInfiniteStatus('trending', 'Could not load more');
-            } finally {
-                st.inFlight = false;
-                if (btn) { btn.disabled = false; btn.textContent = 'Load More'; }
-                toggleLoadMore('trending', true);
+        // Populate Trending (Home)
+        let trendingPage = 1;
+
+        // ===== Home trending hero =====
+        // Rotates through the top Trending items as a full-bleed backdrop
+        // banner in the same slot .resume-hero occupies once there's watch
+        // history -- see the .trending-hero CSS block for the design note.
+        let trendingHeroTimer = null;
+        let trendingHeroIdx = 0;
+
+        function renderTrendingHero(items) {
+            const slidesWrap = document.getElementById('trendingHeroSlides');
+            const dotsWrap = document.getElementById('trendingHeroDots');
+            const fallback = document.getElementById('trendingHeroFallback');
+            if (!slidesWrap || !dotsWrap || !fallback) return;
+            clearInterval(trendingHeroTimer);
+            trendingHeroTimer = null;
+
+            // __cardId is only present once renderGrid('trendingGrid', ...)
+            // has already run on this same array (it mutates each item),
+            // so callers must render the grid first -- see populateTrending.
+            const picks = (items || []).filter(i => i.backdrop && i.title && i.__cardId).slice(0, 6);
+            if (!picks.length) {
+                slidesWrap.innerHTML = '';
+                dotsWrap.innerHTML = '';
+                fallback.style.display = '';
+                return;
+            }
+            fallback.style.display = 'none';
+
+            slidesWrap.innerHTML = picks.map((item, i) => `
+                <div class="trending-hero-slide${i === 0 ? ' active' : ''}" data-idx="${i}">
+                    <div class="trending-hero-bed"><img src="https://image.tmdb.org/t/p/w1280${item.backdrop}" alt="" loading="${i === 0 ? 'eager' : 'lazy'}"></div>
+                    <div class="trending-hero-scrim"></div>
+                    <div class="trending-hero-body">
+                        <div class="trending-hero-kicker"><i class="fas fa-fire"></i> Trending Now</div>
+                        <div class="trending-hero-title">${escapeHtml(item.title)}</div>
+                        ${item.overview ? `<div class="trending-hero-overview">${escapeHtml(item.overview)}</div>` : ''}
+                        <button class="btn btn-primary hero-cta" onclick="event.stopPropagation();openDetail('${item.__cardId}')">
+                            ${ctaCornSvg()} More Info
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            dotsWrap.innerHTML = picks.map((_, i) => `<span class="${i === 0 ? 'active' : ''}" onclick="trendingHeroGoTo(${i})"></span>`).join('');
+
+            trendingHeroIdx = 0;
+            if (picks.length > 1 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                trendingHeroTimer = setInterval(() => {
+                    const welcome = document.getElementById('welcomeHero');
+                    if (!welcome || welcome.style.display === 'none') return;
+                    trendingHeroGoTo((trendingHeroIdx + 1) % picks.length);
+                }, 8000);
             }
         }
+
+        // Click-to-scroll for .content-rail arrow buttons -- native horizontal
+        // scroll already works via trackpad/touch/shift+wheel, this is the
+        // mouse-only affordance (desktop users without a trackpad).
+        function railScroll(gridId, dir) {
+            const el = document.getElementById(gridId);
+            if (!el) return;
+            el.scrollBy({ left: Math.round(el.clientWidth * 0.85) * dir, behavior: 'smooth' });
+        }
+
+        function trendingHeroGoTo(idx) {
+            const slidesWrap = document.getElementById('trendingHeroSlides');
+            const dotsWrap = document.getElementById('trendingHeroDots');
+            if (!slidesWrap || !dotsWrap) return;
+            trendingHeroIdx = idx;
+            slidesWrap.querySelectorAll('.trending-hero-slide').forEach((el, i) => el.classList.toggle('active', i === idx));
+            dotsWrap.querySelectorAll('span').forEach((el, i) => el.classList.toggle('active', i === idx));
+            // CSS animations don't replay just because opacity changed --
+            // force a reflow-triggered restart so the Ken-Burns pan is fresh
+            // on every newly-active slide, not frozen at its end state.
+            const img = slidesWrap.querySelector(`.trending-hero-slide[data-idx="${idx}"] .trending-hero-bed img`);
+            if (img) { img.style.animation = 'none'; void img.offsetWidth; img.style.animation = ''; }
+        }
+
+        // Rebuilt 2026-08-17 onto the same railQuery/makeBatchLoader machinery
+        // Movies/TV/Anime/Bollywood already use, instead of its own hand-rolled
+        // fetch loop -- means mode/genre switching, infinite scroll and the
+        // Load More fallback all behave identically to every other section
+        // for free. See RAIL_CONFIG.home for why modes are trendDay/trendWeek
+        // only (no mixed-media discover equivalent for Popular/Top Rated/etc).
+        const loadMoreHomeTrending = makeBatchLoader('home', {
+            gridId: 'trendingGrid', type: 'all',
+            query: () => railQuery('home'),
+            getPage: () => trendingPage, setPage: (p) => { trendingPage = p; }
+        });
 
         async function populateTrending() {
             const fallback = [
@@ -9945,16 +10946,26 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             ];
             const key = localStorage.getItem('nexus_tmdb_key');
             trendingPage = 1;
-            resetScrollSection('trending');
-            if (!key) { renderGrid('trendingGrid', fallback); return; }
+            resetScrollSection('home');
+            if (!key) { renderGrid('trendingGrid', fallback); renderTrendingHero([]); toggleLoadMore('home', false); return; }
             try {
-                const data = await tmdbFetch('trending/all/week', { page: 1 }, key);
-                const items = trendingResultsToItems(data.results);
-                renderGrid('trendingGrid', items.length ? items : fallback);
-                setupInfiniteScroll('trending', 'trendingGrid', loadMoreTrending);
+                const r = await railFirstLoad('home', key);
+                const rendered = r.items.length ? r.items : fallback;
+                renderGrid('trendingGrid', rendered);
+                // Must run after renderGrid: it assigns __cardId to each item
+                // (mutating the same array), which the hero's "More Info"
+                // button needs to open the real detail page. Only the actual
+                // trending item set drives the hero, never the offline fallback.
+                renderTrendingHero(r.items.length ? r.items : []);
+                renderRailReadout('home', railGridCount('trendingGrid'));
+                setRailGridTitle('home');
+                setupInfiniteScroll('home', 'trendingGrid', loadMoreHomeTrending);
+                toggleLoadMore('home', r.items.length > 0);
             } catch (e) {
                 console.error('populateTrending failed:', e);
                 renderGrid('trendingGrid', fallback);
+                renderTrendingHero([]);
+                toggleLoadMore('home', false);
             }
         }
 
@@ -10083,6 +11094,11 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 fresh:     ['fa-clock', 'Newest Anime'],
                 hot:       ['fa-fire', 'Hot Right Now'],
                 _default:  ['fa-fire', 'Trending Anime']
+            },
+            home: {
+                el: 'trendingGridTitle',
+                trendDay:  ['fa-fire', 'Trending Today'],
+                _default:  ['fa-fire', 'Trending This Week']
             }
         };
 
@@ -10572,6 +11588,9 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             document.getElementById('kodiModeToggle').checked = kodiOn;
             document.body.classList.toggle('kodi-mode', kodiOn);
 
+            // UI_STANDARD §7b: OFF by default, one visible toggle, persisted.
+            document.getElementById('uiSoundToggle').checked = uiSoundEnabled();
+
             document.getElementById('weatherLocationInput').value = localStorage.getItem('nexus_weather_location') || 'Hamilton, New Zealand';
             document.getElementById('weatherUnitSelect').value = localStorage.getItem('nexus_weather_unit') || 'C';
             document.getElementById('tmdbKeyInput').value = localStorage.getItem('nexus_tmdb_key') || '';
@@ -10619,6 +11638,49 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             document.body.classList.toggle('kodi-mode', on);
             localStorage.setItem('nexus_kodi_mode', on);
         }
+
+        // ===== UI micro-audio (UI_STANDARD §7b, DESIGN_DNA 21 Extras #15) =====
+        // Web Audio API oscillator synth, not a sample file -- zero asset
+        // download, per the spec's stated preference for stings <=1s.
+        // OFF by default (uiSoundEnabled() returns false until the toggle is
+        // explicitly turned on), respects prefers-reduced-motion (motion off
+        // => sound off, per the same law), and never autoplays before a real
+        // user gesture -- the toggle click itself IS that gesture.
+        function uiSoundEnabled() {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+            return localStorage.getItem('nexus_ui_sound') === 'true';
+        }
+        function toggleUiSound(on) {
+            localStorage.setItem('nexus_ui_sound', on);
+            if (on) playUiTone(660, 0.08); // audible confirmation the toggle itself worked
+        }
+        let uiAudioCtx = null;
+        function playUiTone(freq, duration) {
+            if (!uiSoundEnabled()) return;
+            try {
+                uiAudioCtx = uiAudioCtx || new (window.AudioContext || window.webkitAudioContext)();
+                const osc = uiAudioCtx.createOscillator();
+                const gain = uiAudioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.06, uiAudioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, uiAudioCtx.currentTime + duration);
+                osc.connect(gain).connect(uiAudioCtx.destination);
+                osc.start();
+                osc.stop(uiAudioCtx.currentTime + duration);
+            } catch (e) { /* Web Audio unavailable -- silently skip, never block the click */ }
+        }
+        // Duck/stop per §7b: a backgrounded tab has no business making noise.
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && uiAudioCtx && uiAudioCtx.state === 'running') uiAudioCtx.suspend();
+            else if (!document.hidden && uiAudioCtx && uiAudioCtx.state === 'suspended') uiAudioCtx.resume();
+        });
+        // Scoped to .hero-cta only (Watch Now / More Info / Resume/Start
+        // Watching) -- the app's real primary actions, not every button on
+        // the page, which would turn this into noise rather than identity.
+        document.addEventListener('click', (e) => {
+            if (e.target.closest && e.target.closest('.hero-cta')) playUiTone(880, 0.1);
+        });
 
         // ===== VPN SETUP WIZARD =====
         // Informational ONLY. No install, no shell-out, no config write of any
@@ -10810,7 +11872,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v92';
+        const LOUNGE_BUILD = 'lounge-shell-v106';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -11637,6 +12699,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             setText('vpnPopCountry', r.country || 'unknown');
             setText('vpnPopIsp', r.isp || 'not reported');
             setText('vpnPopLatency', latencyMs != null ? latencyMs + ' ms' : '—');
+            if (latencyMs != null) shimmerFlash(document.getElementById('vpnPopLatency'));
             setText('vpnPopChecked', new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }));
 
             const base = routeBaseline();
@@ -12888,7 +13951,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m&temperature_unit=${tempUnit}`);
                 const wData = await wRes.json();
 
-                tempEl.textContent = `${Math.round(wData.current.temperature_2m)}°${unit}`;
+                scrambleText(tempEl, `${Math.round(wData.current.temperature_2m)}°${unit}`);
                 locEl.textContent = [place.name, place.admin1 || place.country].filter(Boolean).join(', ');
             } catch (e) {
                 console.error('Weather fetch failed:', e);
@@ -16495,6 +17558,30 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                             }
                         }
 
+                        // Third tier, added 2026-08-18: two more DaddyLive-family
+                        // mirrors (daddylives.sbs, daddylivetv.sbs) share dlhd.st's
+                        // exact channel-ID scheme (confirmed 2026-08-17, same
+                        // data-stream-id per channel) but need a real browser
+                        // click-through for a JS-generated token -- see
+                        // api/lounge/daddylive-mirror-stream.js. Worth trying
+                        // whenever the PRIMARY chain broke for any reason, not just
+                        // the CDN-down case: a different domain in the same family
+                        // can still be up when dlhd.st itself is having a bad day.
+                        if ((!src || src === channel.url) && channel.dlhdId) {
+                            try {
+                                const mirrorUrl = `${getContentBase()}/daddylive-mirror-stream?id=${encodeURIComponent(channel.dlhdId)}`;
+                                const mirrorRes = await fetch(mirrorUrl, { signal: AbortSignal.timeout(45000) });
+                                if (gen !== lpGen) return;
+                                const mirrorBody = await mirrorRes.text();
+                                if (mirrorBody.includes('#EXTM3U')) {
+                                    src = mirrorUrl;
+                                    lpStreamOrigin = { kind: 'Mirror source', detail: 'DaddyLive\'s main chain broke -- playing from an alternate DaddyLive mirror instead' };
+                                }
+                            } catch (e) {
+                                // Mirror resolver itself unreachable/timed out -- fall through to the honest error below.
+                            }
+                        }
+
                         if (!src || src === channel.url) {
                             lpShowState('error', 'Sky Sport stream could not be resolved right now.',
                                 (reason
@@ -17892,7 +18979,17 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         : (addRes.status === 401 || addRes.status === 403)
                             ? `Real-Debrid rejected the request (HTTP ${addRes.status}). Check your API key in Settings.`
                             : `Real-Debrid rejected the request (HTTP ${addRes.status}). Try again, or try a different source.`;
-                    body.innerHTML = `<div class="stream-picker-empty">${escapeHtml(msg)}</div>`;
+                    // Real bug (Deep, 2026-08-17): a manual alt-source button existed
+                    // on the detail page, but this 451 error is what Deep actually
+                    // sees when he's stuck -- the detail page is hidden behind THIS
+                    // modal at that exact moment, so the fix was unreachable from
+                    // where the problem shows up. Surfaced here instead, right next
+                    // to the error, only when one exists for this exact title.
+                    const altUrl = altSourceForItem(detailItem);
+                    const altBtn = (addRes.status === 451 && altUrl)
+                        ? `<button class="btn btn-primary" style="margin-top:14px;" onclick="closeStreamPicker();openAltSource();"><i class="fas fa-external-link-alt"></i> Watch via Alternate Source</button>`
+                        : '';
+                    body.innerHTML = `<div class="stream-picker-empty">${escapeHtml(msg)}${altBtn ? `<br>${altBtn}` : ''}</div>`;
                     return;
                 }
                 const addData = await addRes.json();
@@ -18128,12 +19225,26 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // Render a grid of cards, then hydrate posters async on top
         function renderGrid(gridId, items, showBadge = false, showType = false, append = false) {
             const el = document.getElementById(gridId);
+            const prevCount = append ? el.children.length : 0;
             const html = items.map(i => createCard(i, showBadge, showType)).join('');
             if (append) el.insertAdjacentHTML('beforeend', html);
             else el.innerHTML = html;
             syncWatchlistUi();
             hydratePosters(items);
             hydrateReleaseDates(items);
+            // Skeleton -> content morph (DESIGN_DNA 21 Extras #11, 2026-08-17):
+            // the shimmer's replacement used to be an instant hard swap. New
+            // cards now fade+lift in instead -- same GSAP vocabulary as the
+            // intro's entrance, safety-cleared afterward so a backgrounded-tab-
+            // interrupted tween can never leave a card stuck (the exact defect
+            // class the v92 hero fix solved, applied here pre-emptively).
+            if (typeof gsap !== 'undefined' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                const newCards = Array.prototype.slice.call(el.children, prevCount).filter(c => c.classList.contains('card'));
+                if (newCards.length) {
+                    gsap.from(newCards, { opacity: 0, y: 14, duration: 0.4, stagger: Math.min(0.03, 0.6 / newCards.length), ease: 'power2.out' });
+                    setTimeout(() => gsap.set(newCards, { clearProps: 'opacity,y,transform' }), 1500);
+                }
+            }
         }
 
         // ===== PLAYBACK =====
@@ -18147,6 +19258,21 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             item.__cardId = `card-${cardSeq++}`;
             cardRegistry[item.__cardId] = item;
 
+            // Rating colour-dot -- TMDB's own vote_average scale (out of 10),
+            // no invented thresholds. '?'/NaN (unrated, coming-soon titles)
+            // shows no dot rather than a misleading grey/red one.
+            const ratingNum = parseFloat(item.rating);
+            const ratingDot = !isNaN(ratingNum)
+                ? `<span class="card-rating-dot tier-${ratingNum >= 7 ? 'green' : ratingNum >= 5 ? 'yellow' : 'red'}"></span>`
+                : '';
+            // NEW badge -- released within the last 14 days. comingSoon titles
+            // have a FUTURE releaseDate so this naturally excludes them too,
+            // but the explicit check makes that not depend on the date math.
+            const isNew = !item.comingSoon && item.releaseDate
+                && (Date.now() - new Date(item.releaseDate).getTime()) < 14 * 24 * 60 * 60 * 1000
+                && (Date.now() - new Date(item.releaseDate).getTime()) >= 0;
+            const newBadge = isNew ? `<span class="card-badge-new">NEW</span>` : '';
+
             return `
                 <div class="card${item.comingSoon ? ' coming-soon' : ''}" onclick="openDetail('${item.__cardId}')">
                     <div class="card-image" id="${item.__cardId}">
@@ -18154,6 +19280,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <i class="fas ${icon}"></i>
                         ${badge}
                         ${typeBadge}
+                        ${newBadge}
+                        ${ratingDot}
                         <!-- Quick-add. Painted in its correct state by
                              syncWatchlistUi() right after the grid renders, so
                              the markup here is just the unsaved default. -->
@@ -18162,6 +19290,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                                 title="Add to My List" aria-label="Add to My List" aria-pressed="false"><i class="far fa-bookmark"></i></button>
                         <div class="card-spotlight">
                             <div class="card-spotlight-title">${escapeHtml(item.title)}</div>
+                            ${item.overview ? `<div class="card-spotlight-overview">${escapeHtml(item.overview)}</div>` : ''}
                             <div class="card-spotlight-meta">
                                 <span class="rating"><i class="fas fa-star"></i> ${item.rating}</span>
                                 <i class="fas fa-play-circle"></i>
@@ -18208,7 +19337,191 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         }
 
-        async function openDetail(cardId) {
+        // ===== Manual source overrides (2026-08-17) =====
+        // A rare per-title exception, not a general source system: Real-Debrid
+        // legally blocks some releases outright (HTTP 451 -- confirmed via
+        // Deep's own screenshot of the stream picker's real error message,
+        // not a resolver bug), and for those there is no RD-side fix. Keyed
+        // by exact lowercased title match since Deep supplies these himself
+        // one at a time; add more entries here as they come up.
+        const MANUAL_SOURCE_OVERRIDES = {
+            'south park (not suitable for children)': 'https://ok.ru/videoembed/6417912302082'
+        };
+
+        function altSourceForItem(item) {
+            if (!item || !item.title) return null;
+            return MANUAL_SOURCE_OVERRIDES[item.title.trim().toLowerCase()] || null;
+        }
+
+        function openAltSource() {
+            const url = altSourceForItem(detailItem);
+            if (!url) return;
+            document.getElementById('altSourceTitle').textContent = 'Alternate Source -- ' + (detailItem.title || '');
+            document.getElementById('altSourceFrame').src = url;
+            document.getElementById('altSourceModal').classList.add('active');
+        }
+
+        function closeAltSource() {
+            document.getElementById('altSourceModal').classList.remove('active');
+            // Clears the iframe src so the embedded player actually stops
+            // (just hiding the modal would leave ok.ru's video playing
+            // silently behind it).
+            document.getElementById('altSourceFrame').src = '';
+        }
+
+        // ===== Command Palette (Ctrl+K), 2026-08-17 =====
+        // Static section list -- only the destinations with a real top-nav or
+        // drawer entry (library-section is the retired hardcoded-demo page,
+        // deliberately left out rather than promoting a page nothing else
+        // links to).
+        const CMDK_COMMANDS = [
+            { label: 'Home', icon: 'fa-house', action: () => showSection('home') },
+            { label: 'Movies', icon: 'fa-film', action: () => showSection('movies') },
+            { label: 'TV Shows', icon: 'fa-tv', action: () => showSection('tv') },
+            { label: 'Anime', icon: 'fa-dragon', action: () => showSection('anime') },
+            { label: 'Bollywood', icon: 'fa-music', action: () => showSection('bollywood') },
+            { label: 'Live TV', icon: 'fa-broadcast-tower', action: () => showSection('channels') },
+            { label: 'Live Sports', icon: 'fa-futbol', action: () => showSection('sports') },
+            { label: 'Cinema Finder', icon: 'fa-map-marker-alt', action: () => showSection('cinema') },
+            { label: 'My List / Watchlist', icon: 'fa-bookmark', action: () => showSection('watchlist') },
+            { label: 'Help Guide', icon: 'fa-circle-question', action: () => showSection('help') },
+            { label: 'Settings', icon: 'fa-gear', action: () => showSection('settings') },
+            { label: 'AI Assistant', icon: 'fa-robot', action: () => toggleAI() },
+            { label: 'Restricted Area', icon: 'fa-lock', action: () => openRestrictedArea() }
+        ];
+        let cmdkActiveIdx = 0;
+
+        function openCmdk() {
+            const overlay = document.getElementById('cmdkOverlay');
+            const input = document.getElementById('cmdkInput');
+            overlay.classList.add('active');
+            input.value = '';
+            cmdkActiveIdx = 0;
+            cmdkFilter();
+            // Focus after the overlay is actually visible, or some browsers
+            // silently drop focus on a still-display:none input.
+            requestAnimationFrame(() => input.focus());
+        }
+
+        function closeCmdk() {
+            document.getElementById('cmdkOverlay').classList.remove('active');
+        }
+
+        function cmdkRender(query) {
+            const resultsEl = document.getElementById('cmdkResults');
+            const q = query.trim().toLowerCase();
+            const matches = q ? CMDK_COMMANDS.filter(c => c.label.toLowerCase().includes(q)) : CMDK_COMMANDS;
+            cmdkActiveIdx = Math.min(cmdkActiveIdx, Math.max(0, matches.length - 1 + (q ? 1 : 0)));
+
+            let html = '';
+            if (matches.length) {
+                html += `<div class="cmdk-group-label">Sections</div>`;
+                html += matches.map((c, i) => `
+                    <div class="cmdk-row${i === cmdkActiveIdx ? ' active' : ''}" data-cmdk-idx="${i}" onclick="cmdkRun(${i})">
+                        <i class="fas ${c.icon}"></i> ${escapeHtml(c.label)}
+                    </div>`).join('');
+            }
+            // Anything typed that isn't (just) a section match also offers a
+            // real content search -- delegates to the same handleSearchInput()
+            // the nav search box already uses, not a second implementation.
+            if (q) {
+                const searchIdx = matches.length;
+                html += `<div class="cmdk-group-label">Search</div>`;
+                html += `
+                    <div class="cmdk-row${searchIdx === cmdkActiveIdx ? ' active' : ''}" data-cmdk-idx="${searchIdx}" onclick="cmdkRun(${searchIdx})">
+                        <i class="fas fa-magnifying-glass"></i> Search for "${escapeHtml(query)}"
+                        <span class="cmdk-row-hint">Enter</span>
+                    </div>`;
+            }
+            resultsEl.innerHTML = html || `<div class="cmdk-empty">No matches</div>`;
+        }
+
+        function cmdkFilter() {
+            cmdkActiveIdx = 0;
+            cmdkRender(document.getElementById('cmdkInput').value);
+        }
+
+        function cmdkRun(idx) {
+            const query = document.getElementById('cmdkInput').value.trim().toLowerCase();
+            const matches = query ? CMDK_COMMANDS.filter(c => c.label.toLowerCase().includes(query)) : CMDK_COMMANDS;
+            closeCmdk();
+            if (idx < matches.length) {
+                matches[idx].action();
+            } else {
+                // The trailing "Search for ..." row.
+                document.getElementById('searchInput').value = document.getElementById('cmdkInput').value.trim();
+                handleSearchInput();
+            }
+        }
+
+        function cmdkKeydown(e) {
+            const query = document.getElementById('cmdkInput').value.trim().toLowerCase();
+            const matches = query ? CMDK_COMMANDS.filter(c => c.label.toLowerCase().includes(query)) : CMDK_COMMANDS;
+            const total = matches.length + (query ? 1 : 0);
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                cmdkActiveIdx = Math.min(cmdkActiveIdx + 1, Math.max(0, total - 1));
+                cmdkRender(document.getElementById('cmdkInput').value);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                cmdkActiveIdx = Math.max(cmdkActiveIdx - 1, 0);
+                cmdkRender(document.getElementById('cmdkInput').value);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                cmdkRun(cmdkActiveIdx);
+            } else if (e.key === 'Escape') {
+                closeCmdk();
+            }
+        }
+
+        // Global trigger -- Ctrl+K (Windows/Linux) or Cmd+K (Mac). Doesn't
+        // fire while a text field already has focus UNLESS it's cmdk's own
+        // input (so re-pressing Ctrl+K while the palette is open just
+        // refocuses rather than doing nothing), avoiding hijacking the
+        // browser/OS's own Ctrl+K in an unrelated input.
+        document.addEventListener('keydown', (e) => {
+            const isK = (e.key === 'k' || e.key === 'K');
+            if (isK && (e.ctrlKey || e.metaKey)) {
+                const tag = document.activeElement && document.activeElement.tagName;
+                const inOwnInput = document.activeElement && document.activeElement.id === 'cmdkInput';
+                if ((tag === 'INPUT' || tag === 'TEXTAREA') && !inOwnInput) return;
+                e.preventDefault();
+                const overlay = document.getElementById('cmdkOverlay');
+                if (overlay && overlay.classList.contains('active')) closeCmdk();
+                else openCmdk();
+            }
+        });
+
+        // Card-to-detail View Transition morph (DESIGN_DNA 21 Extras #12,
+        // 2026-08-17). Native View Transitions API only (Chrome/Edge; other
+        // browsers get the plain instant openDetailInner() below, which is
+        // exactly what ran before this existed -- no functional loss, just
+        // no morph). The clicked card's poster <img> and the detail page's
+        // #detail-poster share a view-transition-name for the duration of
+        // the swap only, so the browser cross-fades/morphs between their two
+        // positions/sizes instead of a hard cut. Name is cleared in a
+        // .finally() so it can never collide with the NEXT card clicked.
+        function openDetail(cardId) {
+            const supportsVT = typeof document.startViewTransition === 'function'
+                && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (!supportsVT) return openDetailInner(cardId);
+
+            const cardEl = document.getElementById(cardId);
+            const posterImg = cardEl && cardEl.querySelector('img.card-poster');
+            const detailPoster = document.getElementById('detail-poster');
+            if (posterImg) posterImg.style.viewTransitionName = 'vt-poster';
+
+            const transition = document.startViewTransition(async () => {
+                await openDetailInner(cardId);
+                if (detailPoster) detailPoster.style.viewTransitionName = 'vt-poster';
+            });
+            transition.finished.finally(() => {
+                if (posterImg) posterImg.style.viewTransitionName = '';
+                if (detailPoster) detailPoster.style.viewTransitionName = '';
+            });
+        }
+
+        async function openDetailInner(cardId) {
             const item = cardRegistry[cardId];
             if (!item) {
                 console.error('openDetail: unknown cardId', cardId);
@@ -18234,6 +19547,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // previously-viewed unreleased title leaves the CTA hidden forever.
             document.getElementById('detail-release').hidden = true;
             document.getElementById('detail-watch-btn').style.display = item.comingSoon ? 'none' : '';
+            const altBtn = document.getElementById('detail-alt-source-btn');
+            if (altBtn) altBtn.style.display = altSourceForItem(item) ? '' : 'none';
             const posterEl = document.getElementById('detail-poster');
             if (item.poster) { posterEl.src = item.poster; posterEl.style.visibility = 'visible'; }
             else { posterEl.removeAttribute('src'); posterEl.style.visibility = 'hidden'; }
