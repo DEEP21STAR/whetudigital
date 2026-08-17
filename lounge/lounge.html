@@ -8655,6 +8655,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             }
             playIntro(() => {
                 if (isRemoteMode() && !sessionStorage.getItem('nexus_remote_unlocked')) showRemotePinGate();
+                nudgeLazyImages();
             });
         };
 
@@ -8765,15 +8766,52 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         }
 
         // ===== LENIS SMOOTH SCROLL =====
+        // Module-scope, not local to initLenisSmoothScroll(), so
+        // nudgeLazyImages() below can drive it directly -- a raw
+        // window.scrollBy() would move the real scroll position without
+        // Lenis's own internal target knowing, causing a visible snap-back
+        // glitch the next time a real wheel/touch event fires.
+        let lenisInstance = null;
+
         function initLenisSmoothScroll() {
             if (typeof Lenis === 'undefined') return;
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-            const lenis = new Lenis();
+            lenisInstance = new Lenis();
             function raf(time) {
-                lenis.raf(time);
+                lenisInstance.raf(time);
                 requestAnimationFrame(raf);
             }
             requestAnimationFrame(raf);
+        }
+
+        // Fixes a real bug found 2026-08-17 (Deep's screenshot): posters
+        // above the fold on first paint were missing until scrolled. Cause:
+        // #intro is a position:fixed opaque overlay (z-index 99999) sitting
+        // OVER the home grid, which is already rendered underneath in real
+        // document flow (populateTrending() runs before playIntro()). Native
+        // loading="lazy" only recomputes which images are eligible to fetch
+        // on an ACTUAL scroll-position change -- a synthetic 'scroll' event
+        // does nothing, since this is compositor-level browser behaviour,
+        // not something JS listeners drive. So the very first paint's
+        // lazy-load pass runs while those images are occluded by the intro,
+        // and nothing ever re-triggers it until the user scrolls for real.
+        // A harmless 1px-and-back nudge, fired the instant the intro clears,
+        // forces that recomputation immediately instead of waiting on the user.
+        function nudgeLazyImages() {
+            // Lenis's own scrollTo() is tried first so its internal target
+            // stays in sync -- but real-world reports exist of scrollTo +
+            // immediate not always moving real scroll position (darkroomengineering/
+            // lenis#443), and the one thing that must not happen here is silently
+            // doing nothing. So a native scrollBy always follows regardless: at
+            // worst that's a redundant no-op 1px nudge, never a missed fix.
+            try {
+                if (lenisInstance) {
+                    lenisInstance.scrollTo(1, { immediate: true, force: true });
+                    lenisInstance.scrollTo(0, { immediate: true, force: true });
+                }
+            } catch (e) {}
+            window.scrollBy(0, 1);
+            window.scrollBy(0, -1);
         }
 
         // ===== CARD HOVER GLOW (GSAP-driven, not CSS :hover, per UI_STANDARD.md) =====
