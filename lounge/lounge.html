@@ -10741,7 +10741,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v89';
+        const LOUNGE_BUILD = 'lounge-shell-v90';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -18634,11 +18634,19 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         const TROUBLESHOOT_SOURCE_HINTS =
             `Known backup domains for the DaddyLive/dlhd.st backend Sky Sport NZ already ` +
             `uses, if the primary is down: daddylive.pk, daddylive.mov, daddylive.nl. ` +
-            `Other live-sports sites Deep has on file (unverified/not integrated into ` +
-            `Lounge): streamed.pk, ppv.to, totalsportek.st, v2.sportsurge.net, damitv.st. ` +
-            `None of these are wired into Lounge's actual playback -- if asked to "fix" ` +
-            `a stream, say so plainly and suggest checking the in-app Diagnose button ` +
-            `first, don't imply these are one-click alternatives.`;
+            `Two more DaddyLive-family mirrors Deep found 2026-08-17, same channel IDs ` +
+            `(588-596 for Sky Sport 1-9 NZ) confirmed live: daddylives.sbs, daddylivetv.sbs ` +
+            `(channel list at daddylivetv.sbs/channels; dlhd.st's own full list is at ` +
+            `dlhd.st/24-7-channels.php). NOT yet wired into Lounge's playback -- checked ` +
+            `live: unlike dlhd.st's simple watch.php?id=N + base64 chain, these two use a ` +
+            `JS-generated dynamic token per channel (stream-proxy.php?t=...&token=...), so ` +
+            `integrating them needs a real browser resolve step, not a URL swap. That work ` +
+            `is queued, not done. Other live-sports sites Deep has on file (unverified/not ` +
+            `integrated): streamed.pk (this one IS wired in, as the automatic fallback when ` +
+            `DaddyLive's CDN itself is down, not per-channel), ppv.to, totalsportek.st, ` +
+            `v2.sportsurge.net, damitv.st. If asked to "fix" a stream, say so plainly and ` +
+            `suggest checking the in-app Diagnose button first, don't imply these are ` +
+            `one-click alternatives.`;
 
         const TROUBLESHOOT_RX = /\b(not work|won'?t (play|load|work)|broken|dead link|can'?t (play|watch|load)|error|buffering|stuck|failed|resolve|alternative|backup|down\b)/i;
 

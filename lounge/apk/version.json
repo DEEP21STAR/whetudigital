@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v89"
+      "cacheName": "lounge-shell-v90"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v90",
+      "date": "2026-08-17",
+      "title": "3 real fixes that shipped without a version bump -- this closes that gap",
+      "changes": [
+        "hydratePosters() ran a full TMDB title-search per card SEQUENTIALLY (await inside a for-loop), with no skip for cards that already had a poster from the initial fetch -- a 20-30 card grid could take many seconds to finish, one card at a time. Now runs concurrently (Promise.all) and skips cards that already have a real poster.",
+        "The header widget row (VPN status, Proton launch, Profile switching, Watch Together, Sleep Timer) was unconditionally hidden below both 1300px and 900px viewport width -- meaning all 5 of those were completely unreachable on ANY phone-width screen, including this app. VPN status now stays visible and compact even at true phone width; the other 4 come back compact in the 900-1300px tablet range.",
+        "These three fixes were real and already deployed server-side, but never got a version bump when shipped -- meaning the app had no way to know they existed even after a manual reload. Same mistake as the WebView cache-bust fix earlier the same day, just for the web build number instead of the Android one. Bumping the version is now checked on every ship, not just native rebuilds."
+      ]
+    },
     {
       "version": "0.1.25",
       "versionCode": 23,
