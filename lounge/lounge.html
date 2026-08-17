@@ -1343,6 +1343,37 @@
             position: relative;
         }
         
+        /* Skeleton placeholders, added 2026-08-17. Real bug from Deep's
+           screenshots: trendingGrid/continueWatchingGrid are genuinely EMPTY
+           (zero children) until their TMDB fetch resolves -- no fallback
+           content at all, so a slow network hop reads as a broken blank void
+           rather than "still loading". Shown immediately at page init,
+           before any populate call fires; renderGrid()'s later
+           el.innerHTML = html naturally overwrites these, no cleanup needed. */
+        .skeleton-card {
+            width: 100%;
+            aspect-ratio: 2/3;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #1a1a2e, #0f0f23);
+            position: relative;
+            overflow: hidden;
+        }
+        .skeleton-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(100deg, transparent 30%, rgba(0,212,255,0.08) 50%, transparent 70%);
+            background-size: 200% 100%;
+            animation: skeletonShimmer 1.6s ease-in-out infinite;
+        }
+        @keyframes skeletonShimmer {
+            0% { background-position: 150% 0; }
+            100% { background-position: -50% 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .skeleton-card::after { animation: none; }
+        }
+
         .card-poster {
             position: absolute;
             inset: 0;
@@ -8698,6 +8729,11 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // Ink GEOMETRY is measured later, in showSection() -- offsetLeft and
             // offsetWidth inside a display:none section are both 0.
             initRails();
+            // trendingGrid/continueWatchingGrid aren't RAIL_CONFIG-driven, so
+            // initRails()'s own skeleton pass doesn't cover them -- same real
+            // gap, needs the same fix, shown before either populate call fires.
+            showGridSkeleton('trendingGrid', 12);
+            showGridSkeleton('continueWatchingGrid', 6);
 
             // Populate content
             populateTrending();
@@ -9607,8 +9643,21 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             }, 120);
         });
 
+        // Fills a grid container with skeleton placeholders. Safe to call on
+        // any content-grid -- populate functions overwrite it wholesale via
+        // el.innerHTML = html once their fetch resolves, same as a normal
+        // (re)render, so there's nothing to clean up on the success path.
+        function showGridSkeleton(gridId, count) {
+            const el = document.getElementById(gridId);
+            if (!el || el.children.length) return; // don't stomp real content
+            el.innerHTML = '<div class="skeleton-card"></div>'.repeat(count || 12);
+        }
+
         function initRails() {
             Object.keys(RAIL_CONFIG).forEach(renderRail);
+            // Every RAIL_CONFIG grid has the exact same gap Trending/Continue
+            // Watching had: genuinely empty until its own TMDB fetch resolves.
+            Object.values(RAIL_CONFIG).forEach(cfg => showGridSkeleton(cfg.grid, 12));
         }
 
         // ===== TMDB DISCOVER/TRENDING HELPERS =====
@@ -10741,7 +10790,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v90';
+        const LOUNGE_BUILD = 'lounge-shell-v91';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';

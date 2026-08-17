@@ -33,10 +33,21 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v90"
+      "cacheName": "lounge-shell-v91"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v91",
+      "date": "2026-08-17",
+      "title": "Skeleton loading placeholders -- Home no longer shows blank space while content loads",
+      "changes": [
+        "Real bug from Deep's screenshots: trendingGrid and continueWatchingGrid (and every genre-rail grid) are genuinely EMPTY -- zero children -- until their TMDB fetch resolves. No fallback content existed, so a slow network hop read as a broken blank void rather than \"still loading\". Added a shimmer skeleton placeholder shown immediately at page init, before any populate call fires; the real content overwrites it the moment it arrives, same as any other (re)render.",
+        "Not the same bug as the earlier hydratePosters fix (v90) -- that one was about individual posters missing inside cards that already existed. This one is about whole sections being missing entirely while their own network call is in flight."
+      ]
+    },
     {
       "version": "0.1.25",
       "versionCode": 23,
