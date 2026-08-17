@@ -1824,6 +1824,20 @@
         .card-rating-dot.tier-yellow { background: #ffd700; box-shadow: 0 0 6px rgba(255,215,0,0.6), 0 0 0 2px rgba(0,0,0,0.5); }
         .card-rating-dot.tier-red    { background: #ff0055; box-shadow: 0 0 6px rgba(255,0,85,0.6), 0 0 0 2px rgba(0,0,0,0.5); }
 
+        /* First-viewport-entry pulse, 2026-08-18 (DESIGN_DNA 21 Extras
+           surprise). One-shot -- ratingDotObserver unobserves after firing,
+           so scrolling back up never re-triggers it. Each tier pulses its
+           own colour (no new colour vocabulary) -- three keyframe sets
+           instead of a currentColor trick, since the dots set background,
+           not color, per tier. */
+        @keyframes ratingDotPulseGreen  { 0% { box-shadow: 0 0 0 0 rgba(0,255,136,0.7), 0 0 0 2px rgba(0,0,0,0.5); } 100% { box-shadow: 0 0 0 9px rgba(0,255,136,0), 0 0 0 2px rgba(0,0,0,0.5); } }
+        @keyframes ratingDotPulseYellow { 0% { box-shadow: 0 0 0 0 rgba(255,215,0,0.6), 0 0 0 2px rgba(0,0,0,0.5); } 100% { box-shadow: 0 0 0 9px rgba(255,215,0,0), 0 0 0 2px rgba(0,0,0,0.5); } }
+        @keyframes ratingDotPulseRed    { 0% { box-shadow: 0 0 0 0 rgba(255,0,85,0.6), 0 0 0 2px rgba(0,0,0,0.5); } 100% { box-shadow: 0 0 0 9px rgba(255,0,85,0), 0 0 0 2px rgba(0,0,0,0.5); } }
+        .card-rating-dot.tier-green.pulse-in  { animation: ratingDotPulseGreen 1.1s ease-out; }
+        .card-rating-dot.tier-yellow.pulse-in { animation: ratingDotPulseYellow 1.1s ease-out; }
+        .card-rating-dot.tier-red.pulse-in    { animation: ratingDotPulseRed 1.1s ease-out; }
+        @media (prefers-reduced-motion: reduce) { .card-rating-dot.pulse-in { animation: none; } }
+
         /* Hover Break-Out (signature moment, 2026-08-18, Deep's ask: "tile to
            pop front on screen a lot bigger with auto trailer playing" but
            "not too much"). Deliberately NOT a bigger CSS :hover scale on the
@@ -3263,6 +3277,17 @@
             background: linear-gradient(to top, #0a0a0a 2%, rgba(10,10,10,0.55) 32%, rgba(10,10,10,0) 62%);
         }
 
+        .detail-ambient {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0;
+            mix-blend-mode: screen;
+            transition: opacity 0.8s ease, background 0.8s ease;
+        }
+        .detail-ambient.is-active { opacity: 0.28; }
+        @media (prefers-reduced-motion: reduce) { .detail-ambient { transition: none; } }
+
         .detail-back {
             position: absolute;
             top: 14px;
@@ -3605,6 +3630,67 @@
         .lp-action:hover { border-color: #00d4ff; box-shadow: 0 0 18px rgba(0, 212, 255, 0.4); }
         .lp-action.alt { border-color: rgba(157, 78, 221, 0.5); }
         .lp-action.alt:hover { border-color: #9d4edd; box-shadow: 0 0 18px rgba(157, 78, 221, 0.45); }
+
+        /* Cinematic letterbox, 2026-08-18 (DESIGN_DNA 21 Extras surprise).
+           Static "projector frame" bars during load, lift away the instant
+           video.onplaying fires -- tied to that event rather than the
+           is-open toggle specifically so the transform transition never has
+           to cross a display:none boundary (which CSS can't animate). */
+        .dv-letterbox-bar {
+            position: absolute;
+            left: 0; right: 0;
+            height: 5%;
+            background: #000;
+            z-index: 8;
+            pointer-events: none;
+            transform: translateY(0);
+            transition: transform 0.6s cubic-bezier(.16, 1, .3, 1);
+        }
+        .dv-letterbox-top { top: 0; }
+        .dv-letterbox-bottom { bottom: 0; }
+        #device-player.dv-letterbox-lift .dv-letterbox-top { transform: translateY(-100%); }
+        #device-player.dv-letterbox-lift .dv-letterbox-bottom { transform: translateY(100%); }
+        @media (prefers-reduced-motion: reduce) {
+            .dv-letterbox-bar { transition: none; display: none; }
+        }
+
+        /* "Previously on..." recap, 2026-08-18 (DESIGN_DNA 21 Extras
+           surprise). Deliberately text-only (no narration) -- a synthesized
+           voice reading a plot summary aloud is a bigger, riskier build for
+           a v1 that doesn't need it to land. */
+        .dv-recap {
+            position: absolute;
+            inset: 0;
+            z-index: 9;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 0 24px 64px;
+            background: rgba(0, 0, 0, 0.55);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        .dv-recap.is-active { opacity: 1; }
+        .dv-recap-card {
+            max-width: 560px;
+            padding: 18px 24px;
+            border-radius: 12px;
+            background: rgba(10, 10, 14, 0.88);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            text-align: center;
+        }
+        .dv-recap-label {
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: #00d4ff;
+            margin-bottom: 8px;
+        }
+        .dv-recap-text { font-size: 14px; line-height: 1.5; color: #ddd; }
+        @media (prefers-reduced-motion: reduce) { .dv-recap { transition: none; } }
 
         /* Up Next auto-advance card, 2026-08-18. Bottom-right, same convention
            Skip Intro already uses on this exact stage -- Deep's own established
@@ -7789,6 +7875,12 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                          with its iframe once, and later titles reuse the same player
                          instance via loadVideoById. -->
                     <div id="detail-trailer-wrap" class="detail-trailer-wrap"><div id="detail-trailer-mount"></div></div>
+                    <!-- Poster-driven ambient wash, 2026-08-18 (DESIGN_DNA 21
+                         Extras surprise -- see extractDominantColor()). Sits
+                         above the fade with mix-blend-mode:screen so it tints
+                         the existing frame instead of covering it -- no new
+                         positioning context, no overflow-escape risk. -->
+                    <div id="detail-ambient" class="detail-ambient"></div>
                     <div class="detail-hero-fade"></div>
                     <button class="detail-back" onclick="closeDetail()"><i class="fas fa-arrow-left"></i> Back</button>
                     <div id="detail-transport" class="detail-transport" hidden>
@@ -8559,6 +8651,11 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
          control of any kind -- see the .dv-corn-play / .dv-seek block in the
          stylesheet for why. -->
     <div id="device-player" class="live-player" role="dialog" aria-modal="true" aria-label="Device player">
+        <!-- Cinematic letterbox reveal, 2026-08-18 (DESIGN_DNA 21 Extras
+             surprise). Pure CSS -- rides the existing .is-open class
+             openDevicePlayer() already toggles, no new JS. -->
+        <div class="dv-letterbox-bar dv-letterbox-top" aria-hidden="true"></div>
+        <div class="dv-letterbox-bar dv-letterbox-bottom" aria-hidden="true"></div>
         <div class="live-player-head">
             <span class="live-player-tag" style="color:#00d4ff;border-color:rgba(0,212,255,0.45);background:rgba(0,212,255,0.1);">THIS DEVICE</span>
             <span id="dv-title" class="live-player-title">&nbsp;</span>
@@ -8583,6 +8680,17 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             <div id="dv-loading" class="live-player-state">
                 <i class="fas fa-circle-notch fa-spin"></i>
                 <div class="lp-msg">Opening the file…</div>
+            </div>
+            <!-- "Previously on..." recap, 2026-08-18 (DESIGN_DNA 21 Extras
+                 surprise). Only shown between Up Next auto-advances, where
+                 the episode just finished has cached TMDB overview text
+                 (getEpisodeOverview) -- skipped silently otherwise, never a
+                 blank card. -->
+            <div id="dv-recap" class="dv-recap" hidden>
+                <div class="dv-recap-card">
+                    <div class="dv-recap-label">Previously</div>
+                    <div class="dv-recap-text" id="dv-recap-text"></div>
+                </div>
             </div>
             <!-- Skip Intro, added 2026-08-16. No third-party intro-detection
                  API involved (they're unreliable/paid) -- this is Deep's own
@@ -12295,7 +12403,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v109';
+        const LOUNGE_BUILD = 'lounge-shell-v110';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -16720,6 +16828,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // is-loading suppresses the centre popcorn button while the file is
             // still opening; is-paused drives its visibility from then on.
             wrap.classList.add('is-loading', 'is-paused');
+            wrap.classList.remove('dv-letterbox-lift'); // reset for reuse across opens
             document.body.style.overflow = 'hidden';
 
             // Custom chrome. Must run before play() so the first state sync and
@@ -16738,6 +16847,12 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 // actually decoding -- a file that never starts should not lock
                 // out a real position coming from another device.
                 if (currentPlaybackMeta) reelActiveId = cwItemId(currentPlaybackMeta);
+                // Letterbox bars lift the instant real playback starts, not on
+                // open -- tying it to "first frame decoding" instead of the
+                // is-open toggle sidesteps the CSS can't-transition-from-
+                // display:none problem entirely and reads better besides: the
+                // bars frame the loading state, then the show visibly starts.
+                wrap.classList.add('dv-letterbox-lift');
             };
             dvLastReport = 0;
             video.ontimeupdate = () => dvReportProgress(video, false);
@@ -16786,6 +16901,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const video = document.getElementById('dv-video');
             if (dvWatchdog) { clearTimeout(dvWatchdog); dvWatchdog = null; }
             dvUpnextHide();
+            const recap = document.getElementById('dv-recap');
+            if (recap) { recap.hidden = true; recap.classList.remove('is-active'); }
             if (video) {
                 // Flush the final position BEFORE tearing the element down --
                 // after removeAttribute('src') + load(), currentTime is 0 and the
@@ -18969,7 +19086,34 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const state = dvUpnextState;
             dvUpnextHide();
             if (!state) return;
-            autoAdvancePlayEpisode(state.meta.title, state.meta.tmdbId, state.next.season, state.next.episode, state.next.name);
+            showRecapThenAdvance(state.meta, state.next);
+        }
+
+        // Reads from seasonEpisodesCache, already populated by
+        // dvComputeNextEpisode's own lookup for the season the episode that
+        // just ended belongs to -- no extra TMDB call needed here.
+        function getEpisodeOverview(tmdbId, season, episode) {
+            const episodes = seasonEpisodesCache[`${tmdbId}:${season}`];
+            if (!episodes) return null;
+            const ep = episodes.find(e => e.episode_number === episode);
+            return (ep && ep.overview) ? ep.overview : null;
+        }
+
+        function showRecapThenAdvance(meta, next) {
+            const overview = getEpisodeOverview(meta.tmdbId, meta.season, meta.episode);
+            if (!overview || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                autoAdvancePlayEpisode(meta.title, meta.tmdbId, next.season, next.episode, next.name);
+                return;
+            }
+            const recap = document.getElementById('dv-recap');
+            document.getElementById('dv-recap-text').textContent = `${meta.title}: ${overview}`;
+            recap.hidden = false;
+            requestAnimationFrame(() => recap.classList.add('is-active'));
+            setTimeout(() => {
+                recap.classList.remove('is-active');
+                setTimeout(() => { recap.hidden = true; }, 400);
+                autoAdvancePlayEpisode(meta.title, meta.tmdbId, next.season, next.episode, next.name);
+            }, 2600);
         }
 
         function dvShowUpnext(meta, next) {
@@ -19814,6 +19958,26 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     setTimeout(() => gsap.set(newCards, { clearProps: 'opacity,y,transform' }), 1500);
                 }
             }
+            observeRatingDotsForPulse(el);
+        }
+
+        // Rating-dot first-entry pulse (DESIGN_DNA 21 Extras surprise,
+        // 2026-08-18) -- a single shared observer rather than one per grid,
+        // since dozens of grids render over a session and each would
+        // otherwise leak its own IntersectionObserver instance.
+        let ratingDotObserver = null;
+        function observeRatingDotsForPulse(gridEl) {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            if (!ratingDotObserver) {
+                ratingDotObserver = new IntersectionObserver((entries) => {
+                    entries.forEach((entry) => {
+                        if (!entry.isIntersecting) return;
+                        entry.target.classList.add('pulse-in');
+                        ratingDotObserver.unobserve(entry.target);
+                    });
+                }, { threshold: 0.4 });
+            }
+            gridEl.querySelectorAll('.card-rating-dot').forEach((dot) => ratingDotObserver.observe(dot));
         }
 
         // ===== PLAYBACK =====
@@ -20165,13 +20329,70 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
         function setDetailBackdrop(backdropPath) {
             const img = document.getElementById('detail-backdrop-img');
+            const ambient = document.getElementById('detail-ambient');
             if (backdropPath) {
                 img.src = `https://image.tmdb.org/t/p/original${backdropPath}`;
                 img.style.visibility = 'visible';
+                applyAmbientWash(ambient, backdropPath);
             } else {
                 img.removeAttribute('src');
                 img.style.visibility = 'hidden';
+                if (ambient) ambient.classList.remove('is-active');
             }
+        }
+
+        // ===== Poster-driven ambient wash (DESIGN_DNA 21 Extras surprise, 2026-08-18) =====
+        // Every title's detail page gets its own colour mood instead of the
+        // same fixed accent everywhere -- Apple Music/Spotify Canvas pattern,
+        // applied to a media-center detail hero. TMDB's image CDN sends no
+        // CORS headers (confirmed via curl -I), so canvas pixel sampling goes
+        // through api/lounge/image-proxy.js, which relays the same bytes with
+        // an ACAO header. A w92 thumbnail is plenty for a colour average and
+        // keeps the extra request tiny.
+        const ambientColorCache = {};
+        let ambientRequestToken = 0;
+
+        function extractDominantColor(backdropPath) {
+            if (backdropPath in ambientColorCache) return Promise.resolve(ambientColorCache[backdropPath]);
+            return new Promise((resolve) => {
+                const proxyUrl = `${getContentBase()}/image-proxy?url=${encodeURIComponent('https://image.tmdb.org/t/p/w92' + backdropPath)}`;
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.naturalWidth;
+                        canvas.height = img.naturalHeight;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                        let r = 0, g = 0, b = 0, n = 0;
+                        // Every 7th pixel is plenty for an average on a w92 thumbnail
+                        // and keeps this off the main thread for a negligible time.
+                        for (let i = 0; i < data.length; i += 4 * 7) {
+                            r += data[i]; g += data[i + 1]; b += data[i + 2]; n++;
+                        }
+                        const color = n ? `rgb(${Math.round(r / n)}, ${Math.round(g / n)}, ${Math.round(b / n)})` : null;
+                        ambientColorCache[backdropPath] = color;
+                        resolve(color);
+                    } catch (e) {
+                        ambientColorCache[backdropPath] = null;
+                        resolve(null);
+                    }
+                };
+                img.onerror = () => { ambientColorCache[backdropPath] = null; resolve(null); };
+                img.src = proxyUrl;
+            });
+        }
+
+        async function applyAmbientWash(ambientEl, backdropPath) {
+            if (!ambientEl) return;
+            const myToken = ++ambientRequestToken;
+            const color = await extractDominantColor(backdropPath);
+            if (myToken !== ambientRequestToken) return; // a newer title was opened while this resolved
+            if (!color) { ambientEl.classList.remove('is-active'); return; }
+            ambientEl.style.background = `radial-gradient(ellipse at 28% 35%, ${color} 0%, transparent 68%)`;
+            ambientEl.classList.add('is-active');
         }
 
         function renderDetail(d, type) {

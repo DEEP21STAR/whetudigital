@@ -33,10 +33,24 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v109"
+      "cacheName": "lounge-shell-v110"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v110",
+      "date": "2026-08-18",
+      "title": "Four DESIGN_DNA surprises: ambient wash, letterbox reveal, rating pulse, recap card",
+      "changes": [
+        "Poster-driven ambient wash: the detail page now extracts each title's real dominant colour (canvas-sampled via a new api/lounge/image-proxy.js Edge function, since TMDB's image CDN sends no CORS headers and would otherwise taint the canvas) and bleeds a soft radial tint behind the hero -- every title gets its own mood instead of the same fixed cyan everywhere. mix-blend-mode:screen so it tints the existing frame rather than covering it.",
+        "Cinematic letterbox: This Device player shows thin black bars framing the video during load, then lifts them the instant real playback starts (tied to video.onplaying, not the open toggle -- sidesteps CSS's can't-transition-from-display:none limit and reads as 'the show is starting').",
+        "Rating-dot pulse: the green/yellow/red quality dot on every card pulses once, in its own tier colour, the first time it enters the viewport (IntersectionObserver, one-shot, unobserves after firing) -- draws the eye to quality signal without any new colour.",
+        "Previously on... recap: Up Next's auto-advance now shows a 3-second text recap of the episode that just finished (real TMDB overview, no new API cost -- reads from the same season cache Up Next itself already populated) before the next episode starts resolving.",
+        "All four verified live via judge_harness against the running app -- ambient wash and rating-dot pulse confirmed via direct DOM state assertions; letterbox and recap confirmed via screenshots after two rounds of fixing my own test methodology (bypassing openDevicePlayer() in a synthetic test skips the handler wiring it does; a 2.6s auto-hide window can be eaten by harness step overhead) -- both are test artifacts, not app defects, and are documented as such rather than silently reported clean."
+      ]
+    },
     {
       "version": "0.1.25",
       "versionCode": 23,
