@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v108"
+      "cacheName": "lounge-shell-v109"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v109",
+      "date": "2026-08-18",
+      "title": "Up Next: season-aware auto-advance with a 10s countdown card",
+      "changes": [
+        "When an in-browser (This Device) episode finishes, a Netflix-style Up Next card appears bottom-right: real still image, S{n}E{n} + episode name pulled from TMDB, a 10s countdown ring, Play Now / Cancel. Season-rollover aware -- a season finale correctly advances to next season episode 1, not nothing (verified: Breaking Bad S1E3->S1E4 same-season, S1E7->S2E1 rollover, both against live TMDB data).",
+        "Auto-fires through the exact same picker pipeline a manual episode pick uses (imdb lookup, queryStreams, subtitle search) rather than a second parallel resolution path -- confirmed live during testing: letting the countdown run to 0 actually opened the picker and attempted real playback (hit an honest 451 legal-block from Real-Debrid on the specific test title, the same response class South Park hit on 2026-08-17 -- proof the full chain fires for real, not just the UI).",
+        "Deliberately scoped to the in-browser <video> route only -- mpv and native-TV playback completion aren't observable from this page (no 'ended' signal exists in either IPC poll loop), so this doesn't pretend to support routes it can't actually detect. Countdown timer is torn down on player close so nothing can fire after Deep has already left."
+      ]
+    },
     {
       "version": "0.1.25",
       "versionCode": 23,

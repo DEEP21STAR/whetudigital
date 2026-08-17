@@ -3606,6 +3606,96 @@
         .lp-action.alt { border-color: rgba(157, 78, 221, 0.5); }
         .lp-action.alt:hover { border-color: #9d4edd; box-shadow: 0 0 18px rgba(157, 78, 221, 0.45); }
 
+        /* Up Next auto-advance card, 2026-08-18. Bottom-right, same convention
+           Skip Intro already uses on this exact stage -- Deep's own established
+           pattern here, not a new placement rule. */
+        .dv-upnext {
+            position: absolute;
+            right: 24px;
+            bottom: 24px;
+            z-index: 6;
+            animation: dvUpnextIn 0.35s ease-out;
+        }
+        @keyframes dvUpnextIn {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (prefers-reduced-motion: reduce) { .dv-upnext { animation: none; } }
+        .dv-upnext-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px;
+            width: 340px;
+            max-width: calc(100vw - 48px);
+            border-radius: 12px;
+            background: rgba(10, 10, 14, 0.92);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 212, 255, 0.35);
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.55), 0 0 30px rgba(0, 212, 255, 0.12);
+        }
+        .dv-upnext-still {
+            flex: none;
+            width: 84px;
+            aspect-ratio: 16/9;
+            border-radius: 7px;
+            background: #14141a center/cover no-repeat;
+        }
+        .dv-upnext-info { flex: 1; min-width: 0; }
+        .dv-upnext-label {
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: #00d4ff;
+            margin-bottom: 3px;
+        }
+        .dv-upnext-title {
+            font-size: 13px;
+            color: #eee;
+            line-height: 1.3;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .dv-upnext-actions { display: flex; gap: 8px; }
+        .dv-upnext-actions .lp-action { padding: 6px 12px; font-size: 12px; }
+        .dv-upnext-ring-wrap {
+            flex: none;
+            position: relative;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+        }
+        .dv-upnext-ring { width: 40px; height: 40px; transform: rotate(-90deg); }
+        .dv-upnext-ring-bg, .dv-upnext-ring-fg {
+            fill: none;
+            stroke-width: 3;
+        }
+        .dv-upnext-ring-bg { stroke: rgba(255,255,255,0.12); }
+        .dv-upnext-ring-fg {
+            stroke: #00d4ff;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s linear;
+        }
+        @media (prefers-reduced-motion: reduce) { .dv-upnext-ring-fg { transition: none; } }
+        .dv-upnext-count {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+        }
+        @media (max-width: 480px) {
+            .dv-upnext { right: 12px; bottom: 12px; left: 12px; }
+            .dv-upnext-card { width: 100%; }
+        }
+
         /* Amber, not the app's blue -- a status note, not an action. Deep
            does not want an external-site link here (2026-08-17); this only
            states what's actually wrong so a dead CDN doesn't read as a
@@ -8502,6 +8592,31 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             <button id="dv-skip-intro" class="lp-action alt" style="display:none;position:absolute;right:24px;bottom:80px;z-index:5;" onclick="dvSkipIntro()">
                 <i class="fas fa-forward"></i> Skip Intro
             </button>
+            <!-- Up Next (auto-advance), 2026-08-18. Only ever shown for the
+                 in-browser <video> route -- mpv/native-TV playback completion
+                 isn't observable from this page (no equivalent 'ended' signal
+                 exists in either IPC poll loop), so this honestly limits
+                 itself to the one route Lounge actually controls. -->
+            <div id="dv-upnext" class="dv-upnext" hidden>
+                <div class="dv-upnext-card">
+                    <div class="dv-upnext-still" id="dv-upnext-still"></div>
+                    <div class="dv-upnext-info">
+                        <div class="dv-upnext-label">Up Next</div>
+                        <div class="dv-upnext-title" id="dv-upnext-title"></div>
+                        <div class="dv-upnext-actions">
+                            <button class="lp-action" onclick="dvUpnextPlayNow()"><i class="fas fa-play"></i> Play Now</button>
+                            <button class="lp-action alt" onclick="dvUpnextCancel()">Cancel</button>
+                        </div>
+                    </div>
+                    <div class="dv-upnext-ring-wrap">
+                        <svg class="dv-upnext-ring" viewBox="0 0 40 40" aria-hidden="true">
+                            <circle class="dv-upnext-ring-bg" cx="20" cy="20" r="17"></circle>
+                            <circle class="dv-upnext-ring-fg" id="dv-upnext-ring-fg" cx="20" cy="20" r="17"></circle>
+                        </svg>
+                        <span class="dv-upnext-count" id="dv-upnext-count">10</span>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="live-player-transport">
             <button id="dv-play" class="dt-btn" onclick="dvTogglePlay()" title="Play / pause" aria-label="Play or pause"><i class="fas fa-play"></i></button>
@@ -12180,7 +12295,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v108';
+        const LOUNGE_BUILD = 'lounge-shell-v109';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -16629,7 +16744,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // Pause and end are the two moments a resume point matters most, so
             // both bypass the throttle rather than waiting for the next tick.
             video.onpause = () => dvReportProgress(video, true);
-            video.onended = () => { dvReportProgress(video, true); reelActiveId = null; };
+            video.onended = () => dvHandleEnded(video);
             // MEDIA_ERR_SRC_NOT_SUPPORTED (code 4) is exactly what an MKV or an
             // AC3-only track produces here.
             video.onerror = () => {
@@ -16670,6 +16785,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const wrap = document.getElementById('device-player');
             const video = document.getElementById('dv-video');
             if (dvWatchdog) { clearTimeout(dvWatchdog); dvWatchdog = null; }
+            dvUpnextHide();
             if (video) {
                 // Flush the final position BEFORE tearing the element down --
                 // after removeAttribute('src') + load(), currentTime is 0 and the
@@ -18574,6 +18690,11 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         }
 
         // ===== TV SEASON/EPISODE DRILL-DOWN =====
+        // Caches shared with the Up Next auto-advance card further down --
+        // declared here since this is where they're first populated.
+        const showSeasonListCache = {};
+        const seasonEpisodesCache = {};
+
         async function openSeasonPicker(item) {
             const myGeneration = ++pickerGeneration;
             currentPickerItem = item;
@@ -18617,6 +18738,10 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 body.innerHTML = '<div class="stream-picker-empty">No seasons found for this show.</div>';
                 return;
             }
+            // Cached for the Up Next auto-advance card (dvComputeNextEpisode) --
+            // browsing the picker before hitting play means season-rollover
+            // never needs a fresh TMDB round-trip when the episode ends later.
+            showSeasonListCache[tmdbId] = seasons.map(s => s.season_number).sort((a, b) => a - b);
 
             body.innerHTML = seasons.map(s => `
                 <div class="stream-picker-row" onclick="openEpisodePicker(${tmdbId}, ${s.season_number})">
@@ -18653,6 +18778,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 body.innerHTML = '<div class="stream-picker-empty">No episodes found for this season.</div>';
                 return;
             }
+            seasonEpisodesCache[`${tmdbId}:${seasonNumber}`] = episodes;
 
             const backRow = `<div class="stream-picker-row" onclick="openSeasonPicker(currentPickerItem)" style="opacity:0.7;"><div><i class="fas fa-chevron-left"></i> Back to seasons</div></div>`;
             body.innerHTML = backRow + episodes.map(ep => `
@@ -18778,6 +18904,141 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             }
 
             showStreamResults(streams);
+        }
+
+        // ===== UP NEXT (auto-advance), 2026-08-18 =====
+        // Season-rollover aware: a season finale's "next episode" is season+1
+        // episode 1, not nothing. Cache-first (populated by openSeasonPicker/
+        // openEpisodePicker above when Deep actually browsed there), falls
+        // back to a fresh TMDB round-trip when the episode was reached some
+        // other way (Continue Watching resume, auto-advance chaining into a
+        // season nobody opened the picker for this session).
+        async function fetchSeasonEpisodesCached(tmdbId, season, key) {
+            const cacheKey = `${tmdbId}:${season}`;
+            if (seasonEpisodesCache[cacheKey]) return seasonEpisodesCache[cacheKey];
+            const data = await tmdbFetch(`tv/${tmdbId}/season/${season}`, {}, key);
+            const episodes = data.episodes || [];
+            seasonEpisodesCache[cacheKey] = episodes;
+            return episodes;
+        }
+
+        async function fetchShowSeasonListCached(tmdbId, key) {
+            if (showSeasonListCache[tmdbId]) return showSeasonListCache[tmdbId];
+            const data = await tmdbFetch(`tv/${tmdbId}`, {}, key);
+            const seasons = (data.seasons || []).filter(s => s.season_number > 0).map(s => s.season_number).sort((a, b) => a - b);
+            showSeasonListCache[tmdbId] = seasons;
+            return seasons;
+        }
+
+        async function dvComputeNextEpisode(tmdbId, season, episode) {
+            const key = localStorage.getItem('nexus_tmdb_key');
+            if (!key) return null;
+            try {
+                const episodes = await fetchSeasonEpisodesCached(tmdbId, season, key);
+                const inSeason = episodes.find(e => e.episode_number === episode + 1);
+                if (inSeason) return { season, episode: episode + 1, name: inSeason.name, still: inSeason.still_path };
+
+                const seasons = await fetchShowSeasonListCached(tmdbId, key);
+                const idx = seasons.indexOf(season);
+                if (idx === -1 || idx === seasons.length - 1) return null; // series finale, honestly nothing next
+
+                const nextSeason = seasons[idx + 1];
+                const nextEpisodes = await fetchSeasonEpisodesCached(tmdbId, nextSeason, key);
+                const firstEp = nextEpisodes.find(e => e.episode_number === 1) || nextEpisodes[0];
+                if (!firstEp) return null;
+                return { season: nextSeason, episode: firstEp.episode_number, name: firstEp.name, still: firstEp.still_path };
+            } catch (e) {
+                console.warn('dvComputeNextEpisode failed:', e);
+                return null;
+            }
+        }
+
+        let dvUpnextInterval = null;
+        let dvUpnextState = null;
+
+        function dvUpnextHide() {
+            const overlay = document.getElementById('dv-upnext');
+            if (overlay) overlay.hidden = true;
+            if (dvUpnextInterval) { clearInterval(dvUpnextInterval); dvUpnextInterval = null; }
+            dvUpnextState = null;
+        }
+
+        function dvUpnextCancel() { dvUpnextHide(); }
+
+        function dvUpnextPlayNow() {
+            const state = dvUpnextState;
+            dvUpnextHide();
+            if (!state) return;
+            autoAdvancePlayEpisode(state.meta.title, state.meta.tmdbId, state.next.season, state.next.episode, state.next.name);
+        }
+
+        function dvShowUpnext(meta, next) {
+            const overlay = document.getElementById('dv-upnext');
+            if (!overlay) return;
+            const stillEl = document.getElementById('dv-upnext-still');
+            const titleEl = document.getElementById('dv-upnext-title');
+            // TMDB fills unnamed episodes with "Episode 8" -- same generic-name
+            // filter already used by nextEpisodeLineHtml above, applied here too.
+            const generic = /^episode\s*\d+$/i.test((next.name || '').trim());
+            titleEl.textContent = `S${next.season}E${next.episode}` + (next.name && !generic ? ` — ${next.name}` : '');
+            const stillUrl = next.still ? `https://image.tmdb.org/t/p/w300${next.still}` : (meta.backdrop ? `https://image.tmdb.org/t/p/w300${meta.backdrop}` : null);
+            stillEl.style.backgroundImage = stillUrl ? `url('${stillUrl}')` : 'none';
+            overlay.hidden = false;
+
+            const CIRC = 2 * Math.PI * 17;
+            const ringFg = document.getElementById('dv-upnext-ring-fg');
+            const countEl = document.getElementById('dv-upnext-count');
+            ringFg.style.strokeDasharray = `${CIRC}`;
+            ringFg.style.strokeDashoffset = '0';
+            let remaining = 10;
+            countEl.textContent = remaining;
+            dvUpnextState = { meta, next };
+            if (dvUpnextInterval) clearInterval(dvUpnextInterval);
+            dvUpnextInterval = setInterval(() => {
+                remaining -= 1;
+                countEl.textContent = Math.max(remaining, 0);
+                ringFg.style.strokeDashoffset = String(CIRC * (1 - remaining / 10));
+                if (remaining <= 0) dvUpnextPlayNow();
+            }, 1000);
+        }
+
+        async function dvHandleEnded(video) {
+            dvReportProgress(video, true);
+            reelActiveId = null;
+            const meta = currentPlaybackMeta;
+            if (!meta || meta.type !== 'tv' || !meta.tmdbId || meta.season == null || meta.episode == null) return;
+            const next = await dvComputeNextEpisode(meta.tmdbId, meta.season, meta.episode);
+            if (!next) return;
+            // The TMDB round-trip above is async -- Deep may have already
+            // closed the player while it was in flight. Don't resurrect it.
+            const wrap = document.getElementById('device-player');
+            if (!wrap || !wrap.classList.contains('is-open')) return;
+            dvShowUpnext(meta, next);
+        }
+
+        // Reuses the exact same picker pipeline a manual season/episode pick
+        // goes through (imdb lookup, queryStreams, subtitle search) rather than
+        // a parallel resolution path -- one proven code path, not two to keep
+        // in sync. The picker modal briefly shows "Finding the next episode..."
+        // instead of staying hidden, which is honest: this is a real network
+        // round-trip, not an instant cut, and matches what every major
+        // streaming platform's own up-next transition actually looks like.
+        async function autoAdvancePlayEpisode(showTitle, tmdbId, season, episode, epName) {
+            currentPickerItem = { title: showTitle, type: 'tv' };
+            document.getElementById('stream-picker-title').textContent = `${showTitle} — S${season}E${episode}`;
+            document.getElementById('stream-picker-modal').classList.add('active');
+            document.getElementById('stream-picker-subtitles').style.display = 'none';
+            document.getElementById('stream-picker-quality-tabs').style.display = 'none';
+            document.getElementById('stream-picker-target').style.display = 'none';
+            document.getElementById('stream-picker-body').innerHTML = '<div class="stream-picker-empty">Finding the next episode...</div>';
+            await openEpisodeStreamPicker(tmdbId, season, episode);
+            if (window.__currentStreams && window.__currentStreams.length) {
+                resolveAndPlay(0);
+            }
+            // No sources found: the picker is left open showing queryStreams'
+            // own noResultsMessage() from inside openEpisodeStreamPicker --
+            // same honest empty state a manual pick would show, not a silent
+            // failure that strands Deep on a frozen "ended" screen.
         }
 
         // ===== SCRAPER QUERY (Torrentio / MediaFusion) =====
