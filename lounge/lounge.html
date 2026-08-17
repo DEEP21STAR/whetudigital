@@ -398,9 +398,11 @@
                the mark, not tucked under it) -- so this pulls it DOWN to tuck
                its underside against the couch mark's shoulders, mirroring the
                old margin-top logic in the opposite direction. Was -22px --
-               Deep found that too tight 2026-08-14, opened to -6px for real
-               breathing room between the arc and the couch mark. */
-            margin-bottom: -6px;
+               Deep found that too tight 2026-08-14, opened to -6px, which
+               still overlapped the logo (Deep, 2026-08-17) -- moved to a
+               positive gap, widened to 28px same day, then confirmed still
+               not enough after seeing it live again -- widened further. */
+            margin-bottom: 48px;
             line-height: 0;
         }
         /* Width is capped by the viewport so the arc shrinks as one piece on a
@@ -984,6 +986,10 @@
             .topnav .nav-item { padding: 8px 11px; gap: 0; }
             .topnav .nav-item i { font-size: 16px; }
             .topnav-links { gap: 4px; }
+            /* Icon-only, same reasoning as the nav tabs above -- stays visible
+               and clickable rather than disappearing at a narrow width. */
+            #windscribeToggleBtn #windscribeToggleLabel { display: none; }
+            #windscribeToggleBtn { padding: 4px 9px; }
         }
 
         @media (max-width: 1300px) {
@@ -1374,7 +1380,8 @@
             font-size: 20px;
         }
 
-        .card-image.has-poster i {
+        .card-image.has-poster i,
+        .card-image.has-poster .chan-neon-badge {
             display: none;
         }
 
@@ -1648,7 +1655,17 @@
             padding: 1px 4px;
         }
 
-        .epg-row.now .epg-label { color: #00ff88; }
+        /* Pulsing glow on the live "NOW" label, added 2026-08-17 (Deep: make
+           it obvious at a glance which channel is airing something live right
+           now, distinct from the flat "NOW"/"NEXT" text colour alone). */
+        .epg-row.now .epg-label {
+            color: #00ff88;
+            animation: epgNowGlow 1.8s ease-in-out infinite;
+        }
+        @keyframes epgNowGlow {
+            0%, 100% { text-shadow: 0 0 4px rgba(0, 255, 136, 0.5); }
+            50% { text-shadow: 0 0 12px rgba(0, 255, 136, 1), 0 0 20px rgba(0, 255, 136, 0.6); }
+        }
         .epg-row.next .epg-label { color: #7a7a7a; }
 
         .epg-title {
@@ -1888,6 +1905,42 @@
         }
 
         .channel-card .card-image i { font-size: 28px; }
+
+        /* Neon channel badge, added 2026-08-17: without a real logo, every
+           channel tile showed the SAME grey antenna glyph -- Deep couldn't
+           tell Sky Sport 1 NZ from Sky Sport 9 NZ at a glance. This is a
+           deterministic, per-channel coloured "neon window" (hash of the
+           channel name -> hue, same channel always gets the same colour) so
+           tiles stay visually distinct even with no artwork. Hidden the
+           instant a real logo loads via the .has-poster rule below, same as
+           the old antenna icon was. */
+        .chan-neon-badge {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            box-sizing: border-box;
+        }
+        .chan-neon-badge .cn-num {
+            font-size: 34px;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .chan-neon-badge .cn-sub {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            opacity: 0.85;
+        }
+        .chan-neon-badge .cn-init {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
 
         .channel-card .card-info {
             display: block;
@@ -2225,6 +2278,77 @@
             border: 1px solid #1c1c1c;
             border-left: 2px solid #00d4ff;
             border-radius: 9px;
+            cursor: pointer;
+        }
+        /* Clickable filter, added 2026-08-17: this banner used to be read-only
+           ("X of Y have live data"). It's the honest, exact scope a "show me
+           only what has real data right now" filter should target, so it
+           became one. Active state gets a visible fill treatment, not just a
+           colour change on hover, so "this filter is ON" survives a glance
+           from across the room. */
+        .epgcov.is-active-filter {
+            background: linear-gradient(90deg, rgba(0,255,136,0.14), rgba(0,0,0,0));
+            border-left-color: #00ff88;
+        }
+        .epgcov.is-active-filter .epgcov-num { color: #00ff88; }
+        .epgcov-clear {
+            color: #00d4ff;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+        .epgcov.is-active-filter .epgcov-clear { color: #00ff88; }
+
+        /* "What's Live Now" strip */
+        #liveForYouStrip {
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .lfy-heading {
+            flex: 0 0 100%;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            color: #ffd700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .lfy-card {
+            text-align: left;
+            background: linear-gradient(135deg, rgba(255,215,0,0.14), rgba(0,0,0,0.4));
+            border: 1px solid rgba(255,215,0,0.4);
+            border-radius: 10px;
+            padding: 10px 16px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            box-shadow: 0 0 10px rgba(255,215,0,0.15);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .lfy-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 16px rgba(255,215,0,0.35);
+        }
+        .lfy-team {
+            font-size: 13px;
+            font-weight: 800;
+            color: #ffd700;
+        }
+        .lfy-title {
+            font-size: 12px;
+            color: #e8e8e8;
+            max-width: 260px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .lfy-channel {
+            font-size: 10px;
+            color: #8d8d8d;
         }
         .epgcov-label {
             flex: 0 0 auto;
@@ -2851,6 +2975,20 @@
         .lp-action:hover { border-color: #00d4ff; box-shadow: 0 0 18px rgba(0, 212, 255, 0.4); }
         .lp-action.alt { border-color: rgba(157, 78, 221, 0.5); }
         .lp-action.alt:hover { border-color: #9d4edd; box-shadow: 0 0 18px rgba(157, 78, 221, 0.45); }
+
+        /* Amber, not the app's blue -- a status note, not an action. Deep
+           does not want an external-site link here (2026-08-17); this only
+           states what's actually wrong so a dead CDN doesn't read as a
+           Lounge bug he needs to report. */
+        .lp-cdn-down-note {
+            margin-top: 4px;
+            padding-top: 14px;
+            border-top: 1px dashed rgba(255, 183, 3, 0.3);
+            max-width: 420px;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #ffe1a3;
+        }
 
         .live-player-transport {
             display: flex;
@@ -6240,6 +6378,27 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             <button class="topnav-more neon-actionable" onclick="toggleMobileNav()" aria-label="More sections">
                 <i class="fas fa-ellipsis"></i> More
             </button>
+            <!-- Windscribe ON/OFF toggle, added 2026-08-17 (Deep's ask). Lives
+                 OUTSIDE .header-widgets on purpose -- that whole cluster
+                 (VPN status chip, profile, Watch Together, weather) is
+                 display:none below 1300px, which silently ate this button
+                 too the first time it was placed inside it (Deep, same day:
+                 "no toggle button for VPN"). A REAL toggle, not a launch
+                 button, because windscribe-cli is a genuine scriptable
+                 Windows CLI (verified live) -- unlike Proton VPN, which has
+                 no Windows CLI at all (Linux only), so this couldn't be
+                 built the same way for Proton. PC browser only: the relay it
+                 talks to (nexus_control_relay.py on port 8898) only ever
+                 runs on the PC. -->
+            <button class="btn neon-actionable" id="windscribeToggleBtn" onclick="toggleWindscribeVpn()"
+                style="display:none;padding:4px 12px;font-size:12px;gap:6px;flex-shrink:0;" title="Toggle Windscribe VPN">
+                <i class="fas fa-shield-halved" id="windscribeToggleIcon"></i>
+                <!-- "VPN" is the permanent identifier -- always visible, even
+                     icon-only at narrow widths (Deep, 2026-08-17: a bare power
+                     glyph with no label didn't read as "this is the VPN
+                     control"). Only the On/Off status word collapses. -->
+                VPN<span id="windscribeToggleLabel"> Off</span>
+            </button>
             <!-- Weather/clock live here rather than in a strip over the hero.
                  Sits after More so the two selects (which only appear on Movies
                  and TV Shows) grow leftward and can't shove it off the row. -->
@@ -6398,7 +6557,6 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 <div class="nav-item" onclick="showComingSoon()">
                     <i class="fas fa-calendar-days"></i>
                     <span>Coming Soon</span>
-                    <span style="margin-left:auto;color:#00d4ff;font-size:10px;">SOON</span>
                 </div>
                 <!-- Drawer, not top bar, for the same measured reason as Coming
                      Soon above: the top row already needs ~1790px for 7 tabs.
@@ -6458,10 +6616,6 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
             <div class="nav-section">
                 <div class="nav-title">Add-ons</div>
-                <div class="nav-item" onclick="showSection('scrapers')">
-                    <i class="fas fa-satellite-dish"></i>
-                    <span>Scrapers</span>
-                </div>
                 <div class="nav-item" onclick="showSection('settings')">
                     <i class="fas fa-cog"></i>
                     <span>Settings</span>
@@ -6820,16 +6974,6 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 <div class="content-grid" id="libraryGrid"></div>
             </section>
 
-            <!-- SCRAPERS SECTION -->
-            <section id="scrapers-section" class="section">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fas fa-satellite-dish"></i> Scrapers
-                    </div>
-                </div>
-                <div class="scraper-list" id="scraperList"></div>
-            </section>
-
             <!-- HELP GUIDE SECTION -->
             <section id="help-section" class="section">
                 <div class="section-header">
@@ -6857,7 +7001,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                             <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Subtitles</td><td style="padding:10px 12px;">Real OpenSubtitles search, language dropdown before you press play</td><td style="padding:10px 12px;opacity:0.7;">Needs OpenSubtitles key — optional. Works with the PC off</td></tr>
                             <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Corner-window / native playback</td><td style="padding:10px 12px;">mpv opens top-right always-on-top on PC; the Android app uses native VLC with full touch transport controls for files the browser can't decode</td><td style="padding:10px 12px;opacity:0.7;">Live on both platforms</td></tr>
                             <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Picture-in-picture</td><td style="padding:10px 12px;">Shrink live TV/sports or a movie to a small floating window and keep browsing</td><td style="padding:10px 12px;opacity:0.7;">Android app + supporting browsers</td></tr>
-                            <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Live Sports channels</td><td style="padding:10px 12px;">Free-to-air/legal sports channel list with search + logos</td><td style="padding:10px 12px;opacity:0.7;">Sky Sport NZ / club-branded channels not on the free legal list</td></tr>
+                            <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Live Sports channels</td><td style="padding:10px 12px;">Sky Sport NZ (all numbered channels) plus free-to-air/legal sports channels worldwide, with search + logos and Sky's own real fixture guide on the Sky Sport tiles</td><td style="padding:10px 12px;opacity:0.7;">Live</td></tr>
                             <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Live TV (multi-country)</td><td style="padding:10px 12px;">Free-to-air channel lists across several countries with search + logos</td><td style="padding:10px 12px;opacity:0.7;">Live</td></tr>
                             <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Program guide (EPG)</td><td style="padding:10px 12px;">Now/Next schedule data on live channels, genre-filterable</td><td style="padding:10px 12px;opacity:0.7;">Works with the PC off (cloud-cached) once the one-time cloud storage step is done</td></tr>
                             <tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:10px 12px;font-weight:600;">Favourites (channels)</td><td style="padding:10px 12px;">Star any Sports/TV channel — favourites always sort to the top</td><td style="padding:10px 12px;opacity:0.7;">Channels only — movies and TV use My List instead (below)</td></tr>
@@ -7026,6 +7170,17 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <input type="password" id="rdKeyInput" placeholder="Real-Debrid API key" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:260px;">
                         <button class="btn btn-primary" onclick="saveRdKey()">Save</button>
                     </div>
+                </div>
+
+                <!-- Moved here from its own top-level "Add-ons" menu item, 2026-08-17
+                     (Deep's call) -- a config toggle for what queryStreams() searches,
+                     same category as the keys above, not a browsable content section. -->
+                <div class="settings-row">
+                    <div class="settings-row-text">
+                        <h4>Stream Sources</h4>
+                        <p>Which scrapers get searched for playable streams when you press play. More sources on means better coverage; turning one off can help if it's returning bad results right now.</p>
+                    </div>
+                    <div class="scraper-list" id="scraperList"></div>
                 </div>
 
                 <!-- Which lanes can actually turn a title into a stream right now.
@@ -7217,6 +7372,13 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <i class="fas fa-futbol"></i> Live Sports
                     </div>
                 </div>
+                <!-- "What's Live Now" strip, added 2026-08-17: cross-references
+                     Sky's real guide against Deep's followed teams so the
+                     answer to "is anything I care about on right now" doesn't
+                     require scanning 467 tiles. Hidden entirely (display:none,
+                     set in JS) when nothing matches -- an empty strip would
+                     just be dead space above the grid. -->
+                <div id="liveForYouStrip" style="display:none;"></div>
                 <div class="epgsearch">
                     <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
                     <input type="text" id="sportsSearch" aria-label="Search sports channels"
@@ -7394,6 +7556,11 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     <button class="lp-action" onclick="retryLivePlayer()"><i class="fas fa-rotate-right"></i> Try again</button>
                     <button class="lp-action alt" onclick="livePlayerFallbackToMpv()"><i class="fas fa-desktop"></i> Play on PC (mpv)</button>
                     <button id="lp-diagnose-btn" class="lp-action alt" onclick="diagnoseSkyStream()" style="display:none;"><i class="fas fa-stethoscope"></i> Diagnose</button>
+                </div>
+                <div id="lp-cdn-down-note" class="lp-cdn-down-note" style="display:none;">
+                    DaddyLive's own servers are down, not just this channel — every Sky Sport tile will show this
+                    until they recover, usually within a few hours. Lounge already tried a backup source for
+                    what's currently airing automatically; it just didn't have this specific event.
                 </div>
             </div>
         </div>
@@ -8217,6 +8384,18 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 window.addEventListener('keydown', onIntroKey);
             });
             enterBtn.onclick = triggerEnter;
+            // Click/tap ANYWHERE to proceed (Deep, 2026-08-17) -- "press any key"
+            // depends on the page actually having keyboard focus, which isn't
+            // guaranteed right after a navigation (address bar, an extension,
+            // etc. can hold it), so the button was the only thing that reliably
+            // worked. triggerEnter() is already a no-op until enterArmed is true,
+            // so this is safe to attach once at setup rather than only inside
+            // the pause callback. Skip keeps its own distinct action (kill the
+            // whole sequence), so it's excluded here.
+            intro.addEventListener('click', (e) => {
+                if (e.target === skipBtn) return;
+                triggerEnter();
+            });
 
             // L6: portal out -- a quick counter-flash on exit too, so the close
             // reads as deliberate rather than an abrupt cut.
@@ -8411,6 +8590,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             initAmbientStarfield();
             initCustomCursor();
             registerServiceWorker();
+            initWindscribeToggle();
+            initTypeToJump();
             // Lockout escape hatch. The PIN gate covers the whole screen, so if
             // its stored PIN ever stops matching what you can type (e.g. a PIN
             // saved in Settings that you no longer remember), there is no route
@@ -10095,6 +10276,19 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             { name: 'Torrentio', desc: 'Torrent-based scraper, wide movie/TV coverage', icon: 'fa-bolt', included: true },
             { name: 'MediaFusion', desc: 'Multi-source aggregator scraper', icon: 'fa-cubes', included: true }
         ];
+        // Persistence added 2026-08-17: this was previously an in-memory-only
+        // toggle, so turning a scraper off to work around a broken source
+        // silently reset to both-on on the next visit (Deep flagged this).
+        // Keyed by name, not array index, so it survives scraperData being
+        // reordered/extended later.
+        (function restoreScraperState() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('nexus_scraper_state') || '{}');
+                for (const s of scraperData) {
+                    if (Object.prototype.hasOwnProperty.call(saved, s.name)) s.included = !!saved[s.name];
+                }
+            } catch (e) { /* corrupt/missing -- keep the coded defaults */ }
+        })();
 
         function populateScrapers() {
             document.getElementById('scraperList').innerHTML = scraperData.map((s, idx) => `
@@ -10115,6 +10309,11 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
         function toggleScraper(idx) {
             scraperData[idx].included = !scraperData[idx].included;
+            try {
+                const state = {};
+                for (const s of scraperData) state[s.name] = s.included;
+                localStorage.setItem('nexus_scraper_state', JSON.stringify(state));
+            } catch (e) { /* localStorage unavailable -- toggle still works this session */ }
             populateScrapers();
         }
 
@@ -10840,6 +11039,95 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             else showRemoteToast('Could not open Proton VPN or the Play Store on this device');
             // The app may have been installed since the panel was painted.
             setTimeout(initProtonQuick, 1200);
+        }
+
+        // ===== WINDSCRIBE VPN TOGGLE (header button) =====
+        let windscribeToggleBusy = false;
+        let windscribePollTimer = null;
+
+        async function initWindscribeToggle() {
+            const btn = document.getElementById('windscribeToggleBtn');
+            if (!btn) return;
+            // Android app: Proton's launch button already covers this slot,
+            // and the relay this talks to only ever runs on the PC anyway.
+            if (protonBridge()) { btn.style.display = 'none'; return; }
+            await refreshWindscribeStatus();
+            if (windscribePollTimer) clearInterval(windscribePollTimer);
+            // Same cadence as the mpv /status poll elsewhere -- frequent enough
+            // to notice a manual connect/disconnect from outside the app,
+            // cheap enough (one local relay call) not to matter.
+            windscribePollTimer = setInterval(refreshWindscribeStatus, 15000);
+        }
+
+        async function refreshWindscribeStatus() {
+            const btn = document.getElementById('windscribeToggleBtn');
+            const icon = document.getElementById('windscribeToggleIcon');
+            const label = document.getElementById('windscribeToggleLabel');
+            if (!btn) return;
+            if (windscribeToggleBusy) return; // don't fight an in-flight toggle's own repaint
+            try {
+                const res = await fetch(`${getRelayBase()}/vpn-status`, { signal: AbortSignal.timeout(4000) });
+                const data = await res.json();
+                if (!data.available) { btn.style.display = 'none'; return; }
+                btn.style.display = '';
+                btn.dataset.connected = data.connected ? '1' : '0';
+                btn.title = data.connected
+                    ? `Windscribe connected${data.location ? ' — ' + data.location : ''} — click to disconnect`
+                    : 'Windscribe disconnected — click to connect';
+                // Explicit red when off, not just "unset" -- an unset colour
+                // inherits the button's default (white/grey-ish), which reads
+                // as "no state shown" rather than "disconnected" (Deep,
+                // 2026-08-17: only green worked, off state showed no colour).
+                if (icon) icon.style.color = data.connected ? '#00ff88' : '#ff4d4d';
+                if (label) label.textContent = data.connected ? ' On' : ' Off';
+            } catch (e) {
+                // Relay unreachable (PC off, or this device isn't on the PC's
+                // LAN/tunnel) -- stay hidden rather than show a dead button.
+                btn.style.display = 'none';
+            }
+        }
+
+        async function toggleWindscribeVpn() {
+            if (windscribeToggleBusy) return;
+            const btn = document.getElementById('windscribeToggleBtn');
+            const label = document.getElementById('windscribeToggleLabel');
+            const turningOn = btn.dataset.connected !== '1';
+
+            // Disconnecting mid-stream can drop geo-restricted playback or
+            // change your visible IP mid-watch without warning (Deep,
+            // 2026-08-17). Two signals cover both playback surfaces this app
+            // has: reelActiveId (Movies/TV, set for the whole time something
+            // is actively tracked -- see startPlaybackTracking) and mpv's own
+            // /status (covers Live TV/Sports, which don't set reelActiveId).
+            // Connecting is never blocked -- only turning the VPN OFF while
+            // something is live.
+            if (!turningOn) {
+                let mpvPlaying = false;
+                try {
+                    const s = await fetch(`${getRelayBase()}/status`, { signal: AbortSignal.timeout(3000) });
+                    mpvPlaying = !!(await s.json()).playing;
+                } catch (e) { /* relay unreachable -- fall through on reelActiveId alone */ }
+                if (reelActiveId || mpvPlaying) {
+                    const proceed = confirm('Something is currently playing. Disconnecting the VPN now may interrupt playback or change what content is available. Disconnect anyway?');
+                    if (!proceed) return;
+                }
+            }
+
+            windscribeToggleBusy = true;
+            if (label) label.textContent = turningOn ? ' Connecting…' : ' Disconnecting…';
+            try {
+                const res = await fetch(`${getRelayBase()}/vpn-toggle`, {
+                    method: 'POST', headers: reelHeaders(),
+                    body: JSON.stringify({ on: turningOn }),
+                    signal: AbortSignal.timeout(30000)
+                });
+                const data = await res.json();
+                if (!data.ok) showRemoteToast(data.msg || 'VPN toggle failed');
+            } catch (e) {
+                showRemoteToast('Could not reach the VPN relay — is the PC on?');
+            }
+            windscribeToggleBusy = false;
+            await refreshWindscribeStatus();
         }
 
         const ROUTE_BASELINE_KEY = 'lounge_route_baseline';
@@ -13476,8 +13764,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // Two independent axes, same shape as the Discovery Rail: `bucket` is the
         // pill row, `country` and `sort` are the select refinements.
         const epgRailState = {
-            livetv: { bucket: '', country: '', sort: 'default' },
-            sports: { bucket: '', country: '', sort: 'default' }
+            livetv: { bucket: '', country: '', sort: 'default', onlyLive: false },
+            sports: { bucket: '', country: '', sort: 'default', onlyLive: false }
         };
         const EPG_RAIL_CFG = {
             // all() routes through visibleChannels() so the Restricted gate is
@@ -13555,6 +13843,13 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
             if (st.bucket) {
                 list = list.filter(c => epgBucketsFor(c).includes(st.bucket));
+            }
+            // "X of Y have live guide data" banner is now a real filter, not
+            // just a readout (Deep, 2026-08-17: make it clickable). Applied
+            // after bucket so it composes with genre filtering rather than
+            // overriding it.
+            if (st.onlyLive) {
+                list = list.filter(c => { const e = epgEntryFor(c); return e && e.now; });
             }
             if (st.sort === 'plays') {
                 const plays = readChannelPlays();
@@ -13756,7 +14051,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     <span class="drail-divider" aria-hidden="true"></span>
                     <div class="drail-readout" id="drailReadout-${section}" aria-live="polite"></div>
                 </div>
-                <div class="epgcov" id="epgcov-${section}">
+                <div class="epgcov" id="epgcov-${section}" onclick="toggleOnlyLiveFilter('${section}')" role="button" tabindex="0" title="Click to show only channels with live guide data right now">
                     <span class="epgcov-label">Guide Coverage</span>
                     <span class="epgcov-track"><span class="epgcov-fill" id="epgcovFill-${section}"></span></span>
                     <span class="epgcov-num" id="epgcovNum-${section}">—</span>
@@ -13780,17 +14075,33 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
             cov.classList.toggle('is-none', scope > 0 && r.withGuide === 0);
             cov.classList.toggle('is-thin', pct > 0 && pct < 50);
+            const st = epgRailState[section];
+            cov.classList.toggle('is-active-filter', !!st.onlyLive);
             if (fill) fill.style.width = `${pct}%`;
             if (num) num.textContent = scope ? `${pct}%` : '—';
 
             if (!note) return;
-            const st = epgRailState[section];
-            if (!scope) {
+            // Set explicitly on every render, in every branch below -- this
+            // function only updates an existing element, it never rebuilds
+            // it, so a stale onclick from an EARLIER render (e.g. nulled out
+            // when withGuide was 0) would otherwise survive into a later
+            // render where clicking should work again.
+            cov.onclick = () => toggleOnlyLiveFilter(section);
+            if (st.onlyLive && r.withGuide === 0) {
+                // Reachable if a country/search change zeroes out live data
+                // WHILE the filter is still on -- must stay clickable so this
+                // never strands the user on a permanently empty grid.
+                note.innerHTML = `Nothing has live data in this scope right now. <span class="epgcov-clear">Click to show all ${scope} channels again.</span>`;
+            } else if (!scope) {
                 note.innerHTML = `No channels in this scope yet.`;
+                cov.onclick = null; // truly nothing here at all -- no filter to toggle either way
             } else if (r.withGuide === 0) {
                 note.innerHTML = `<strong>${scope}</strong> channels listed, but the free guide source publishes nothing for ${st.country ? escapeHtml(epgCountryName(st.country)) : 'these countries'} — so genre filters can't see them. They still play.`;
+                cov.onclick = null; // nothing to filter to -- clicking would show an empty grid
+            } else if (st.onlyLive) {
+                note.innerHTML = `Showing only the <strong>${r.withGuide}</strong> channels with live data right now. <span class="epgcov-clear">Click to show all ${scope} again.</span>`;
             } else {
-                note.innerHTML = `<strong>${r.withGuide}</strong> of <strong>${scope}</strong> channels have live guide data right now. The rest still play — they just can't be genre-filtered.`;
+                note.innerHTML = `<strong>${r.withGuide}</strong> of <strong>${scope}</strong> channels have live guide data right now. The rest still play — they just can't be genre-filtered. <span class="epgcov-clear">Click to show only those ${r.withGuide}.</span>`;
             }
         }
 
@@ -13949,9 +14260,13 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         }
 
         function resetEpgRail(section) {
-            epgRailState[section] = { bucket: '', country: '', sort: 'default' };
+            epgRailState[section] = { bucket: '', country: '', sort: 'default', onlyLive: false };
             renderEpgRail(section);
             renderEpgSection(section);
+        }
+
+        function toggleOnlyLiveFilter(section) {
+            setEpgRefine(section, 'onlyLive', !epgRailState[section].onlyLive);
         }
 
         // Shows the SOURCE's own category word, coloured by the bucket it mapped
@@ -13972,15 +14287,67 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         const channelRegistry = {};
         let channelSeq = 0;
 
+        // Deterministic hash -> hue so the SAME channel always gets the SAME
+        // colour across renders/sessions (not random per paint, which would
+        // make the grid feel broken rather than colour-coded). High
+        // saturation/lightness on purpose -- DESIGN_DNA A1 bans muted fills.
+        function channelHue(name) {
+            let h = 0;
+            const s = String(name || '');
+            for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+            return h % 360;
+        }
+
+        function channelBadgeHtml(channel) {
+            const hue = channelHue(channel.name);
+            const glow = `hsl(${hue}, 90%, 62%)`;
+            // Toned down 2026-08-17 (Deep: "too busy to the naked eye") -- lower
+            // saturation/lightness on the fill so the grid reads calmer at a
+            // glance; the bordered frame below now carries the identity colour
+            // instead of a loud full-tile fill doing it alone.
+            const bg = `radial-gradient(circle at 50% 40%, hsla(${hue},55%,14%,0.9), hsla(${hue},45%,6%,0.95))`;
+            // Sky Sport NZ channels have no real per-number artwork -- their
+            // actual on-air ident IS a big number + "SKY SPORT" wordmark, so
+            // that's what the badge shows rather than generic initials.
+            const skyMatch = /^Sky Sport (\d+) NZ$/i.exec(channel.name || '');
+            const inner = skyMatch
+                ? `<div class="cn-num" style="color:${glow};text-shadow:0 0 14px ${glow};">${escapeHtml(skyMatch[1])}</div>
+                   <div class="cn-sub" style="color:${glow};">SKY SPORT</div>`
+                : `<div class="cn-init" style="color:${glow};text-shadow:0 0 14px ${glow};">${escapeHtml(channelInitials(channel.name))}</div>`;
+            return `<div class="chan-neon-badge" style="background:${bg};">${inner}</div>`;
+        }
+
+        // "Adventure Earth (1080p)" -> "AE". Strips the resolution/format tags
+        // that would otherwise pollute the initials (every free IPTV list
+        // carries these), then takes up to 2 leading letters from real words.
+        function channelInitials(name) {
+            const clean = String(name || '')
+                .replace(/\([^)]*\)/g, '')
+                .replace(/\b(HD|SD|FHD|UHD|4K|NZ|AU|US|UK)\b/gi, '')
+                .replace(/[+].*/, '')
+                .trim();
+            const words = clean.split(/\s+/).filter(Boolean);
+            if (!words.length) return '?';
+            if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+            return (words[0][0] + words[1][0]).toUpperCase();
+        }
+
         function createChannelCard(channel) {
             const channelId = `channel-${channelSeq++}`;
             channel.__cardId = channelId;
             channelRegistry[channelId] = channel;
             const isFav = isFavouriteChannel(channel.url);
             const isRestricted = isRestrictedChannel(channel.url);
+            // Frame widened to wrap the WHOLE card -- icon, name, and the live
+            // EPG line -- not just the icon area (Deep, 2026-08-17: drew this
+            // exact scope on a photo of the grid). Same per-channel hue as the
+            // badge so the frame and the icon read as one identity, not two
+            // different colours competing.
+            const frameHue = channelHue(channel.name);
+            const frameColour = `hsl(${frameHue}, 85%, 55%)`;
 
             return `
-                <div class="card channel-card" onclick="playChannel('${channelId}')">
+                <div class="card channel-card" onclick="playChannel('${channelId}')" style="border:2px solid ${frameColour};border-radius:10px;box-shadow:0 0 8px hsla(${frameHue},80%,55%,0.35);">
                     <div class="card-image" id="${channelId}">
                         <button class="fav-star ${isFav ? 'active' : ''}" data-fav-url="${escapeHtml(channel.url)}" onclick="onFavStarClick(event)" title="${isFav ? 'Remove from Favourites' : 'Add to Favourites'}" aria-label="${isFav ? 'Remove from Favourites' : 'Add to Favourites'}">
                             <i class="fas fa-star"></i>
@@ -13988,7 +14355,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <button class="chan-lock ${isRestricted ? 'active' : ''}" data-lock-url="${escapeHtml(channel.url)}" onclick="onChanLockClick(event)" title="${isRestricted ? 'Remove from Restricted' : 'Move to Restricted (PIN required to view)'}" aria-label="${isRestricted ? 'Remove from Restricted' : 'Move to Restricted'}">
                             <i class="fas ${isRestricted ? 'fa-lock' : 'fa-lock-open'}"></i>
                         </button>
-                        <i class="fas fa-broadcast-tower"></i>
+                        ${channelBadgeHtml(channel)}
                         <span class="card-badge live">LIVE</span>
                     </div>
                     <div class="card-info">
@@ -15372,7 +15739,21 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             if (el) el.textContent = text;
         }
 
-        function lpShowState(which, msg, detail) {
+        // Deep explicitly does not want an external-browser link here
+        // (2026-08-17) -- an in-app fallback (actually playing a different
+        // source inside Lounge's own player when DaddyLive's CDN is down)
+        // was investigated the same day: DaddyLive's other channels share
+        // the exact same dead CDN host (no fallback there), and the one
+        // alternate provider checked (streamed.pk -> embed.st) is protected
+        // by heavy obfuscated JS a plain server-side fetch can't unpack --
+        // it would need a real headless-browser resolver, a separate build,
+        // not a same-session swap. This just states the real cause plainly.
+        function renderCdnDownNote(show) {
+            const note = lpEl('lp-cdn-down-note');
+            if (note) note.style.display = show ? '' : 'none';
+        }
+
+        function lpShowState(which, msg, detail, altSources) {
             const loading = lpEl('lp-loading');
             const error = lpEl('lp-error');
             loading.classList.toggle('is-shown', which === 'loading');
@@ -15386,6 +15767,9 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 // nothing for it to diagnose.
                 const diagBtn = lpEl('lp-diagnose-btn');
                 if (diagBtn) diagBtn.style.display = (lpChannel && lpChannel.externalWatch && lpChannel.dlhdId) ? '' : 'none';
+                renderCdnDownNote(!!altSources);
+            } else {
+                renderCdnDownNote(false);
             }
         }
 
@@ -15678,14 +16062,51 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     if (!body.includes('#EXTM3U')) {
                         let reason = null;
                         try { reason = JSON.parse(body).error; } catch (e) { /* not JSON, e.g. a network edge error */ }
-                        lpShowState('error', 'Sky Sport stream could not be resolved right now.',
-                            (reason
-                                ? `DaddyLive's chain broke at: ${reason}`
-                                : 'The cloud relay reached DaddyLive but got no playlist back. Their player chain changes often.')
-                            + ' — try again, or open the source page.');
-                        return;
+                        // A "Backend fetch failed"/503 reason means DaddyLive's
+                        // OWN CDN origin is down, not our resolver -- confirmed
+                        // live 2026-08-17 (all 5 Sky Sport NZ ids failed
+                        // identically at the same upstream host). Only THAT
+                        // specific case is worth trying a fallback provider for;
+                        // other reasons (chain structure changed) aren't
+                        // something a different site fixes.
+                        const isCdnDown = /backend fetch failed|http error 50[0-9]/i.test(reason || '');
+
+                        // Auto fallback -- Deep was explicit (2026-08-17): no
+                        // external tab, ever, and no extra click. If DaddyLive's
+                        // CDN is down, silently try the same live event on a
+                        // second provider and keep playing in THIS SAME player;
+                        // only show an error if that also comes up empty.
+                        if (isCdnDown) {
+                            const epgInfo = skyNowNext(channel.name);
+                            const liveTitle = epgInfo && epgInfo.now && epgInfo.now.t;
+                            if (liveTitle) {
+                                try {
+                                    const fbUrl = `${getContentBase()}/fallback-stream?title=${encodeURIComponent(liveTitle)}`;
+                                    const fbRes = await fetch(fbUrl, { signal: AbortSignal.timeout(45000) });
+                                    if (gen !== lpGen) return;
+                                    const fbBody = await fbRes.text();
+                                    if (fbBody.includes('#EXTM3U')) {
+                                        src = fbUrl;
+                                        lpStreamOrigin = { kind: 'Fallback source', detail: `DaddyLive was down -- playing "${liveTitle}" from a backup provider` };
+                                    }
+                                } catch (e) {
+                                    // Fallback itself unreachable/timed out -- fall through to the honest error below.
+                                }
+                            }
+                        }
+
+                        if (!src || src === channel.url) {
+                            lpShowState('error', 'Sky Sport stream could not be resolved right now.',
+                                (reason
+                                    ? `DaddyLive's chain broke at: ${reason}`
+                                    : 'The cloud relay reached DaddyLive but got no playlist back. Their player chain changes often.')
+                                + (isCdnDown ? ' A backup provider was tried automatically but had no equivalent live event right now.' : ' — try again.'),
+                                isCdnDown);
+                            return;
+                        }
+                    } else {
+                        src = relayUrl;
                     }
-                    src = relayUrl;
                 } catch (e) {
                     if (gen !== lpGen) return;
                     lpShowState('error', 'Could not reach the stream relay.',
@@ -16004,6 +16425,100 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             renderEpgRail('sports');
             renderEpgSection('sports');
             refreshSearchChannelsIfSearching();
+            // Cards must exist first -- this reads channel.__cardId, which
+            // createChannelCard() only assigns during renderEpgSection above.
+            renderLiveForYouStrip();
+        }
+
+        // ===== "WHAT'S LIVE NOW" -- team-match strip (added 2026-08-17) =====
+        // Deep's followed teams, from user_sports.md. Kept here rather than
+        // fetched -- these change maybe once a season, not worth a network
+        // round-trip or a settings UI for four strings.  "Black Caps" is
+        // matched as two words too (Sky's own titles use both spellings);
+        // "Chiefs" is safe to match bare here specifically BECAUSE this only
+        // scans Sky Sport NZ's own guide text, which never carries NFL
+        // content -- the ambiguity that would exist against a general/US
+        // sports source doesn't apply to this data.
+        const LIVE_FOR_YOU_TEAMS = [
+            { key: 'arsenal', label: 'Arsenal', match: /\barsenal\b/i },
+            { key: 'warriors', label: 'Warriors', match: /\bwarriors\b/i },
+            { key: 'blackcaps', label: 'Black Caps', match: /\bblack\s?caps\b/i },
+            { key: 'chiefs', label: 'Chiefs', match: /\bchiefs\b/i }
+        ];
+
+        function computeLiveTeamMatches() {
+            const matches = [];
+            for (const channel of sportsChannelsFull) {
+                if (!channel.__cardId) continue; // no card rendered for it yet
+                const info = skyNowNext(channel.name);
+                if (!info || !info.now) continue;
+                const title = info.now.t || '';
+                for (const team of LIVE_FOR_YOU_TEAMS) {
+                    if (team.match.test(title)) {
+                        matches.push({
+                            team: team.label,
+                            title,
+                            channelName: channel.name,
+                            cardId: channel.__cardId,
+                            endsAt: info.now.e
+                        });
+                        break; // one match per channel is enough
+                    }
+                }
+            }
+            return matches;
+        }
+
+        function renderLiveForYouStrip() {
+            const el = document.getElementById('liveForYouStrip');
+            if (!el) return;
+            const matches = computeLiveTeamMatches();
+            if (!matches.length) { el.style.display = 'none'; el.innerHTML = ''; return; }
+            el.style.display = 'flex';
+            el.innerHTML = `<div class="lfy-heading"><i class="fas fa-star"></i> Live now for you</div>` +
+                matches.map(m => `
+                    <button class="lfy-card" onclick="playChannel('${m.cardId}')">
+                        <span class="lfy-team">${escapeHtml(m.team)}</span>
+                        <span class="lfy-title">${escapeHtml(m.title)}</span>
+                        <span class="lfy-channel">${escapeHtml(m.channelName)} — until ${epgTime(m.endsAt)}</span>
+                    </button>
+                `).join('');
+        }
+
+        // ===== TYPE-TO-JUMP (added 2026-08-17) =====
+        // A 467-channel grid has no "channel number" muscle memory the way a
+        // real remote does. This gives typing that back: start typing a
+        // channel name anywhere on Sports/Live TV -- no need to click the
+        // search box first -- and it routes into that section's real search
+        // input, reusing the exact same filter path a manual click would.
+        const TYPE_TO_JUMP_SECTIONS = {
+            sports: 'sportsSearch',
+            channels: 'livetvSearch'
+        };
+        function initTypeToJump() {
+            document.addEventListener('keydown', (e) => {
+                const inputId = TYPE_TO_JUMP_SECTIONS[currentSection];
+                if (!inputId) return;
+                // Same exclusions as the intro's key handler: modifiers stay
+                // modifiers, and don't steal typing already happening in some
+                // OTHER input/textarea/contenteditable on the page.
+                if (e.ctrlKey || e.metaKey || e.altKey) return;
+                const tag = (e.target.tagName || '').toLowerCase();
+                if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
+                // Printable single characters only -- letters, digits, space,
+                // a handful of punctuation that appear in real channel names
+                // ("30A Golf Kingdom", "Sky Sport 1 NZ"). Backspace/Escape are
+                // deliberately NOT handled here: once focus moves to the real
+                // input on the first keystroke, the browser's native input
+                // handling takes over for everything after that.
+                if (e.key.length !== 1) return;
+                const input = document.getElementById(inputId);
+                if (!input) return;
+                input.focus();
+                input.value += e.key;
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                e.preventDefault();
+            });
         }
 
         // Live TV carried ONLY iptv-org's nz.m3u until this pass, which is why
@@ -17660,6 +18175,26 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         
         let aiChatHistory = [];
 
+        // ===== TROUBLESHOOTING SOURCE HINTS (added 2026-08-17) =====
+        // Curated from Deep's full FMHY link dump (C:\NEXUS\resources\
+        // streaming_sources_curated.md has the reasoning + full reference --
+        // this is deliberately just the small, actionable slice, not all
+        // 1400 raw URLs). Only appended to the AI's system prompt when the
+        // message actually looks like a troubleshooting question -- stuffing
+        // this into EVERY call would burn Deep's free Groq quota on tokens
+        // that are irrelevant 95% of the time.
+        const TROUBLESHOOT_SOURCE_HINTS =
+            `Known backup domains for the DaddyLive/dlhd.st backend Sky Sport NZ already ` +
+            `uses, if the primary is down: daddylive.pk, daddylive.mov, daddylive.nl. ` +
+            `Other live-sports sites Deep has on file (unverified/not integrated into ` +
+            `Lounge): streamed.pk, ppv.to, totalsportek.st, v2.sportsurge.net, damitv.st. ` +
+            `None of these are wired into Lounge's actual playback -- if asked to "fix" ` +
+            `a stream, say so plainly and suggest checking the in-app Diagnose button ` +
+            `first, don't imply these are one-click alternatives.`;
+
+        const TROUBLESHOOT_RX = /\b(not work|won'?t (play|load|work)|broken|dead link|can'?t (play|watch|load)|error|buffering|stuck|failed|resolve|alternative|backup|down\b)/i;
+
+
         function escapeHtml(str) {
             const div = document.createElement('div');
             div.textContent = str;
@@ -17688,6 +18223,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const catalogTitles = watchlistCards('all')
                 .map(i => `${i.title} (${i.type})`)
                 .join(', ');
+            const troubleshootHint = TROUBLESHOOT_RX.test(msg) ? ` ${TROUBLESHOOT_SOURCE_HINTS}` : '';
 
             aiChatHistory.push({ role: 'user', content: msg });
 
@@ -17709,7 +18245,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         messages: [
                             {
                                 role: 'system',
-                                content: `You are the AI Assistant inside Lounge, a home media dashboard. Titles currently in the catalog: ${catalogTitles}. Answer questions about what's available grounded in that list, and give brief, friendly general help otherwise. Keep replies short (2-3 sentences).`
+                                content: `You are the AI Assistant inside Lounge, a home media dashboard. Titles currently in the catalog: ${catalogTitles}. Answer questions about what's available grounded in that list, and give brief, friendly general help otherwise. Keep replies short (2-3 sentences).${troubleshootHint}`
                             },
                             ...aiChatHistory.slice(-10)
                         ],
