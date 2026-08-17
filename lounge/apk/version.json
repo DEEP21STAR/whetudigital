@@ -33,10 +33,21 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v110"
+      "cacheName": "lounge-shell-v111"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v111",
+      "date": "2026-08-18",
+      "title": "For You: a real personalised row, seeded from My List",
+      "changes": [
+        "New Home row, right under the hero: 'For You -- because you added <title>', seeded from the most recently added My List title (watchlist entries always carry a real tmdbId; movie Continue Watching entries don't) and ranked by TMDB's own /recommendations endpoint -- no custom scoring model, one honest seed, one honest label.",
+        "Hides itself entirely with an empty watchlist or no results -- never a fake or stale row. Verified both states live: floor 10.0/0 defects, real recommendations rendered for a live seed (Inception -> Push, Solo, Ghost in the Shell, The Creator, etc) and the row confirmed absent with an empty watchlist."
+      ]
+    },
     {
       "version": "0.1.25",
       "versionCode": 23,

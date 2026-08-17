@@ -7620,6 +7620,26 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     <button class="rail-arrow rail-arrow-next" onclick="railScroll('continueWatchingGrid',1)" aria-label="Scroll right"><i class="fas fa-chevron-right"></i></button>
                 </div>
 
+                <!-- For You, 2026-08-18 (DESIGN_DNA elevation ask, Medium tier).
+                     Seeded from the most recently added My List title with a
+                     real tmdbId (watchlist entries always carry one; movie
+                     Continue Watching entries don't -- see currentPlaybackMeta,
+                     tmdbId is only ever set from an episode pick). TMDB's own
+                     /recommendations endpoint does the actual ranking -- no
+                     custom scoring model, one seed, one honest label. Hidden
+                     entirely (not a fake/empty row) when there's no seed yet
+                     or TMDB returns nothing for it. -->
+                <div class="section-header" id="forYouHeader" style="display:none;">
+                    <div class="section-title" id="forYouTitle">
+                        <i class="fas fa-wand-magic-sparkles"></i> For You
+                    </div>
+                </div>
+                <div class="rail-wrap" id="forYouWrap" style="display:none;">
+                    <button class="rail-arrow rail-arrow-prev" onclick="railScroll('forYouGrid',-1)" aria-label="Scroll left"><i class="fas fa-chevron-left"></i></button>
+                    <div class="content-grid content-rail" id="forYouGrid"></div>
+                    <button class="rail-arrow rail-arrow-next" onclick="railScroll('forYouGrid',1)" aria-label="Scroll right"><i class="fas fa-chevron-right"></i></button>
+                </div>
+
                 <!-- Trending, rebuilt 2026-08-17 to match the Movies section's
                      structure (Deep's explicit ask): horizontal genre-discovery
                      rails on top for a quick scroll, THEN the full Discovery
@@ -9820,6 +9840,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             initTrafficRoute();
             initUpdates();
             populateContinueWatching();
+            populateForYou();
             // Paints from localStorage first (above), then reconciles with
             // whatever the phone/TV recorded while this device wasn't watching.
             startReelSync();
@@ -12403,7 +12424,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v110';
+        const LOUNGE_BUILD = 'lounge-shell-v111';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -15159,6 +15180,51 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 </div>`;
             }).join('');
             hydrateNextEpisodes(list);
+        }
+
+        // ===== FOR YOU (DESIGN_DNA elevation, Medium tier, 2026-08-18) =====
+        // Seeded from My List rather than watch history: a saved-but-not-yet-
+        // watched title is a cleaner taste signal than something already
+        // finished, and watchlist entries always carry a real tmdbId (movie
+        // Continue Watching entries don't -- currentPlaybackMeta.tmdbId is
+        // only ever set from an episode pick, see resolveAndPlay). TMDB's own
+        // /recommendations endpoint does the ranking; this is a seed picker
+        // and a renderer, not a scoring model.
+        function pickForYouSeed() {
+            const watchlist = readWatchlist();
+            const withId = watchlist.filter(i => i.tmdbId);
+            if (!withId.length) return null;
+            // readWatchlist/writeWatchlist front-insert on add (matches the
+            // continue-watching list.unshift() pattern elsewhere), so index 0
+            // is already the most recently added title.
+            const seed = withId[0];
+            return { tmdbId: seed.tmdbId, type: seed.type === 'tv' ? 'tv' : 'movie', title: seed.title };
+        }
+
+        async function populateForYou() {
+            const header = document.getElementById('forYouHeader');
+            const wrap = document.getElementById('forYouWrap');
+            const grid = document.getElementById('forYouGrid');
+            if (!header || !wrap || !grid) return;
+
+            const seed = pickForYouSeed();
+            const key = localStorage.getItem('nexus_tmdb_key');
+            if (!seed || !key) { header.style.display = 'none'; wrap.style.display = 'none'; return; }
+
+            let items = [];
+            try {
+                const data = await tmdbFetch(`${seed.type}/${seed.tmdbId}/recommendations`, {}, key);
+                items = tmdbResultsToItems(data.results, seed.type, 20);
+            } catch (e) {
+                console.warn('populateForYou failed:', e);
+            }
+            if (!items.length) { header.style.display = 'none'; wrap.style.display = 'none'; return; }
+
+            document.getElementById('forYouTitle').innerHTML =
+                `<i class="fas fa-wand-magic-sparkles"></i> For You — because you added <span style="color:#00d4ff;">${escapeHtml(seed.title)}</span>`;
+            header.style.display = '';
+            wrap.style.display = '';
+            renderGrid('forYouGrid', items);
         }
 
         // Bumped by every repaint, so a hydrate pass still in flight when the row
