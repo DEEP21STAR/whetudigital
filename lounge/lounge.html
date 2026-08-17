@@ -8591,6 +8591,11 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             initCustomCursor();
             registerServiceWorker();
             initWindscribeToggle();
+            // Was only called from onSettingsOpened() -- meant the header VPN
+            // button (meant to be "always visible", per its own comment above
+            // protonHeaderBtn) never appeared until Deep opened Settings once
+            // that session. Found live 2026-08-17 from "no VPN toggle on apk64".
+            initProtonQuick();
             initTypeToJump();
             // Lockout escape hatch. The PIN gate covers the whole screen, so if
             // its stored PIN ever stops matching what you can type (e.g. a PIN

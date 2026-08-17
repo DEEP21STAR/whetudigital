@@ -33,7 +33,7 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v87"
+      "cacheName": "lounge-shell-v88"
     }
   },
   "changelog": [
