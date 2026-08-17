@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v107"
+      "cacheName": "lounge-shell-v108"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v108",
+      "date": "2026-08-18",
+      "title": "Hover Break-Out: cards pop bigger with an auto-playing trailer (signature moment)",
+      "changes": [
+        "New card interaction on Home/Movies/TV/etc rails and grids: hover a poster for ~550ms and it lifts out of the rail into a floating, ~45% larger preview -- title, rating, year, overview, and (once TMDB's videos endpoint returns a real trailer) a muted auto-playing YouTube trailer that fills the tile edge-to-edge (same object-fit:cover-for-iframe technique as the existing detail-page trailer, not a naive width/height:100% which letterboxed on the first pass -- fixed and re-verified). Click-through to the detail page still works from the enlarged tile.",
+        "Deliberately restrained per Deep's own 'not too much / not overpowering': one scale step, existing cyan accent only, poster stays visible under the info panel. Gated to mouse+hover devices only (hover:hover, pointer:fine, not tv-mode) -- touch and Fire Stick remote navigation never trigger it, same reasoning as the metadata-only choice made for those surfaces on 2026-08-17.",
+        "Trailer key lookups are cached per title and only fire after the dwell delay, so scrolling past a rail costs nothing. judge_harness: floor 9.64/10, the only 2 remaining flags are the pre-existing OpenSubtitles-unrelated ERR_NAME_NOT_RESOLVED entries present since before this session started."
+      ]
+    },
     {
       "version": "0.1.25",
       "versionCode": 23,

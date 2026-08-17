@@ -1824,6 +1824,128 @@
         .card-rating-dot.tier-yellow { background: #ffd700; box-shadow: 0 0 6px rgba(255,215,0,0.6), 0 0 0 2px rgba(0,0,0,0.5); }
         .card-rating-dot.tier-red    { background: #ff0055; box-shadow: 0 0 6px rgba(255,0,85,0.6), 0 0 0 2px rgba(0,0,0,0.5); }
 
+        /* Hover Break-Out (signature moment, 2026-08-18, Deep's ask: "tile to
+           pop front on screen a lot bigger with auto trailer playing" but
+           "not too much"). Deliberately NOT a bigger CSS :hover scale on the
+           card itself -- a rail's overflow-x:auto clips anything that grows
+           past its own cell, so the only way to actually get bigger without
+           either un-clipping the whole rail (breaks scroll-snap + arrows) or
+           reflowing the grid on every hover (jank, A3 violation) is a
+           position:fixed clone layered above everything, sized/positioned to
+           start exactly on top of the real card so the "lift" reads as the
+           same tile growing, not a second thing appearing. Restraint per
+           Deep's "not overpowering": one scale step (not full-viewport), the
+           existing cyan accent only, poster stays visible under the info
+           panel instead of being replaced by a wall of text.
+           Trailer autoplay is muted+loop (browser autoplay policy requires
+           muted; a hover preview isn't the place to blast audio anyway) and
+           only fires after a dwell delay so scrolling past a rail never
+           spends a TMDB videos call or a YouTube embed on titles the user
+           didn't actually pause on. Gated to hover:hover + pointer:fine
+           (desktop/mouse) -- touch and TV-remote navigation (old Fire Sticks
+           in apk/version.json's own compatibility note) never trigger this,
+           same reasoning that made the earlier apexmovies pass choose
+           metadata-only for touch; this build adds the video layer ONLY
+           where a mouse proves hover intent exists. */
+        .chb-overlay {
+            position: fixed;
+            z-index: 60;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #0a0a0e;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,212,255,0.35), 0 0 40px rgba(0,212,255,0.18);
+            cursor: pointer;
+            will-change: transform;
+        }
+        .chb-overlay .chb-media {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .chb-overlay .chb-poster {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.4s ease;
+        }
+        .chb-overlay.chb-video-ready .chb-poster { opacity: 0; }
+        /* Same object-fit:cover-for-iframe trick as .detail-trailer-wrap iframe
+           -- the YouTube IFrame API replaces the target element with its own
+           iframe (dropping any class we put on the div), so this has to
+           target the tag generically inside .chb-media rather than a class
+           on the (now-gone) mount div. */
+        .chb-overlay .chb-media iframe {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: auto;
+            height: auto;
+            min-width: 100%;
+            min-height: 100%;
+            aspect-ratio: 16 / 9;
+            border: 0;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+        .chb-overlay.chb-video-ready .chb-media iframe { opacity: 1; }
+        .chb-overlay .chb-info {
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            padding: 16px 16px 14px;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.65) 55%, transparent 100%);
+        }
+        .chb-overlay .chb-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 0 12px rgba(0,212,255,0.6);
+            margin-bottom: 5px;
+            line-height: 1.25;
+        }
+        .chb-overlay .chb-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12.5px;
+            color: #00d4ff;
+            margin-bottom: 6px;
+        }
+        .chb-overlay .chb-overview {
+            font-size: 12px;
+            line-height: 1.4;
+            color: #bbb;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .chb-overlay .chb-mute-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.25);
+            background: rgba(10,10,14,0.7);
+            backdrop-filter: blur(4px);
+            color: #fff;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            z-index: 2;
+        }
+        .chb-overlay.chb-video-ready .chb-mute-toggle { display: flex; }
+        @media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+            .chb-overlay { display: none !important; }
+        }
+
         /* Top-right, same slot as .card-badge -- mutually exclusive in
            practice (a NEW title can't also be comingSoon: comingSoon means a
            future release date, NEW means a real one in the last 14 days). */
@@ -9488,6 +9610,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             buildCouchMark(document.getElementById('logo-mark'));
             initLenisSmoothScroll();
             initCardHoverGlow();
+            initCardHoverBreakout();
             initAmbientStarfield();
             initCustomCursor();
             initMagneticButtons();
@@ -9812,7 +9935,192 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 if (spotlight) gsap.to(spotlight, { opacity: 0, duration: 0.2 });
             });
         }
-        
+
+        // ===== HOVER BREAK-OUT (card pop + auto trailer) =====
+        // See the .chb-overlay CSS comment for the full reasoning. This is
+        // layered on top of initCardHoverGlow, not a replacement -- the small
+        // immediate scale/glow above still fires the instant the pointer
+        // lands, this dwell-gated overlay is the bigger "did they actually
+        // stop here" preview.
+        const CHB_DWELL_MS = 550;
+        const chbTrailerCache = new Map(); // `${type}:${tmdbId}` -> key|null
+        const chbState = { timer: null, overlay: null, sourceCard: null, ytPlayer: null, token: 0 };
+
+        function chbEligible() {
+            return typeof gsap !== 'undefined'
+                && window.matchMedia('(hover: hover)').matches
+                && window.matchMedia('(pointer: fine)').matches
+                && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+                && !document.body.classList.contains('tv-mode');
+        }
+
+        function chbItemForCard(card) {
+            const img = card.querySelector('.card-image[id]');
+            if (!img || !img.id) return null;
+            const item = cardRegistry[img.id];
+            return item ? { cardId: img.id, item } : null;
+        }
+
+        async function chbFetchTrailerKey(item) {
+            const type = item.type === 'tv' ? 'tv' : 'movie';
+            const cacheKey = `${type}:${item.tmdbId}`;
+            if (chbTrailerCache.has(cacheKey)) return chbTrailerCache.get(cacheKey);
+            const key = localStorage.getItem('nexus_tmdb_key');
+            if (!key || !item.tmdbId) { chbTrailerCache.set(cacheKey, null); return null; }
+            try {
+                const data = await tmdbFetch(`${type}/${item.tmdbId}/videos`, {}, key);
+                const trailerKey = pickTrailerKey(data.results);
+                chbTrailerCache.set(cacheKey, trailerKey);
+                return trailerKey;
+            } catch (e) {
+                chbTrailerCache.set(cacheKey, null);
+                return null;
+            }
+        }
+
+        function chbTeardown(instant) {
+            if (chbState.timer) { clearTimeout(chbState.timer); chbState.timer = null; }
+            const overlay = chbState.overlay;
+            const source = chbState.sourceCard;
+            chbState.overlay = null;
+            chbState.sourceCard = null;
+            chbState.token++;
+            if (chbState.ytPlayer) {
+                try { chbState.ytPlayer.destroy(); } catch (e) {}
+                chbState.ytPlayer = null;
+            }
+            if (!overlay) return;
+            const finish = () => overlay.remove();
+            if (instant || !source || !source.isConnected) { finish(); return; }
+            const rect = source.getBoundingClientRect();
+            gsap.to(overlay, {
+                top: rect.top, left: rect.left, width: rect.width, height: rect.height,
+                duration: 0.28, ease: 'power2.in', onComplete: finish
+            });
+        }
+
+        function chbBuildOverlay(card, cardId, item, rect) {
+            const overlay = document.createElement('div');
+            overlay.className = 'chb-overlay';
+            overlay.style.top = rect.top + 'px';
+            overlay.style.left = rect.left + 'px';
+            overlay.style.width = rect.width + 'px';
+            overlay.style.height = rect.height + 'px';
+
+            const ratingNum = parseFloat(item.rating);
+            const metaBits = [];
+            if (!isNaN(ratingNum)) metaBits.push(`<i class="fas fa-star" style="color:#ffd700;"></i> ${escapeHtml(String(item.rating))}`);
+            if (item.releaseDate) metaBits.push(escapeHtml(String(item.releaseDate).slice(0, 4)));
+            metaBits.push(item.type === 'tv' ? 'TV' : 'Movie');
+
+            overlay.innerHTML = `
+                <div class="chb-media">
+                    ${item.poster ? `<img class="chb-poster" src="${item.poster}" alt="">` : ''}
+                </div>
+                <button class="chb-mute-toggle" type="button" aria-label="Toggle trailer sound"><i class="fas fa-volume-mute"></i></button>
+                <div class="chb-info">
+                    <div class="chb-title">${escapeHtml(item.title || '')}</div>
+                    <div class="chb-meta">${metaBits.join(' &middot; ')}</div>
+                    ${item.overview ? `<div class="chb-overview">${escapeHtml(item.overview)}</div>` : ''}
+                </div>
+            `;
+            overlay.addEventListener('click', () => { chbTeardown(true); openDetail(cardId); });
+            const muteBtn = overlay.querySelector('.chb-mute-toggle');
+            muteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (!chbState.ytPlayer) return;
+                const icon = muteBtn.querySelector('i');
+                if (chbState.ytPlayer.isMuted()) {
+                    chbState.ytPlayer.unMute();
+                    icon.className = 'fas fa-volume-high';
+                } else {
+                    chbState.ytPlayer.mute();
+                    icon.className = 'fas fa-volume-mute';
+                }
+            });
+            return overlay;
+        }
+
+        async function chbTriggerExpand(card, cardId, item) {
+            const myToken = ++chbState.token;
+            const rect = card.getBoundingClientRect();
+            const overlay = chbBuildOverlay(card, cardId, item, rect);
+            document.body.appendChild(overlay);
+            chbState.overlay = overlay;
+            chbState.sourceCard = card;
+
+            // Restrained scale step (A1 voltage without A2-breaking size --
+            // Deep's own "not too much"): +45% width, clamped to the viewport
+            // so a card near an edge never grows off-screen.
+            const targetW = Math.min(rect.width * 1.45, window.innerWidth - 24);
+            const targetH = targetW / (rect.width / rect.height);
+            let targetLeft = rect.left - (targetW - rect.width) / 2;
+            let targetTop = rect.top - (targetH - rect.height) / 2;
+            targetLeft = Math.max(12, Math.min(targetLeft, window.innerWidth - targetW - 12));
+            targetTop = Math.max(12, Math.min(targetTop, window.innerHeight - targetH - 12));
+
+            gsap.to(overlay, {
+                top: targetTop, left: targetLeft, width: targetW, height: targetH,
+                duration: 0.4, ease: 'power3.out'
+            });
+
+            const trailerKey = await chbFetchTrailerKey(item);
+            if (myToken !== chbState.token || !trailerKey) return;
+            try {
+                const YT = await loadYouTubeApi();
+                if (myToken !== chbState.token) return;
+                const mountId = `chb-mount-${cardId}`;
+                const frame = document.createElement('div');
+                frame.id = mountId;
+                overlay.querySelector('.chb-media').appendChild(frame);
+                chbState.ytPlayer = new YT.Player(mountId, {
+                    videoId: trailerKey,
+                    playerVars: { autoplay: 1, mute: 1, controls: 0, loop: 1, playlist: trailerKey, playsinline: 1, modestbranding: 1, rel: 0 },
+                    events: { onReady: (e) => { e.target.mute(); e.target.playVideo(); overlay.classList.add('chb-video-ready'); } }
+                });
+            } catch (e) { /* trailer is a bonus, not a requirement -- poster stays up */ }
+        }
+
+        function initCardHoverBreakout() {
+            if (typeof gsap === 'undefined') return;
+            document.addEventListener('mouseover', (e) => {
+                if (!chbEligible()) return;
+                const card = e.target.closest('.card');
+                if (!card || card.classList.contains('channel-card') || card === chbState.sourceCard) return;
+                if (card.contains(e.relatedTarget)) return;
+                const found = chbItemForCard(card);
+                if (!found) return;
+                if (chbState.timer) clearTimeout(chbState.timer);
+                chbState.timer = setTimeout(() => {
+                    chbState.timer = null;
+                    chbTriggerExpand(card, found.cardId, found.item);
+                }, CHB_DWELL_MS);
+            });
+            document.addEventListener('mouseout', (e) => {
+                const card = e.target.closest('.card');
+                if (card && card === chbState.sourceCard && !card.contains(e.relatedTarget)) {
+                    if (chbState.overlay && chbState.overlay.contains(e.relatedTarget)) return;
+                    chbTeardown(false);
+                    return;
+                }
+                if (!card && chbState.timer && e.target.closest && !e.target.closest('.card')) {
+                    // pointer left the card entirely before the dwell fired
+                    clearTimeout(chbState.timer);
+                    chbState.timer = null;
+                }
+            });
+            document.addEventListener('mouseout', (e) => {
+                const overlay = e.target.closest && e.target.closest('.chb-overlay');
+                if (overlay && overlay === chbState.overlay && !overlay.contains(e.relatedTarget)) {
+                    chbTeardown(false);
+                }
+            });
+            // A rail/grid scroll invalidates the overlay's screen position
+            // instantly (position:fixed doesn't track scrolled content) --
+            // tear down rather than let it visually detach from its card.
+            document.addEventListener('scroll', () => { if (chbState.overlay) chbTeardown(true); }, true);
+        }
+
         // Clock
         function updateClock() {
             const now = new Date();
@@ -11872,7 +12180,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v107';
+        const LOUNGE_BUILD = 'lounge-shell-v108';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
