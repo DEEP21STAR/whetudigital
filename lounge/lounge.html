@@ -8357,6 +8357,22 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // letter lands. Smaller than the old 1.26x wordmark pop -- the mark
             // now carries its own weight, so the pop is punctuation, not the beat.
             const POP_CLIMAX = LETTERS_AT + (letterEls.length - 1) * LETTER_STAGGER + 0.28; // ~5.51
+            // Intro sting, added 2026-08-17 (Deep-sourced: Pixabay Content
+            // License, free/commercial-OK, "Epic Cinematic Logo Reveal" by
+            // Sound Breakz Studios). Synced to the SAME beat as the flash --
+            // this is the intro's one true climax, everything before it is
+            // build-up. tl.call(), not a plain function call here -- this
+            // whole function BUILDS the timeline up front, it does not run
+            // it, so a bare call would have fired the sting at t=0 instead
+            // of at POP_CLIMAX. Fresh Audio() each play so a fast
+            // skip-and-replay (the skip button makes that possible) doesn't
+            // fight a still-decaying previous instance. .play()'s promise is
+            // caught, not awaited -- autoplay-with-sound can be blocked by
+            // browser policy on a page with no prior interaction, and that
+            // must never be treated as an intro failure, only silence.
+            tl.call(() => {
+                try { new Audio('audio/intro-reveal.mp3').play().catch(() => {}); } catch (e) {}
+            }, null, POP_CLIMAX - 0.06);
             tl.to(flashEl, { opacity: 0.85, duration: 0.14, ease: 'power1.out' }, POP_CLIMAX - 0.06);
             tl.to(flashEl, { opacity: 0, duration: 0.5, ease: 'power2.in' }, POP_CLIMAX + 0.08);
             tl.to(couchWrap, { scale: 1.10, duration: 0.20, ease: 'power3.out' }, POP_CLIMAX);
