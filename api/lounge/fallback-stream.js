@@ -131,7 +131,12 @@ export default async function handler(req) {
   const headers = { 'Access-Control-Allow-Origin': '*' };
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers });
 
-  const url = new URL(req.url);
+  // Unlike skystream.js's Edge runtime (where req.url is always absolute),
+  // Vercel's Node.js runtime hands back a relative path here -- confirmed
+  // live 2026-08-17 via a FUNCTION_INVOCATION_FAILED / ERR_INVALID_URL crash
+  // on the very first request. A dummy base makes new URL() work regardless
+  // of runtime; only searchParams are ever read from the result.
+  const url = new URL(req.url, 'http://localhost');
   const title = (url.searchParams.get('title') || '').trim();
   if (!title) {
     return new Response(JSON.stringify({ error: 'title required, e.g. /api/lounge/fallback-stream?title=Arsenal%20v%20Chelsea' }), {
