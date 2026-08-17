@@ -22,8 +22,8 @@
   "generated": "2026-08-16",
   "latest": {
     "android": {
-      "versionCode": 22,
-      "versionName": "0.1.24",
+      "versionCode": 23,
+      "versionName": "0.1.25",
       "minSdk": 23,
       "certSha256": "082961c7cc1097dfb4f76239947becb18cd98f88eca3da6585e504d6f523352f",
       "apk": {
@@ -37,6 +37,18 @@
     }
   },
   "changelog": [
+    {
+      "version": "0.1.25",
+      "versionCode": 23,
+      "web": "lounge-shell-v89",
+      "date": "2026-08-17",
+      "title": "WebView disk-cache fix -- app was serving stale content on cold launch",
+      "changes": [
+        "Fixed a real bug found live: Deep's phone was showing stale app content after server updates, even though curl proved the server was serving the latest build correctly. Root cause was the Android WebView's own disk cache reusing an old lounge.html on cold launch. Added a cache-busting query param to the entry-point loadUrl() call.",
+        "This is the SECOND build of this fix -- the first (same day) shipped without a version bump, which meant old and new binaries were both indistinguishable as \"0.1.24 build 22\". Bumping the version is now part of the fix itself, not a formality, so this can't happen again.",
+        "Also ships (web-only, already live before this build): Simkl watch-history sync alongside Trakt, intro sting audio, Sky Sport EPG cloud fallback (fixes Now/Next strip going dark off-LAN), and a fix for posters missing on first paint above the fold."
+      ]
+    },
     {
       "version": "0.1.24",
       "versionCode": 22,
