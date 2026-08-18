@@ -34,6 +34,16 @@
       "source": "/help-media/:path*",
       "has": [{ "type": "host", "value": "lounge.whetudigital.co.nz" }],
       "destination": "/lounge/help-media/:path*"
+    },
+    {
+      "source": "/Install-Lounge.exe",
+      "has": [{ "type": "host", "value": "lounge.whetudigital.co.nz" }],
+      "destination": "/lounge/Install-Lounge.exe"
+    },
+    {
+      "source": "/Install-LoungeApp.ps1",
+      "has": [{ "type": "host", "value": "lounge.whetudigital.co.nz" }],
+      "destination": "/lounge/Install-LoungeApp.ps1"
     }
   ]
 }
