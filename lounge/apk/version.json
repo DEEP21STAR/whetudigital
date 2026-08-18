@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v120"
+      "cacheName": "lounge-shell-v121"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.29",
+      "versionCode": 27,
+      "web": "lounge-shell-v121",
+      "date": "2026-08-19",
+      "title": "Sleep Cinema Mode -- 21-extras batch, item 1: one toggle for sleep timer + auto-skip-intro",
+      "changes": [
+        "New toggle inside the existing Sleep Timer popover. Turning it on sets a 60-min sleep timer (only if none is already running -- an active timer isn't overridden) and enables auto-skip-intro for the rest of the session, so a show with a saved intro mark skips it automatically instead of waiting for a tap.",
+        "Doesn't touch Up Next auto-advance -- that already advances on its own countdown, nothing to add there.",
+        "Verified with real functional tests, not just code review: toggle flips and persists correctly, defaults the sleep timer only when none is set, auto-skip actually fires dvSkipIntro() when on, and confirmed it does NOT fire when off (regression check on the existing manual-button behavior)."
+      ]
+    },
     {
       "version": "0.1.29",
       "versionCode": 27,

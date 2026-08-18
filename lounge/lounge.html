@@ -7523,6 +7523,15 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             <button onclick="sleepTimerSet(90)">90 min</button>
             <button onclick="sleepTimerSet(0)"><i class="fas fa-xmark"></i> Off</button>
         </div>
+        <!-- Sleep Cinema Mode, 2026-08-19: one toggle for "just let me fall
+             asleep watching this" -- combines the sleep timer above with
+             auto-skip-intro (no tap needed for shows with a saved intro
+             mark) for the rest of this session. Doesn't touch Up Next
+             auto-advance -- that already auto-advances on its own countdown,
+             nothing to add there. -->
+        <div class="vpn-popover-actions" style="border-top:1px solid #2a2a2a;margin-top:8px;padding-top:10px;">
+            <button id="sleepCinemaBtn" onclick="toggleSleepCinemaMode()" style="width:100%;"><i class="fas fa-couch"></i> Sleep Cinema Mode: Off</button>
+        </div>
     </div>
 
     <!-- Scrim and drawer are root-level siblings on purpose. When the scrim sat
@@ -12637,7 +12646,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v120';
+        const LOUNGE_BUILD = 'lounge-shell-v121';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -13677,6 +13686,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             pop.style.right = (window.innerWidth - rect.right) + 'px';
             pop.style.left = 'auto';
             pop.classList.add('open');
+            renderSleepCinemaBtn();
         }
 
         function sleepTimerSet(minutes) {
@@ -13692,6 +13702,39 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             sleepTimerRender();
             showRemoteToast(`Sleep timer set — stopping in ${minutes} min`);
             sleepTimerTickHandle = setInterval(sleepTimerTick, 1000);
+        }
+
+        // Sleep Cinema Mode, 2026-08-19 -- "surprise me" batch item. One toggle
+        // for falling asleep to something rather than tapping through
+        // multiple settings. Combines the sleep timer above (defaults to
+        // 60 min if none is set yet -- long enough to actually doze off, and
+        // the timer above still overrides it if changed) with auto-skip-intro
+        // for the rest of this session.
+        function sleepCinemaModeOn() {
+            return localStorage.getItem('nexus_sleep_cinema') === '1';
+        }
+
+        function renderSleepCinemaBtn() {
+            const btn = document.getElementById('sleepCinemaBtn');
+            if (!btn) return;
+            const on = sleepCinemaModeOn();
+            btn.innerHTML = `<i class="fas fa-couch"></i> Sleep Cinema Mode: ${on ? 'On' : 'Off'}`;
+            btn.style.background = on ? 'rgba(0,212,255,0.18)' : '';
+            btn.style.color = on ? '#00d4ff' : '';
+        }
+
+        function toggleSleepCinemaMode() {
+            const turningOn = !sleepCinemaModeOn();
+            localStorage.setItem('nexus_sleep_cinema', turningOn ? '1' : '0');
+            renderSleepCinemaBtn();
+            if (turningOn) {
+                if (!sleepTimerDeadline) sleepTimerSet(60); // also closes the popover
+                else document.getElementById('sleepTimerPopover')?.classList.remove('open');
+                showRemoteToast('Sleep Cinema Mode on — sleep timer + auto-skip-intro for this session');
+            } else {
+                document.getElementById('sleepTimerPopover')?.classList.remove('open');
+                showRemoteToast('Sleep Cinema Mode off');
+            }
         }
 
         function sleepTimerTick() {
@@ -17161,7 +17204,13 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // A few seconds of headroom before the mark so it doesn't flash
             // on and immediately off again for a mark set only a moment
             // earlier in the video's very first second.
-            btn.style.display = (typeof mark === 'number' && currentTime < mark - 1) ? '' : 'none';
+            const showBtn = typeof mark === 'number' && currentTime < mark - 1;
+            // Sleep Cinema Mode: skip it automatically instead of waiting for
+            // a tap -- the whole point is not touching the screen again.
+            // Same constraint as the manual button: only works for a show
+            // that already has a saved intro mark, nothing new introduced.
+            if (showBtn && sleepCinemaModeOn()) { dvSkipIntro(); return; }
+            btn.style.display = showBtn ? '' : 'none';
         }
 
         function dvFmtTime(s) {
