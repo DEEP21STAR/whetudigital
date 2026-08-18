@@ -22,8 +22,8 @@
   "generated": "2026-08-16",
   "latest": {
     "android": {
-      "versionCode": 25,
-      "versionName": "0.1.27",
+      "versionCode": 26,
+      "versionName": "0.1.28",
       "minSdk": 23,
       "certSha256": "082961c7cc1097dfb4f76239947becb18cd98f88eca3da6585e504d6f523352f",
       "apk": {
@@ -38,6 +38,19 @@
   },
   "changelog": [
     {
+      "version": "0.1.28",
+      "versionCode": 26,
+      "web": "lounge-shell-v118",
+      "date": "2026-08-18",
+      "title": "Real APK fix: Restricted Area outbound links now stay embedded in-app, not external",
+      "changes": [
+        "Reported by Deep: Restricted Area category tiles loaded fine, but clicking through opened external URLs instead of staying in Lounge. Same defect class as the earlier Cinema Finder fix (window.open()/target=_blank silently mishandled by a bare WebView with no onCreateWindow override) -- but a DIFFERENT WebView instance (RestrictedSectionActivity's own embedded WebView, not MainActivity's), so the earlier fix never covered it.",
+        "Fixed: setSupportMultipleWindows + onCreateWindow added to RestrictedSectionActivity's WebView. Unlike MainActivity's fix (which intentionally hands off to the system browser, e.g. Cinema Finder), this one loads the target URL into the SAME embedded WebView instead -- keeps outbound affiliate links inside Lounge, matching what Deep actually asked for.",
+        "Also flagged, not yet changed: the category tiles point at theporndude.com's link-directory pages, not direct content sources -- by nature every click funnels to yet another external site regardless of embedding. Making this fully self-contained needs real direct sources per category, separate task.",
+        "Gradle compile clean, release APK built and signed with the existing keystore. versionCode 25->26, versionName 0.1.27->0.1.28."
+      ]
+    },
+    {
       "version": "0.1.27",
       "versionCode": 25,
       "web": "lounge-shell-v118",
@@ -49,6 +62,13 @@
         "One tool round per turn by design -- caps every AI turn at 2 Groq calls, not an unbounded agent loop, to protect Deep's free-tier quota.",
         "Verified live end-to-end: real Groq tool_calls response, real TMDB results rendered, clicking a result opens the real detail page, add-to-watchlist writes a real localStorage entry."
       ]
+    },
+    {
+      "version": "0.1.27",
+      "versionCode": 25,
+      "web": "lounge-shell-v117",
+      "date": "2026-08-18",
+      "title": "Settings cleanup: removed the dead Plex free-account lane (ad-supported, never wired to playback), Real-Debrid marked clearly optional now Free Streaming is the default"
     },
     {
       "version": "0.1.27",
