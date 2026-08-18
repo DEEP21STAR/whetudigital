@@ -38,9 +38,26 @@ $ErrorActionPreference = 'Stop'
 
 $LoungeUrl = 'https://lounge.whetudigital.co.nz/'
 $AppName   = 'Lounge'
-$IconPath  = Join-Path $PSScriptRoot 'icons\lounge.ico'
 
-if (-not (Test-Path $IconPath)) {
+# $PSScriptRoot is EMPTY when this runs as a ps2exe-compiled .exe (it only
+# resolves for a real .ps1 file on disk) -- real bug, caught by actually
+# running the compiled exe, not assumed from the script text. When compiled,
+# ps2exe already embeds -iconFile INTO the exe itself, so the running exe's
+# own path (via the current process, which works in both compiled and
+# script form) is used as the icon source instead of a sibling file that
+# may not travel with a distributed .exe anyway.
+$runningExe = [System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName
+$isCompiled = $runningExe -and ($runningExe -notmatch 'powershell\.exe$|pwsh\.exe$')
+
+if ($isCompiled) {
+    $IconPath = $runningExe
+} elseif ($PSScriptRoot) {
+    $IconPath = Join-Path $PSScriptRoot 'icons\lounge.ico'
+} else {
+    $IconPath = $null
+}
+
+if ($IconPath -and -not (Test-Path $IconPath)) {
     Write-Warning "Icon not found at $IconPath -- shortcuts will use the browser's default icon instead."
     $IconPath = $null
 }
