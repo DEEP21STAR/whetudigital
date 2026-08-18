@@ -33,10 +33,23 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v118"
+      "cacheName": "lounge-shell-v119"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.28",
+      "versionCode": 26,
+      "web": "lounge-shell-v119",
+      "date": "2026-08-18",
+      "title": "Help Guide: first real visual walkthrough added (search flow) -- real captured screenshots of the actual app, not a mockup",
+      "changes": [
+        "Item 4 from Deep's ask: Help Guide was all text, no GIF/video guides. Built the real pipeline -- Playwright captures actual app screenshots through a real flow, stitched into an animated GIF (Pillow), not any kind of fabricated mockup.",
+        "First one shipped: '2. Browsing & Searching' now has a real 4-frame GIF (empty search -> typing 'Weapons' -> results loading -> real poster grid) embedded above the existing steps.",
+        "Hit one real snag while building this: resizing the test viewport re-triggered the app's boot intro, so the first capture attempt was 5 frames of the splash screen, not the app -- caught by actually looking at the images before shipping, not just checking they existed. Redone properly after skipping the intro.",
+        "Mechanism now proven end-to-end (capture -> stitch -> embed -> verify live). Remaining 5 Help Guide sections (Setup, Playing, Favourites/Sports, Troubleshooting, App overview) are the same process, not yet done."
+      ]
+    },
     {
       "version": "0.1.28",
       "versionCode": 26,
