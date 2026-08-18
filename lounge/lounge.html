@@ -8221,8 +8221,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
                 <div class="settings-row">
                     <div class="settings-row-text">
-                        <h4>Real-Debrid API Key</h4>
-                        <p>From <a href="https://real-debrid.com/apitoken" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">real-debrid.com/apitoken</a> (requires an active premium subscription) — resolves scraped torrents into direct playable links.</p>
+                        <h4>Real-Debrid API Key <span style="color:#6b7a85;font-weight:400;font-size:12px;">(optional)</span></h4>
+                        <p>Movies and TV already play through the Free Streaming source below with no key needed. Add this only if you want the extra torrent-sourced quality tiers on top — from <a href="https://real-debrid.com/apitoken" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">real-debrid.com/apitoken</a> (requires an active premium subscription).</p>
                     </div>
                     <div style="display:flex;gap:10px;align-items:center;">
                         <input type="password" id="rdKeyInput" placeholder="Real-Debrid API key" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:260px;">
@@ -8249,18 +8249,6 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <h4>Playback Sources</h4>
                         <p>What Lounge can currently resolve a film or episode with. Live TV and Live Sports are separate and need none of these.</p>
                         <div id="sourceStatusList" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;"></div>
-                    </div>
-                </div>
-
-                <div class="settings-row">
-                    <div class="settings-row-text">
-                        <h4>Plex (free account)</h4>
-                        <p>Plex's ad-supported Movies &amp; Shows catalogue is free and does not need Plex Pass, but it does need a Plex account — there is no anonymous access. Signing in links this device with a 4-character code; Lounge stores the returned token on this device only.</p>
-                        <div id="plexLinkStatus" style="margin-top:10px;color:#9fb3c0;font-size:13px;"></div>
-                    </div>
-                    <div style="display:flex;gap:10px;align-items:center;">
-                        <button class="btn btn-primary" id="plexLinkBtn" onclick="plexStartLink()">Sign in to Plex</button>
-                        <button class="btn" id="plexSignOutBtn" onclick="plexSignOut()" style="display:none;">Sign out</button>
                     </div>
                 </div>
 
@@ -12330,7 +12318,6 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             document.getElementById('rdKeyInput').value = localStorage.getItem('nexus_rd_key') || '';
             document.getElementById('groqKeyInput').value = localStorage.getItem('nexus_groq_key') || '';
             document.getElementById('osubKeyInput').value = localStorage.getItem('nexus_osub_key') || '';
-            renderPlexStatus();
             renderSourceStatus();
 
             const remoteOn = isRemoteMode();
@@ -12605,7 +12592,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v116';
+        const LOUNGE_BUILD = 'lounge-shell-v117';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -14074,126 +14061,12 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             renderSourceStatus();
         }
 
-        // ===== PLEX ACCOUNT LINKING =====
-        // Plex has no static API key and no anonymous token (probed 2026-08-08:
-        // /api/v2/users/anonymous is 404 on both plex.tv and clients.plex.tv, and
-        // every provider endpoint answers "You must provide a token!"). The real
-        // flow is device linking: create a PIN, the user types the 4-character code
-        // at plex.tv/link, then the same PIN id starts returning an authToken.
-        //
-        // This runs in the page, not through nexus_control_relay, on purpose. The
-        // relay proxies Real-Debrid and OpenSubtitles because those hosts send NO
-        // Access-Control-Allow-Origin and a browser therefore cannot call them at
-        // all. Plex is the opposite: plex.tv and *.provider.plex.tv all return
-        // ACAO:* (measured 2026-08-08 on /api/v2/pins, vod.provider and
-        // discover.provider). Routing it through the relay would add a hop, a
-        // restart dependency and a second place for the token to sit, and buy
-        // nothing. Same reasoning the relay comments use -- proxy only what CORS
-        // actually blocks.
-        const PLEX_TOKEN_KEY = 'nexus_plex_token';
-        const PLEX_CLIENT_ID_KEY = 'nexus_plex_client_id';
-        let plexPollTimer = null;
-
-        // Plex ties the PIN to a client identifier and expects the SAME one on the
-        // poll and on every later call. A per-device UUID kept in localStorage means
-        // re-linking does not orphan the previous authorisation.
-        function plexClientId() {
-            let id = localStorage.getItem(PLEX_CLIENT_ID_KEY);
-            if (!id) {
-                id = 'lounge-' + (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
-                localStorage.setItem(PLEX_CLIENT_ID_KEY, id);
-            }
-            return id;
-        }
-
-        function plexHeaders() {
-            return {
-                'Accept': 'application/json',
-                'X-Plex-Product': 'Lounge',
-                'X-Plex-Version': '1.0',
-                'X-Plex-Client-Identifier': plexClientId(),
-                'X-Plex-Platform': 'Web',
-                'X-Plex-Device': 'Lounge Entertainment Center'
-            };
-        }
-
-        async function plexStartLink() {
-            const statusEl = document.getElementById('plexLinkStatus');
-            const btn = document.getElementById('plexLinkBtn');
-            if (plexPollTimer) { clearInterval(plexPollTimer); plexPollTimer = null; }
-            btn.disabled = true;
-            statusEl.textContent = 'Asking Plex for a code...';
-            let pin;
-            try {
-                const res = await fetch('https://plex.tv/api/v2/pins', {
-                    method: 'POST', headers: plexHeaders(),
-                    signal: AbortSignal.timeout(15000)
-                });
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                pin = await res.json();
-            } catch (e) {
-                btn.disabled = false;
-                statusEl.innerHTML = `<span style="color:#ff5470;">Could not reach Plex (${e.message}). Check the connection and try again.</span>`;
-                return;
-            }
-
-            statusEl.innerHTML = 'Open <a href="https://plex.tv/link" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">plex.tv/link</a> and enter this code:'
-                + `<div style="font-size:30px;letter-spacing:7px;font-weight:700;color:#e9faff;margin:10px 0;">${pin.code}</div>`
-                + '<span id="plexPinCountdown" style="color:#9fb3c0;">Waiting for you to enter it...</span>';
-
-            // Poll rather than ask the user to press anything after linking: Plex
-            // gives no callback, and the PIN simply starts carrying a token. 2s is
-            // well inside the PIN's ~15 minute life and cheap against a CORS-open
-            // endpoint. The interval clears itself on success, expiry or error, so
-            // it can never outlive the Settings visit.
-            plexPollTimer = setInterval(async () => {
-                try {
-                    const r = await fetch(`https://plex.tv/api/v2/pins/${pin.id}`, {
-                        headers: plexHeaders(), signal: AbortSignal.timeout(10000)
-                    });
-                    if (!r.ok) throw new Error('HTTP ' + r.status);
-                    const d = await r.json();
-                    if (d.authToken) {
-                        clearInterval(plexPollTimer); plexPollTimer = null;
-                        localStorage.setItem(PLEX_TOKEN_KEY, d.authToken);
-                        btn.disabled = false;
-                        renderPlexStatus();
-                        renderSourceStatus();
-                        return;
-                    }
-                    if (d.expiresIn <= 0) throw new Error('code expired');
-                    const c = document.getElementById('plexPinCountdown');
-                    if (c) c.textContent = `Waiting for you to enter it... (code expires in ${Math.floor(d.expiresIn / 60)}m ${d.expiresIn % 60}s)`;
-                } catch (e) {
-                    clearInterval(plexPollTimer); plexPollTimer = null;
-                    btn.disabled = false;
-                    statusEl.innerHTML = `<span style="color:#ff5470;">Linking stopped: ${e.message}. Press Sign in to Plex to get a fresh code.</span>`;
-                }
-            }, 2000);
-        }
-
-        function plexSignOut() {
-            if (plexPollTimer) { clearInterval(plexPollTimer); plexPollTimer = null; }
-            localStorage.removeItem(PLEX_TOKEN_KEY);
-            renderPlexStatus();
-            renderSourceStatus();
-        }
-
-        function renderPlexStatus() {
-            const statusEl = document.getElementById('plexLinkStatus');
-            const btn = document.getElementById('plexLinkBtn');
-            const outBtn = document.getElementById('plexSignOutBtn');
-            if (!statusEl || !btn || !outBtn) return;
-            if (localStorage.getItem(PLEX_TOKEN_KEY)) {
-                statusEl.innerHTML = '<span style="color:#3ddc84;">Signed in.</span> This device holds a Plex token.';
-                btn.textContent = 'Re-link this device';
-                outBtn.style.display = '';
-            } else {
-                statusEl.textContent = 'Not signed in.';
-                btn.textContent = 'Sign in to Plex';
-                outBtn.style.display = 'none';
-            }
-        }
+        // Plex free-tier resolver removed 2026-08-18 (Deep's ask: no ad-supported
+        // lane at all -- Plex's free catalogue is ad-supported, and it was already
+        // dead code besides, never wired into queryStreams()). See the Free
+        // Streaming resolver (vidking.net) in getResolverChain() for the real
+        // no-account no-ads replacement. Old device-linking flow is in git
+        // history if ever needed again.
 
         // Mirrors getResolverChain() into the Settings panel so "what is actually
         // resolving my content" is answerable without opening a title.
