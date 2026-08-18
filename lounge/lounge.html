@@ -5035,7 +5035,29 @@
             color: #000;
             margin-left: 20px;
         }
-        
+
+        /* AI tool-call search results (2026-08-18) -- clickable cards inside a
+           chat bubble, so search_titles/add_to_watchlist read as real actions
+           rather than more chat text. */
+        .ai-tool-results { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .ai-tool-empty { margin-top: 10px; color: #9fb3c0; font-size: 13px; }
+        .ai-tool-row {
+            display: flex; align-items: center; gap: 10px; padding: 8px;
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(0,212,255,0.25);
+            border-radius: 10px; cursor: pointer;
+        }
+        .ai-tool-row:hover { background: rgba(0,212,255,0.08); }
+        .ai-tool-row img { width: 38px; height: 57px; object-fit: cover; border-radius: 4px; flex: none; }
+        .ai-tool-row-noposter {
+            width: 38px; height: 57px; border-radius: 4px; flex: none; display: flex;
+            align-items: center; justify-content: center; background: #222; color: #555;
+        }
+        .ai-tool-row-info { flex: 1; min-width: 0; }
+        .ai-tool-row-title { font-weight: 600; color: #e9faff; font-size: 13px; }
+        .ai-tool-row-meta { color: #9fb3c0; font-size: 11.5px; margin-top: 2px; }
+        .ai-tool-row-add { color: #6b7a85; font-size: 15px; padding: 6px; flex: none; }
+        .ai-tool-row-add:hover { color: #00d4ff; }
+
         .ai-input-area {
             padding: 20px;
             border-top: 1px solid #1a1a1a;
@@ -12592,7 +12614,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v117';
+        const LOUNGE_BUILD = 'lounge-shell-v118';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -21102,6 +21124,125 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             return div.innerHTML;
         }
 
+        // ===== AI ASSISTANT TOOL CALLING (2026-08-18) =====
+        // Deep's ask: the welcome message already claimed the AI could "find
+        // movies... and more", but it was purely conversational -- it could talk
+        // about a title, never actually surface or open one. Groq's API is
+        // OpenAI-tool-call-compatible, so real actions are now real function
+        // calls, not string parsing of the reply.
+        const AI_TOOLS = [
+            {
+                type: 'function',
+                function: {
+                    name: 'search_titles',
+                    description: 'Search TMDB for movies or TV shows by name/genre/vibe. Use this whenever the user asks to find, recommend, or look up something to watch.',
+                    parameters: {
+                        type: 'object',
+                        properties: {
+                            query: { type: 'string', description: 'Search text, e.g. "sci-fi thriller" or a title name' },
+                            mediaType: { type: 'string', enum: ['movie', 'tv'], description: 'Restrict to movies or TV shows; omit to search both' }
+                        },
+                        required: ['query']
+                    }
+                }
+            },
+            {
+                type: 'function',
+                function: {
+                    name: 'add_to_watchlist',
+                    description: 'Add a specific TMDB title (by its numeric tmdbId, from a prior search_titles result) to the user\'s My List / watchlist.',
+                    parameters: {
+                        type: 'object',
+                        properties: {
+                            tmdbId: { type: 'number', description: 'The numeric TMDB id from a search_titles result' },
+                            mediaType: { type: 'string', enum: ['movie', 'tv'] }
+                        },
+                        required: ['tmdbId', 'mediaType']
+                    }
+                }
+            }
+        ];
+
+        async function aiToolSearchTitles(args) {
+            const key = localStorage.getItem('nexus_tmdb_key');
+            if (!key) return { error: 'No TMDB key configured in Settings.' };
+            const endpoint = args.mediaType === 'movie' ? 'search/movie' : args.mediaType === 'tv' ? 'search/tv' : 'search/multi';
+            try {
+                const res = await fetch(`https://api.themoviedb.org/3/${endpoint}?api_key=${key}&query=${encodeURIComponent(args.query)}`, { signal: AbortSignal.timeout(15000) });
+                if (!res.ok) return { error: `TMDB search failed (HTTP ${res.status})` };
+                const data = await res.json();
+                const results = (data.results || [])
+                    .filter(r => !endpoint.includes('multi') || r.media_type === 'movie' || r.media_type === 'tv')
+                    .slice(0, 5)
+                    .map(r => ({
+                        tmdbId: r.id,
+                        title: r.title || r.name,
+                        mediaType: r.media_type || (endpoint.includes('movie') ? 'movie' : 'tv'),
+                        year: (r.release_date || r.first_air_date || '').slice(0, 4) || null,
+                        rating: r.vote_average ? r.vote_average.toFixed(1) : null,
+                        poster: r.poster_path ? `https://image.tmdb.org/t/p/w185${r.poster_path}` : null
+                    }));
+                return { results };
+            } catch (e) {
+                return { error: e.message || 'Search failed' };
+            }
+        }
+
+        async function aiToolAddToWatchlist(args) {
+            const key = localStorage.getItem('nexus_tmdb_key');
+            if (!key || !args.tmdbId || !args.mediaType) return { error: 'Missing tmdbId/mediaType, or no TMDB key configured.' };
+            try {
+                const endpoint = args.mediaType === 'tv' ? 'tv' : 'movie';
+                const res = await fetch(`https://api.themoviedb.org/3/${endpoint}/${args.tmdbId}?api_key=${key}`, { signal: AbortSignal.timeout(15000) });
+                if (!res.ok) return { error: `Could not look up that title (HTTP ${res.status})` };
+                const d = await res.json();
+                const added = toggleWatchlist({
+                    title: d.title || d.name,
+                    type: args.mediaType,
+                    tmdbId: args.tmdbId,
+                    poster: d.poster_path ? `https://image.tmdb.org/t/p/w342${d.poster_path}` : null,
+                    backdrop: d.backdrop_path ? `https://image.tmdb.org/t/p/w780${d.backdrop_path}` : null,
+                    rating: d.vote_average ? d.vote_average.toFixed(1) : '?'
+                });
+                return { added, title: d.title || d.name };
+            } catch (e) {
+                return { error: e.message || 'Add to watchlist failed' };
+            }
+        }
+
+        const AI_TOOL_EXECUTORS = {
+            search_titles: aiToolSearchTitles,
+            add_to_watchlist: aiToolAddToWatchlist
+        };
+
+        // Opens a title's detail page directly from a TMDB search result, without
+        // requiring it to already be a rendered card -- registers a synthetic
+        // cardRegistry entry (same shape createCard() items carry) and reuses the
+        // existing openDetail() flow rather than duplicating it.
+        function aiOpenTitle(tmdbId, mediaType, title, poster) {
+            const cardId = `card-ai-${cardSeq++}`;
+            cardRegistry[cardId] = { tmdbId, type: mediaType, title, poster: poster || null, __cardId: cardId };
+            document.getElementById('ai-modal').classList.remove('active');
+            openDetail(cardId);
+        }
+
+        // Renders search_titles results as clickable rows inside the chat --
+        // click opens the title's detail page, the bookmark icon adds it to
+        // My List without leaving the chat.
+        function renderAiSearchResults(results) {
+            if (!results || !results.length) return '<div class="ai-tool-empty">No matches found.</div>';
+            return '<div class="ai-tool-results">' + results.map(r => `
+                <div class="ai-tool-row" onclick="aiOpenTitle(${r.tmdbId}, '${r.mediaType}', '${escapeHtml(r.title).replace(/'/g, "\\'")}', ${r.poster ? `'${r.poster}'` : 'null'})">
+                    ${r.poster ? `<img src="${r.poster}" alt="" loading="lazy">` : '<div class="ai-tool-row-noposter"><i class="fas fa-film"></i></div>'}
+                    <div class="ai-tool-row-info">
+                        <div class="ai-tool-row-title">${escapeHtml(r.title)}</div>
+                        <div class="ai-tool-row-meta">${r.year || ''}${r.rating ? ` · ${r.rating}★` : ''} · ${r.mediaType === 'tv' ? 'TV' : 'Movie'}</div>
+                    </div>
+                    <i class="fas fa-bookmark ai-tool-row-add" title="Add to My List" onclick="event.stopPropagation();aiToolAddToWatchlist({tmdbId:${r.tmdbId},mediaType:'${r.mediaType}'}).then(res => { if(res.added !== undefined) showRemoteToast(res.added ? 'Added to My List' : 'Removed from My List'); })"></i>
+                </div>
+            `).join('') + '</div>';
+        }
+
         async function sendAI() {
             const input = document.getElementById('ai-input');
             const msg = input.value.trim();
@@ -21134,22 +21275,20 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             container.appendChild(thinkingEl);
             container.scrollTop = container.scrollHeight;
 
+            const systemMsg = {
+                role: 'system',
+                content: `You are the AI Assistant inside Lounge, a home media dashboard. Titles currently in the catalog: ${catalogTitles}. Answer questions about what's available grounded in that list, and give brief, friendly general help otherwise. Keep replies short (2-3 sentences). When the user wants to find/discover/recommend something to watch, call search_titles rather than describing titles from memory -- your training data doesn't know what's actually in Lounge or current. After a search_titles call, do not re-list the results in your own text (they're already shown as clickable cards) -- just add one short sentence of framing.${troubleshootHint}`
+            };
+
             try {
-                const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                let res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${groqKey}`,
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Authorization': `Bearer ${groqKey}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        model: 'llama-3.3-70b-versatile',
-                        messages: [
-                            {
-                                role: 'system',
-                                content: `You are the AI Assistant inside Lounge, a home media dashboard. Titles currently in the catalog: ${catalogTitles}. Answer questions about what's available grounded in that list, and give brief, friendly general help otherwise. Keep replies short (2-3 sentences).${troubleshootHint}`
-                            },
-                            ...aiChatHistory.slice(-10)
-                        ],
+                        model: 'openai/gpt-oss-120b',
+                        messages: [systemMsg, ...aiChatHistory.slice(-10)],
+                        tools: AI_TOOLS,
+                        tool_choice: 'auto',
                         temperature: 0.7
                     }),
                     signal: AbortSignal.timeout(20000)
@@ -21161,16 +21300,65 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     return;
                 }
 
-                const data = await res.json();
-                const reply = data.choices && data.choices[0] && data.choices[0].message.content;
-                if (!reply) {
+                let data = await res.json();
+                let message = data.choices && data.choices[0] && data.choices[0].message;
+                if (!message) {
                     thinkingEl.textContent = 'Groq returned an empty response. Try again.';
                     container.scrollTop = container.scrollHeight;
                     return;
                 }
 
-                thinkingEl.textContent = reply;
-                aiChatHistory.push({ role: 'assistant', content: reply });
+                // One tool round only, by design -- caps every AI turn at 2 Groq
+                // calls instead of letting a chained-tool-call loop run unbounded
+                // and burn Deep's free-tier quota (2026-08-13 quota incident).
+                let toolResultsHtml = '';
+                if (message.tool_calls && message.tool_calls.length) {
+                    aiChatHistory.push({ role: 'assistant', content: message.content || null, tool_calls: message.tool_calls });
+                    thinkingEl.textContent = 'Searching...';
+
+                    for (const call of message.tool_calls) {
+                        const fn = AI_TOOL_EXECUTORS[call.function.name];
+                        let result;
+                        try {
+                            const args = JSON.parse(call.function.arguments || '{}');
+                            result = fn ? await fn(args) : { error: 'Unknown tool' };
+                        } catch (e) {
+                            result = { error: e.message || 'Tool call failed' };
+                        }
+                        aiChatHistory.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(result) });
+                        if (call.function.name === 'search_titles' && result.results) {
+                            toolResultsHtml += renderAiSearchResults(result.results);
+                        }
+                    }
+
+                    res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${groqKey}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            model: 'openai/gpt-oss-120b',
+                            messages: [systemMsg, ...aiChatHistory.slice(-12)],
+                            temperature: 0.7
+                        }),
+                        signal: AbortSignal.timeout(20000)
+                    });
+                    if (!res.ok) {
+                        thinkingEl.innerHTML = `Groq request failed (HTTP ${res.status}) after a tool call.${toolResultsHtml}`;
+                        container.scrollTop = container.scrollHeight;
+                        return;
+                    }
+                    data = await res.json();
+                    message = data.choices && data.choices[0] && data.choices[0].message;
+                }
+
+                const reply = message && message.content;
+                if (!reply && !toolResultsHtml) {
+                    thinkingEl.textContent = 'Groq returned an empty response. Try again.';
+                    container.scrollTop = container.scrollHeight;
+                    return;
+                }
+
+                thinkingEl.innerHTML = `${reply ? escapeHtml(reply) : ''}${toolResultsHtml}`;
+                aiChatHistory.push({ role: 'assistant', content: reply || '' });
                 container.scrollTop = container.scrollHeight;
             } catch (e) {
                 console.error('sendAI failed:', e);

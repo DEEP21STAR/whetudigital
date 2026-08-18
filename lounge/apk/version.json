@@ -33,16 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v117"
+      "cacheName": "lounge-shell-v118"
     }
   },
   "changelog": [
     {
       "version": "0.1.27",
       "versionCode": 25,
-      "web": "lounge-shell-v117",
+      "web": "lounge-shell-v118",
       "date": "2026-08-18",
-      "title": "Settings cleanup: removed the dead Plex free-account lane (ad-supported, never wired to playback), Real-Debrid marked clearly optional now Free Streaming is the default"
+      "title": "AI Assistant: real tool-calling (search/open/add-to-watchlist) + fixed a total outage -- its Groq model ID had gone dead, every message was failing HTTP 404",
+      "changes": [
+        "Found while building tool-calling: llama-3.3-70b-versatile no longer exists on Groq (confirmed live against /v1/models) -- the AI Assistant has been returning 'Groq request failed (HTTP 404)' on every single message. Swapped to openai/gpt-oss-120b, current and verified live.",
+        "Real tool calling added: search_titles (live TMDB search, results render as clickable cards with poster/year/rating inside the chat), add_to_watchlist (bookmark icon on each result). Previously the AI could only talk about titles, never surface or act on them despite the welcome message implying otherwise.",
+        "One tool round per turn by design -- caps every AI turn at 2 Groq calls, not an unbounded agent loop, to protect Deep's free-tier quota.",
+        "Verified live end-to-end: real Groq tool_calls response, real TMDB results rendered, clicking a result opens the real detail page, add-to-watchlist writes a real localStorage entry."
+      ]
     },
     {
       "version": "0.1.27",
