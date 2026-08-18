@@ -22,8 +22,8 @@
   "generated": "2026-08-16",
   "latest": {
     "android": {
-      "versionCode": 23,
-      "versionName": "0.1.25",
+      "versionCode": 24,
+      "versionName": "0.1.26",
       "minSdk": 23,
       "certSha256": "082961c7cc1097dfb4f76239947becb18cd98f88eca3da6585e504d6f523352f",
       "apk": {
@@ -37,6 +37,18 @@
     }
   },
   "changelog": [
+    {
+      "version": "0.1.26",
+      "versionCode": 24,
+      "web": "lounge-shell-v114",
+      "date": "2026-08-18",
+      "title": "Real APK fix: nested-video fullscreen (South Park alt-source and any other embedded player)",
+      "changes": [
+        "Reported by Deep via Telegram (photo: VK player's fullscreen/expand icon doing nothing). Root cause: MainActivity.kt used a bare WebChromeClient() which never implements onShowCustomView/onHideCustomView -- the standard Android WebView callback for native HTML5 video fullscreen. Any nested iframe's own fullscreen button (South Park's VK alt-source, or any other embedded player) silently did nothing, regardless of anything in the web app itself.",
+        "Fixed with a proper WebChromeClient override: mounts the fullscreen surface WebView hands us over the app's root view, hides the system status/nav bars for the duration (WindowInsetsControllerCompat), and restores everything cleanly on exit.",
+        "This is a genuine native Android source change -- unlike every other fix tonight (all web-content-only, picked up automatically via the service worker), this one needed a real new APK build. versionCode 23->24, versionName 0.1.25->0.1.26. Verified: gradle compile clean, release APK built and signed with the existing keystore (same cert, so this installs as an update over the current app, not a fresh install)."
+      ]
+    },
     {
       "version": "0.1.25",
       "versionCode": 23,
