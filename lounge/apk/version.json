@@ -33,10 +33,17 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v114"
+      "cacheName": "lounge-shell-v115"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.27",
+      "versionCode": 25,
+      "web": "lounge-shell-v115",
+      "date": "2026-08-18",
+      "title": "Free Streaming resolver (vidking.net) -- ad-free, no account, Movies/TV/Bollywood/Anime, works with no Real-Debrid key"
+    },
     {
       "version": "0.1.27",
       "versionCode": 25,

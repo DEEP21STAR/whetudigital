@@ -12605,7 +12605,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v114';
+        const LOUNGE_BUILD = 'lounge-shell-v115';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -15471,7 +15471,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 openEpisodeStreamPicker(entry.tmdbId, entry.season, entry.episode);
                 return;
             }
-            openStreamPicker({ title: entry.title, type: entry.type, poster: entry.posterPath, rating: '—' });
+            openStreamPicker({ title: entry.title, type: entry.type, poster: entry.posterPath, rating: '—', tmdbId: entry.tmdbId });
         }
 
         function clearWatchHistory() {
@@ -19253,22 +19253,36 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         //
         // Deliberately not a list of "free content" -- nothing here is hardcoded
         // catalogue. Each source is a live query at pick time.
+        // vidking.net is a public, keyless embed player -- takes the same TMDB id
+        // Lounge already carries on every card, no debrid/account/login. Verified
+        // live 2026-08-18: real 4K HLS stream, zero ad-network requests, zero
+        // popup/redirect on a real trusted click (Playwright network+tab audit).
+        // Deep's ask (2026-08-18): no ad-supported lane at all -- Plex free was
+        // never actually wired to a query anyway (dead resolver entry), removed.
+        const FREE_EMBED_BASE = 'https://www.vidking.net/embed';
+        function freeEmbedUrl(type, tmdbId, season, episode) {
+            const path = type === 'tv'
+                ? `tv/${tmdbId}/${season}/${episode}`
+                : `movie/${tmdbId}`;
+            return `${FREE_EMBED_BASE}/${path}?color=00d4ff&autoPlay=true`;
+        }
+
         function getResolverChain() {
             return [
+                {
+                    id: 'freeembed',
+                    label: 'Free Streaming',
+                    configured: true,
+                    resolves: 'Movies, TV, Bollywood, Anime -- ad-free, no account, no debrid',
+                    setup: 'Always on -- no setup needed.'
+                },
                 {
                     id: 'realdebrid',
                     label: 'Real-Debrid',
                     configured: !!localStorage.getItem('nexus_rd_key'),
                     // What it unlocks, phrased for the empty state below.
-                    resolves: 'torrent sources (Torrentio / MediaFusion)',
+                    resolves: 'torrent sources (Torrentio / MediaFusion) -- optional, higher quality tiers',
                     setup: 'Add a Real-Debrid API key in Settings.'
-                },
-                {
-                    id: 'plex',
-                    label: 'Plex free',
-                    configured: !!localStorage.getItem('nexus_plex_token'),
-                    resolves: "Plex's free ad-supported catalogue",
-                    setup: 'Sign in to Plex in Settings (one-time, free account).'
                 }
             ];
         }
@@ -19318,11 +19332,6 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             body.innerHTML = '<div class="stream-picker-empty">Searching sources...</div>';
 
             const tmdbKey = localStorage.getItem('nexus_tmdb_key');
-            if (activeResolvers().length === 0) {
-                if (myGeneration !== pickerGeneration) return;
-                body.innerHTML = noResolverMessage();
-                return;
-            }
 
             let imdbId = null;
             try {
@@ -19336,14 +19345,11 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             }
 
             if (myGeneration !== pickerGeneration) return;
-            if (!imdbId) {
-                body.innerHTML = '<div class="stream-picker-empty">Could not identify this show on TMDB.</div>';
-                return;
-            }
+            if (imdbId) searchSubtitles(imdbId); // fire-and-forget
 
-            searchSubtitles(imdbId); // fire-and-forget
-
-            const streams = await queryStreams(`${imdbId}:${seasonNumber}:${episodeNumber}`, 'series');
+            // No imdbId (common on anime -- TMDB often has no external_ids match)
+            // isn't fatal: the free embed lane only needs tmdbId, already have it.
+            const streams = await queryStreams(imdbId, 'series', tmdbId, seasonNumber, episodeNumber);
             if (myGeneration !== pickerGeneration) return;
             if (streams.length === 0) {
                 body.innerHTML = noResultsMessage('episode');
@@ -19554,28 +19560,44 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             '&tr=' + encodeURIComponent('udp://exodus.desync.com:6969/announce') +
             '&tr=' + encodeURIComponent('udp://tracker.torrent.eu.org:451/announce');
 
-        async function queryStreams(imdbId, type) {
+        async function queryStreams(imdbId, type, tmdbId, season, episode) {
+            const results = [];
+
+            // Free embed lane -- no key, no debrid, ad-free (vidking.net, verified
+            // live 2026-08-18). Always first when a TMDB id is known, since it's
+            // the zero-setup default now (Deep's ask, 2026-08-18: no ad-supported
+            // lane, free movie/TV/Bollywood/anime sources only).
+            if (tmdbId) {
+                results.push({
+                    title: 'Free Stream',
+                    quality: 'HD',
+                    isFreeEmbed: true,
+                    source: 'Free Embed',
+                    freeEmbedUrl: freeEmbedUrl(type === 'series' ? 'tv' : 'movie', tmdbId, season, episode)
+                });
+            }
+
             // Every scraper here returns an infoHash, i.e. a magnet. A magnet is not
             // a stream: something has to turn it into an HTTP link before the player
             // can touch it, and in this app that something is Real-Debrid. With no RD
-            // key the scrapers still answer, so the old code would have happily listed
-            // 40 results that could not play. Skipping them without a debrid is the
-            // honest behaviour -- an empty lane, not a lane full of dead buttons.
-            if (!localStorage.getItem('nexus_rd_key')) return [];
+            // key or no imdbId (external_ids lookup can miss, esp. on anime) the
+            // scrapers can't be queried -- the free embed lane above still stands.
+            if (!imdbId || !localStorage.getItem('nexus_rd_key')) return results;
 
+            const scraperImdbId = type === 'series' ? `${imdbId}:${season}:${episode}` : imdbId;
             const enabledScrapers = scraperData.filter(s => s.included && SCRAPER_ENDPOINTS[s.name]);
-            const results = [];
+            const torrentResults = [];
 
             for (const scraper of enabledScrapers) {
                 try {
-                    const res = await fetch(`${SCRAPER_ENDPOINTS[scraper.name]}/stream/${type}/${imdbId}.json`);
+                    const res = await fetch(`${SCRAPER_ENDPOINTS[scraper.name]}/stream/${type}/${scraperImdbId}.json`);
                     if (!res.ok) continue;
                     const data = await res.json();
                     for (const s of (data.streams || [])) {
                         if (!s.infoHash) continue;
                         const parsed = parseStreamTitle(s.title || s.name || '');
                         const cleanTitle = (s.title || s.name || 'Unknown').split('\n')[0];
-                        results.push({
+                        torrentResults.push({
                             title: cleanTitle,
                             quality: parsed.quality,
                             sizeGB: parsed.sizeGB,
@@ -19605,8 +19627,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 }
             }
 
-            results.sort((a, b) => (QUALITY_RANK[b.quality] - QUALITY_RANK[a.quality]) || (b.seeders - a.seeders));
-            return results;
+            torrentResults.sort((a, b) => (QUALITY_RANK[b.quality] - QUALITY_RANK[a.quality]) || (b.seeders - a.seeders));
+            return results.concat(torrentResults);
         }
 
         // ===== STREAM PICKER =====
@@ -19693,7 +19715,20 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 window.__currentStreams = [];
                 return;
             }
-            body.innerHTML = streams.map((s, idx) => `
+            body.innerHTML = streams.map((s, idx) => s.isFreeEmbed ? `
+                <div class="stream-picker-row" onclick="resolveAndPlay(${idx})" style="border:1px solid rgba(0,212,255,0.4);">
+                    <div style="display:flex;align-items:center;">
+                        <span class="quality-badge" style="background:rgba(0,212,255,0.18);color:#00d4ff;">FREE</span>
+                        <div>
+                            <div>${escapeHtml(s.title)}</div>
+                            <div class="stream-picker-meta">Ad-free · No account · No debrid needed</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:16px;">
+                        <i class="fas fa-play"></i>
+                    </div>
+                </div>
+            ` : `
                 <div class="stream-picker-row" onclick="resolveAndPlay(${idx})">
                     <div style="display:flex;align-items:center;">
                         <span class="quality-badge quality-${s.quality}">${escapeHtml(s.quality)}</span>
@@ -19780,25 +19815,17 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 return;
             }
 
-            if (activeResolvers().length === 0) {
-                if (myGeneration !== pickerGeneration) return;
-                body.innerHTML = noResolverMessage();
-                return;
-            }
-
             const imdbId = await resolveImdbId(item.title, item.type || 'movie', tmdbKey);
             if (myGeneration !== pickerGeneration) return;
-            if (!imdbId) {
-                body.innerHTML = '<div class="stream-picker-empty">Could not identify this title on TMDB.</div>';
-                return;
-            }
+            if (imdbId) searchSubtitles(imdbId); // fire-and-forget, populates the subtitle dropdown when it resolves
 
-            searchSubtitles(imdbId); // fire-and-forget, populates the subtitle dropdown when it resolves
-
-            const streams = await queryStreams(imdbId, item.type === 'tv' ? 'series' : 'movie');
+            // No imdbId is not fatal -- the free embed lane below only needs the
+            // TMDB id, which every card already carries. Only the RD/torrent
+            // lane needs imdbId, and queryStreams already skips it without one.
+            const streams = await queryStreams(imdbId, item.type === 'tv' ? 'series' : 'movie', item.tmdbId);
             if (myGeneration !== pickerGeneration) return;
             if (streams.length === 0) {
-                body.innerHTML = noResultsMessage('title');
+                body.innerHTML = item.tmdbId ? noResultsMessage('title') : '<div class="stream-picker-empty">Could not identify this title on TMDB.</div>';
                 return;
             }
 
@@ -19993,6 +20020,22 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         async function resolveAndPlay(streamIdx, downloadInstead) {
             const myGeneration = pickerGeneration;
             const stream = window.__currentStreams[streamIdx];
+
+            // Free embed lane -- no RD, no magnet, no file resolve. Just an
+            // iframe. Progress tracking is out of scope for this lane (vidking
+            // posts its own postMessage events, not wired into Continue Watching
+            // yet) -- Continue Watching still works fully for the RD/mpv lane.
+            if (stream.isFreeEmbed) {
+                if (downloadInstead) return; // offline download needs a direct file link, not an iframe
+                const title = currentPickerItem
+                    ? currentPickerItem.title + (currentPickerEpisode ? ` — S${currentPickerEpisode.season}E${currentPickerEpisode.episode}` : '')
+                    : 'Free Stream';
+                const url = stream.freeEmbedUrl;
+                closeStreamPicker();
+                openEmbedPlayer(url, title);
+                return;
+            }
+
             const rdKey = localStorage.getItem('nexus_rd_key');
             const body = document.getElementById('stream-picker-body');
             currentRdTorrentId = null;
@@ -20419,7 +20462,13 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         function openAltSource() {
             const url = altSourceForItem(detailItem);
             if (!url) return;
-            document.getElementById('altSourceTitle').textContent = 'Alternate Source -- ' + (detailItem.title || '');
+            openEmbedPlayer(url, 'Alternate Source -- ' + (detailItem.title || ''));
+        }
+
+        // Shared iframe-embed modal -- used by the manual per-title alt-source
+        // override above AND the Free Streaming resolver (vidking.net) below.
+        function openEmbedPlayer(url, title) {
+            document.getElementById('altSourceTitle').textContent = title || 'Free Stream';
             document.getElementById('altSourceFrame').src = url;
             document.getElementById('altSourceModal').classList.add('active');
         }
