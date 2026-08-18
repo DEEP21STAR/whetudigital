@@ -22,8 +22,8 @@
   "generated": "2026-08-16",
   "latest": {
     "android": {
-      "versionCode": 24,
-      "versionName": "0.1.26",
+      "versionCode": 25,
+      "versionName": "0.1.27",
       "minSdk": 23,
       "certSha256": "082961c7cc1097dfb4f76239947becb18cd98f88eca3da6585e504d6f523352f",
       "apk": {
@@ -37,6 +37,18 @@
     }
   },
   "changelog": [
+    {
+      "version": "0.1.27",
+      "versionCode": 25,
+      "web": "lounge-shell-v114",
+      "date": "2026-08-18",
+      "title": "Real APK fix: Cinema Finder (and every window.open() call) now actually opens",
+      "changes": [
+        "Reported by Deep: Cinema Finder not working. Root cause was systemic, not specific to Cinema Finder -- a plain Android WebView silently drops window.open() entirely unless setSupportMultipleWindows is on AND WebChromeClient.onCreateWindow is implemented. Neither was true, so EVERY window.open() call in the app (Cinema Finder's showtimes search, the South Park alternate-source link, and others) has been doing nothing on Android since it was written.",
+        "Fixed properly: setSupportMultipleWindows + javaScriptCanOpenWindowsAutomatically enabled, onCreateWindow implemented to hand the target URL to a real Android Intent (opens the system browser / whatever app claims the link) rather than trying to render it inside the app's own WebView -- matches the actual intent of 'opens an external tab' and Lounge's existing host-restriction security model.",
+        "Second native-code fix this session (after the fullscreen bug in 0.1.26) -- genuinely needs this APK update, not just a web-content refresh. versionCode 24->25, versionName 0.1.26->0.1.27. Gradle compile verified clean, release APK built and signed with the existing keystore."
+      ]
+    },
     {
       "version": "0.1.26",
       "versionCode": 24,
