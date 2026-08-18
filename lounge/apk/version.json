@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v121"
+      "cacheName": "lounge-shell-v122"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.29",
+      "versionCode": 27,
+      "web": "lounge-shell-v122",
+      "date": "2026-08-19",
+      "title": "Ambient Mode clock -- 21-extras batch, item 2",
+      "changes": [
+        "Added a live clock + date to the existing 5-minute idle screensaver (backdrop art cycling) -- real value on a dock/always-on tablet, glanceable without waking the screen.",
+        "Real bug caught before shipping: backdrop images are appended to the DOM after the clock on every slide change, which paints over it regardless of the image's own opacity -- fixed with an explicit z-index rather than relying on the image's 85% opacity to let it show through.",
+        "ambientShow()/ambientHide() live inside a private closure (loungeExtras(), by design) so the wiring couldn't be called directly to test -- verified the new piece (clock creation/update/z-index) by reproducing the exact DOM the real function builds and screenshotting it: clock renders clearly over a real busy poster image, confirmed live, not assumed from the CSS."
+      ]
+    },
     {
       "version": "0.1.29",
       "versionCode": 27,

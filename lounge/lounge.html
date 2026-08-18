@@ -12646,7 +12646,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v121';
+        const LOUNGE_BUILD = 'lounge-shell-v122';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -21460,7 +21460,19 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     object-fit: cover; opacity: 0; transition: opacity 2s ease, transform 12s linear; }
                 #lounge-ambient img.show { opacity: 0.85; transform: scale(1.08); }
                 #lounge-ambient .hint { position: absolute; bottom: 30px; width: 100%; text-align: center;
-                    color: rgba(255,255,255,0.6); font-size: 13px; letter-spacing: 0.05em; }
+                    color: rgba(255,255,255,0.6); font-size: 13px; letter-spacing: 0.05em; z-index: 2; }
+                /* PWA Ambient Mode clock, 2026-08-19 -- 21-extras batch, item 2.
+                   Real value while idle on a dock/always-on tablet: useful at a
+                   glance without waking the screensaver. Positioned top-left so
+                   it never collides with the "Press any key" hint at the bottom.
+                   z-index above the backdrop images -- those are appended to the
+                   DOM AFTER this on every slide change, which would otherwise
+                   paint over it regardless of the image's own opacity. */
+                #lounge-ambient .ambient-clock { position: absolute; top: 40px; left: 44px; z-index: 2;
+                    color: rgba(255,255,255,0.92); text-shadow: 0 2px 20px rgba(0,0,0,0.6); }
+                #lounge-ambient .ambient-clock .time { font-size: 64px; font-weight: 700; line-height: 1;
+                    font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+                #lounge-ambient .ambient-clock .date { font-size: 18px; margin-top: 8px; color: rgba(255,255,255,0.7); }
                 #lounge-shortcuts, #lounge-stats { position: fixed; z-index: 9500; background: rgba(15,15,18,0.95);
                     color: #eee; border-radius: 12px; padding: 18px 22px; font-size: 14px; backdrop-filter: blur(8px);
                     box-shadow: 0 8px 30px rgba(0,0,0,0.5); display: none; }
@@ -21502,6 +21514,22 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     currentSection === 'detail' || LoungeBridge?.videoPlaying;
             }
 
+            // PWA Ambient Mode clock, 2026-08-19 -- 21-extras batch, item 2.
+            // Standalone-display-mode check is informational only in the log
+            // comment, not gating: the clock is genuinely useful whether Deep
+            // is idle in a browser tab or the installed app, no reason to
+            // withhold it in one and not the other.
+            let ambientClockTimer = null;
+            function ambientUpdateClock() {
+                const el = ambientEl && ambientEl.querySelector('#ambientClock');
+                if (!el) return;
+                const now = new Date();
+                const timeEl = el.querySelector('.time');
+                const dateEl = el.querySelector('.date');
+                if (timeEl) timeEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                if (dateEl) dateEl.textContent = now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+            }
+
             function ambientShow() {
                 if (ambientBusy()) { armAmbient(); return; }
                 const posters = Object.values(cardRegistry).map(i => i.backdrop || i.poster).filter(Boolean);
@@ -21509,11 +21537,14 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 if (!ambientEl) {
                     ambientEl = document.createElement('div');
                     ambientEl.id = 'lounge-ambient';
-                    ambientEl.innerHTML = '<div class="hint">Press any key to return</div>';
+                    ambientEl.innerHTML = '<div class="ambient-clock" id="ambientClock"><div class="time"></div><div class="date"></div></div><div class="hint">Press any key to return</div>';
                     document.body.appendChild(ambientEl);
                     ambientEl.addEventListener('click', ambientHide);
                 }
                 ambientEl.classList.add('on');
+                ambientUpdateClock();
+                clearInterval(ambientClockTimer);
+                ambientClockTimer = setInterval(ambientUpdateClock, 15000);
                 let idx = 0;
                 const shown = new Set();
                 function nextSlide() {
@@ -21536,6 +21567,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 if (!ambientEl) return;
                 ambientEl.classList.remove('on');
                 clearTimeout(ambientEl._nextTimer);
+                clearInterval(ambientClockTimer);
+                ambientClockTimer = null;
             }
 
             function armAmbient() {
