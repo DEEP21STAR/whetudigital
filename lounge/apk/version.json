@@ -22,8 +22,8 @@
   "generated": "2026-08-16",
   "latest": {
     "android": {
-      "versionCode": 26,
-      "versionName": "0.1.28",
+      "versionCode": 27,
+      "versionName": "0.1.29",
       "minSdk": 23,
       "certSha256": "082961c7cc1097dfb4f76239947becb18cd98f88eca3da6585e504d6f523352f",
       "apk": {
@@ -37,6 +37,19 @@
     }
   },
   "changelog": [
+    {
+      "version": "0.1.29",
+      "versionCode": 27,
+      "web": "lounge-shell-v120",
+      "date": "2026-08-18",
+      "title": "Real APK fix: Restricted Area 'Free Tubes' now lists 24 real direct sites, not one theporndude.com directory link",
+      "changes": [
+        "Deep supplied a real list of site URLs ('URL Adult Streaming Links.txt') after this was flagged as the remaining gap in the earlier Restricted Area fix. Wired in exactly what he provided -- 24 direct site URLs, affiliate-wrapper duplicates (theporndude.com/*, pdude.link/*) and tracking query params stripped since they add a pointless redirect hop and nothing for personal use.",
+        "'Free Tubes' tile now opens a scrollable named list instead of jumping straight to a single URL -- tapping any site opens it the same embedded way (in-app WebView, same onCreateWindow fix from the earlier build) as every other category.",
+        "The other 5 categories (Premium Sites, Live Cams, Amateur, Lesbian, Mature) are unchanged -- the supplied list was one flat set of general tube sites, didn't map to those specific categories. Left for Deep to supply if he wants them updated too, rather than guessing.",
+        "Gradle compile + assembleRelease both clean, signed with the existing keystore. versionCode 26->27, versionName 0.1.28->0.1.29."
+      ]
+    },
     {
       "version": "0.1.28",
       "versionCode": 26,
