@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v119"
+      "cacheName": "lounge-shell-v120"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.28",
+      "versionCode": 26,
+      "web": "lounge-shell-v120",
+      "date": "2026-08-18",
+      "title": "YouTube Ad-Free (ReVanced) added to Settings -- real official links, not assumed ones",
+      "changes": [
+        "Deep asked for 4 items (Manager, MicroG, ReVanced YouTube, ReVanced YouTube Music) embedded. Checked the real official github.com/revanced org first: only ReVanced Manager and MicroG (GmsCore) are actual separate downloads -- YouTube/YouTube Music aren't independently distributed, Manager patches your own existing installs on-device to produce those (by design, ReVanced doesn't redistribute modified Google APKs).",
+        "New Settings row: two buttons, verified live against github.com/ReVanced/*/releases/latest (real 302 to the current release tag, not guessed), open in the system browser via window.open -- nothing bundled or installed by Lounge itself.",
+        "Verified live: row renders correctly in Settings, both buttons fire the exact correct URLs (confirmed via a window.open hook, not just eyeballing the code)."
+      ]
+    },
     {
       "version": "0.1.28",
       "versionCode": 26,

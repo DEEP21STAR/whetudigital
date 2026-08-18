@@ -8216,6 +8216,28 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     <button class="btn btn-primary" onclick="jumpToVpnWizard()">Open Guide</button>
                 </div>
 
+                <!-- YouTube Ad-Free (ReVanced), added 2026-08-18. Deep asked for
+                     4 items (Manager, MicroG, ReVanced YouTube, ReVanced YouTube
+                     Music) -- checked against the real official ReVanced GitHub
+                     org first: only Manager and MicroG (GmsCore) are actual
+                     direct downloads. YouTube/YouTube Music aren't separately
+                     distributed -- Manager patches your own YouTube/YT Music
+                     on-device to produce those, by design (ReVanced doesn't
+                     redistribute modified Google APKs). Both links verified
+                     live against github.com/ReVanced/*/releases/latest before
+                     shipping -- real 302s to real current release tags, not
+                     guessed URLs. -->
+                <div class="settings-row">
+                    <div class="settings-row-text">
+                        <h4>YouTube Ad-Free (ReVanced)</h4>
+                        <p>ReVanced Manager patches your own YouTube and YouTube Music installs on-device to strip ads and add features (SponsorBlock, background play) — it isn't a separate YouTube app, it modifies the real one. MicroG is the companion Google-services replacement many patched setups need. Both open the official ReVanced GitHub releases in your browser to download and install yourself; nothing is bundled or installed by Lounge.</p>
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                        <button class="btn btn-primary" onclick="window.open('https://github.com/ReVanced/revanced-manager/releases/latest', '_blank', 'noopener')"><i class="fas fa-download"></i> ReVanced Manager</button>
+                        <button class="btn btn-primary" onclick="window.open('https://github.com/ReVanced/GmsCore/releases/latest', '_blank', 'noopener')"><i class="fas fa-download"></i> MicroG (GmsCore)</button>
+                    </div>
+                </div>
+
                 <div class="settings-row">
                     <div class="settings-row-text">
                         <h4>Weather Location</h4>
@@ -12615,7 +12637,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v119';
+        const LOUNGE_BUILD = 'lounge-shell-v120';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
