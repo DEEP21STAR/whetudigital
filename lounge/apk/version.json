@@ -33,10 +33,17 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v115"
+      "cacheName": "lounge-shell-v116"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.27",
+      "versionCode": 25,
+      "web": "lounge-shell-v116",
+      "date": "2026-08-18",
+      "title": "Fix: posters silently vanishing on genre rails (Comedy/Animation report) -- one auto-retry before falling back, was a permanent blank on any transient TMDB image failure"
+    },
     {
       "version": "0.1.27",
       "versionCode": 25,

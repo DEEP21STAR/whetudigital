@@ -12605,7 +12605,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v115';
+        const LOUNGE_BUILD = 'lounge-shell-v116';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -15345,7 +15345,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 return `
                 <div class="card" onclick="resumeContinueWatching(${idx})">
                     <div class="card-image">
-                        ${e.posterPath ? `<img class="card-poster" src="${e.posterPath}" alt="" loading="lazy" onerror="this.remove()">` : ''}
+                        ${e.posterPath ? `<img class="card-poster" src="${e.posterPath}" alt="" loading="lazy" onerror="handlePosterError(this)">` : ''}
                         <i class="fas ${e.type === 'tv' ? 'fa-tv' : 'fa-film'}"></i>
                         ${ep}
                         <button class="cw-remove" title="Remove from Continue Watching"
@@ -20334,6 +20334,25 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             observeRatingDotsForPulse(el);
         }
 
+        // Real bug (Deep, 2026-08-18, screenshot of Comedy/Animation rails): two
+        // posters in a row of otherwise-loaded cards rendered as bare cells. Root
+        // cause was onerror="this.remove()" on the poster <img> -- a single failed
+        // TMDB image fetch (transient network blip / brief rate-limit) permanently
+        // blanked the card, since a removed <img> never gets another chance and
+        // nothing re-renders the grid afterward. One cache-busted retry recovers
+        // the transient case; if the poster is genuinely gone even after that, the
+        // existing <i> fallback glyph in .card-image still shows (it was never
+        // hidden by this bug, just low-contrast against the black tile).
+        function handlePosterError(img) {
+            if (!img.dataset.posterRetried) {
+                img.dataset.posterRetried = '1';
+                const base = img.src.split('?')[0];
+                setTimeout(() => { img.src = `${base}?retry=${Date.now()}`; }, 900);
+                return;
+            }
+            img.remove();
+        }
+
         // Rating-dot first-entry pulse (DESIGN_DNA 21 Extras surprise,
         // 2026-08-18) -- a single shared observer rather than one per grid,
         // since dozens of grids render over a session and each would
@@ -20382,7 +20401,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             return `
                 <div class="card${item.comingSoon ? ' coming-soon' : ''}" onclick="openDetail('${item.__cardId}')">
                     <div class="card-image" id="${item.__cardId}">
-                        ${item.poster ? `<img class="card-poster" src="${item.poster}" alt="" loading="lazy" onerror="this.remove()">` : ''}
+                        ${item.poster ? `<img class="card-poster" src="${item.poster}" alt="" loading="lazy" onerror="handlePosterError(this)">` : ''}
                         <i class="fas ${icon}"></i>
                         ${badge}
                         ${typeBadge}
