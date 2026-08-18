@@ -37,6 +37,16 @@ async function resolveMirrorMaster(id) {
   // Lazy imports, same reasoning as fallback-stream.js: a request that never
   // reaches this function (the two cheaper tiers already succeeded) never
   // pays Chromium's cold-start cost.
+  //
+  // REAL BUG, fixed 2026-08-19: this and fallback-stream.js were both dead in
+  // production since deploy -- every request 502'd with "error while loading
+  // shared libraries: libnss3.so: cannot open shared object file". Root cause
+  // confirmed via @sparticuz/chromium's own GitHub issue #427: the maintainer
+  // states the AL2023 shared-library bundle (libnss3/libnspr4/etc) was only
+  // brought current as of v140 -- package.json here was pinned to ^131.0.1,
+  // which resolves to a version predating that fix. Bumped to ^149.0.0
+  // (paired with playwright-core ^1.62.1, both current) in the root
+  // package.json. Not a code bug in this file -- a stale dependency pin.
   const chromium = (await import('@sparticuz/chromium')).default;
   const { chromium: pwChromium } = await import('playwright-core');
 
