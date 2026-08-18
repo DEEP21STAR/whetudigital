@@ -29,6 +29,11 @@
       "source": "/apk/:path*",
       "has": [{ "type": "host", "value": "lounge.whetudigital.co.nz" }],
       "destination": "/lounge/apk/:path*"
+    },
+    {
+      "source": "/help-media/:path*",
+      "has": [{ "type": "host", "value": "lounge.whetudigital.co.nz" }],
+      "destination": "/lounge/help-media/:path*"
     }
   ]
 }
