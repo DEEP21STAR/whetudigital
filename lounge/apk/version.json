@@ -33,10 +33,21 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v122"
+      "cacheName": "lounge-shell-v123"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.29",
+      "versionCode": 27,
+      "web": "lounge-shell-v123",
+      "date": "2026-08-19",
+      "title": "Number-key section jumps -- 21-extras batch, item 3",
+      "changes": [
+        "1-9 now jump straight to Home/Movies/TV/Anime/Bollywood/Live TV/Sports/My List/Settings -- same 9 destinations Ctrl+K's command palette already lists, one key instead of opening the palette every time.",
+        "Verified live with real Playwright key presses (not just wiring reviewed): pressing 2 navigated to Movies, pressing 9 navigated to Settings, both confirmed via currentSection. Also verified the existing INPUT/TEXTAREA guard correctly protects it -- focused a Settings text field, pressed 1, confirmed it typed '1' into the field and did NOT navigate away."
+      ]
+    },
     {
       "version": "0.1.29",
       "versionCode": 27,

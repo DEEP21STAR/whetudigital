@@ -12646,7 +12646,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v122';
+        const LOUNGE_BUILD = 'lounge-shell-v123';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -21585,10 +21585,22 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             armAmbient();
 
             // ---- 3. Keyboard shortcuts cheatsheet ----
+            // Number-key section jumps, 2026-08-19 -- 21-extras batch, item 3.
+            // Same 9 destinations Ctrl+K's CMDK_COMMANDS already lists, just a
+            // one-key path for the ones a power user hits constantly instead
+            // of opening the palette every time. Checked first that no other
+            // keydown handler in the app claims digit keys -- none did.
+            const NUMBER_KEY_SECTIONS = {
+                '1': 'home', '2': 'movies', '3': 'tv', '4': 'anime',
+                '5': 'bollywood', '6': 'channels', '7': 'sports',
+                '8': 'watchlist', '9': 'settings'
+            };
+
             const SHORTCUTS = [
                 ['Arrow keys', 'Move focus (D-pad on TV)'],
                 ['Enter / OK', 'Select'],
                 ['/', 'Focus search'],
+                ['1-9', 'Jump to Home/Movies/TV/Anime/Bollywood/Live TV/Sports/My List/Settings'],
                 ['S', 'Surprise Me'],
                 ['?', 'Toggle this cheatsheet'],
                 ['Esc / Back', 'Close overlay / go back'],
@@ -21662,6 +21674,9 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 if (e.key === '?') { toggleShortcuts(); }
                 else if (e.key === 's' || e.key === 'S') { window.loungeSurpriseMe(); }
                 else if (e.key === 'i' || e.key === 'I') { toggleStats(); }
+                else if (NUMBER_KEY_SECTIONS[e.key] && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                    showSection(NUMBER_KEY_SECTIONS[e.key]);
+                }
             });
 
             // ---- 5. Watchlist export / import ----
