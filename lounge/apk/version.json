@@ -33,10 +33,21 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v143"
+      "cacheName": "lounge-shell-v144"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v144",
+      "date": "2026-08-20",
+      "title": "Real fix: Matrix-drop tagline scramble was invisible on real devices (Deep confirmed on laptop + mobile)",
+      "changes": [
+        "Deep tested on 2 real devices: intro plays, gold arc \"YOUR CINEMA, EVERYWHERE\" text appears correctly, but the letter-scramble/flicker effect before it never showed -- text just popped straight to final form. Root cause: some browser engines don't repaint a <tspan> textContent mutation inside an SVG <textPath> until something else forces text layout to recompute. The scramble callbacks were genuinely firing on schedule (proven by the final character always rendering correctly) -- they just never got painted along the way, so only the last state before the next unrelated repaint (the sheen fade-in) was ever visible. Fixed by forcing a layout read (getComputedTextLength() on the shared textPath) after every single character mutation, which costs nothing timing-wise and doesn't touch the animation schedule itself.",
+        "[UNTESTED -- diagnosed from Deep's reported symptom plus a known SVG textPath/tspan repaint quirk, not reproduced live this session: no PIN for the production site, and this session's browser tooling can't reliably observe real-time GSAP animation even when it can reach a page. Needs Deep's confirmation on the same laptop + mobile he tested before."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,

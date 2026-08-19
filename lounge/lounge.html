@@ -9926,16 +9926,37 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // room -- see the SETTLE block below.
         function scheduleTaglineDecode(tl, chars, startAt, stagger, flipMs, flips) {
             if (!chars.length) return;
+            // REAL BUG FOUND 2026-08-20 (Deep: tested on 2 real devices, saw the
+            // gold arc text appear correctly but zero scramble/flicker before
+            // it): some engines don't repaint a <tspan> textContent mutation
+            // inside a <textPath> until something ELSE forces SVG text layout
+            // to recompute -- the flip callbacks above were genuinely firing
+            // (proven by the fact the FINAL character always rendered right),
+            // they just never got painted along the way, so only the very last
+            // state before the next real repaint (the sheen fade-in) was ever
+            // visible. getComputedTextLength() reads a layout-dependent value
+            // on the shared <textPath>, which is enough to force a real
+            // repaint after every single mutation. [UNTESTED -- diagnosed from
+            // the reported symptom + a known SVG textPath/tspan repaint quirk,
+            // not reproduced live: no PIN for the production site and this
+            // session's browser tooling can't reliably observe real-time
+            // animation. Needs Deep's confirmation on a real device.]
+            const forceRepaint = (el) => {
+                try {
+                    const path = el.parentNode;
+                    if (path && path.getComputedTextLength) path.getComputedTextLength();
+                } catch (e) {}
+            };
             chars.forEach((c, i) => {
                 const base = startAt + i * stagger;
                 if (!c.scrambles) {
-                    tl.call(() => { c.el.textContent = c.final === ' ' ? ' ' : c.final; }, null, base);
+                    tl.call(() => { c.el.textContent = c.final === ' ' ? ' ' : c.final; forceRepaint(c.el); }, null, base);
                     return;
                 }
                 for (let f = 0; f < flips; f++) {
-                    tl.call(() => { c.el.textContent = TAGLINE_GLYPHS[Math.floor(Math.random() * TAGLINE_GLYPHS.length)]; }, null, base + f * flipMs);
+                    tl.call(() => { c.el.textContent = TAGLINE_GLYPHS[Math.floor(Math.random() * TAGLINE_GLYPHS.length)]; forceRepaint(c.el); }, null, base + f * flipMs);
                 }
-                tl.call(() => { c.el.textContent = c.final; }, null, base + flips * flipMs);
+                tl.call(() => { c.el.textContent = c.final; forceRepaint(c.el); }, null, base + flips * flipMs);
             });
         }
 
@@ -13604,7 +13625,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v143';
+        const LOUNGE_BUILD = 'lounge-shell-v144';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
