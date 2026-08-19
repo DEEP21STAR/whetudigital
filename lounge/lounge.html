@@ -12736,7 +12736,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v129';
+        const LOUNGE_BUILD = 'lounge-shell-v130';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -13161,10 +13161,11 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const n = window.LoungeNative;
             const item = document.getElementById('navRestrictedArea');
             if (!item) return;
-            item.style.display = (n && typeof n.openRestrictedSection === 'function') ? '' : 'none';
+            item.style.display = (n && typeof n.openRestrictedSection === 'function' && !isKidsProfile()) ? '' : 'none';
         }
 
         function openRestrictedArea() {
+            if (isKidsProfile()) { showRemoteToast('Not available on this profile'); return; }
             const n = window.LoungeNative;
             if (!n || typeof n.openRestrictedSection !== 'function') {
                 showRemoteToast('Only available in the Lounge Android app');
@@ -13682,6 +13683,19 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             return loadProfiles().find(p => p.id === id) || { id, name: 'Main', emoji: '👤' };
         }
 
+        // Parental controls (2026-08-19, from the Emby feature comparison Deep
+        // asked for -- the one real gap that comparison surfaced: Emby gates
+        // adult content per-user, Lounge only had one flat app-wide PIN with no
+        // per-profile distinction). A kids profile can't reach EITHER of
+        // Lounge's two restricted-content gates: the native Restricted Area
+        // (RestrictedSectionActivity, adult tube sites) and the web-side Live
+        // TV Restricted channel bucket -- both checked here so a kid profile
+        // can't get through even by guessing the PIN, not just by the entry
+        // points being hidden.
+        function isKidsProfile() {
+            return !!currentProfile().kids;
+        }
+
         function renderProfileChip() {
             const chip = document.getElementById('profileChip');
             if (!chip) return;
@@ -13714,7 +13728,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const activeId = activeProfileId();
             wrap.innerHTML = profiles.map(p => `
                 <div class="vpn-popover-row" style="cursor:pointer;${p.id === activeId ? 'color:#00ff88;' : ''}" onclick="switchProfile('${p.id}')">
-                    <span>${escapeHtml(p.emoji)} ${escapeHtml(p.name)}</span>
+                    <span>${escapeHtml(p.emoji)} ${escapeHtml(p.name)}${p.kids ? ' <i class="fas fa-shield-halved" style="color:#00d4ff;font-size:11px;" title="Kids profile -- restricted content hidden"></i>' : ''}</span>
                     ${profiles.length > 1 ? `<span onclick="event.stopPropagation();deleteProfile('${p.id}')" title="Delete"><i class="fas fa-trash" style="color:#ff5470;"></i></span>` : ''}
                 </div>`).join('');
         }
@@ -13734,11 +13748,12 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         function addProfile() {
             const name = (prompt('Profile name?') || '').trim();
             if (!name) return;
-            const EMOJI = ['👤', '🧑', '👩', '👨', '🧒', '👧', '👦', '🐱', '🐶', '⭐'];
+            const kids = confirm('Make this a Kids profile?\n\nHides the Restricted Area and the Live TV Restricted channel bucket entirely for this profile -- even the PIN screen won\'t open. Cancel for a normal profile.');
+            const EMOJI = kids ? ['🧒', '👧', '👦'] : ['👤', '🧑', '👩', '👨', '🐱', '🐶', '⭐'];
             const profiles = loadProfiles();
             const emoji = EMOJI[profiles.length % EMOJI.length];
             const id = 'p' + Date.now();
-            profiles.push({ id, name, emoji });
+            profiles.push({ id, name, emoji, kids });
             localStorage.setItem('nexus_profiles', JSON.stringify(profiles));
             switchProfile(id);
         }
@@ -16296,7 +16311,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // gate is worse than no gate: it advertises that a hidden section
             // exists while having nothing behind it. Same
             // only-render-what-exists rule the country pills follow.
-            const nRestricted = section === 'livetv' ? getRestrictedUrls().length : 0;
+            const nRestricted = (section === 'livetv' && !isKidsProfile()) ? getRestrictedUrls().length : 0;
             const restrictedPill = nRestricted ? pill('restricted',
                 `<i class="fas fa-lock" aria-hidden="true"></i> Restricted`,
                 '#ff3860', restrictedView.active,
@@ -16778,6 +16793,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
         // ---- The gate ----
         function openRestrictedGate() {
+            if (isKidsProfile()) { showRemoteToast('Not available on this profile'); return; }
             // Tapping the pill while already inside the section exits it, the
             // same toggle behaviour the country pills have.
             if (restrictedView.active) {
@@ -19925,6 +19941,27 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // is an unusable flat dropdown. Top N by download_count covers real use.
         const SUBTITLE_PER_LANG = 6;
 
+        // Per-show subtitle memory (2026-08-19, from the "21 extras" candidate
+        // list). Small, real quality-of-life gap: picking a subtitle language
+        // was a per-EPISODE chore even though the same show gets watched in
+        // the same language every time. Keyed by the show's tmdbId (stable
+        // across every episode of that series, unlike imdbId which is fetched
+        // fresh per-episode via resolveImdbId and can differ for episode-level
+        // IMDb entries on some titles) -- movies aren't scoped here since
+        // there's no "next episode" to carry a memory into.
+        function rememberSubtitleLang(tmdbId, lang) {
+            if (!tmdbId || !lang) return;
+            let mem = {};
+            try { mem = JSON.parse(localStorage.getItem('nexus_subtitle_memory') || '{}'); } catch (e) { /* corrupt -- start fresh */ }
+            mem[tmdbId] = lang;
+            localStorage.setItem('nexus_subtitle_memory', JSON.stringify(mem));
+        }
+        function recalledSubtitleLang(tmdbId) {
+            if (!tmdbId) return null;
+            try { return (JSON.parse(localStorage.getItem('nexus_subtitle_memory') || '{}'))[tmdbId] || null; }
+            catch (e) { return null; }
+        }
+
         function setSubtitleStatus(msg) {
             const el = document.getElementById('subtitleStatus');
             if (el) el.textContent = msg || '';
@@ -20003,6 +20040,19 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
                 select.innerHTML = html;
                 setSubtitleStatus(`${shown} subtitle${shown === 1 ? '' : 's'} across ${langs.length} language${langs.length === 1 ? '' : 's'} - optional.`);
+
+                // Auto-apply this show's remembered language, if any and if
+                // it's actually available for this episode -- a remembered
+                // language that happens to have zero results this episode is
+                // silently skipped rather than forcing "No Subtitles".
+                if (currentPickerItem?.type === 'tv' && currentPickerItem?.tmdbId) {
+                    const wantLang = recalledSubtitleLang(currentPickerItem.tmdbId);
+                    if (wantLang && byLang[wantLang]?.length) {
+                        select.value = String(byLang[wantLang][0].idx);
+                        onSubtitleSelectChange();
+                        setSubtitleStatus(`${shown} subtitle${shown === 1 ? '' : 's'} - auto-picked ${SUBTITLE_LANG_NAMES[wantLang] || wantLang.toUpperCase()} (remembered for this show).`);
+                    }
+                }
             } catch (e) {
                 console.error('searchSubtitles failed:', e);
                 setSubtitleStatus('Subtitle search unavailable. You can still play without subtitles.');
@@ -20017,6 +20067,9 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
             const sub = subtitleResults[idx];
             if (!sub) return;
+            if (currentPickerItem?.type === 'tv' && currentPickerItem?.tmdbId) {
+                rememberSubtitleLang(currentPickerItem.tmdbId, sub.language);
+            }
             const osubKey = localStorage.getItem('nexus_osub_key');
             setSubtitleStatus('Preparing subtitle...');
             try {

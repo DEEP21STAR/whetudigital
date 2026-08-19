@@ -33,10 +33,21 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v129"
+      "cacheName": "lounge-shell-v130"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.29",
+      "versionCode": 27,
+      "web": "lounge-shell-v130",
+      "date": "2026-08-19",
+      "title": "Kids profiles (parental controls) + per-show subtitle memory",
+      "changes": [
+        "New from the Emby feature comparison Deep asked for: the one real gap that surfaced was per-user parental controls -- Emby gates adult content per account, Lounge only had one flat app-wide PIN. Profiles can now be marked 'Kids' at creation (a confirm prompt, matching the existing profile-creation UX) -- a Kids profile can't reach EITHER of Lounge's restricted-content gates (native Restricted Area, Live TV's Restricted channel bucket), checked at every entry point (nav item, pill visibility, AND the open functions themselves) so it can't be reached even by guessing the PIN, not just by the button being hidden. Kids profiles get a small shield badge in the profile switcher.",
+        "Per-show subtitle memory: picking a subtitle language for a TV show now remembers it (keyed by the show's tmdbId, stable across every episode) and auto-applies the same language next episode if it's actually available -- no more re-picking subtitles every single episode of the same show. Movies aren't scoped in (no 'next episode' to carry the memory into). A remembered language with zero results for a given episode is silently skipped, never forces 'No Subtitles'."
+      ]
+    },
     {
       "version": "0.1.29",
       "versionCode": 27,
