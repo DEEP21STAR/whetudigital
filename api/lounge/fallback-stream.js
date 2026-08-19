@@ -108,7 +108,20 @@ async function resolveFallbackMaster(embedUrl) {
     // Fetch playlists through the SAME browser context (real TLS
     // fingerprint), then close the browser before returning -- only the
     // resolved text needs to survive, not the browser process.
-    const masterRes = await page.request.get(master, { headers: { Referer: embedUrl } });
+    // 2026-08-19: added the fuller header set a real in-page XHR/fetch would
+    // carry (Origin + Sec-Fetch-*) -- a bare Referer-only request was 403ing,
+    // and a plain nginx 403 with no CF-Ray suggests a config check on more
+    // than just Referer. Testing this before the more invasive move to an
+    // in-page fetch() (which would introduce a real CORS exposure page.request
+    // doesn't have).
+    const fetchHeaders = {
+      Referer: embedUrl,
+      Origin: new URL(embedUrl).origin,
+      'Sec-Fetch-Dest': 'empty',
+      'Sec-Fetch-Mode': 'cors',
+      'Sec-Fetch-Site': 'cross-site',
+    };
+    const masterRes = await page.request.get(master, { headers: fetchHeaders });
     if (!masterRes.ok()) {
       // Temporary rich diagnostics (2026-08-19) -- a bare "HTTP 403" wasn't
       // enough to tell IP-reputation blocking apart from a Referer/header
@@ -124,7 +137,7 @@ async function resolveFallbackMaster(embedUrl) {
     if (!lines.length) throw new Error('fallback master playlist had no variants');
     const mediaUrl = new URL(lines[0], master).href;
 
-    const mediaRes = await page.request.get(mediaUrl, { headers: { Referer: embedUrl } });
+    const mediaRes = await page.request.get(mediaUrl, { headers: fetchHeaders });
     if (!mediaRes.ok()) throw new Error(`media fetch HTTP ${mediaRes.status()}`);
     const mediaBody = await mediaRes.text();
     const out = mediaBody.split('\n').map(line => {
