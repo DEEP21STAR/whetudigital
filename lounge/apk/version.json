@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v136"
+      "cacheName": "lounge-shell-v137"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.30",
+      "versionCode": 28,
+      "web": "lounge-shell-v137",
+      "date": "2026-08-19",
+      "title": "Poster-retry upgrade + sound diagnostics + AI Assistant folded into Quick Actions",
+      "changes": [
+        "Missing-posters bug (Deep's 3rd/4th report, mobile-specific, always below the fold on first load): the previous fix's single blind retry couldn't outlast a mobile connection choking on dozens of simultaneous poster+API requests firing at once on page load. Now retries twice with backoff, and if a poster is still missing after that, an IntersectionObserver gives it exactly one more real attempt the moment it's actually scrolled into view -- by then the initial request storm is over, so the retry runs on a quiet connection instead of a congested one.",
+        "Sound toggles: rather than guess a third time, added real on-screen diagnostics. If Sound is toggled on but the device's OS-level \"Reduce Motion\" accessibility setting is active, the app now says so directly (UI_STANDARD §7b hard-gates opt-in sound behind that setting -- likely root cause for a total, consistent silence rather than an intermittent one). If the audio engine ends up in any state other than \"running\", that exact state is shown on-screen too, turning the next report into evidence instead of another guess.",
+        "AI Assistant relocated from a standalone unlabelled floating button into a third row inside the Quick Actions panel (Deep: \"AI in the window frame... easier for users to know what they are\") -- same toggleAI() function, just a labelled, discoverable entry point. Stays reachable even when Quick Actions is turned off in Settings: the standalone button reappears automatically. Each row now has its own identity colour (amber dice, cyan keyboard, violet-cyan gradient robot) instead of one flat treatment."
+      ]
+    },
     {
       "version": "0.1.30",
       "versionCode": 28,

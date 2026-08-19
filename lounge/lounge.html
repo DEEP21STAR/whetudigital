@@ -8588,7 +8588,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 <div class="settings-row">
                     <div class="settings-row-text">
                         <h4>Quick Actions Button</h4>
-                        <p>The Surprise Me / Shortcuts panel floating bottom-right. On by default -- turn off if you'd rather the corner stay clear (the AI Assistant button is unaffected, it stays regardless).</p>
+                        <p>The Surprise Me / Shortcuts / AI Assistant panel floating bottom-right. On by default -- turn off if you'd rather the corner stay clear. AI Assistant stays reachable either way: it moves back to its own standalone button when this panel is off.</p>
                     </div>
                     <label class="toggle-switch">
                         <input type="checkbox" id="fabEnabledToggle" checked onchange="toggleFabVisibility(this.checked)">
@@ -13145,7 +13145,30 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             try { localStorage.setItem('nexus_ui_sound', on); }
             catch (e) { console.warn('nexus_ui_sound write failed (private mode / storage blocked?):', e); }
             uiSoundMemFallback = on;
-            if (on) playUiTone(660, 0.08); // audible confirmation the toggle itself worked
+            if (on) {
+                // Diagnostic, 2026-08-19: Deep reported "sounds are not working"
+                // again after the previous mobile fix -- rather than guess a third
+                // time, this surfaces the ACTUAL reason on-screen so the next
+                // report is evidence, not just "still doesn't work". The strongest
+                // real candidate: uiSoundEnabled() hard-gates on
+                // prefers-reduced-motion (UI_STANDARD §7b, motion off => sound
+                // off) -- an OS-level accessibility setting (iOS Settings >
+                // Accessibility > Motion > Reduce Motion; Android Settings >
+                // Accessibility > Remove animations) would make the toggle show
+                // ON here while staying silently, permanently muted, with zero
+                // errors anywhere -- exactly matching a total, consistent failure
+                // rather than an intermittent one.
+                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                    showRemoteToast('Sound is on, but this device\'s "Reduce Motion" accessibility setting is silencing it. Turn that off in your phone\'s system Accessibility settings if you want sound.');
+                    return;
+                }
+                playUiTone(660, 0.08); // audible confirmation the toggle itself worked
+                setTimeout(() => {
+                    if (uiAudioCtx && uiAudioCtx.state !== 'running') {
+                        showRemoteToast(`Sound toggle is on, but audio engine state is "${uiAudioCtx.state}" instead of "running" -- the browser is blocking playback. Screenshot this and send it over so the real cause can be fixed.`);
+                    }
+                }, 400);
+            }
         }
         let uiSoundMemFallback = null;
         let uiAudioCtx = null;
@@ -13243,7 +13266,20 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             try { localStorage.setItem('nexus_intro_sound', on); }
             catch (e) { console.warn('nexus_intro_sound write failed (private mode / storage blocked?):', e); }
             introSoundMemFallback = on;
-            if (on) playIntroSting(); // audible confirmation the toggle itself worked, same pattern as toggleUiSound
+            if (on) {
+                // Same diagnostic as toggleUiSound -- see its comment for why
+                // prefers-reduced-motion is the strongest real candidate.
+                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                    showRemoteToast('Sound is on, but this device\'s "Reduce Motion" accessibility setting is silencing it. Turn that off in your phone\'s system Accessibility settings if you want sound.');
+                    return;
+                }
+                playIntroSting(); // audible confirmation the toggle itself worked, same pattern as toggleUiSound
+                setTimeout(() => {
+                    if (loungeIntroAudioCtx && loungeIntroAudioCtx.state !== 'running') {
+                        showRemoteToast(`Sound toggle is on, but audio engine state is "${loungeIntroAudioCtx.state}" instead of "running" -- the browser is blocking playback. Screenshot this and send it over so the real cause can be fixed.`);
+                    }
+                }, 400);
+            }
         }
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && loungeIntroAudioCtx && loungeIntroAudioCtx.state === 'running') loungeIntroAudioCtx.suspend();
@@ -13446,7 +13482,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v136';
+        const LOUNGE_BUILD = 'lounge-shell-v137';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -21581,19 +21617,70 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // the transient case; if the poster is genuinely gone even after that, the
         // existing <i> fallback glyph in .card-image still shows (it was never
         // hidden by this bug, just low-contrast against the black tile).
+        // Upgraded 2026-08-19: Deep reported this same missing-posters symptom
+        // again (3rd/4th time) after v116's single blind retry -- the previous
+        // fix assumed a one-off transient blip, but his screenshots consistently
+        // show it on mobile specifically, in rails BELOW the fold on initial
+        // page load. Real mechanism: this app renders every home rail's cards
+        // into the DOM at once on boot, so dozens of poster <img> requests (plus
+        // their own TMDB lookups) fire together -- on a slower/higher-latency
+        // mobile connection that's enough to blow through transient failures
+        // that a single 900ms retry can't outlast. Two changes: (1) two retries
+        // with backoff instead of one, (2) if BOTH still fail, the card is not
+        // written off -- an IntersectionObserver gives it exactly one more real
+        // attempt the moment the user actually scrolls it into view, which is
+        // precisely the "I scrolled down and it's still blank" moment Deep keeps
+        // hitting. By then the initial page-load request storm is long over, so
+        // this attempt runs on a quiet connection instead of a congested one.
         function handlePosterError(img) {
-            if (!img.dataset.posterRetried) {
-                img.dataset.posterRetried = '1';
-                const base = img.src.split('?')[0];
-                setTimeout(() => { img.src = `${base}?retry=${Date.now()}`; }, 900);
+            const retries = parseInt(img.dataset.posterRetries || '0', 10);
+            const base = img.dataset.posterBase || (img.dataset.posterBase = img.src.split('?')[0]);
+            if (retries < 2) {
+                img.dataset.posterRetries = String(retries + 1);
+                const delay = retries === 0 ? 900 : 2500;
+                setTimeout(() => { img.src = `${base}?retry=${Date.now()}`; }, delay);
                 return;
             }
             const wrap = img.closest('.card-image');
             img.remove();
-            // Genuinely gone after the retry -- stop shimmering (would loop
+            // Genuinely gone after 2 retries -- stop shimmering (would loop
             // forever otherwise, reading as permanently "loading" instead of
             // falling back to the .fa-play glyph that's still there underneath).
-            if (wrap) wrap.classList.remove('loading-poster');
+            if (wrap) {
+                wrap.classList.remove('loading-poster');
+                if (!wrap.dataset.posterVisRetried) {
+                    wrap.dataset.posterVisRetried = '1';
+                    wrap.dataset.posterBaseUrl = base;
+                    observePosterForVisRetry(wrap);
+                }
+            }
+        }
+
+        let posterVisRetryObserver = null;
+        function observePosterForVisRetry(wrap) {
+            if (!('IntersectionObserver' in window)) return;
+            if (!posterVisRetryObserver) {
+                posterVisRetryObserver = new IntersectionObserver((entries) => {
+                    entries.forEach((entry) => {
+                        if (!entry.isIntersecting) return;
+                        posterVisRetryObserver.unobserve(entry.target);
+                        const w = entry.target;
+                        const base = w.dataset.posterBaseUrl;
+                        if (!base || w.querySelector('.card-poster')) return; // already has a poster somehow
+                        const freshImg = document.createElement('img');
+                        freshImg.className = 'card-poster';
+                        freshImg.alt = '';
+                        freshImg.dataset.posterRetries = '0';
+                        freshImg.dataset.posterBase = base;
+                        freshImg.onerror = () => handlePosterError(freshImg);
+                        freshImg.onload = () => w.classList.remove('loading-poster');
+                        w.classList.add('loading-poster');
+                        freshImg.src = `${base}?vretry=${Date.now()}`;
+                        w.insertBefore(freshImg, w.firstChild);
+                    });
+                }, { threshold: 0.1, rootMargin: '150px' });
+            }
+            posterVisRetryObserver.observe(wrap);
         }
 
         // Rating-dot first-entry pulse (DESIGN_DNA 21 Extras surprise,
@@ -22723,41 +22810,55 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         (function loungeExtras() {
             const style = document.createElement('style');
             style.textContent = `
-                /* Quick Actions panel redesign, 2026-08-19 (Deep: "better
-                   design & area so its more noticible with bit more
-                   information with a option to Toggle ON/OFF"). Was two
-                   disconnected floating pills (fixed in an earlier pass this
-                   same session, from bare icon circles with no label to
-                   labelled pills) -- still read as two random buttons, not
-                   one deliberate feature. Now a single structured glass card
-                   (same dark/blur/glow language as the header chips and
-                   .vpn-popover elsewhere in this file), each row carrying a
-                   real one-line description under its title, not just a
-                   name -- that's the "more information" ask. Settings toggle
-                   (fabEnabledToggle) controls #lounge-fab directly via
-                   toggleFabVisibility() below; the AI Assistant button is a
-                   separate, older, always-on element and deliberately
-                   untouched by this toggle. */
+                /* Quick Actions panel, elevated 2026-08-19 -- Deep: "can we
+                   have AI in the window frame as that will make sense...
+                   needs a better LMC inspired design... easier for users to
+                   know what they are." AI Assistant folds in as a third row
+                   here (was a separate standalone circular .ai-btn stacked
+                   below this panel, undiscoverable/unlabelled on its own) --
+                   see the JS below for the visibility handoff that keeps AI
+                   reachable even when this panel is turned off in Settings.
+                   Each row now carries its OWN identity colour instead of
+                   one shared cyan treatment, same "give every control a
+                   distinct read" move as the header chip icons and the
+                   windowed-Settings cards shipped earlier this session --
+                   dice=amber (chance), keyboard=cyan (utility),
+                   robot=violet-to-cyan gradient matching .ai-btn's own
+                   identity so the relocated control still reads as "the
+                   same AI button", not a new one. */
                 #lounge-fab { position: fixed; right: 20px; bottom: 90px; z-index: 500;
-                    width: 220px; border-radius: 16px; overflow: hidden;
+                    width: 236px; border-radius: 16px; overflow: hidden;
                     background: rgba(16,16,20,0.88); backdrop-filter: blur(10px);
                     border: 1px solid rgba(0,212,255,0.18);
                     box-shadow: 0 12px 34px rgba(0,0,0,0.5), 0 0 24px rgba(0,212,255,0.08); }
-                #lounge-fab .fab-panel-title { padding: 10px 14px 6px; font-size: 10.5px;
+                #lounge-fab::before { content: ''; position: absolute; top: 0; left: 18px; right: 18px;
+                    height: 2px; border-radius: 2px;
+                    background: linear-gradient(90deg, transparent, #00d4ff, #9d4edd, transparent);
+                    opacity: 0.6; }
+                #lounge-fab .fab-panel-title { padding: 11px 14px 6px; font-size: 10.5px;
                     font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
                     color: rgba(255,255,255,0.4); }
                 #lounge-fab button { display: flex; align-items: center; gap: 10px;
-                    width: 100%; padding: 9px 14px; border: none; background: transparent;
+                    width: 100%; padding: 10px 14px; border: none; background: transparent;
                     color: #fff; text-align: left; cursor: pointer; transition: background 0.15s ease; }
                 #lounge-fab button:hover { background: rgba(0,212,255,0.1); }
+                #lounge-fab button:hover .fab-row-icon { transform: scale(1.08); }
                 #lounge-fab button:not(:last-child) { border-bottom: 1px solid rgba(255,255,255,0.06); }
-                #lounge-fab .fab-row-icon { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%;
+                #lounge-fab .fab-row-icon { flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%;
                     display: flex; align-items: center; justify-content: center; font-size: 13px;
-                    background: rgba(0,212,255,0.12); color: #00d4ff; border: 1px solid rgba(0,212,255,0.3); }
+                    background: rgba(0,212,255,0.12); color: #00d4ff; border: 1px solid rgba(0,212,255,0.3);
+                    transition: transform 0.2s ease; }
+                #lounge-fab .fab-icon-dice { background: rgba(255,183,3,0.14); color: #ffb703; border-color: rgba(255,183,3,0.35); }
+                #lounge-fab .fab-icon-key { background: rgba(0,212,255,0.12); color: #00d4ff; border-color: rgba(0,212,255,0.3); }
+                #lounge-fab .fab-icon-ai { background: linear-gradient(135deg, rgba(0,212,255,0.22), rgba(157,78,221,0.28));
+                    color: #fff; border-color: rgba(157,78,221,0.4); }
                 #lounge-fab .fab-row-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
                 #lounge-fab .fab-label { font-size: 13px; font-weight: 700; color: #fff; }
                 #lounge-fab .fab-hint { font-size: 10.5px; color: rgba(255,255,255,0.45);
                     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                @media (prefers-reduced-motion: reduce) {
+                    #lounge-fab button:hover .fab-row-icon { transform: none; }
+                }
                 #lounge-ambient { position: fixed; inset: 0; z-index: 9000; background: #000;
                     opacity: 0; pointer-events: none; transition: opacity 1.2s ease; }
                 #lounge-ambient.on { opacity: 1; pointer-events: auto; }
@@ -23048,28 +23149,45 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             };
 
             // ---- FAB ("Quick Actions" panel) ----
+            // AI Assistant folded in as a 3rd row, 2026-08-19 (Deep: "AI in
+            // the window frame... easier for users to know what they are").
+            // Was a separate standalone .ai-btn circle stacked below this
+            // panel with no visible label of its own -- now it reads as one
+            // of three named tools instead of an unexplained floating robot.
             const fab = document.createElement('div');
             fab.id = 'lounge-fab';
             fab.innerHTML = `
                 <div class="fab-panel-title">Quick Actions</div>
                 <button title="Surprise Me (S)" aria-label="Surprise Me — open a random title">
-                    <span class="fab-row-icon"><i class="fas fa-dice"></i></span>
+                    <span class="fab-row-icon fab-icon-dice"><i class="fas fa-dice"></i></span>
                     <span class="fab-row-text"><span class="fab-label">Surprise Me</span><span class="fab-hint">Open a random title</span></span>
                 </button>
                 <button title="Keyboard shortcuts (?)" aria-label="Show keyboard shortcuts">
-                    <span class="fab-row-icon"><i class="fas fa-keyboard"></i></span>
+                    <span class="fab-row-icon fab-icon-key"><i class="fas fa-keyboard"></i></span>
                     <span class="fab-row-text"><span class="fab-label">Shortcuts</span><span class="fab-hint">Keyboard controls</span></span>
+                </button>
+                <button title="AI Assistant" aria-label="Open AI Assistant">
+                    <span class="fab-row-icon fab-icon-ai"><i class="fas fa-robot"></i></span>
+                    <span class="fab-row-text"><span class="fab-label">AI Assistant</span><span class="fab-hint">Ask for recommendations</span></span>
                 </button>
             `;
             fab.querySelectorAll('button')[0].onclick = loungeSurpriseMe;
             fab.querySelectorAll('button')[1].onclick = toggleShortcuts;
+            fab.querySelectorAll('button')[2].onclick = toggleAI;
             // ON by default -- only actually hidden if Deep explicitly turned
             // it off last session (localStorage absent/anything else = on).
+            // The standalone .ai-btn stays the fallback entry point whenever
+            // this panel is hidden -- AI Assistant must never become
+            // unreachable, the one hard constraint from Deep's original ask.
+            const standaloneAiBtn = document.querySelector('.ai-btn');
             window.toggleFabVisibility = function (on) {
                 localStorage.setItem('nexus_fab_enabled', on ? '1' : '0');
                 fab.style.display = on ? '' : 'none';
+                if (standaloneAiBtn) standaloneAiBtn.style.display = on ? 'none' : '';
             };
-            if (localStorage.getItem('nexus_fab_enabled') === '0') fab.style.display = 'none';
+            const fabOn = localStorage.getItem('nexus_fab_enabled') !== '0';
+            fab.style.display = fabOn ? '' : 'none';
+            if (standaloneAiBtn) standaloneAiBtn.style.display = fabOn ? 'none' : '';
             document.body.appendChild(fab);
         })();
     </script>
