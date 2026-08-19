@@ -5447,6 +5447,13 @@
             background: rgba(0, 0, 0, 0.86);
             -webkit-backdrop-filter: blur(7px);
             backdrop-filter: blur(7px);
+            /* .wn-beam is deliberately min(150vw,1400px) wide (a light-cone
+               effect that has to bleed past its own edges to read as light,
+               not a hard-edged shape) -- found 2026-08-19 contributing real
+               document-level horizontal scroll on every version bump, since
+               this modal auto-opens whenever LOUNGE_BUILD changes and had no
+               clipping of its own. inset:0 already IS the intended edge. */
+            overflow: hidden;
         }
 
         .wn-modal.is-open { display: flex; }
@@ -8334,7 +8341,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <h4>Weather Location</h4>
                         <p>City for the live weather widget — powered by Open-Meteo (free, no API key needed)</p>
                     </div>
-                    <div style="display:flex;gap:10px;align-items:center;">
+                    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
                         <select id="weatherUnitSelect" onchange="saveWeatherUnit(this.value)" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;">
                             <option value="F">°F</option>
                             <option value="C">°C</option>
@@ -8349,7 +8356,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <h4>Movie Poster API (TMDB)</h4>
                         <p>Free key from <a href="https://www.themoviedb.org/settings/api" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">themoviedb.org/settings/api</a> (2-min signup, no card) — enables real posters instead of icons. Poster data provided by TMDB.</p>
                     </div>
-                    <div style="display:flex;gap:10px;align-items:center;">
+                    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
                         <input type="password" id="tmdbKeyInput" placeholder="TMDB API key" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:260px;">
                         <button class="btn btn-primary" onclick="saveTmdbKey()">Save</button>
                     </div>
@@ -8360,7 +8367,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <h4>Real-Debrid API Key <span style="color:#6b7a85;font-weight:400;font-size:12px;">(optional)</span></h4>
                         <p>Movies and TV already play through the Free Streaming source below with no key needed. Add this only if you want the extra torrent-sourced quality tiers on top — from <a href="https://real-debrid.com/apitoken" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">real-debrid.com/apitoken</a> (requires an active premium subscription).</p>
                     </div>
-                    <div style="display:flex;gap:10px;align-items:center;">
+                    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
                         <input type="password" id="rdKeyInput" placeholder="Real-Debrid API key" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:260px;">
                         <button class="btn btn-primary" onclick="saveRdKey()">Save</button>
                     </div>
@@ -8407,7 +8414,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         </div>
                         <div id="traktStatus" style="margin-top:10px;color:#9fb3c0;font-size:13px;"></div>
                     </div>
-                    <div style="display:flex;gap:10px;align-items:center;">
+                    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
                         <button class="btn btn-primary" id="traktConnectBtn" onclick="traktConnect()">Connect Trakt</button>
                         <button class="btn" id="traktDisconnectBtn" onclick="traktDisconnect()" style="display:none;">Disconnect</button>
                     </div>
@@ -8428,13 +8435,13 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     <div class="settings-row-text">
                         <h4>Simkl Sync</h4>
                         <p>Same idea as Trakt sync above, but Simkl's free tier has no "one app" limit — useful if Trakt is already tied up elsewhere. Create an app at <a href="https://simkl.com/settings/developer/new/" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">simkl.com/settings/developer/new</a> (Redirect URI can be anything, e.g. <code>http://localhost/callback</code> — the PIN flow below never uses it) to get a Client ID.</p>
-                        <div style="display:flex;gap:10px;align-items:center;margin-top:10px;">
-                            <input type="password" id="simklClientIdInput" placeholder="Client ID" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:220px;">
+                        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px;">
+                            <input type="password" id="simklClientIdInput" placeholder="Client ID" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:220px;max-width:100%;min-width:0;box-sizing:border-box;">
                             <button class="btn btn-primary" onclick="saveSimklKeys()">Save</button>
                         </div>
                         <div id="simklStatus" style="margin-top:10px;color:#9fb3c0;font-size:13px;"></div>
                     </div>
-                    <div style="display:flex;gap:10px;align-items:center;">
+                    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
                         <button class="btn btn-primary" id="simklConnectBtn" onclick="simklConnect()">Connect Simkl</button>
                         <button class="btn" id="simklDisconnectBtn" onclick="simklDisconnect()" style="display:none;">Disconnect</button>
                     </div>
@@ -8445,7 +8452,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <h4>Groq API Key (AI Assistant)</h4>
                         <p>From <a href="https://console.groq.com" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">console.groq.com</a> (free tier) — powers the AI Assistant chat.</p>
                     </div>
-                    <div style="display:flex;gap:10px;align-items:center;">
+                    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
                         <input type="password" id="groqKeyInput" placeholder="Groq API key" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:260px;">
                         <button class="btn btn-primary" onclick="saveGroqKey()">Save</button>
                     </div>
@@ -8456,7 +8463,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <h4>OpenSubtitles API Key</h4>
                         <p>From <a href="https://www.opensubtitles.com/en/consumers" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">opensubtitles.com/en/consumers</a> (free — sign up, create an API consumer) — enables real subtitle search/download for playback.</p>
                     </div>
-                    <div style="display:flex;gap:10px;align-items:center;">
+                    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
                         <input type="password" id="osubKeyInput" placeholder="OpenSubtitles API key" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:260px;">
                         <button class="btn btn-primary" onclick="saveOsubKey()">Save</button>
                     </div>
@@ -12728,7 +12735,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v126';
+        const LOUNGE_BUILD = 'lounge-shell-v127';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';

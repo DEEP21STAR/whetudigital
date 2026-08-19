@@ -33,10 +33,21 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v126"
+      "cacheName": "lounge-shell-v127"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.29",
+      "versionCode": 27,
+      "web": "lounge-shell-v127",
+      "date": "2026-08-19",
+      "title": "Third and final pass on the Settings horizontal-scroll bug -- Simkl row + the What's New modal's own light-beam were the last two contributors",
+      "changes": [
+        "v126 got scrollWidth down from 108px over to 13px over. Two remaining sources: the Simkl Sync row's Client-ID+Save action div had the same missing flex-wrap as the other rows (same bug, just not caught in the first sweep since it lives inside .settings-row-text rather than beside it), and separately -- unrelated to Settings itself -- the What's New modal's decorative light-beam (.wn-beam, deliberately min(150vw,1400px) wide by design, a light-cone effect) had no clipping on its parent modal, so it contributed real document-level horizontal scroll every single time a version bump auto-opens that modal, which is every build.",
+        "Fixed both: Simkl row gets the same flex-wrap treatment as every other action row, .wn-modal gets overflow:hidden (inset:0 already IS its intended edge, nothing should render past it anyway). Verified live: scrollWidth now matches viewport width exactly on the Settings page, both with and without the What's New modal open."
+      ]
+    },
     {
       "version": "0.1.29",
       "versionCode": 27,
