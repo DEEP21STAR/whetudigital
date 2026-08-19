@@ -13482,7 +13482,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v137';
+        const LOUNGE_BUILD = 'lounge-shell-v138';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -21617,40 +21617,54 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // the transient case; if the poster is genuinely gone even after that, the
         // existing <i> fallback glyph in .card-image still shows (it was never
         // hidden by this bug, just low-contrast against the black tile).
-        // Upgraded 2026-08-19: Deep reported this same missing-posters symptom
-        // again (3rd/4th time) after v116's single blind retry -- the previous
-        // fix assumed a one-off transient blip, but his screenshots consistently
-        // show it on mobile specifically, in rails BELOW the fold on initial
-        // page load. Real mechanism: this app renders every home rail's cards
-        // into the DOM at once on boot, so dozens of poster <img> requests (plus
-        // their own TMDB lookups) fire together -- on a slower/higher-latency
-        // mobile connection that's enough to blow through transient failures
-        // that a single 900ms retry can't outlast. Two changes: (1) two retries
-        // with backoff instead of one, (2) if BOTH still fail, the card is not
-        // written off -- an IntersectionObserver gives it exactly one more real
-        // attempt the moment the user actually scrolls it into view, which is
-        // precisely the "I scrolled down and it's still blank" moment Deep keeps
-        // hitting. By then the initial page-load request storm is long over, so
-        // this attempt runs on a quiet connection instead of a congested one.
+        // Upgraded 2026-08-19, corrected same night after Deep opened DevTools
+        // on the actual Desktop LMC (192.168.1.30:8899) and sent the real
+        // console: the failures are genuine `404 File Not Found` responses
+        // from image.tmdb.org, not network timeouts or rate-limiting. That
+        // invalidates the "mobile connection overwhelmed" theory this fix
+        // started with -- a cache-busting `?retry=` query string changes
+        // NOTHING about a real 404, the server returns 404 for that exact
+        // path every single time regardless of query params, so the earlier
+        // same-URL retry could never have fixed this class of failure. Real,
+        // documented TMDB CDN behaviour: a poster's smaller resized
+        // derivatives (w342 etc.) can 404 while the `original` size for the
+        // same poster_path is available -- TMDB generates size variants
+        // asynchronously after upload and some never backfill for
+        // lower-traffic titles. So retry 2 now swaps the URL's size segment
+        // to `original` instead of re-requesting the identical dead path --
+        // an actual different URL, not a cache-bust of the same 404.
+        function tmdbSwapToOriginalSize(url) {
+            return url.replace(/\/t\/p\/w\d+\//, '/t/p/original/');
+        }
         function handlePosterError(img) {
             const retries = parseInt(img.dataset.posterRetries || '0', 10);
             const base = img.dataset.posterBase || (img.dataset.posterBase = img.src.split('?')[0]);
-            if (retries < 2) {
-                img.dataset.posterRetries = String(retries + 1);
-                const delay = retries === 0 ? 900 : 2500;
-                setTimeout(() => { img.src = `${base}?retry=${Date.now()}`; }, delay);
+            if (retries === 0) {
+                img.dataset.posterRetries = '1';
+                setTimeout(() => { img.src = `${base}?retry=${Date.now()}`; }, 900);
+                return;
+            }
+            if (retries === 1) {
+                img.dataset.posterRetries = '2';
+                const originalUrl = tmdbSwapToOriginalSize(base);
+                img.dataset.posterFinalUrl = originalUrl; // remembered for the visibility retry below
+                setTimeout(() => { img.src = `${originalUrl}?retry=${Date.now()}`; }, 1200);
                 return;
             }
             const wrap = img.closest('.card-image');
             img.remove();
-            // Genuinely gone after 2 retries -- stop shimmering (would loop
-            // forever otherwise, reading as permanently "loading" instead of
-            // falling back to the .fa-play glyph that's still there underneath).
+            // Genuinely gone after both the transient-blip retry and the
+            // original-size retry -- stop shimmering (would loop forever
+            // otherwise, reading as permanently "loading" instead of falling
+            // back to the .fa-play glyph that's still there underneath).
             if (wrap) {
                 wrap.classList.remove('loading-poster');
                 if (!wrap.dataset.posterVisRetried) {
                     wrap.dataset.posterVisRetried = '1';
-                    wrap.dataset.posterBaseUrl = base;
+                    // Retry-on-visible must also use the original-size URL --
+                    // retrying the known-404 w342 path again would just 404
+                    // a third time regardless of how long it waits.
+                    wrap.dataset.posterBaseUrl = img.dataset.posterFinalUrl || tmdbSwapToOriginalSize(base);
                     observePosterForVisRetry(wrap);
                 }
             }
@@ -22859,6 +22873,37 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 @media (prefers-reduced-motion: reduce) {
                     #lounge-fab button:hover .fab-row-icon { transform: none; }
                 }
+
+                /* Collapse to a slim edge tab, 2026-08-19 (Deep: "minimise on
+                   the right hand side with the title Quick Actions written
+                   top to bottom"). Same panel, same identity -- collapsing
+                   just hides the 3 rows and shrinks the glass card down to a
+                   38px rail with the vertical label, rather than a separate
+                   component. Remembers whichever state Deep leaves it in. */
+                #lounge-fab .fab-collapse-btn { position: absolute; top: 8px; right: 8px;
+                    width: 22px; height: 22px; border-radius: 6px; border: none;
+                    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5);
+                    display: flex; align-items: center; justify-content: center;
+                    font-size: 11px; cursor: pointer; transition: background .15s ease, color .15s ease; }
+                #lounge-fab .fab-collapse-btn:hover { background: rgba(0,212,255,0.16); color: #00d4ff; }
+                #lounge-fab.fab-collapsed { width: 40px; border-radius: 20px; }
+                #lounge-fab.fab-collapsed .fab-panel-title,
+                #lounge-fab.fab-collapsed .fab-row-btn,
+                #lounge-fab.fab-collapsed .fab-collapse-btn { display: none; }
+                #lounge-fab .fab-collapsed-rail { display: none; }
+                #lounge-fab.fab-collapsed .fab-collapsed-rail {
+                    display: flex; flex-direction: column; align-items: center; justify-content: center;
+                    gap: 12px; padding: 20px 0 16px; cursor: pointer; }
+                #lounge-fab .fab-collapsed-rail .fab-rail-icon { color: #00d4ff; font-size: 14px; }
+                #lounge-fab .fab-collapsed-rail .fab-rail-label {
+                    writing-mode: vertical-rl; text-orientation: mixed;
+                    font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+                    color: rgba(255,255,255,0.55); }
+                #lounge-fab.fab-collapsed:hover .fab-rail-label { color: #00d4ff; }
+                #lounge-fab { transition: width 0.25s ease, border-radius 0.25s ease; }
+                @media (prefers-reduced-motion: reduce) {
+                    #lounge-fab { transition: none; }
+                }
                 #lounge-ambient { position: fixed; inset: 0; z-index: 9000; background: #000;
                     opacity: 0; pointer-events: none; transition: opacity 1.2s ease; }
                 #lounge-ambient.on { opacity: 1; pointer-events: auto; }
@@ -23157,23 +23202,31 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const fab = document.createElement('div');
             fab.id = 'lounge-fab';
             fab.innerHTML = `
+                <button class="fab-collapse-btn" title="Collapse" aria-label="Collapse Quick Actions">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
                 <div class="fab-panel-title">Quick Actions</div>
-                <button title="Surprise Me (S)" aria-label="Surprise Me — open a random title">
+                <button class="fab-row-btn" title="Surprise Me (S)" aria-label="Surprise Me — open a random title">
                     <span class="fab-row-icon fab-icon-dice"><i class="fas fa-dice"></i></span>
                     <span class="fab-row-text"><span class="fab-label">Surprise Me</span><span class="fab-hint">Open a random title</span></span>
                 </button>
-                <button title="Keyboard shortcuts (?)" aria-label="Show keyboard shortcuts">
+                <button class="fab-row-btn" title="Keyboard shortcuts (?)" aria-label="Show keyboard shortcuts">
                     <span class="fab-row-icon fab-icon-key"><i class="fas fa-keyboard"></i></span>
                     <span class="fab-row-text"><span class="fab-label">Shortcuts</span><span class="fab-hint">Keyboard controls</span></span>
                 </button>
-                <button title="AI Assistant" aria-label="Open AI Assistant">
+                <button class="fab-row-btn" title="AI Assistant" aria-label="Open AI Assistant">
                     <span class="fab-row-icon fab-icon-ai"><i class="fas fa-robot"></i></span>
                     <span class="fab-row-text"><span class="fab-label">AI Assistant</span><span class="fab-hint">Ask for recommendations</span></span>
                 </button>
+                <div class="fab-collapsed-rail" title="Expand Quick Actions" role="button" tabindex="0" aria-label="Expand Quick Actions">
+                    <i class="fas fa-bolt fab-rail-icon"></i>
+                    <span class="fab-rail-label">Quick Actions</span>
+                </div>
             `;
-            fab.querySelectorAll('button')[0].onclick = loungeSurpriseMe;
-            fab.querySelectorAll('button')[1].onclick = toggleShortcuts;
-            fab.querySelectorAll('button')[2].onclick = toggleAI;
+            const fabRowBtns = fab.querySelectorAll('.fab-row-btn');
+            fabRowBtns[0].onclick = loungeSurpriseMe;
+            fabRowBtns[1].onclick = toggleShortcuts;
+            fabRowBtns[2].onclick = toggleAI;
             // ON by default -- only actually hidden if Deep explicitly turned
             // it off last session (localStorage absent/anything else = on).
             // The standalone .ai-btn stays the fallback entry point whenever
@@ -23188,6 +23241,22 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const fabOn = localStorage.getItem('nexus_fab_enabled') !== '0';
             fab.style.display = fabOn ? '' : 'none';
             if (standaloneAiBtn) standaloneAiBtn.style.display = fabOn ? 'none' : '';
+
+            // Collapse-to-edge-tab, 2026-08-19 (Deep: "minimise on the right
+            // hand side with the title Quick Actions written top to bottom").
+            // Remembers whichever state Deep leaves it in, same persistence
+            // pattern as every other Settings-adjacent toggle in this file.
+            function setFabCollapsed(collapsed) {
+                fab.classList.toggle('fab-collapsed', collapsed);
+                localStorage.setItem('nexus_fab_collapsed', collapsed ? '1' : '0');
+            }
+            fab.querySelector('.fab-collapse-btn').onclick = () => setFabCollapsed(true);
+            fab.querySelector('.fab-collapsed-rail').onclick = () => setFabCollapsed(false);
+            fab.querySelector('.fab-collapsed-rail').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFabCollapsed(false); }
+            });
+            setFabCollapsed(localStorage.getItem('nexus_fab_collapsed') === '1');
+
             document.body.appendChild(fab);
         })();
     </script>

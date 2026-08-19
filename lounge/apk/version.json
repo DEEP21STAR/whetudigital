@@ -33,10 +33,21 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v137"
+      "cacheName": "lounge-shell-v138"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.30",
+      "versionCode": 28,
+      "web": "lounge-shell-v138",
+      "date": "2026-08-19",
+      "title": "Real poster-404 fix (found via Deep's own DevTools console) + collapsible Quick Actions",
+      "changes": [
+        "Missing-posters bug, ROOT CAUSE FOUND: Deep opened Chrome DevTools on the actual Desktop LMC and sent the real console -- the failures are genuine `404 File Not Found` responses from image.tmdb.org, not network timeouts. That invalidated the earlier 'mobile connection overwhelmed' theory: a cache-busting retry can never fix a real 404, the server returns 404 for that exact path forever regardless of query string. Real, documented TMDB CDN behaviour: a poster's smaller resized derivative (w342) can 404 while the `original` size for the same image is available -- TMDB generates size variants asynchronously and some never backfill for lower-traffic titles. Fix: the 2nd retry now swaps the URL to the `original` size instead of re-requesting the identical dead path -- an actual different URL, not a cache-bust of the same 404. The scroll-into-view last-chance retry also uses the corrected URL.",
+        "Quick Actions panel can now collapse into a slim vertical edge tab (Deep: \"minimise on the right hand side with the title Quick Actions written top to bottom\") -- click the chevron to collapse, click the vertical rail to expand again. Remembers whichever state you leave it in."
+      ]
+    },
     {
       "version": "0.1.30",
       "versionCode": 28,
