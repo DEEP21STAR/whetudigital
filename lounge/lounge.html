@@ -12736,7 +12736,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v128';
+        const LOUNGE_BUILD = 'lounge-shell-v129';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -21610,9 +21610,20 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             function ambientBusy() {
                 const livePlayer = document.getElementById('live-player');
                 const devicePlayer = document.getElementById('device-player');
+                // Real bug found 2026-08-19: this used to also check
+                // `LoungeBridge?.videoPlaying` -- LoungeBridge was never a real
+                // global (the actual native bridge is window.LoungeNative,
+                // established convention everywhere else in this file), and
+                // videoPlaying isn't a real property on it either, so this
+                // clause could never evaluate true -- it only ever threw a
+                // ReferenceError on web (crashing ambientShow()) since the
+                // bare identifier isn't declared at all there. Same honest
+                // limitation as Up Next's auto-advance elsewhere in this file:
+                // mpv/native-TV playback state isn't observable from this
+                // page, no invented property name changes that.
                 return (livePlayer && livePlayer.classList.contains('active')) ||
                     (devicePlayer && getComputedStyle(devicePlayer).display !== 'none') ||
-                    currentSection === 'detail' || LoungeBridge?.videoPlaying;
+                    currentSection === 'detail';
             }
 
             // PWA Ambient Mode clock, 2026-08-19 -- 21-extras batch, item 2.

@@ -33,10 +33,23 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v128"
+      "cacheName": "lounge-shell-v129"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.29",
+      "versionCode": 27,
+      "web": "lounge-shell-v129",
+      "date": "2026-08-19",
+      "title": "End-to-end QA sweep: fixed a real crash in Ambient Mode's busy-check, confirmed cloud EPG/sync still needs Deep's one-time Vercel step",
+      "changes": [
+        "Swept every section (Home/Movies/TV/Anime/Bollywood/Live TV/Sports/My List/Help) plus detail page + stream picker for the same overflow-class bug fixed in v125-127 -- all clean, 0 overflow everywhere.",
+        "Found and fixed a real crash: ambientBusy() (the idle-screensaver busy-check) referenced a bare `LoungeBridge` global that was never declared on the web build -- threw a ReferenceError every time Ambient Mode tried to activate. Turns out LoungeBridge was never a real bridge at all (the actual native bridge everywhere else in this file is window.LoungeNative) and `videoPlaying` isn't a real property on it either -- the whole clause could never have worked, even on native. Removed rather than guessing a fake replacement; native/TV playback state genuinely isn't observable from this page, same honest limitation Up Next's auto-advance already documents elsewhere.",
+        "Confirmed (not new, already documented in CLOUD_STORAGE_SETUP.md since 2026-08-12): EPG and Continue-Watching cloud sync are still fully non-functional off-LAN -- the local relay call is browser-blocked as mixed content on the HTTPS public deploy, and the cloud fallback honestly self-reports 501 'cloud storage not set up yet' because the Upstash Redis integration was never connected in the Vercel dashboard. Needs Deep's one-time ~3min action (Storage tab -> Create Database -> Upstash for Redis -> Connect Project -> Redeploy); not something fixable from code.",
+        "console.error volume on the public deploy is dominated by the above two known/expected sources (mixed-content blocks + 501s) plus 2 unrelated ad-domain DNS failures (googleads/doubleclick, pre-existing, harmless) -- no other unexpected errors found across the sweep."
+      ]
+    },
     {
       "version": "0.1.29",
       "versionCode": 27,
