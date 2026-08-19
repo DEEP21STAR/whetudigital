@@ -959,8 +959,33 @@
             flex-shrink: 0;
             transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         }
+        /* Identity colours, 2026-08-19 (Deep: header icons need "more feel,
+           structure & easily to identify" -- his own screenshot showed 5
+           badges all the same flat grey #999, indistinguishable at a glance,
+           worse still once <1300px drops the text labels entirely and the
+           badge is the ONLY signal left. Two real defects fixed together:
+           (1) Profile and Layout had no colour identity at all -- pure grey
+           forever, regardless of state. (2) Watch Together and Sleep both
+           inherited VPN's red "off" treatment below, which is wrong: VPN off
+           is genuinely alarming (insecure traffic), but Watch Together/Sleep
+           being off is just their normal, non-alarming default -- red there
+           reads as "something's broken" when nothing is. Each chip now has a
+           permanent identity colour (never grey), and only VPN keeps the
+           real green/red security semaphore; Together/Sleep's activity state
+           lives in the small corner dot instead of recolouring the whole
+           badge as if it were an error. */
+        #vpnChip .vpn-chip-icon        { color: #00d4ff; border-color: rgba(0,212,255,0.3); }
+        #profileChip .vpn-chip-icon    { color: #b98cf0; border-color: rgba(157,78,221,0.35); }
+        #wtChip .vpn-chip-icon         { color: #ff6fa8; border-color: rgba(255,111,168,0.3); }
+        #sleepTimerChip .vpn-chip-icon { color: #7c8cf0; border-color: rgba(124,140,240,0.3); }
+        #railLayoutToggle .vpn-chip-icon { color: #2dd4bf; border-color: rgba(45,212,191,0.3); }
         .vpn-chip[data-state="on"]  .vpn-chip-icon { color: #00ff88; border-color: rgba(0,255,136,0.4); box-shadow: 0 0 10px rgba(0,255,136,0.3); }
         .vpn-chip[data-state="off"] .vpn-chip-icon { color: #ff0055; border-color: rgba(255,0,85,0.35); box-shadow: 0 0 10px rgba(255,0,85,0.2); }
+        /* Together/Sleep override the shared red "off" rule above -- see
+           comment block right above this one for why. Higher specificity
+           (#id + [data-state]) wins over the bare [data-state] rule. */
+        #wtChip[data-state="off"] .vpn-chip-icon { color: #ff6fa8; border-color: rgba(255,111,168,0.3); box-shadow: none; }
+        #sleepTimerChip[data-state="off"] .vpn-chip-icon { color: #7c8cf0; border-color: rgba(124,140,240,0.3); box-shadow: none; }
         .vpn-chip[data-state="checking"] .vpn-chip-icon { animation: vpnDotPulse 1s ease-in-out infinite; }
         .vpn-chip-dot {
             position: absolute;
@@ -976,6 +1001,11 @@
         }
         .vpn-chip[data-state="on"]  .vpn-chip-dot { background: #00ff88; box-shadow: 0 0 8px rgba(0,255,136,0.7); }
         .vpn-chip[data-state="off"] .vpn-chip-dot { background: #ff0055; box-shadow: 0 0 8px rgba(255,0,85,0.5); }
+        /* Same non-alarming-off fix as the icon colour above -- these two are
+           optional features, not security state, so their "off" dot stays a
+           calm neutral grey rather than the same red VPN uses for "insecure". */
+        #wtChip[data-state="off"] .vpn-chip-dot,
+        #sleepTimerChip[data-state="off"] .vpn-chip-dot { background: #555; box-shadow: none; }
         .vpn-chip[data-state="checking"] .vpn-chip-dot { animation: vpnDotPulse 1s ease-in-out infinite; }
         /* Signature moment: the dot doesn't just flip colour on a state change,
            it fires one radiating ring -- a signal-lock beat, not a static swap. */
@@ -1124,8 +1154,13 @@
             .header-widgets { gap: 6px; }
             .vpn-chip { padding: 4px; gap: 0; }
             .vpn-chip-label, .vpn-chip-sub { display: none; }
-            .vpn-chip-icon { width: 26px; height: 26px; font-size: 13px; }
-            #profileChipEmoji { font-size: 14px; }
+            /* Bumped 26px->30px, 2026-08-19 (Deep: header icons need "more
+               feel, structure & easily to identify") -- larger badge gives
+               each identity colour (set above) more surface to actually read
+               as a colour rather than a thin ring, and a better touch target
+               now this is the ONLY visible signal at this width. */
+            .vpn-chip-icon { width: 30px; height: 30px; font-size: 14px; }
+            #profileChipEmoji { font-size: 15px; }
             .weather-location { display: none; }
             .weather-widget, .clock-widget { padding: 3px 6px; }
         }
@@ -8297,6 +8332,17 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
                 <div class="settings-row">
                     <div class="settings-row-text">
+                        <h4>Quick Actions Button</h4>
+                        <p>The Surprise Me / Shortcuts panel floating bottom-right. On by default -- turn off if you'd rather the corner stay clear (the AI Assistant button is unaffected, it stays regardless).</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="fabEnabledToggle" checked onchange="toggleFabVisibility(this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-row-text">
                         <h4>UI Sound Effects</h4>
                         <p>Soft synthesized tones on primary buttons. Off by default (UI_STANDARD §7b). Doesn't affect the intro's own sting, which is a separate feature you already set up.</p>
                     </div>
@@ -12480,6 +12526,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // UI_STANDARD §7b: OFF by default, one visible toggle, persisted.
             document.getElementById('uiSoundToggle').checked = uiSoundEnabled();
 
+            document.getElementById('fabEnabledToggle').checked = localStorage.getItem('nexus_fab_enabled') !== '0';
+
             document.getElementById('weatherLocationInput').value = localStorage.getItem('nexus_weather_location') || 'Hamilton, New Zealand';
             document.getElementById('weatherUnitSelect').value = localStorage.getItem('nexus_weather_unit') || 'C';
             document.getElementById('tmdbKeyInput').value = localStorage.getItem('nexus_tmdb_key') || '';
@@ -12760,7 +12808,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v131';
+        const LOUNGE_BUILD = 'lounge-shell-v132';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -21619,18 +21667,41 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         (function loungeExtras() {
             const style = document.createElement('style');
             style.textContent = `
+                /* Quick Actions panel redesign, 2026-08-19 (Deep: "better
+                   design & area so its more noticible with bit more
+                   information with a option to Toggle ON/OFF"). Was two
+                   disconnected floating pills (fixed in an earlier pass this
+                   same session, from bare icon circles with no label to
+                   labelled pills) -- still read as two random buttons, not
+                   one deliberate feature. Now a single structured glass card
+                   (same dark/blur/glow language as the header chips and
+                   .vpn-popover elsewhere in this file), each row carrying a
+                   real one-line description under its title, not just a
+                   name -- that's the "more information" ask. Settings toggle
+                   (fabEnabledToggle) controls #lounge-fab directly via
+                   toggleFabVisibility() below; the AI Assistant button is a
+                   separate, older, always-on element and deliberately
+                   untouched by this toggle. */
                 #lounge-fab { position: fixed; right: 20px; bottom: 90px; z-index: 500;
-                    display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
-                /* Labelled pills, not bare icon circles (Deep, 2026-08-19: the
-                   dice/keyboard/AI stack meant nothing without hovering, and
-                   there's no hover on a phone -- the label has to be visible
-                   by default, not revealed on interaction). */
-                #lounge-fab button { display: flex; align-items: center; gap: 8px;
-                    height: 40px; padding: 0 14px; border-radius: 20px; border: none;
-                    background: rgba(20,20,24,0.85); color: #fff; font-size: 16px; cursor: pointer;
-                    backdrop-filter: blur(6px); box-shadow: 0 2px 10px rgba(0,0,0,0.4); }
-                #lounge-fab button:hover { background: rgba(255,255,255,0.15); }
-                #lounge-fab .fab-label { font-size: 11px; font-weight: 600; letter-spacing: .01em; color: #eee; }
+                    width: 220px; border-radius: 16px; overflow: hidden;
+                    background: rgba(16,16,20,0.88); backdrop-filter: blur(10px);
+                    border: 1px solid rgba(0,212,255,0.18);
+                    box-shadow: 0 12px 34px rgba(0,0,0,0.5), 0 0 24px rgba(0,212,255,0.08); }
+                #lounge-fab .fab-panel-title { padding: 10px 14px 6px; font-size: 10.5px;
+                    font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+                    color: rgba(255,255,255,0.4); }
+                #lounge-fab button { display: flex; align-items: center; gap: 10px;
+                    width: 100%; padding: 9px 14px; border: none; background: transparent;
+                    color: #fff; text-align: left; cursor: pointer; transition: background 0.15s ease; }
+                #lounge-fab button:hover { background: rgba(0,212,255,0.1); }
+                #lounge-fab button:not(:last-child) { border-bottom: 1px solid rgba(255,255,255,0.06); }
+                #lounge-fab .fab-row-icon { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%;
+                    display: flex; align-items: center; justify-content: center; font-size: 13px;
+                    background: rgba(0,212,255,0.12); color: #00d4ff; border: 1px solid rgba(0,212,255,0.3); }
+                #lounge-fab .fab-row-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+                #lounge-fab .fab-label { font-size: 13px; font-weight: 700; color: #fff; }
+                #lounge-fab .fab-hint { font-size: 10.5px; color: rgba(255,255,255,0.45);
+                    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
                 #lounge-ambient { position: fixed; inset: 0; z-index: 9000; background: #000;
                     opacity: 0; pointer-events: none; transition: opacity 1.2s ease; }
                 #lounge-ambient.on { opacity: 1; pointer-events: auto; }
@@ -21911,15 +21982,30 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 reader.readAsText(file);
             };
 
-            // ---- FAB ----
+            // ---- FAB ("Quick Actions" panel) ----
             const fab = document.createElement('div');
             fab.id = 'lounge-fab';
             fab.innerHTML = `
-                <button title="Surprise Me (S)" aria-label="Surprise Me — open a random title" onclick="loungeSurpriseMe()"><span class="fab-label">Surprise Me</span><i class="fas fa-dice"></i></button>
-                <button title="Keyboard shortcuts (?)" aria-label="Show keyboard shortcuts"><span class="fab-label">Shortcuts</span><i class="fas fa-keyboard"></i></button>
+                <div class="fab-panel-title">Quick Actions</div>
+                <button title="Surprise Me (S)" aria-label="Surprise Me — open a random title">
+                    <span class="fab-row-icon"><i class="fas fa-dice"></i></span>
+                    <span class="fab-row-text"><span class="fab-label">Surprise Me</span><span class="fab-hint">Open a random title</span></span>
+                </button>
+                <button title="Keyboard shortcuts (?)" aria-label="Show keyboard shortcuts">
+                    <span class="fab-row-icon"><i class="fas fa-keyboard"></i></span>
+                    <span class="fab-row-text"><span class="fab-label">Shortcuts</span><span class="fab-hint">Keyboard controls</span></span>
+                </button>
             `;
-            document.body.appendChild(fab);
+            fab.querySelectorAll('button')[0].onclick = loungeSurpriseMe;
             fab.querySelectorAll('button')[1].onclick = toggleShortcuts;
+            // ON by default -- only actually hidden if Deep explicitly turned
+            // it off last session (localStorage absent/anything else = on).
+            window.toggleFabVisibility = function (on) {
+                localStorage.setItem('nexus_fab_enabled', on ? '1' : '0');
+                fab.style.display = on ? '' : 'none';
+            };
+            if (localStorage.getItem('nexus_fab_enabled') === '0') fab.style.display = 'none';
+            document.body.appendChild(fab);
         })();
     </script>
 </body>

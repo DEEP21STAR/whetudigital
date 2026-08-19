@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v131"
+      "cacheName": "lounge-shell-v132"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.30",
+      "versionCode": 28,
+      "web": "lounge-shell-v132",
+      "date": "2026-08-19",
+      "title": "Header icons + Quick Actions panel elevated -- real identity colours, an off-red bug fixed, and a Settings toggle",
+      "changes": [
+        "Header icon row (VPN/Profile/Watch Together/Sleep/Layout): every chip's icon badge was flat grey #999 unless it had an active data-state -- Profile and Layout had no colour identity at all, ever. Below 1300px (very common real width, not just phones) the text labels vanish entirely, leaving that flat grey badge as the ONLY signal -- exactly Deep's complaint about the row being unclear. Each chip now has a permanent identity colour (cyan/violet/pink/indigo/teal) so it's differentiable at a glance with zero hover, at any width.",
+        "Found and fixed a real mislabeling bug along the way: Watch Together and Sleep Timer both inherited VPN's red 'off' treatment -- but VPN off is genuinely alarming (insecure traffic), while Together/Sleep off is just their normal default state. Red on a normal, expected state reads as 'something's broken' when nothing is. Both now keep their own identity colour when off, with a neutral grey status dot instead of a red one.",
+        "Quick Actions panel (Surprise Me / Shortcuts, bottom-right): redesigned from two disconnected floating pills into one structured glass card matching the app's existing popover language -- each row now carries a real one-line description under its title (Deep's 'bit more information' ask), not just a name. New Settings toggle ('Quick Actions Button', on by default) hides the whole panel for anyone who'd rather the corner stay clear -- the separate AI Assistant button is unaffected."
+      ]
+    },
     {
       "version": "0.1.30",
       "versionCode": 28,
