@@ -33,10 +33,23 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v123"
+      "cacheName": "lounge-shell-v124"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.29",
+      "versionCode": 27,
+      "web": "lounge-shell-v124",
+      "date": "2026-08-19",
+      "title": "Fix: Action rail posters reading as \"missing\" + two more Help Guide GIFs + labelled the FAB icon stack",
+      "changes": [
+        "Real root cause found for Deep's screenshot (Action rail on Home showing mostly blank space on his connection): the placeholder icon inside every poster tile is #333 on a near-black gradient -- practically invisible. A poster that's still loading (slower mobile network, 96 images racing across 6 genre rails at once) was indistinguishable from empty space until it painted. Fixed by giving every real poster a visible shimmer while its <img> is in flight (reuses the existing skeleton shimmer keyframe), cleared the instant it loads or, after one retry, genuinely fails. Applied to both card-render paths (main grid cards + Continue Watching).",
+        "Fixed the other report in the same message: the floating dice/keyboard/AI icon stack had no visible label -- title/aria-label tooltips need hover, which doesn't exist on a phone. All three now carry an always-visible text label (\"Surprise Me\", \"Shortcuts\", \"AI\").",
+        "Help Guide: shipped the 2 remaining walkthrough GIFs from this batch -- '3. Playing Movies & TV Shows' (Home -> detail page -> stream picker) and '4. Favourites & Live Sports' (Sports section -> channel grid -> star toggle). Same real-capture pipeline as the first GIF (2026-08-18), not mockups.",
+        "DaddyLive/Sky Sport fallback resolvers (fallback-stream.js, daddylive-mirror-stream.js) fixed separately server-side: page.request.get() never actually routed through the real browser TLS stack, which is what the CDN's nginx 403 was checking for. Switched both to an in-page fetch() via page.evaluate() -- verified live against a real streamed.pk match (real 200, real HLS playlist). No web-build version tie to this one, it's Vercel serverless code outside the lockstep system."
+      ]
+    },
     {
       "version": "0.1.29",
       "versionCode": 27,

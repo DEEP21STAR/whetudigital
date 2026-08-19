@@ -1724,6 +1724,28 @@
             color: #333;
         }
 
+        /* Real-poster loading shimmer (2026-08-19, Deep's screenshot: Action
+           rail posters read as "missing" on his connection). Root cause: the
+           #333 fallback icon above is near-invisible against this card's own
+           near-black gradient, so a genuinely-still-loading poster (slow
+           mobile network, dozens of images racing at once) is visually
+           indistinguishable from empty space until it paints. Reuses the
+           skeleton-card shimmer keyframe so a loading real card reads exactly
+           like the initial skeleton state instead of a blank void; createCard
+           adds .loading-poster only when there IS a poster URL to wait for,
+           and the img's onload strips it the moment the poster actually paints. */
+        .card-image.loading-poster::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(100deg, transparent 30%, rgba(0,212,255,0.08) 50%, transparent 70%);
+            background-size: 200% 100%;
+            animation: skeletonShimmer 1.6s ease-in-out infinite;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .card-image.loading-poster::after { animation: none; }
+        }
+
         .card-image.has-poster {
             background-size: cover;
             background-position: center;
@@ -4534,6 +4556,26 @@
         
         .ai-btn:hover {
             transform: scale(1.1);
+        }
+
+        /* Always-visible caption (2026-08-19, Deep): a bare robot icon reads
+           as decoration, not a button, with no hover to reveal what it does
+           on a phone. Positioned via ::after since .ai-btn is a lone <button>
+           referenced in exactly one place -- adding a label wrapper everywhere
+           it's positioned (three breakpoints/modes above) would be far riskier
+           than one pseudo-element anchored to the button's own fixed box. */
+        .ai-btn::after {
+            content: 'AI';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: .04em;
+            color: rgba(255,255,255,0.75);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+            pointer-events: none;
         }
         
         .ai-suggestion {
@@ -8121,6 +8163,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
                 <div class="help-block">
                     <h3><i class="fas fa-play"></i> 3. Playing Movies & TV Shows</h3>
+                    <img src="/help-media/play-flow.gif" alt="Opening a title's detail page and the stream picker with the Free Stream option" loading="lazy" style="width:100%;max-width:320px;border-radius:12px;border:1px solid #222;margin:4px 0 12px;display:block;">
                     <ol>
                         <li>Click any movie poster to open the stream picker — it searches real sources and shows quality-filtered results (4K/1080p/720p/etc, colour-coded).</li>
                         <li>For TV shows, clicking the poster opens Seasons first, then Episodes, then the same stream picker.</li>
@@ -8131,6 +8174,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
                 <div class="help-block">
                     <h3><i class="fas fa-star"></i> 4. Favourites & Live Sports</h3>
+                    <img src="/help-media/fav-flow.gif" alt="Browsing Live Sports channels and tapping the star icon to favourite a channel" loading="lazy" style="width:100%;max-width:320px;border-radius:12px;border:1px solid #222;margin:4px 0 12px;display:block;">
                     <ol>
                         <li>In Sports or Live TV, click the star icon on any channel to favourite it — favourited channels always sort to the top.</li>
                         <li>Use the search box within those sections to find a specific channel by name.</li>
@@ -12646,7 +12690,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v123';
+        const LOUNGE_BUILD = 'lounge-shell-v124';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -15305,8 +15349,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 const remaining = fmtRemaining(e.duration - e.position);
                 return `
                 <div class="card" onclick="resumeContinueWatching(${idx})">
-                    <div class="card-image">
-                        ${e.posterPath ? `<img class="card-poster" src="${e.posterPath}" alt="" loading="lazy" onerror="handlePosterError(this)">` : ''}
+                    <div class="card-image${e.posterPath ? ' loading-poster' : ''}">
+                        ${e.posterPath ? `<img class="card-poster" src="${e.posterPath}" alt="" loading="lazy" onerror="handlePosterError(this)" onload="this.closest('.card-image').classList.remove('loading-poster')">` : ''}
                         <i class="fas ${e.type === 'tv' ? 'fa-tv' : 'fa-film'}"></i>
                         ${ep}
                         <button class="cw-remove" title="Remove from Continue Watching"
@@ -20317,7 +20361,12 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 setTimeout(() => { img.src = `${base}?retry=${Date.now()}`; }, 900);
                 return;
             }
+            const wrap = img.closest('.card-image');
             img.remove();
+            // Genuinely gone after the retry -- stop shimmering (would loop
+            // forever otherwise, reading as permanently "loading" instead of
+            // falling back to the .fa-play glyph that's still there underneath).
+            if (wrap) wrap.classList.remove('loading-poster');
         }
 
         // Rating-dot first-entry pulse (DESIGN_DNA 21 Extras surprise,
@@ -20367,8 +20416,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
             return `
                 <div class="card${item.comingSoon ? ' coming-soon' : ''}" onclick="openDetail('${item.__cardId}')">
-                    <div class="card-image" id="${item.__cardId}">
-                        ${item.poster ? `<img class="card-poster" src="${item.poster}" alt="" loading="lazy" onerror="handlePosterError(this)">` : ''}
+                    <div class="card-image${item.poster ? ' loading-poster' : ''}" id="${item.__cardId}">
+                        ${item.poster ? `<img class="card-poster" src="${item.poster}" alt="" loading="lazy" onerror="handlePosterError(this)" onload="this.closest('.card-image').classList.remove('loading-poster')">` : ''}
                         <i class="fas ${icon}"></i>
                         ${badge}
                         ${typeBadge}
@@ -21448,11 +21497,17 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const style = document.createElement('style');
             style.textContent = `
                 #lounge-fab { position: fixed; right: 20px; bottom: 90px; z-index: 500;
-                    display: flex; flex-direction: column; gap: 10px; }
-                #lounge-fab button { width: 46px; height: 46px; border-radius: 50%; border: none;
-                    background: rgba(20,20,24,0.85); color: #fff; font-size: 18px; cursor: pointer;
+                    display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+                /* Labelled pills, not bare icon circles (Deep, 2026-08-19: the
+                   dice/keyboard/AI stack meant nothing without hovering, and
+                   there's no hover on a phone -- the label has to be visible
+                   by default, not revealed on interaction). */
+                #lounge-fab button { display: flex; align-items: center; gap: 8px;
+                    height: 40px; padding: 0 14px; border-radius: 20px; border: none;
+                    background: rgba(20,20,24,0.85); color: #fff; font-size: 16px; cursor: pointer;
                     backdrop-filter: blur(6px); box-shadow: 0 2px 10px rgba(0,0,0,0.4); }
                 #lounge-fab button:hover { background: rgba(255,255,255,0.15); }
+                #lounge-fab .fab-label { font-size: 11px; font-weight: 600; letter-spacing: .01em; color: #eee; }
                 #lounge-ambient { position: fixed; inset: 0; z-index: 9000; background: #000;
                     opacity: 0; pointer-events: none; transition: opacity 1.2s ease; }
                 #lounge-ambient.on { opacity: 1; pointer-events: auto; }
@@ -21726,8 +21781,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const fab = document.createElement('div');
             fab.id = 'lounge-fab';
             fab.innerHTML = `
-                <button title="Surprise Me (S)" aria-label="Surprise Me — open a random title" onclick="loungeSurpriseMe()"><i class="fas fa-dice"></i></button>
-                <button title="Keyboard shortcuts (?)" aria-label="Show keyboard shortcuts"><i class="fas fa-keyboard"></i></button>
+                <button title="Surprise Me (S)" aria-label="Surprise Me — open a random title" onclick="loungeSurpriseMe()"><span class="fab-label">Surprise Me</span><i class="fas fa-dice"></i></button>
+                <button title="Keyboard shortcuts (?)" aria-label="Show keyboard shortcuts"><span class="fab-label">Shortcuts</span><i class="fas fa-keyboard"></i></button>
             `;
             document.body.appendChild(fab);
             fab.querySelectorAll('button')[1].onclick = toggleShortcuts;
