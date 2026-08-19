@@ -33,10 +33,21 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v125"
+      "cacheName": "lounge-shell-v126"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.29",
+      "versionCode": 27,
+      "web": "lounge-shell-v126",
+      "date": "2026-08-19",
+      "title": "v125 fixed most of the Settings horizontal-scroll bug, not all of it -- second pass closes the rest",
+      "changes": [
+        "v125's min-width:0 fix cut the overflow from 729px down to 522px on a 414px viewport but didn't fully close it. Remaining cause: several rows (Trakt Client ID/Secret, TMDB/RD/Groq/OSub keys, Simkl Client ID, relay host, weather location) put their input+Save-button action area in a SEPARATE flex child next to .settings-row-text, not inside it -- v125's fix only covered the text side. That action child had its own default min-width:auto and several inputs carry a fixed 200-260px inline width, so it kept refusing to shrink.",
+        "This pass: .settings-row now allows flex-wrap (the action area drops to its own line on a phone instead of squeezing a password field down to a few unreadable pixels), and every settings-row text/password input gets min-width:0 so it can actually participate in the layout instead of holding a hard floor. Verified live: scrollWidth now matches viewport width exactly, confirmed on the specific row that was still 108px over after v125."
+      ]
+    },
     {
       "version": "0.1.29",
       "versionCode": 27,

@@ -5173,8 +5173,10 @@
         /* Settings */
         .settings-row {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
+            gap: 12px;
             padding: 22px 25px;
             background: #111;
             border: 1px solid #1a1a1a;
@@ -5191,13 +5193,31 @@
            unbroken strings like "real-debrid.com/apitoken" in its <p> links)
            refused to shrink below that width and pushed every one of the
            ~18 rows on this page wider than the viewport. Every row on this
-           page shares the bug since none had an explicit width rule at all. */
+           page shares the bug since none had an explicit width rule at all.
+           flex-wrap on .settings-row is the second half of the fix: several
+           rows' trailing action area (key input + Save button, e.g. TMDB/RD/
+           Groq/OSub/Trakt/Simkl/relay-host/weather-location) is itself wide
+           enough to not fit beside the text on a phone even once the text
+           shrinks -- wrapping it to its own line beats squeezing a password
+           field down to an unreadable few pixels. */
         .settings-row-text {
             min-width: 0;
             overflow-wrap: anywhere;
         }
         .settings-row > .btn {
             flex-shrink: 0;
+        }
+        /* Same overflow class of bug, one level deeper: several key/ID input
+           fields (TMDB/RD/Groq/OSub/Trakt/Simkl/relay-host/weather-location)
+           carry a fixed inline width (200-260px) for desktop. Their own
+           default min-width:auto held that width as a floor regardless of
+           available space. One rule catches all of them rather than patching
+           each inline style individually. */
+        .settings-row input[type="password"],
+        .settings-row input[type="text"] {
+            min-width: 0;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .help-block {
@@ -8380,9 +8400,9 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     <div class="settings-row-text">
                         <h4>Trakt.tv Sync</h4>
                         <p>Real watch-history sync, separate from the local "Continue Watching" list. Every movie/episode played from Lounge is pushed to your Trakt profile, viewable and tracked from any device. Free account, no VIP needed. Create an app at <a href="https://app.trakt.tv/settings/apps/api/new" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">app.trakt.tv/settings/apps/api/new</a> (Redirect URI can be anything, e.g. <code>urn:ietf:wg:oauth:2.0:oob</code> — the device flow below never uses it) to get a Client ID and Secret. If that page loads blank, try an Incognito window — an ad-blocker extension can prevent Trakt's settings page from rendering.</p>
-                        <div style="display:flex;gap:10px;align-items:center;margin-top:10px;">
-                            <input type="password" id="traktClientIdInput" placeholder="Client ID" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:220px;">
-                            <input type="password" id="traktClientSecretInput" placeholder="Client Secret" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:220px;">
+                        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px;">
+                            <input type="password" id="traktClientIdInput" placeholder="Client ID" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:220px;max-width:100%;min-width:0;box-sizing:border-box;">
+                            <input type="password" id="traktClientSecretInput" placeholder="Client Secret" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:220px;max-width:100%;min-width:0;box-sizing:border-box;">
                             <button class="btn btn-primary" onclick="saveTraktKeys()">Save</button>
                         </div>
                         <div id="traktStatus" style="margin-top:10px;color:#9fb3c0;font-size:13px;"></div>
@@ -12708,7 +12728,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v124';
+        const LOUNGE_BUILD = 'lounge-shell-v126';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
