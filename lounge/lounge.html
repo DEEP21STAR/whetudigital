@@ -6001,6 +6001,121 @@
 
         .update-pill.is-on { display: inline-flex; }
 
+        /* ---- Settings: windowed feature groups, 2026-08-19 ----
+           Deep's ask: "make each feature a windowed area so it's easier to
+           follow" -- every row used to share identical flat .settings-row
+           styling top to bottom, no grouping, no way to scan for a specific
+           feature. Extends the SAME glass-panel language .route-panel/
+           .vpn-wizard already established (A4 theme law: reuse, don't
+           invent) rather than a new visual system. */
+        .settings-quicknav {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 4px 2px 16px;
+            margin-bottom: 6px;
+            scrollbar-width: thin;
+        }
+        .settings-quicknav-btn {
+            flex: none;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 16px;
+            border-radius: 999px;
+            border: 1px solid rgba(0, 212, 255, 0.18);
+            background: rgba(0, 212, 255, 0.06);
+            color: #9fb3c0;
+            font-size: 12.5px;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: border-color .2s ease, background .2s ease, color .2s ease, box-shadow .2s ease;
+        }
+        .settings-quicknav-btn:hover, .settings-quicknav-btn:focus-visible {
+            border-color: rgba(0, 212, 255, 0.5);
+            background: rgba(0, 212, 255, 0.14);
+            color: #fff;
+            box-shadow: 0 0 16px rgba(0, 212, 255, 0.2);
+        }
+        .settings-quicknav-btn i { color: #00d4ff; font-size: 12px; }
+
+        .settings-window {
+            position: relative;
+            background: linear-gradient(180deg, rgba(20, 24, 30, 0.9), rgba(13, 16, 20, 0.92));
+            border: 1px solid rgba(0, 212, 255, 0.14);
+            border-radius: 18px;
+            padding: 26px 28px;
+            margin-bottom: 22px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 28px rgba(0, 0, 0, 0.35);
+            opacity: 0;
+            transform: translateY(16px);
+            scroll-margin-top: 90px;
+        }
+        .settings-window.settings-window-violet { border-color: rgba(157, 78, 221, 0.16); }
+        .settings-window::before {
+            /* Thin accent rule along the top edge -- the "windowed area" cue
+               Deep asked for, cheap (one pseudo-element) and reads instantly
+               as a distinct panel even at a glance/scroll. */
+            content: '';
+            position: absolute;
+            top: 0; left: 24px; right: 24px;
+            height: 2px;
+            border-radius: 2px;
+            background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+            opacity: 0.55;
+        }
+        .settings-window-violet::before { background: linear-gradient(90deg, transparent, #9d4edd, transparent); }
+
+        .settings-window-head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .settings-window-icon {
+            width: 34px; height: 34px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(0, 212, 255, 0.12);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            color: #00d4ff;
+            font-size: 15px;
+            flex: none;
+        }
+        .settings-window-violet .settings-window-icon {
+            background: rgba(157, 78, 221, 0.14);
+            border-color: rgba(157, 78, 221, 0.35);
+            color: #b98cf0;
+        }
+        .settings-window-title { font-size: 16px; font-weight: 700; color: #fff; }
+        .settings-window-desc { font-size: 12px; color: #6b7a85; margin-top: 2px; }
+        /* Rows become plain list items inside a window -- the window itself is
+           the box now, so a .settings-row keeping its own #111 card/border
+           would double-box every single feature (a window full of windows). */
+        .settings-window-body > .settings-row {
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            margin-bottom: 0;
+            padding: 18px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .settings-window-body > .settings-row:first-child { padding-top: 0; }
+        .settings-window-body > .settings-row:last-child { border-bottom: none; padding-bottom: 0; }
+        /* route-panel/vpn-wizard are already their own windowed component --
+           nesting one inside a .settings-window would double it too. */
+        .settings-window-body > .route-panel,
+        .settings-window-body > .vpn-wizard { margin-bottom: 0; }
+        .settings-window-body > .route-panel + .vpn-wizard { margin-top: 22px; }
+
+        @media (max-width: 720px) {
+            .settings-window { padding: 20px 18px; border-radius: 14px; }
+        }
+
         /* ---- Settings: traffic-route (VPN) panel ---- */
         .route-panel {
             background: #111;
@@ -8409,9 +8524,34 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     </div>
                 </div>
 
-                <!-- BUILD + UPDATE. First row on purpose: "which build am I on"
-                     and "is there a newer one" were the two questions Settings
-                     could not answer at all before this pass. -->
+                <!-- Quick-nav, 2026-08-19 windowed-Settings pass -- jumps to
+                     each window below via scrollIntoView. Same pill language
+                     as the genre-filter chips elsewhere in the app. -->
+                <div class="settings-quicknav" id="settingsQuicknav">
+                    <button class="settings-quicknav-btn" onclick="jumpToSettingsWindow('about')"><i class="fas fa-info-circle"></i> About</button>
+                    <button class="settings-quicknav-btn" onclick="jumpToSettingsWindow('appearance')"><i class="fas fa-palette"></i> Appearance</button>
+                    <button class="settings-quicknav-btn" onclick="jumpToSettingsWindow('sound')"><i class="fas fa-volume-high"></i> Sound</button>
+                    <button class="settings-quicknav-btn" onclick="jumpToSettingsWindow('subtitles')"><i class="fas fa-closed-captioning"></i> Subtitles</button>
+                    <button class="settings-quicknav-btn" onclick="jumpToSettingsWindow('sources')"><i class="fas fa-key"></i> Sources &amp; Keys</button>
+                    <button class="settings-quicknav-btn" onclick="jumpToSettingsWindow('sync')"><i class="fas fa-arrows-rotate"></i> Watch Sync</button>
+                    <button class="settings-quicknav-btn" onclick="jumpToSettingsWindow('remote')"><i class="fas fa-mobile-screen-button"></i> Remote</button>
+                    <button class="settings-quicknav-btn" onclick="jumpToSettingsWindow('addons')"><i class="fas fa-puzzle-piece"></i> Add-ons</button>
+                    <button class="settings-quicknav-btn" onclick="jumpToSettingsWindow('data')"><i class="fas fa-database"></i> Data &amp; Privacy</button>
+                    <button class="settings-quicknav-btn" onclick="jumpToSettingsWindow('vpn')"><i class="fas fa-shield-halved"></i> VPN &amp; Network</button>
+                </div>
+
+                <!-- BUILD + UPDATE. First window on purpose: "which build am I
+                     on" and "is there a newer one" were the two questions
+                     Settings could not answer at all before this pass. -->
+                <div class="settings-window" id="settingsWindow-about">
+                    <div class="settings-window-head">
+                        <div class="settings-window-icon"><i class="fas fa-info-circle"></i></div>
+                        <div>
+                            <div class="settings-window-title">About &amp; Updates</div>
+                            <div class="settings-window-desc">What build you're running, and whether a newer one exists</div>
+                        </div>
+                    </div>
+                    <div class="settings-window-body">
                 <div class="settings-row">
                     <div class="settings-row-text">
                         <h4>This Build <span class="update-pill" id="updatePill"><i class="fas fa-arrow-up"></i> Update available</span></h4>
@@ -8422,7 +8562,18 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <button class="btn btn-primary" onclick="openWhatsNew('manual')">What&rsquo;s New</button>
                     </div>
                 </div>
+                    </div>
+                </div>
 
+                <div class="settings-window settings-window-violet" id="settingsWindow-appearance">
+                    <div class="settings-window-head">
+                        <div class="settings-window-icon"><i class="fas fa-palette"></i></div>
+                        <div>
+                            <div class="settings-window-title">Appearance &amp; Home</div>
+                            <div class="settings-window-desc">Theme, floating controls, idle screensaver, and your homepage layout</div>
+                        </div>
+                    </div>
+                    <div class="settings-window-body">
                 <div class="settings-row">
                     <div class="settings-row-text">
                         <h4>Kodi Mode</h4>
@@ -8445,6 +8596,46 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     </label>
                 </div>
 
+                <!-- Ambient Mode had zero on/off surface before this audit
+                     (2026-08-19) -- the 5-min idle screensaver just always
+                     armed. Some setups (always-on dock/tablet) want it kept
+                     on; others find the screen going black unannounced. -->
+                <div class="settings-row">
+                    <div class="settings-row-text">
+                        <h4>Ambient Mode</h4>
+                        <p>After 5 minutes idle, fades in a rotating backdrop + clock screensaver. On by default -- any key, click or touch wakes it instantly.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ambientModeToggle" checked onchange="toggleAmbientMode(this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <!-- Customize Home -- 2026-08-19 extras batch, moved up here into
+                     Appearance during the windowed-Settings pass (was its own
+                     orphaned row further down). Up/down instead of drag-and-drop:
+                     this app runs on Fire TV/Google TV remotes with no pointer
+                     input, and up/down buttons are the one control scheme that
+                     works identically on phone, desktop and TV. -->
+                <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:10px;">
+                    <div class="settings-row-text">
+                        <h4>Customize Home</h4>
+                        <p>Reorder or hide the rails on your homepage. Works the same on a TV remote as a mouse.</p>
+                    </div>
+                    <div id="homeBlockCustomizeList"></div>
+                </div>
+                    </div>
+                </div>
+
+                <div class="settings-window" id="settingsWindow-sound">
+                    <div class="settings-window-head">
+                        <div class="settings-window-icon"><i class="fas fa-volume-high"></i></div>
+                        <div>
+                            <div class="settings-window-title">Sound</div>
+                            <div class="settings-window-desc">Both off by default (UI_STANDARD §7b) -- opt in per your own taste</div>
+                        </div>
+                    </div>
+                    <div class="settings-window-body">
                 <div class="settings-row">
                     <div class="settings-row-text">
                         <h4>Intro Sound</h4>
@@ -8466,6 +8657,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
+                    </div>
+                </div>
 
                 <!-- Subtitle Appearance -- 2026-08-19 extras batch. Only ::cue
                      (browser default box, sized off video height) existed
@@ -8475,11 +8668,16 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                      in this app (#dv-video) is the only local-playback path
                      that carries text tracks -- cast/iframe lanes render their
                      own subtitles remotely and are out of scope here. -->
-                <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:14px;">
-                    <div class="settings-row-text">
-                        <h4>Subtitle Appearance</h4>
-                        <p>Size, colour, background and edge style for captions -- applies live to the player. Saved on this device.</p>
+                <div class="settings-window settings-window-violet" id="settingsWindow-subtitles">
+                    <div class="settings-window-head">
+                        <div class="settings-window-icon"><i class="fas fa-closed-captioning"></i></div>
+                        <div>
+                            <div class="settings-window-title">Subtitles</div>
+                            <div class="settings-window-desc">Size, colour, background and edge style -- applies live to the player</div>
+                        </div>
                     </div>
+                    <div class="settings-window-body">
+                <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:14px;">
                     <div id="subStylePreviewWrap" style="background:#0a0e14 url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22><rect width=%2240%22 height=%2240%22 fill=%22%230d1219%22/><rect width=%2220%22 height=%2220%22 fill=%22%230f141b%22/><rect x=%2220%22 y=%2220%22 width=%2220%22 height=%2220%22 fill=%22%230f141b%22/></svg>') repeat;border-radius:10px;padding:36px 16px;text-align:center;border:1px solid #222;">
                         <span id="subStylePreviewText">The quick brown fox jumps over the lazy dog</span>
                     </div>
@@ -8519,20 +8717,18 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <button class="btn btn-secondary" onclick="resetSubtitleStyle()">Reset to Default</button>
                     </div>
                 </div>
-
-                <!-- Customize Home -- 2026-08-19 extras batch. Up/down instead
-                     of drag-and-drop: this app runs on Fire TV/Google TV
-                     remotes with no pointer input, and up/down buttons are the
-                     one control scheme that works identically on phone, desktop
-                     and TV. -->
-                <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:10px;">
-                    <div class="settings-row-text">
-                        <h4>Customize Home</h4>
-                        <p>Reorder or hide the rails on your homepage. Works the same on a TV remote as a mouse.</p>
                     </div>
-                    <div id="homeBlockCustomizeList"></div>
                 </div>
 
+                <div class="settings-window" id="settingsWindow-data">
+                    <div class="settings-window-head">
+                        <div class="settings-window-icon"><i class="fas fa-database"></i></div>
+                        <div>
+                            <div class="settings-window-title">Data &amp; Privacy</div>
+                            <div class="settings-window-desc">What Lounge measures and stores locally, and how to clear it</div>
+                        </div>
+                    </div>
+                    <div class="settings-window-body">
                 <!-- Data Usage -- 2026-08-19 extras batch. Real measurement via
                      the Resource Timing API on video segment/manifest fetches
                      that route through this browser -- not a guess. Honestly
@@ -8557,7 +8753,25 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <button class="btn btn-secondary" onclick="resetDataUsageMonth()">Reset Monthly Total</button>
                     </div>
                 </div>
+                <div class="settings-row">
+                    <div class="settings-row-text">
+                        <h4>Watch History</h4>
+                        <p>Clears your local "Continue Watching" list. This only lives in this browser/device — there's no account or cloud sync.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="clearWatchHistory()">Clear Watch History</button>
+                </div>
+                    </div>
+                </div>
 
+                <div class="settings-window" id="settingsWindow-remote">
+                    <div class="settings-window-head">
+                        <div class="settings-window-icon"><i class="fas fa-mobile-screen-button"></i></div>
+                        <div>
+                            <div class="settings-window-title">Remote Control</div>
+                            <div class="settings-window-desc">Turn your phone into a remote for playback running on your PC</div>
+                        </div>
+                    </div>
+                    <div class="settings-window-body">
                 <div class="settings-row">
                     <div class="settings-row-text">
                         <h4>Remote Control Mode</h4>
@@ -8582,15 +8796,18 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     </div>
                     <input type="password" id="remotePinInput" placeholder="5591" maxlength="8" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:120px;" onchange="saveRemotePin()">
                 </div>
-
-                <div class="settings-row">
-                    <div class="settings-row-text">
-                        <h4>VPN Setup Guide</h4>
-                        <p>Device-by-device instructions for putting Lounge's traffic behind a VPN — including which platforms can do it per-app and which can't. Informational only; nothing is installed or changed for you.</p>
                     </div>
-                    <button class="btn btn-primary" onclick="jumpToVpnWizard()">Open Guide</button>
                 </div>
 
+                <div class="settings-window settings-window-violet" id="settingsWindow-addons">
+                    <div class="settings-window-head">
+                        <div class="settings-window-icon"><i class="fas fa-puzzle-piece"></i></div>
+                        <div>
+                            <div class="settings-window-title">Add-ons</div>
+                            <div class="settings-window-desc">Companion apps Lounge links out to -- nothing installed for you</div>
+                        </div>
+                    </div>
+                    <div class="settings-window-body">
                 <!-- YouTube Ad-Free (ReVanced), added 2026-08-18. Deep asked for
                      4 items (Manager, MicroG, ReVanced YouTube, ReVanced YouTube
                      Music) -- checked against the real official ReVanced GitHub
@@ -8613,6 +8830,18 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     </div>
                 </div>
 
+                    </div>
+                </div>
+
+                <div class="settings-window" id="settingsWindow-sources">
+                    <div class="settings-window-head">
+                        <div class="settings-window-icon"><i class="fas fa-key"></i></div>
+                        <div>
+                            <div class="settings-window-title">Sources &amp; API Keys</div>
+                            <div class="settings-window-desc">What Lounge can resolve playback with, and the free keys that unlock more of it</div>
+                        </div>
+                    </div>
+                    <div class="settings-window-body">
                 <div class="settings-row">
                     <div class="settings-row-text">
                         <h4>Weather Location</h4>
@@ -8672,6 +8901,39 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     </div>
                 </div>
 
+                <div class="settings-row">
+                    <div class="settings-row-text">
+                        <h4>Groq API Key (AI Assistant)</h4>
+                        <p>From <a href="https://console.groq.com" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">console.groq.com</a> (free tier) — powers the AI Assistant chat.</p>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+                        <input type="password" id="groqKeyInput" placeholder="Groq API key" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:260px;">
+                        <button class="btn btn-primary" onclick="saveGroqKey()">Save</button>
+                    </div>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-row-text">
+                        <h4>OpenSubtitles API Key</h4>
+                        <p>From <a href="https://www.opensubtitles.com/en/consumers" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">opensubtitles.com/en/consumers</a> (free — sign up, create an API consumer) — enables real subtitle search/download for playback.</p>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+                        <input type="password" id="osubKeyInput" placeholder="OpenSubtitles API key" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:260px;">
+                        <button class="btn btn-primary" onclick="saveOsubKey()">Save</button>
+                    </div>
+                </div>
+                    </div>
+                </div>
+
+                <div class="settings-window settings-window-violet" id="settingsWindow-sync">
+                    <div class="settings-window-head">
+                        <div class="settings-window-icon"><i class="fas fa-arrows-rotate"></i></div>
+                        <div>
+                            <div class="settings-window-title">Watch Sync</div>
+                            <div class="settings-window-desc">Push watch history to a real account, viewable from any device</div>
+                        </div>
+                    </div>
+                    <div class="settings-window-body">
                 <!-- Trakt.tv sync, added 2026-08-16. API confirmed free (an
                      app registration + API key, no VIP needed) before
                      building this. Uses the device-code OAuth flow (show a
@@ -8723,35 +8985,24 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <button class="btn" id="simklDisconnectBtn" onclick="simklDisconnect()" style="display:none;">Disconnect</button>
                     </div>
                 </div>
-
-                <div class="settings-row">
-                    <div class="settings-row-text">
-                        <h4>Groq API Key (AI Assistant)</h4>
-                        <p>From <a href="https://console.groq.com" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">console.groq.com</a> (free tier) — powers the AI Assistant chat.</p>
-                    </div>
-                    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
-                        <input type="password" id="groqKeyInput" placeholder="Groq API key" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:260px;">
-                        <button class="btn btn-primary" onclick="saveGroqKey()">Save</button>
                     </div>
                 </div>
 
+                <div class="settings-window settings-window-violet" id="settingsWindow-vpn">
+                    <div class="settings-window-head">
+                        <div class="settings-window-icon"><i class="fas fa-shield-halved"></i></div>
+                        <div>
+                            <div class="settings-window-title">VPN &amp; Network</div>
+                            <div class="settings-window-desc">Where your traffic leaves from, and how to route Lounge behind a VPN per device</div>
+                        </div>
+                    </div>
+                    <div class="settings-window-body">
                 <div class="settings-row">
                     <div class="settings-row-text">
-                        <h4>OpenSubtitles API Key</h4>
-                        <p>From <a href="https://www.opensubtitles.com/en/consumers" target="_blank" onclick="return externalLinkClick(event)" style="color:#00d4ff;">opensubtitles.com/en/consumers</a> (free — sign up, create an API consumer) — enables real subtitle search/download for playback.</p>
+                        <h4>VPN Setup Guide</h4>
+                        <p>Device-by-device instructions for putting Lounge's traffic behind a VPN — including which platforms can do it per-app and which can't. Informational only; nothing is installed or changed for you.</p>
                     </div>
-                    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
-                        <input type="password" id="osubKeyInput" placeholder="OpenSubtitles API key" style="padding:10px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;width:260px;">
-                        <button class="btn btn-primary" onclick="saveOsubKey()">Save</button>
-                    </div>
-                </div>
-
-                <div class="settings-row">
-                    <div class="settings-row-text">
-                        <h4>Watch History</h4>
-                        <p>Clears your local "Continue Watching" list. This only lives in this browser/device — there's no account or cloud sync.</p>
-                    </div>
-                    <button class="btn btn-primary" onclick="clearWatchHistory()">Clear Watch History</button>
+                    <button class="btn btn-primary" onclick="jumpToVpnWizard()">Open Guide</button>
                 </div>
 
                 <!-- TRAFFIC ROUTE ("VPN status").
@@ -8855,6 +9106,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     </div>
 
                     <div class="vpn-panel" id="vpnPanel" role="tabpanel" aria-live="polite"></div>
+                </div>
+                    </div>
                 </div>
             </section>
 
@@ -11062,6 +11315,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             target.classList.add('active');
             currentSection = section;
             syncNavActive(section);
+            if (section === 'settings') animateSettingsWindowsIn();
             // The section was display:none until the line above, so this is the
             // first moment its rail has real geometry to measure. Not animated:
             // the ink should already be in place when the section paints, not
@@ -12805,6 +13059,35 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             initSubtitleStyleSettings();
             renderHomeBlockCustomizeList();
             renderDataUsagePanel();
+            const ambientToggleEl = document.getElementById('ambientModeToggle');
+            if (ambientToggleEl) ambientToggleEl.checked = localStorage.getItem('nexus_ambient_mode') !== '0';
+        }
+
+        // Quick-nav jump, 2026-08-19 windowed-Settings pass.
+        function jumpToSettingsWindow(key) {
+            const el = document.getElementById(`settingsWindow-${key}`);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Entrance stagger for the windowed Settings groups (UI_STANDARD §6:
+        // all interactive-adjacent entrances go through GSAP, not CSS-only).
+        // Guarded so it only ever plays once per page load -- initSettings()
+        // itself can re-run (e.g. after a toggle changes a value elsewhere),
+        // and re-triggering a fade-in on an already-visible panel would read
+        // as a glitch, not a reveal.
+        let settingsWindowsAnimated = false;
+        function animateSettingsWindowsIn() {
+            if (settingsWindowsAnimated) return;
+            const windows = document.querySelectorAll('#settings-section .settings-window');
+            if (!windows.length) return;
+            settingsWindowsAnimated = true;
+            if (typeof gsap === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                windows.forEach(w => { w.style.opacity = '1'; w.style.transform = 'none'; });
+                return;
+            }
+            gsap.to(windows, {
+                opacity: 1, y: 0, duration: 0.5, ease: 'power3.out', stagger: 0.06
+            });
         }
 
         // Nav drawer: the "More" dropdown on desktop and the off-canvas drawer on
@@ -12833,6 +13116,12 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             localStorage.setItem('nexus_kodi_mode', on);
         }
 
+        // Settings toggle for Ambient Mode -- see armAmbient()'s gate.
+        function toggleAmbientMode(on) {
+            localStorage.setItem('nexus_ambient_mode', on ? '1' : '0');
+            if (typeof window.rearmAmbientForToggle === 'function') window.rearmAmbientForToggle();
+        }
+
         // ===== UI micro-audio (UI_STANDARD §7b, DESIGN_DNA 21 Extras #15) =====
         // Web Audio API oscillator synth, not a sample file -- zero asset
         // download, per the spec's stated preference for stings <=1s.
@@ -12842,17 +13131,35 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // user gesture -- the toggle click itself IS that gesture.
         function uiSoundEnabled() {
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
-            return localStorage.getItem('nexus_ui_sound') === 'true';
+            try { return localStorage.getItem('nexus_ui_sound') === 'true'; }
+            catch (e) { return uiSoundMemFallback === true; } // storage blocked this session -- fall back to the in-memory toggle
         }
         function toggleUiSound(on) {
-            localStorage.setItem('nexus_ui_sound', on);
+            // 2026-08-19: Deep reported this not saving on mobile. try/catch added --
+            // Safari private-mode (and some mobile WebViews under storage pressure)
+            // throws QuotaExceededError on ANY localStorage.setItem, which would
+            // otherwise silently no-op here while the checkbox still LOOKS toggled,
+            // exactly matching his report. Surfaced via console.warn so it's
+            // debuggable instead of invisible; uiSoundMemFallback keeps the toggle
+            // functional for the rest of THIS session even if disk write is blocked.
+            try { localStorage.setItem('nexus_ui_sound', on); }
+            catch (e) { console.warn('nexus_ui_sound write failed (private mode / storage blocked?):', e); }
+            uiSoundMemFallback = on;
             if (on) playUiTone(660, 0.08); // audible confirmation the toggle itself worked
         }
+        let uiSoundMemFallback = null;
         let uiAudioCtx = null;
         function playUiTone(freq, duration) {
             if (!uiSoundEnabled()) return;
             try {
                 uiAudioCtx = uiAudioCtx || new (window.AudioContext || window.webkitAudioContext)();
+                // Real mobile bug, 2026-08-19: some mobile browsers/WebViews create a
+                // new AudioContext already 'suspended' even inside a genuine user
+                // gesture (the checkbox's onchange) -- every scheduled node below then
+                // runs silently with no audio output and no error. resume() is the
+                // documented fix; it's async but scheduling the oscillator immediately
+                // after calling it (not awaiting) is safe -- the nodes queue correctly.
+                if (uiAudioCtx.state === 'suspended') uiAudioCtx.resume().catch(() => {});
                 const osc = uiAudioCtx.createOscillator();
                 const gain = uiAudioCtx.createGain();
                 osc.type = 'sine';
@@ -12889,14 +13196,18 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // cinematic beat, not a per-click UI tone, different enough to want
         // independent control), ducks on visibilitychange.
         let loungeIntroAudioCtx = null;
+        let introSoundMemFallback = null;
         function introSoundEnabled() {
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
-            return localStorage.getItem('nexus_intro_sound') === 'true';
+            try { return localStorage.getItem('nexus_intro_sound') === 'true'; }
+            catch (e) { return introSoundMemFallback === true; }
         }
         function playIntroSting() {
             if (!introSoundEnabled()) return;
             try {
                 const ctx = loungeIntroAudioCtx = loungeIntroAudioCtx || new (window.AudioContext || window.webkitAudioContext)();
+                // Same mobile-suspended-context fix as playUiTone above.
+                if (ctx.state === 'suspended') ctx.resume().catch(() => {});
                 const now = ctx.currentTime;
                 // Rising swell -- a low sine sweeping up under the couch-mark
                 // reveal, the "curtain lifting" half of the beat.
@@ -12929,7 +13240,9 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             } catch (e) { /* Web Audio unavailable -- silently skip, never block the intro */ }
         }
         function toggleIntroSound(on) {
-            localStorage.setItem('nexus_intro_sound', on);
+            try { localStorage.setItem('nexus_intro_sound', on); }
+            catch (e) { console.warn('nexus_intro_sound write failed (private mode / storage blocked?):', e); }
+            introSoundMemFallback = on;
             if (on) playIntroSting(); // audible confirmation the toggle itself worked, same pattern as toggleUiSound
         }
         document.addEventListener('visibilitychange', () => {
@@ -13133,7 +13446,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v135';
+        const LOUNGE_BUILD = 'lounge-shell-v136';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -22574,8 +22887,16 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 ambientClockTimer = null;
             }
 
+            // Opt-out toggle, 2026-08-19 Settings audit -- Ambient Mode had no
+            // on/off surface anywhere before this; some setups (always-on
+            // dock/tablet) want it, others find a screen going black after 5
+            // idle minutes surprising. Gate at the arm step so disabling it
+            // simply means the timer never fires again -- no separate teardown
+            // path needed.
+            window.ambientModeEnabled = function () { return localStorage.getItem('nexus_ambient_mode') !== '0'; };
             function armAmbient() {
                 clearTimeout(ambientTimer);
+                if (!window.ambientModeEnabled()) return;
                 ambientTimer = setTimeout(ambientShow, AMBIENT_IDLE_MS);
             }
 
@@ -22586,6 +22907,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 }, { passive: true });
             });
             armAmbient();
+            window.rearmAmbientForToggle = armAmbient;
 
             // ---- 3. Keyboard shortcuts cheatsheet ----
             // Number-key section jumps, 2026-08-19 -- 21-extras batch, item 3.

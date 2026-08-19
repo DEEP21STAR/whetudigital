@@ -33,10 +33,23 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v135"
+      "cacheName": "lounge-shell-v136"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.30",
+      "versionCode": 28,
+      "web": "lounge-shell-v136",
+      "date": "2026-08-19",
+      "title": "Settings rebuilt as 10 windowed feature groups + 2 real bug fixes",
+      "changes": [
+        "Deep's report from mobile: Intro Sound / UI Sound Effects toggles appeared to do nothing, and UI Sound Effects didn't survive an app restart. Couldn't reproduce the persistence failure on desktop (real toggle, real reload, correctly persisted) -- the storage logic itself checked out. Hardened anyway against a real known cause: Safari private-mode (and some mobile WebViews under storage pressure) throws on localStorage.setItem, which would silently no-op while the checkbox still looked toggled -- both toggles now try/catch with an in-memory fallback so the setting stays functional for the rest of that session even if disk write is blocked, and log a console.warn instead of failing silently.",
+        "Real, higher-confidence mobile fix: some mobile browsers create a new Web Audio AudioContext already 'suspended' even inside a genuine user gesture (the checkbox's own onchange) -- every scheduled tone then plays with zero audio output and no error. Added the documented fix (ctx.resume() before scheduling) to both the UI tone and the intro sting.",
+        "Settings rebuilt from a flat, undifferentiated list of ~25 rows into 10 windowed feature groups (About & Updates, Appearance & Home, Sound, Subtitles, Data & Privacy, Remote Control, Add-ons, Sources & API Keys, Watch Sync, VPN & Network) with a quick-nav pill bar to jump straight to one. Extends the existing glass-panel language (.route-panel/.vpn-wizard) rather than inventing a new visual system -- A4 theme law.",
+        "Audit pass while rebuilding: found and fixed a real gap -- Ambient Mode (the 5-min idle screensaver) had zero on/off surface anywhere in Settings, it just always armed. Added a toggle (on by default, matches existing behaviour) gated at the idle-timer arm step."
+      ]
+    },
     {
       "version": "0.1.30",
       "versionCode": 28,
