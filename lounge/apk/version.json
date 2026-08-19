@@ -33,10 +33,24 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v134"
+      "cacheName": "lounge-shell-v135"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.30",
+      "versionCode": 28,
+      "web": "lounge-shell-v135",
+      "date": "2026-08-19",
+      "title": "4 leveled-up extras: Subtitle Appearance, Voice Search, Customize Home, Because You Watched + Data Usage",
+      "changes": [
+        "Subtitle Appearance (Settings): real per-viewer control over caption size/colour/background/edge/font, applied live via a dynamically-injected ::cue stylesheet (::cue rules can't be set through inline element style) with a live preview swatch.",
+        "Voice Search: mic button on the search box using the Web Speech API, hidden entirely on browsers without it (Firefox) rather than showing a control that errors on click. Says 'play <title>' to jump straight to that title's detail page when exactly one strong match comes back; anything else is a plain search.",
+        "Customize Home (Settings): reorder or hide the Continue Watching / For You / Because You Watched / Trending & Discover rails. Up/down buttons instead of drag-and-drop on purpose -- this app runs on Fire TV/Google TV remotes with no pointer input, so buttons are the one control scheme that works identically everywhere it actually runs.",
+        "Because You Watched: new homepage rail, deliberately seeded from Continue Watching (titles actively being watched) rather than For You's watchlist seed (titles saved for later) so the two rails don't duplicate each other. Skips For You's seed if they'd otherwise coincide. Hidden entirely, not shown empty, when there's no distinct seed.",
+        "Data Usage (Settings): real measurement via the PerformanceObserver Resource Timing API on video segment/manifest fetches, not an estimate -- session total + a persisted rolling monthly total with a reset button. Honestly can't see Chromecast or embedded-iframe playback bytes (never touch this page's own network stack) and says so in the UI."
+      ]
+    },
     {
       "version": "0.1.30",
       "versionCode": 28,

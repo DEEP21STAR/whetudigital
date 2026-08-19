@@ -841,13 +841,64 @@
 
         .search-box input {
             width: 100%;
-            padding: 9px 14px 9px 36px;
+            padding: 9px 34px 9px 36px;
             background: #141414;
             border: 1px solid #2a2a2a;
             border-radius: 8px;
             color: #fff;
             font-size: 13px;
             outline: none;
+        }
+
+        .voice-search-btn {
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: #8a8a8a;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            transition: color .2s ease, background .2s ease;
+        }
+        .voice-search-btn:hover { color: #00d4ff; background: rgba(0, 212, 255, 0.12); }
+        .voice-search-btn.listening {
+            color: #ff006e;
+            background: rgba(255, 0, 110, 0.15);
+            animation: voiceListenPulse 1.2s ease-in-out infinite;
+        }
+        @keyframes voiceListenPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 0, 110, 0.45); }
+            50% { box-shadow: 0 0 0 8px rgba(255, 0, 110, 0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .voice-search-btn.listening { animation: none; }
+        }
+        /* Customize Home block reordering -- home-block wrappers are plain
+           containers, appendChild-moved by applyHomeBlockOrder(), never
+           re-rendered. */
+        .home-block-hidden { display: none !important; }
+
+        .voice-search-transcript {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: #141414;
+            border: 1px solid rgba(0, 212, 255, 0.35);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: #00d4ff;
+            z-index: 50;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
         }
 
         .search-box input:focus {
@@ -7515,6 +7566,14 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             <div class="search-box">
                 <i class="fas fa-search"></i>
                 <input type="text" placeholder="Search…" id="searchInput" aria-label="Search movies, shows, anime and channels" oninput="handleSearchInput()">
+                <!-- Voice search, 2026-08-19 extras batch. Web Speech API,
+                     hidden entirely if unsupported (Firefox has none) rather
+                     than showing a button that errors on click. -->
+                <button type="button" id="voiceSearchBtn" class="voice-search-btn" style="display:none;"
+                    onclick="toggleVoiceSearch()" title="Voice search" aria-label="Search by voice">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <div id="voiceSearchTranscript" class="voice-search-transcript" style="display:none;" aria-live="polite"></div>
             </div>
             <!-- Command palette trigger + discoverability hint (2026-08-17) --
                  Ctrl+K works from anywhere already; this chip is the visible
@@ -7846,6 +7905,14 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     </div>
                 </div>
 
+                <!-- Customize Home, 2026-08-19 extras batch: these 3 blocks
+                     are reorderable/hideable via Settings (applyHomeBlockOrder()
+                     moves the actual elements, doesn't re-render). Up/down
+                     buttons rather than drag-and-drop -- this app runs on
+                     Fire TV/Google TV remotes where drag has no input path,
+                     so buttons are the one control scheme that works everywhere
+                     this actually runs. -->
+                <div class="home-block" id="homeBlock-continueWatching" data-home-block="continueWatching">
                 <div class="section-header" id="continueWatchingHeader" style="display:none;">
                     <div class="section-title">
                         <i class="fas fa-history"></i> Continue Watching
@@ -7855,6 +7922,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     <button class="rail-arrow rail-arrow-prev" onclick="railScroll('continueWatchingGrid',-1)" aria-label="Scroll left"><i class="fas fa-chevron-left"></i></button>
                     <div class="content-grid content-rail" id="continueWatchingGrid"></div>
                     <button class="rail-arrow rail-arrow-next" onclick="railScroll('continueWatchingGrid',1)" aria-label="Scroll right"><i class="fas fa-chevron-right"></i></button>
+                </div>
                 </div>
 
                 <!-- For You, 2026-08-18 (DESIGN_DNA elevation ask, Medium tier).
@@ -7866,6 +7934,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                      custom scoring model, one seed, one honest label. Hidden
                      entirely (not a fake/empty row) when there's no seed yet
                      or TMDB returns nothing for it. -->
+                <div class="home-block" id="homeBlock-forYou" data-home-block="forYou">
                 <div class="section-header" id="forYouHeader" style="display:none;">
                     <div class="section-title" id="forYouTitle">
                         <i class="fas fa-wand-magic-sparkles"></i> For You
@@ -7875,6 +7944,24 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     <button class="rail-arrow rail-arrow-prev" onclick="railScroll('forYouGrid',-1)" aria-label="Scroll left"><i class="fas fa-chevron-left"></i></button>
                     <div class="content-grid content-rail" id="forYouGrid"></div>
                     <button class="rail-arrow rail-arrow-next" onclick="railScroll('forYouGrid',1)" aria-label="Scroll right"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                </div>
+
+                <!-- Because You Watched, 2026-08-19 extras batch -- see
+                     renderBecauseYouWatched(). Separate seed source from For
+                     You (most recent Continue Watching entry, not watchlist),
+                     so the two rails don't just duplicate each other. -->
+                <div class="home-block" id="homeBlock-becauseYouWatched" data-home-block="becauseYouWatched">
+                <div class="section-header" id="becauseYouWatchedHeader" style="display:none;">
+                    <div class="section-title" id="becauseYouWatchedTitle">
+                        <i class="fas fa-clapperboard"></i> Because You Watched
+                    </div>
+                </div>
+                <div class="rail-wrap" id="becauseYouWatchedWrap" style="display:none;">
+                    <button class="rail-arrow rail-arrow-prev" onclick="railScroll('becauseYouWatchedGrid',-1)" aria-label="Scroll left"><i class="fas fa-chevron-left"></i></button>
+                    <div class="content-grid content-rail" id="becauseYouWatchedGrid"></div>
+                    <button class="rail-arrow rail-arrow-next" onclick="railScroll('becauseYouWatchedGrid',1)" aria-label="Scroll right"><i class="fas fa-chevron-right"></i></button>
+                </div>
                 </div>
 
                 <!-- Trending, rebuilt 2026-08-17 to match the Movies section's
@@ -7888,6 +7975,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                      discover endpoint has no mixed-media equivalent for
                      Popular/Top Rated/etc, so those modes don't exist here
                      (see RAIL_CONFIG.home). -->
+                <div class="home-block" id="homeBlock-discover" data-home-block="discover">
                 <div class="genre-rails" id="genreRails-home"></div>
                 <div class="drail" id="drail-home"></div>
                 <div class="section-header">
@@ -7900,6 +7988,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 </div>
                 <div style="text-align:center;margin:10px 0 26px;">
                     <button id="homeLoadMoreBtn" class="btn btn-secondary neon-actionable" onclick="loadMoreHomeTrending()" style="display:none;">Load More</button>
+                </div>
                 </div>
             </section>
 
@@ -8376,6 +8465,97 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <input type="checkbox" id="uiSoundToggle" onchange="toggleUiSound(this.checked)">
                         <span class="toggle-slider"></span>
                     </label>
+                </div>
+
+                <!-- Subtitle Appearance -- 2026-08-19 extras batch. Only ::cue
+                     (browser default box, sized off video height) existed
+                     before; this gives real per-viewer control, applied via a
+                     dynamically-injected <style> tag since ::cue rules cannot
+                     be set through inline element style. Single video element
+                     in this app (#dv-video) is the only local-playback path
+                     that carries text tracks -- cast/iframe lanes render their
+                     own subtitles remotely and are out of scope here. -->
+                <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:14px;">
+                    <div class="settings-row-text">
+                        <h4>Subtitle Appearance</h4>
+                        <p>Size, colour, background and edge style for captions -- applies live to the player. Saved on this device.</p>
+                    </div>
+                    <div id="subStylePreviewWrap" style="background:#0a0e14 url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22><rect width=%2240%22 height=%2240%22 fill=%22%230d1219%22/><rect width=%2220%22 height=%2220%22 fill=%22%230f141b%22/><rect x=%2220%22 y=%2220%22 width=%2220%22 height=%2220%22 fill=%22%230f141b%22/></svg>') repeat;border-radius:10px;padding:36px 16px;text-align:center;border:1px solid #222;">
+                        <span id="subStylePreviewText">The quick brown fox jumps over the lazy dog</span>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:18px;">
+                        <div>
+                            <div style="font-size:12px;opacity:0.65;margin-bottom:6px;">Size</div>
+                            <div id="subStyleSizeGroup" style="display:flex;gap:6px;"></div>
+                        </div>
+                        <div>
+                            <div style="font-size:12px;opacity:0.65;margin-bottom:6px;">Colour</div>
+                            <div id="subStyleColorGroup" style="display:flex;gap:6px;align-items:center;"></div>
+                        </div>
+                        <div>
+                            <div style="font-size:12px;opacity:0.65;margin-bottom:6px;">Background</div>
+                            <input type="range" id="subStyleBgSlider" min="0" max="100" value="0" style="width:120px;vertical-align:middle;" oninput="onSubtitleStyleChange()">
+                            <span id="subStyleBgPct" style="font-size:12px;opacity:0.7;">0%</span>
+                        </div>
+                        <div>
+                            <div style="font-size:12px;opacity:0.65;margin-bottom:6px;">Edge</div>
+                            <select id="subStyleEdgeSelect" onchange="onSubtitleStyleChange()" style="padding:8px 10px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;">
+                                <option value="shadow">Drop shadow (default)</option>
+                                <option value="outline">Outline</option>
+                                <option value="none">None</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div style="font-size:12px;opacity:0.65;margin-bottom:6px;">Font</div>
+                            <select id="subStyleFontSelect" onchange="onSubtitleStyleChange()" style="padding:8px 10px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;">
+                                <option value="default">Default</option>
+                                <option value="serif">Serif</option>
+                                <option value="sans">Sans</option>
+                                <option value="mono">Monospace</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn btn-secondary" onclick="resetSubtitleStyle()">Reset to Default</button>
+                    </div>
+                </div>
+
+                <!-- Customize Home -- 2026-08-19 extras batch. Up/down instead
+                     of drag-and-drop: this app runs on Fire TV/Google TV
+                     remotes with no pointer input, and up/down buttons are the
+                     one control scheme that works identically on phone, desktop
+                     and TV. -->
+                <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:10px;">
+                    <div class="settings-row-text">
+                        <h4>Customize Home</h4>
+                        <p>Reorder or hide the rails on your homepage. Works the same on a TV remote as a mouse.</p>
+                    </div>
+                    <div id="homeBlockCustomizeList"></div>
+                </div>
+
+                <!-- Data Usage -- 2026-08-19 extras batch. Real measurement via
+                     the Resource Timing API on video segment/manifest fetches
+                     that route through this browser -- not a guess. Honestly
+                     can't see Chromecast or embedded-iframe playback bytes
+                     (those never touch this page's own network stack), says so. -->
+                <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:10px;">
+                    <div class="settings-row-text">
+                        <h4>Data Usage</h4>
+                        <p>Video data transferred through this browser tab. Useful on a metered connection. Doesn't see Chromecast or embedded-player playback -- those bytes never pass through this page.</p>
+                    </div>
+                    <div style="display:flex;gap:24px;flex-wrap:wrap;">
+                        <div>
+                            <div style="font-size:12px;opacity:0.65;">This session</div>
+                            <div id="dataUsageSession" style="font-size:20px;font-weight:700;color:#00d4ff;">0 B</div>
+                        </div>
+                        <div>
+                            <div style="font-size:12px;opacity:0.65;" id="dataUsageMonthLabel">This month</div>
+                            <div id="dataUsageMonth" style="font-size:20px;font-weight:700;color:#9d4edd;">0 B</div>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn btn-secondary" onclick="resetDataUsageMonth()">Reset Monthly Total</button>
+                    </div>
                 </div>
 
                 <div class="settings-row">
@@ -10118,11 +10298,15 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             populateLibrary();
             populateScrapers();
             initSettings();
+            initVoiceSearch();
+            initDataUsageTracking();
             initVpnWizard();
             initTrafficRoute();
             initUpdates();
             populateContinueWatching();
             populateForYou();
+            renderBecauseYouWatched();
+            initHomeBlockCustomize();
             // Paints from localStorage first (above), then reconciles with
             // whatever the phone/TV recorded while this device wasn't watching.
             startReelSync();
@@ -12617,6 +12801,10 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // (which sits at z-index 99999, above the gate's 5000) and always
             // reads as one continuous cinematic sequence, not two screens
             // fighting for the same moment.
+
+            initSubtitleStyleSettings();
+            renderHomeBlockCustomizeList();
+            renderDataUsagePanel();
         }
 
         // Nav drawer: the "More" dropdown on desktop and the off-canvas drawer on
@@ -12945,7 +13133,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v134';
+        const LOUNGE_BUILD = 'lounge-shell-v135';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -15056,6 +15244,90 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             }
         }
 
+        // ===== VOICE SEARCH, 2026-08-19 extras batch =====
+        // Web Speech API, zero deps, same pattern as the existing UI-sound
+        // Web Audio code: feature-detect, hide entirely if unsupported rather
+        // than showing a control that errors on click (Firefox has no
+        // SpeechRecognition at all as of this build).
+        const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let voiceRecognition = null;
+        let voiceListening = false;
+        // Set by a "play X" transcript so the search results handler can
+        // auto-open a single strong match; cleared after use or after 10s so
+        // a stale intent can never fire on a later, unrelated typed search.
+        let voiceSearchIntent = null;
+
+        function initVoiceSearch() {
+            const btn = document.getElementById('voiceSearchBtn');
+            if (!SpeechRecognitionCtor || !btn) return; // stays hidden -- no error state to design for
+            btn.style.display = 'flex';
+        }
+
+        function toggleVoiceSearch() {
+            if (voiceListening) { stopVoiceSearch(); return; }
+            startVoiceSearch();
+        }
+
+        function startVoiceSearch() {
+            if (!SpeechRecognitionCtor) return;
+            const btn = document.getElementById('voiceSearchBtn');
+            const transcriptEl = document.getElementById('voiceSearchTranscript');
+            try {
+                voiceRecognition = new SpeechRecognitionCtor();
+                voiceRecognition.lang = 'en-NZ';
+                voiceRecognition.interimResults = true;
+                voiceRecognition.maxAlternatives = 1;
+            } catch (e) { console.warn('voice search init failed:', e); return; }
+
+            voiceListening = true;
+            btn.classList.add('listening');
+            transcriptEl.style.display = 'block';
+            transcriptEl.textContent = 'Listening…';
+            playUiTone(720, 0.08);
+
+            voiceRecognition.onresult = (ev) => {
+                let interim = '', final = '';
+                for (let i = ev.resultIndex; i < ev.results.length; i++) {
+                    const t = ev.results[i][0].transcript;
+                    if (ev.results[i].isFinal) final += t; else interim += t;
+                }
+                transcriptEl.textContent = (final || interim) || 'Listening…';
+                if (final.trim()) applyVoiceTranscript(final.trim());
+            };
+            voiceRecognition.onerror = (ev) => {
+                transcriptEl.textContent = ev.error === 'no-speech' ? 'Didn’t catch that — try again.' : 'Voice search unavailable right now.';
+                setTimeout(() => stopVoiceSearch(true), 1400);
+            };
+            voiceRecognition.onend = () => stopVoiceSearch(true);
+
+            try { voiceRecognition.start(); } catch (e) { stopVoiceSearch(true); }
+        }
+
+        function stopVoiceSearch(fromEngine) {
+            if (!fromEngine && voiceRecognition) { try { voiceRecognition.stop(); } catch (e) { /* already stopped */ } }
+            voiceListening = false;
+            const btn = document.getElementById('voiceSearchBtn');
+            if (btn) btn.classList.remove('listening');
+            playUiTone(480, 0.06);
+            setTimeout(() => {
+                const t = document.getElementById('voiceSearchTranscript');
+                if (t && !voiceListening) t.style.display = 'none';
+            }, 1600);
+        }
+
+        // "Play arsenal vs chelsea" / "play the matrix" jumps straight to
+        // that title's detail page if exactly one strong match comes back
+        // (see the auto-navigate check in searchTmdb). Anything else is a
+        // plain search, same as typing it.
+        function applyVoiceTranscript(transcript) {
+            const playMatch = /^\s*play\s+(.+)/i.exec(transcript);
+            const query = playMatch ? playMatch[1].trim() : transcript;
+            voiceSearchIntent = playMatch ? { mode: 'play', ts: Date.now() } : null;
+            const input = document.getElementById('searchInput');
+            input.value = query;
+            handleSearchInput();
+        }
+
         function handleSearchInput() {
             const query = document.getElementById('searchInput').value.trim();
             searchLastQuery = query;
@@ -15154,6 +15426,12 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 total += renderSearchChannels(query);
 
                 updateSearchStates(total, false, query);
+
+                if (voiceSearchIntent && voiceSearchIntent.mode === 'play' && Date.now() - voiceSearchIntent.ts < 10000) {
+                    const allMatches = [...groups.movie, ...groups.tv, ...groups.anime, ...groups.bollywood];
+                    if (allMatches.length === 1 && allMatches[0].__cardId) openDetail(allMatches[0].__cardId);
+                    voiceSearchIntent = null;
+                }
             } catch (e) {
                 // Silent failure was the old behaviour here -- a failed TMDB call left
                 // the user staring at a blank grid with no explanation. Say so instead.
@@ -15664,6 +15942,115 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // is already the most recently added title.
             const seed = withId[0];
             return { tmdbId: seed.tmdbId, type: seed.type === 'tv' ? 'tv' : 'movie', title: seed.title };
+        }
+
+        // ===== BECAUSE YOU WATCHED, 2026-08-19 extras batch =====
+        // Deliberately a different seed source from For You (watchlist =
+        // "saved for later"): this one comes from Continue Watching, i.e.
+        // titles actually being watched right now. Skips whichever entry
+        // For You already used as its seed so the two rails don't render
+        // identical recommendation lists under different headings.
+        function pickBecauseYouWatchedSeed(excludeSeed) {
+            const cw = readContinueWatching();
+            const withId = cw.filter(e => e.tmdbId);
+            for (const e of withId) {
+                const type = e.type === 'tv' ? 'tv' : 'movie';
+                if (excludeSeed && e.tmdbId === excludeSeed.tmdbId && type === excludeSeed.type) continue;
+                return { tmdbId: e.tmdbId, type, title: e.title };
+            }
+            return null;
+        }
+
+        async function renderBecauseYouWatched() {
+            const header = document.getElementById('becauseYouWatchedHeader');
+            const wrap = document.getElementById('becauseYouWatchedWrap');
+            const grid = document.getElementById('becauseYouWatchedGrid');
+            if (!header || !wrap || !grid) return;
+
+            const key = localStorage.getItem('nexus_tmdb_key');
+            const seed = pickBecauseYouWatchedSeed(pickForYouSeed());
+            if (!seed || !key) { header.style.display = 'none'; wrap.style.display = 'none'; return; }
+
+            let items = [];
+            try {
+                const data = await tmdbFetch(`${seed.type}/${seed.tmdbId}/recommendations`, {}, key);
+                items = tmdbResultsToItems(data.results, seed.type, 20);
+            } catch (e) {
+                console.warn('renderBecauseYouWatched failed:', e);
+            }
+            if (!items.length) { header.style.display = 'none'; wrap.style.display = 'none'; return; }
+
+            document.getElementById('becauseYouWatchedTitle').innerHTML =
+                `<i class="fas fa-clapperboard"></i> Because You Watched <span style="color:#00d4ff;">${escapeHtml(seed.title)}</span>`;
+            header.style.display = '';
+            wrap.style.display = '';
+            renderGrid('becauseYouWatchedGrid', items);
+        }
+
+        // ===== DATA USAGE PANEL, 2026-08-19 extras batch =====
+        // Real measurement, not an estimate: PerformanceObserver on the
+        // 'resource' timing entries this page's own fetches generate,
+        // filtered to the URL shapes video segments/manifests actually use
+        // in this app. Same-origin proxied fetches (e.g. the Sky Sport
+        // /api/lounge/skysegment proxy) report a real transferSize; a
+        // handful of cross-origin paths without CORS timing exposure would
+        // report 0 and are silently skipped rather than guessed at.
+        const DATA_USAGE_URL_MATCH = /skysegment|\.m3u8(\?|$)|\.ts(\?|$)|r2\.cloudflarestorage|vidking\.net/i;
+        let dataUsageSessionBytes = 0;
+
+        function dataUsageMonthKey() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        }
+
+        function loadDataUsageMonth() {
+            try {
+                const v = JSON.parse(localStorage.getItem('nexus_data_usage_month') || '{}');
+                if (v.ym === dataUsageMonthKey()) return v;
+            } catch (e) { /* corrupt -- roll over to a fresh month below */ }
+            return { ym: dataUsageMonthKey(), bytes: 0 };
+        }
+
+        function formatDataUsageBytes(n) {
+            if (n < 1024) return Math.round(n) + ' B';
+            if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+            if (n < 1024 * 1024 * 1024) return (n / 1024 / 1024).toFixed(1) + ' MB';
+            return (n / 1024 / 1024 / 1024).toFixed(2) + ' GB';
+        }
+
+        function renderDataUsagePanel() {
+            const sessEl = document.getElementById('dataUsageSession');
+            const monthEl = document.getElementById('dataUsageMonth');
+            if (sessEl) sessEl.textContent = formatDataUsageBytes(dataUsageSessionBytes);
+            if (monthEl) monthEl.textContent = formatDataUsageBytes(loadDataUsageMonth().bytes);
+        }
+
+        function addDataUsageBytes(n) {
+            if (!n || n <= 0) return;
+            dataUsageSessionBytes += n;
+            const m = loadDataUsageMonth();
+            m.bytes += n;
+            localStorage.setItem('nexus_data_usage_month', JSON.stringify(m));
+            renderDataUsagePanel();
+        }
+
+        function resetDataUsageMonth() {
+            localStorage.setItem('nexus_data_usage_month', JSON.stringify({ ym: dataUsageMonthKey(), bytes: 0 }));
+            renderDataUsagePanel();
+        }
+
+        function initDataUsageTracking() {
+            if (!('PerformanceObserver' in window)) return; // panel still shows the persisted monthly total, just won't update live
+            try {
+                const obs = new PerformanceObserver((list) => {
+                    list.getEntries().forEach(e => {
+                        if (!DATA_USAGE_URL_MATCH.test(e.name)) return;
+                        const bytes = e.transferSize || e.encodedBodySize || 0;
+                        if (bytes > 0) addDataUsageBytes(bytes);
+                    });
+                });
+                obs.observe({ type: 'resource', buffered: true });
+            } catch (e) { console.warn('data usage tracking init failed:', e); }
         }
 
         async function populateForYou() {
@@ -17983,6 +18370,225 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // Subtitle files are frequently not UTF-8 (cp1252/latin-1 is common on
         // older uploads). Decoding those as UTF-8 produces U+FFFD confetti
         // through every accented character, so a lossy first pass is retried.
+        // ===== SUBTITLE APPEARANCE, 2026-08-19 extras batch =====
+        // ::cue rules can only live in a real stylesheet, never inline on the
+        // video element -- so a live style change means rewriting a <style>
+        // tag's text, not touching element.style. One video element in this
+        // app (#dv-video) carries text tracks; cast/iframe playback renders
+        // subtitles remotely and is untouched by this.
+        const SUBTITLE_STYLE_DEFAULTS = { size: 'm', color: '#ffffff', bg: 0, edge: 'shadow', font: 'default' };
+        const SUB_SIZE_EM = { s: 0.65, m: 0.8, l: 1.05, xl: 1.35 };
+        const SUB_FONT_STACK = {
+            default: 'inherit',
+            serif: 'Georgia, "Times New Roman", serif',
+            sans: '"Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+            mono: '"Consolas", "SF Mono", Menlo, monospace'
+        };
+        const SUB_COLOR_SWATCHES = ['#ffffff', '#ffd166', '#00d4ff', '#9d4edd', '#7cff8a'];
+
+        function getSubtitleStyle() {
+            try {
+                return { ...SUBTITLE_STYLE_DEFAULTS, ...JSON.parse(localStorage.getItem('nexus_subtitle_style') || '{}') };
+            } catch (e) { return { ...SUBTITLE_STYLE_DEFAULTS }; }
+        }
+
+        function subtitleStyleCss(s) {
+            const sizeEm = SUB_SIZE_EM[s.size] || SUB_SIZE_EM.m;
+            const fontFamily = SUB_FONT_STACK[s.font] || SUB_FONT_STACK.default;
+            const bgAlpha = Math.max(0, Math.min(100, Number(s.bg) || 0)) / 100;
+            const bg = bgAlpha > 0 ? `rgba(0,0,0,${bgAlpha.toFixed(2)})` : 'transparent';
+            let edgeCss = 'none';
+            if (s.edge === 'shadow') edgeCss = '0 2px 5px rgba(0,0,0,0.95), 0 0 14px rgba(0,0,0,0.85)';
+            else if (s.edge === 'outline') {
+                edgeCss = [-1, 0, 1].flatMap(x => [-1, 0, 1].map(y => `${x}px ${y}px 0 rgba(0,0,0,0.9)`)).filter(v => v).join(', ');
+            }
+            return `#dv-video::cue {
+                background: ${bg};
+                color: ${s.color || '#ffffff'};
+                font-size: ${sizeEm}em;
+                line-height: 1.35;
+                font-family: ${fontFamily};
+                ${bgAlpha > 0 ? 'padding: 0.1em 0.35em; border-radius: 4px;' : ''}
+                text-shadow: ${edgeCss};
+            }`;
+        }
+
+        function applySubtitleStyle() {
+            const s = getSubtitleStyle();
+            let tag = document.getElementById('dynamicSubtitleStyleTag');
+            if (!tag) {
+                tag = document.createElement('style');
+                tag.id = 'dynamicSubtitleStyleTag';
+                document.head.appendChild(tag);
+            }
+            tag.textContent = subtitleStyleCss(s);
+            const preview = document.getElementById('subStylePreviewText');
+            if (preview) {
+                const sizeEm = SUB_SIZE_EM[s.size] || SUB_SIZE_EM.m;
+                preview.style.fontSize = (sizeEm * 1.9) + 'em';
+                preview.style.color = s.color || '#ffffff';
+                preview.style.fontFamily = SUB_FONT_STACK[s.font] || 'inherit';
+                const bgAlpha = Math.max(0, Math.min(100, Number(s.bg) || 0)) / 100;
+                preview.style.background = bgAlpha > 0 ? `rgba(0,0,0,${bgAlpha.toFixed(2)})` : 'transparent';
+                preview.style.padding = bgAlpha > 0 ? '0.1em 0.35em' : '0';
+                preview.style.borderRadius = '4px';
+                preview.style.textShadow = s.edge === 'shadow' ? '0 2px 5px rgba(0,0,0,0.95), 0 0 14px rgba(0,0,0,0.85)'
+                    : s.edge === 'outline' ? '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000'
+                    : 'none';
+            }
+        }
+
+        function renderSubtitleStyleControls() {
+            const s = getSubtitleStyle();
+            const sizeGroup = document.getElementById('subStyleSizeGroup');
+            if (sizeGroup) {
+                sizeGroup.innerHTML = ['s', 'm', 'l', 'xl'].map(sz => `
+                    <button type="button" class="btn ${s.size === sz ? 'btn-primary' : 'btn-secondary'}"
+                        style="padding:6px 12px;font-size:12px;" data-sub-size="${sz}"
+                        onclick="setSubtitleStyleField('size','${sz}')">${sz.toUpperCase()}</button>
+                `).join('');
+            }
+            const colorGroup = document.getElementById('subStyleColorGroup');
+            if (colorGroup) {
+                colorGroup.innerHTML = SUB_COLOR_SWATCHES.map(c => `
+                    <button type="button" title="${c}" data-sub-color="${c}" onclick="setSubtitleStyleField('color','${c}')"
+                        style="width:26px;height:26px;border-radius:50%;background:${c};cursor:pointer;
+                        border:2px solid ${s.color === c ? '#00d4ff' : 'transparent'};box-shadow:0 0 0 1px #000 inset;"></button>
+                `).join('') + `
+                    <input type="color" id="subStyleCustomColor" value="${s.color || '#ffffff'}"
+                        onchange="setSubtitleStyleField('color', this.value)"
+                        style="width:28px;height:28px;padding:0;border:none;border-radius:6px;background:none;cursor:pointer;" title="Custom colour">`;
+            }
+            const bgSlider = document.getElementById('subStyleBgSlider');
+            if (bgSlider) bgSlider.value = s.bg;
+            const bgPct = document.getElementById('subStyleBgPct');
+            if (bgPct) bgPct.textContent = s.bg + '%';
+            const edgeSel = document.getElementById('subStyleEdgeSelect');
+            if (edgeSel) edgeSel.value = s.edge;
+            const fontSel = document.getElementById('subStyleFontSelect');
+            if (fontSel) fontSel.value = s.font;
+        }
+
+        function setSubtitleStyleField(field, value) {
+            const s = getSubtitleStyle();
+            s[field] = value;
+            localStorage.setItem('nexus_subtitle_style', JSON.stringify(s));
+            renderSubtitleStyleControls();
+            applySubtitleStyle();
+        }
+
+        // Reads every control at once -- used by the slider/select onchange
+        // handlers where re-deriving a single field from the DOM is simpler
+        // than threading the new value through per-control like the buttons do.
+        function onSubtitleStyleChange() {
+            const s = {
+                size: getSubtitleStyle().size,
+                color: getSubtitleStyle().color,
+                bg: Number(document.getElementById('subStyleBgSlider').value) || 0,
+                edge: document.getElementById('subStyleEdgeSelect').value,
+                font: document.getElementById('subStyleFontSelect').value
+            };
+            localStorage.setItem('nexus_subtitle_style', JSON.stringify(s));
+            renderSubtitleStyleControls();
+            applySubtitleStyle();
+        }
+
+        function resetSubtitleStyle() {
+            localStorage.removeItem('nexus_subtitle_style');
+            renderSubtitleStyleControls();
+            applySubtitleStyle();
+        }
+
+        function initSubtitleStyleSettings() {
+            renderSubtitleStyleControls();
+            applySubtitleStyle();
+        }
+
+        // ===== CUSTOMIZE HOME (reorder/hide rails), 2026-08-19 extras batch =====
+        const HOME_BLOCK_LABELS = {
+            continueWatching: { icon: 'fa-history', label: 'Continue Watching' },
+            forYou: { icon: 'fa-wand-magic-sparkles', label: 'For You' },
+            becauseYouWatched: { icon: 'fa-clapperboard', label: 'Because You Watched' },
+            discover: { icon: 'fa-fire', label: 'Trending & Discover' }
+        };
+        const HOME_BLOCK_DEFAULT_ORDER = ['continueWatching', 'forYou', 'becauseYouWatched', 'discover'];
+
+        function getHomeBlockConfig() {
+            let saved = [];
+            try { saved = JSON.parse(localStorage.getItem('nexus_home_block_order') || '[]'); } catch (e) { /* corrupt -- rebuild from defaults */ }
+            const known = new Set(HOME_BLOCK_DEFAULT_ORDER);
+            // Drop any id from a since-removed block, then append any new
+            // block id (e.g. this update's own "becauseYouWatched") that an
+            // existing save predates -- always visible by default, at the end.
+            const cfg = saved.filter(e => known.has(e.id));
+            const present = new Set(cfg.map(e => e.id));
+            HOME_BLOCK_DEFAULT_ORDER.forEach(id => { if (!present.has(id)) cfg.push({ id, visible: true }); });
+            return cfg;
+        }
+
+        function saveHomeBlockConfig(cfg) {
+            localStorage.setItem('nexus_home_block_order', JSON.stringify(cfg));
+        }
+
+        function applyHomeBlockOrder() {
+            const cfg = getHomeBlockConfig();
+            const home = document.getElementById('home-section');
+            if (!home) return;
+            cfg.forEach(entry => {
+                const el = document.getElementById(`homeBlock-${entry.id}`);
+                if (!el) return;
+                home.appendChild(el); // appendChild on an existing node MOVES it -- this is what establishes the order
+                el.classList.toggle('home-block-hidden', entry.visible === false);
+            });
+        }
+
+        function moveHomeBlock(id, dir) {
+            const cfg = getHomeBlockConfig();
+            const i = cfg.findIndex(e => e.id === id);
+            const j = i + dir;
+            if (i < 0 || j < 0 || j >= cfg.length) return;
+            [cfg[i], cfg[j]] = [cfg[j], cfg[i]];
+            saveHomeBlockConfig(cfg);
+            applyHomeBlockOrder();
+            renderHomeBlockCustomizeList();
+        }
+
+        function toggleHomeBlockVisibility(id, visible) {
+            const cfg = getHomeBlockConfig();
+            const e = cfg.find(x => x.id === id);
+            if (e) e.visible = visible;
+            saveHomeBlockConfig(cfg);
+            applyHomeBlockOrder();
+        }
+
+        function renderHomeBlockCustomizeList() {
+            const wrap = document.getElementById('homeBlockCustomizeList');
+            if (!wrap) return;
+            const cfg = getHomeBlockConfig();
+            wrap.innerHTML = cfg.map((entry, idx) => {
+                const meta = HOME_BLOCK_LABELS[entry.id] || { icon: 'fa-layer-group', label: entry.id };
+                const visible = entry.visible !== false;
+                return `
+                <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:#141414;border:1px solid #222;border-radius:8px;${visible ? '' : 'opacity:0.55;'}">
+                    <i class="fas ${meta.icon}" style="width:18px;text-align:center;color:#00d4ff;"></i>
+                    <span style="flex:1;font-size:13px;">${meta.label}</span>
+                    <button type="button" class="btn btn-secondary" style="padding:4px 9px;" title="Move up"
+                        onclick="moveHomeBlock('${entry.id}',-1)" ${idx === 0 ? 'disabled' : ''}><i class="fas fa-chevron-up"></i></button>
+                    <button type="button" class="btn btn-secondary" style="padding:4px 9px;" title="Move down"
+                        onclick="moveHomeBlock('${entry.id}',1)" ${idx === cfg.length - 1 ? 'disabled' : ''}><i class="fas fa-chevron-down"></i></button>
+                    <label class="toggle-switch" title="${visible ? 'Hide' : 'Show'} this rail">
+                        <input type="checkbox" ${visible ? 'checked' : ''} onchange="toggleHomeBlockVisibility('${entry.id}', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>`;
+            }).join('');
+        }
+
+        function initHomeBlockCustomize() {
+            renderHomeBlockCustomizeList();
+            applyHomeBlockOrder();
+        }
+
         function dvDecodeSubtitle(buf) {
             let txt = new TextDecoder('utf-8').decode(buf);
             if (txt.indexOf('�') !== -1) {
