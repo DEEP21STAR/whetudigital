@@ -99,6 +99,11 @@ async function resolveFallbackMaster(embedUrl) {
     }
     await page.waitForTimeout(2500);
     if (!master) throw new Error('no m3u8 request seen on the embed page');
+    // Diagnostic (2026-08-19): if embed.st redirects before the player fires
+    // its m3u8 request, the CDN's own Referer check expects the POST-redirect
+    // page URL, not the one originally requested -- page.url() reflects
+    // wherever navigation actually landed.
+    const finalPageUrl = page.url();
 
     // Fetch playlists through the SAME browser context (real TLS
     // fingerprint), then close the browser before returning -- only the
@@ -112,7 +117,7 @@ async function resolveFallbackMaster(embedUrl) {
       let bodySnippet = '';
       try { bodySnippet = (await masterRes.text()).slice(0, 300); } catch (e) {}
       const respHeaders = masterRes.headers();
-      throw new Error(`master fetch HTTP ${masterRes.status()} | url=${master} | referer=${embedUrl} | server=${respHeaders['server'] || 'n/a'} | cf-ray=${respHeaders['cf-ray'] || 'n/a'} | body=${JSON.stringify(bodySnippet)}`);
+      throw new Error(`master fetch HTTP ${masterRes.status()} | url=${master} | referer=${embedUrl} | finalPageUrl=${finalPageUrl} | server=${respHeaders['server'] || 'n/a'} | cf-ray=${respHeaders['cf-ray'] || 'n/a'} | body=${JSON.stringify(bodySnippet)}`);
     }
     const masterBody = await masterRes.text();
     const lines = masterBody.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
