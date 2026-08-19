@@ -22,8 +22,8 @@
   "generated": "2026-08-16",
   "latest": {
     "android": {
-      "versionCode": 27,
-      "versionName": "0.1.29",
+      "versionCode": 28,
+      "versionName": "0.1.30",
       "minSdk": 23,
       "certSha256": "082961c7cc1097dfb4f76239947becb18cd98f88eca3da6585e504d6f523352f",
       "apk": {
@@ -37,6 +37,17 @@
     }
   },
   "changelog": [
+    {
+      "version": "0.1.30",
+      "versionCode": 28,
+      "web": "lounge-shell-v130",
+      "date": "2026-08-19",
+      "title": "Real APK: Restricted Area's 5 unused categories removed -- the file Deep pointed at for them turned out to already be the Free Tubes list",
+      "changes": [
+        "Deep pointed at 'URL Adult Streaming Links.txt' for the 5 remaining categories (Premium Sites, Live Cams, Amateur, Lesbian, Mature). Checked it: same flat 24-site list already wired into Free Tubes, not per-category URLs. Rather than leave 5 categories pointed at theporndude.com directory links (the exact thing Free Tubes was fixed to stop doing) or guess a site-to-category mapping, Deep's call was to drop the unused categories entirely -- Free Tubes is now the only category. Re-add if/when real category-specific lists are supplied.",
+        "Gradle compile clean, release APK built and signed with the existing keystore. versionCode 27->28, versionName 0.1.29->0.1.30."
+      ]
+    },
     {
       "version": "0.1.29",
       "versionCode": 27,
