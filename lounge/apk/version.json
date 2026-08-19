@@ -22,8 +22,8 @@
   "generated": "2026-08-16",
   "latest": {
     "android": {
-      "versionCode": 29,
-      "versionName": "0.1.31",
+      "versionCode": 30,
+      "versionName": "0.1.32",
       "minSdk": 23,
       "certSha256": "082961c7cc1097dfb4f76239947becb18cd98f88eca3da6585e504d6f523352f",
       "apk": {
@@ -37,6 +37,20 @@
     }
   },
   "changelog": [
+    {
+      "version": "0.1.32",
+      "versionCode": 30,
+      "web": "lounge-shell-v140",
+      "date": "2026-08-19",
+      "title": "Restricted Area: rotating PIN, always-on gate, red theme, status-bar fix",
+      "changes": [
+        "PIN gate now challenges on EVERY open (Deep: 'PIN Entry Needed to Open it') -- the old KEY_UNLOCKED flag persisted forever once set, so the dialog only ever fired once per install. Removed entirely; onCreate() always shows the PIN dialog now.",
+        "Rotating PIN, Deep's ask: entry PIN is '69', but the moment it's used successfully the active PIN silently rotates to '5591' and stays there -- '69' never works again after its one use. Stored in SharedPreferences (not hardcoded), read fresh on every dialog.",
+        "Content text (section title, category names, site list rows) switched from white to a saturated red (#FF3B54) -- Deep's ask, marks this section as visually distinct from the rest of Lounge's cyan/violet theme. Brand wordmark and icons unchanged.",
+        "Fixed the persistent header overlapping the phone's notification/status bar -- this Activity draws its own root view with no insets handling at all. Applied the same ViewCompat.setOnApplyWindowInsetsListener pattern MainActivity already uses on its root, padding by real system-bar insets instead of a guessed magic-number margin, so it's correct on any notch/cutout.",
+        "Real rebuild via ./gradlew assembleRelease, BUILD SUCCESSFUL (pre-existing onBackPressed deprecation warning only, unrelated)."
+      ]
+    },
     {
       "version": "0.1.31",
       "versionCode": 29,
