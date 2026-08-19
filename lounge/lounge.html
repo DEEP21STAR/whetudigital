@@ -8189,6 +8189,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
                 <div class="help-block">
                     <h3><i class="fas fa-rocket"></i> 1. First-Time Setup</h3>
+                    <img src="/help-media/setup-flow.gif" alt="The Settings page and the API Keys section where you paste in your TMDB/Real-Debrid keys" loading="lazy" style="width:100%;max-width:320px;border-radius:12px;border:1px solid #222;margin:4px 0 12px;display:block;">
                     <ol>
                         <li>Always open Nexus via <strong>Launch Nexus.vbs</strong> in the C:\NEXUS folder — never double-click the HTML file directly. This starts a small local server, which Real-Debrid requires to work at all.</li>
                         <li>Go to <strong>Settings</strong> and paste in your API keys: TMDB (free, needed for posters/search), Real-Debrid (needed for playback), Groq (free, powers the AI Assistant), OpenSubtitles (free, optional — enables real subtitles).</li>
@@ -12735,7 +12736,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v127';
+        const LOUNGE_BUILD = 'lounge-shell-v128';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';

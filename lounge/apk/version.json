@@ -33,10 +33,21 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v127"
+      "cacheName": "lounge-shell-v128"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.29",
+      "versionCode": 27,
+      "web": "lounge-shell-v128",
+      "date": "2026-08-19",
+      "title": "Help Guide: First-Time Setup GIF -- 3 of 5 walkthrough sections now shipped",
+      "changes": [
+        "'1. First-Time Setup' now has a real 2-frame GIF (Settings overview -> API Keys section) using the same capture pipeline as the other 2 GIFs shipped earlier today. Captured after the v127 layout fix so it shows the corrected, non-overflowing Settings page. Real key values were masked with a fake placeholder of identical length before capturing -- no credential ever appeared in a frame.",
+        "Remaining: Troubleshooting, App overview -- 2 of 5 Help Guide sections left."
+      ]
+    },
     {
       "version": "0.1.29",
       "versionCode": 27,
