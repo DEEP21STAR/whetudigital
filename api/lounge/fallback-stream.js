@@ -121,6 +121,25 @@ async function resolveFallbackMaster(embedUrl) {
       'Sec-Fetch-Mode': 'cors',
       'Sec-Fetch-Site': 'cross-site',
     };
+    // DIAGNOSTIC ONLY (2026-08-19): page.request.get() with a fuller header
+    // set still 403'd -- testing whether page.request is the real problem
+    // (it's Playwright's OWN Node-based HTTP client, not literally routed
+    // through the browser's network stack/TLS handshake despite what this
+    // file's original comment assumed). An in-page fetch() runs through the
+    // actual browser engine. Caught inside evaluate() since a CORS failure
+    // throws a JS TypeError in-page, not something evaluate() should let
+    // escape uncaught.
+    const diagFetch = await page.evaluate(async (u) => {
+      try {
+        const r = await fetch(u, { credentials: 'omit' });
+        const t = await r.text();
+        return { ok: r.ok, status: r.status, bodySnippet: t.slice(0, 200), corsBlocked: false };
+      } catch (e) {
+        return { ok: false, status: 0, bodySnippet: '', corsBlocked: true, errMsg: String(e) };
+      }
+    }, master);
+    throw new Error(`DIAG in-page fetch: ${JSON.stringify(diagFetch)} | page.request result was 403`);
+
     const masterRes = await page.request.get(master, { headers: fetchHeaders });
     if (!masterRes.ok()) {
       // Temporary rich diagnostics (2026-08-19) -- a bare "HTTP 403" wasn't
