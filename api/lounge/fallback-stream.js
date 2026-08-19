@@ -99,66 +99,40 @@ async function resolveFallbackMaster(embedUrl) {
     }
     await page.waitForTimeout(2500);
     if (!master) throw new Error('no m3u8 request seen on the embed page');
-    // Diagnostic (2026-08-19): if embed.st redirects before the player fires
-    // its m3u8 request, the CDN's own Referer check expects the POST-redirect
-    // page URL, not the one originally requested -- page.url() reflects
-    // wherever navigation actually landed.
-    const finalPageUrl = page.url();
 
-    // Fetch playlists through the SAME browser context (real TLS
-    // fingerprint), then close the browser before returning -- only the
-    // resolved text needs to survive, not the browser process.
-    // 2026-08-19: added the fuller header set a real in-page XHR/fetch would
-    // carry (Origin + Sec-Fetch-*) -- a bare Referer-only request was 403ing,
-    // and a plain nginx 403 with no CF-Ray suggests a config check on more
-    // than just Referer. Testing this before the more invasive move to an
-    // in-page fetch() (which would introduce a real CORS exposure page.request
-    // doesn't have).
-    const fetchHeaders = {
-      Referer: embedUrl,
-      Origin: new URL(embedUrl).origin,
-      'Sec-Fetch-Dest': 'empty',
-      'Sec-Fetch-Mode': 'cors',
-      'Sec-Fetch-Site': 'cross-site',
-    };
-    // DIAGNOSTIC ONLY (2026-08-19): page.request.get() with a fuller header
-    // set still 403'd -- testing whether page.request is the real problem
-    // (it's Playwright's OWN Node-based HTTP client, not literally routed
-    // through the browser's network stack/TLS handshake despite what this
-    // file's original comment assumed). An in-page fetch() runs through the
-    // actual browser engine. Caught inside evaluate() since a CORS failure
-    // throws a JS TypeError in-page, not something evaluate() should let
-    // escape uncaught.
-    const diagFetch = await page.evaluate(async (u) => {
+    // Root-caused 2026-08-19: page.request.get() is Playwright's OWN
+    // Node-based HTTP client -- it does NOT run through the actual browser
+    // engine's network stack/TLS handshake, despite what this file
+    // previously assumed. This CDN's nginx config checks exactly that (a
+    // real browser TLS/JA3 fingerprint), which is why every page.request
+    // call 403'd (confirmed: adding Origin/Sec-Fetch-* headers didn't help,
+    // but a genuine in-page fetch() succeeded immediately, real 200 with a
+    // real playlist body). Fetching through page.evaluate() instead routes
+    // the request through the real browser engine.
+    const pageFetch = await page.evaluate(async (u) => {
       try {
-        const r = await fetch(u, { credentials: 'omit' });
-        const t = await r.text();
-        return { ok: r.ok, status: r.status, bodySnippet: t.slice(0, 200), corsBlocked: false };
+        const r = await fetch(u);
+        return { ok: r.ok, status: r.status, text: await r.text() };
       } catch (e) {
-        return { ok: false, status: 0, bodySnippet: '', corsBlocked: true, errMsg: String(e) };
+        return { ok: false, status: 0, text: '', errMsg: String(e) };
       }
     }, master);
-    throw new Error(`DIAG in-page fetch: ${JSON.stringify(diagFetch)} | page.request result was 403`);
-
-    const masterRes = await page.request.get(master, { headers: fetchHeaders });
-    if (!masterRes.ok()) {
-      // Temporary rich diagnostics (2026-08-19) -- a bare "HTTP 403" wasn't
-      // enough to tell IP-reputation blocking apart from a Referer/header
-      // mismatch or an expired signed token. Captures exactly what's needed
-      // to tell those apart, then this block comes back out once resolved.
-      let bodySnippet = '';
-      try { bodySnippet = (await masterRes.text()).slice(0, 300); } catch (e) {}
-      const respHeaders = masterRes.headers();
-      throw new Error(`master fetch HTTP ${masterRes.status()} | url=${master} | referer=${embedUrl} | finalPageUrl=${finalPageUrl} | server=${respHeaders['server'] || 'n/a'} | cf-ray=${respHeaders['cf-ray'] || 'n/a'} | body=${JSON.stringify(bodySnippet)}`);
-    }
-    const masterBody = await masterRes.text();
+    if (!pageFetch.ok) throw new Error(`master fetch failed | url=${master} | status=${pageFetch.status} | err=${pageFetch.errMsg || 'n/a'} | body=${JSON.stringify((pageFetch.text || '').slice(0, 200))}`);
+    const masterBody = pageFetch.text;
     const lines = masterBody.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
     if (!lines.length) throw new Error('fallback master playlist had no variants');
     const mediaUrl = new URL(lines[0], master).href;
 
-    const mediaRes = await page.request.get(mediaUrl, { headers: fetchHeaders });
-    if (!mediaRes.ok()) throw new Error(`media fetch HTTP ${mediaRes.status()}`);
-    const mediaBody = await mediaRes.text();
+    const mediaFetch = await page.evaluate(async (u) => {
+      try {
+        const r = await fetch(u);
+        return { ok: r.ok, status: r.status, text: await r.text() };
+      } catch (e) {
+        return { ok: false, status: 0, text: '', errMsg: String(e) };
+      }
+    }, mediaUrl);
+    if (!mediaFetch.ok) throw new Error(`media fetch failed | url=${mediaUrl} | status=${mediaFetch.status} | err=${mediaFetch.errMsg || 'n/a'}`);
+    const mediaBody = mediaFetch.text;
     const out = mediaBody.split('\n').map(line => {
       const s = line.trim();
       if (s && !s.startsWith('#') && !s.startsWith('http')) return new URL(s, mediaUrl).href;

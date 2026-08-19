@@ -79,16 +79,26 @@ async function resolveMirrorMaster(id) {
     }
     if (!master) throw lastError || new Error('no m3u8 request seen on either mirror');
 
-    const masterRes = await page.request.get(master, { headers: { Referer: `${refererBase}/` } });
-    if (!masterRes.ok()) throw new Error(`master fetch HTTP ${masterRes.status()}`);
-    const masterBody = await masterRes.text();
+    // Root-caused 2026-08-19 (same fix as fallback-stream.js): page.request
+    // is Playwright's own Node HTTP client, not routed through the real
+    // browser TLS stack -- a CDN nginx config checking that fingerprint
+    // 403's it. In-page fetch() via page.evaluate() uses the real engine.
+    const masterFetch = await page.evaluate(async (u) => {
+      try { const r = await fetch(u); return { ok: r.ok, status: r.status, text: await r.text() }; }
+      catch (e) { return { ok: false, status: 0, text: '', errMsg: String(e) }; }
+    }, master);
+    if (!masterFetch.ok) throw new Error(`master fetch failed | status=${masterFetch.status} | err=${masterFetch.errMsg || 'n/a'}`);
+    const masterBody = masterFetch.text;
     const lines = masterBody.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
     if (!lines.length) throw new Error('mirror master playlist had no variants');
     const mediaUrl = new URL(lines[0], master).href;
 
-    const mediaRes = await page.request.get(mediaUrl, { headers: { Referer: master } });
-    if (!mediaRes.ok()) throw new Error(`media fetch HTTP ${mediaRes.status()}`);
-    const mediaBody = await mediaRes.text();
+    const mediaFetch = await page.evaluate(async (u) => {
+      try { const r = await fetch(u); return { ok: r.ok, status: r.status, text: await r.text() }; }
+      catch (e) { return { ok: false, status: 0, text: '', errMsg: String(e) }; }
+    }, mediaUrl);
+    if (!mediaFetch.ok) throw new Error(`media fetch failed | status=${mediaFetch.status} | err=${mediaFetch.errMsg || 'n/a'}`);
+    const mediaBody = mediaFetch.text;
     const out = mediaBody.split('\n').map(line => {
       const s = line.trim();
       if (s && !s.startsWith('#') && !s.startsWith('http')) return new URL(s, mediaUrl).href;
