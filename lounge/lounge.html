@@ -13569,7 +13569,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v140';
+        const LOUNGE_BUILD = 'lounge-shell-v141';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -13984,8 +13984,9 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             return (n && typeof n.openVpnApp === 'function') ? n : null;
         }
 
-        // The native Restricted Area (RestrictedSectionActivity, PIN "69") has
-        // existed since it was first added to the Android project but was never
+        // The native Restricted Area (RestrictedSectionActivity, PIN "69" once,
+        // then rotates to "5591" -- see RestrictedSection.kt) has existed since
+        // it was first added to the Android project but was never
         // reachable -- no menu item ever called it. Found live 2026-08-14. It is
         // Android-app-only (no web equivalent, unlike the Live TV Restricted
         // channel lock elsewhere in this file), so the nav item stays hidden
@@ -17787,7 +17788,11 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // and no adult source has been vetted, so this builds the MECHANISM and
         // lets Deep assign channels into it with the lock button on each card.
         const RESTRICTED_KEY = 'nexus_restricted_channels_v1';
-        const RESTRICTED_PIN = '69';
+        // Changed 69 -> 5591 (Deep, 2026-08-19), matching the Android
+        // Restricted Area's rotated PIN -- but set directly here, no
+        // rotation logic, since this is a different gate (hidden Live TV
+        // channels, not adult sites) and Deep asked for the simpler fix.
+        const RESTRICTED_PIN = '5591';
 
         // Unlock is per-session, not persisted: closing the app re-locks it.
         // A remembered unlock would defeat the entire point on a shared TV.

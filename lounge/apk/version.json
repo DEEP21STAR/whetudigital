@@ -33,10 +33,20 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v140"
+      "cacheName": "lounge-shell-v141"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.32",
+      "versionCode": 30,
+      "web": "lounge-shell-v141",
+      "date": "2026-08-19",
+      "title": "Live TV Restricted-channel PIN changed to 5591 (Settings audit finding)",
+      "changes": [
+        "Settings audit surfaced a real inconsistency: the web-side Live TV \"Restricted channels\" gate (a separate, unrelated feature that hides specific TV channels you've manually locked -- not the Android adult-sites Restricted Area) was hardcoded to PIN '69', same value as the Android section by coincidence. Deep confirmed: change this one directly to '5591' too, no rotation logic needed since it's a lower-stakes gate protecting different content."
+      ]
+    },
     {
       "version": "0.1.32",
       "versionCode": 30,
