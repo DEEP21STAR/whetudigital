@@ -1094,6 +1094,7 @@
         .vpn-popover {
             position: fixed;
             width: 300px;
+            max-width: calc(100vw - 24px);
             background: #141414;
             border: 1px solid #2a2a2a;
             border-radius: 12px;
@@ -7979,6 +7980,40 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 </div>
             </div>
 
+            <!-- Status section, 2026-08-20 -- mobile reachability fix. Below
+                 900px, .header-widgets collapses to icon-dot-only (only the
+                 bare VPN dot survives), which left Profile/VPN detail/
+                 Utilities completely unreachable on any phone -- flagged in
+                 the code's own earlier comments, never actually fixed. These
+                 3 rows call the EXACT SAME toggle functions the header chips
+                 use (positionPopoverNearChip now centers the popover on
+                 screen when its usual trigger chip is hidden, instead of
+                 pinning to a zero-size rect at the top-left). -->
+            <div class="nav-section">
+                <div class="nav-title">Status</div>
+                <!-- toggleMobileNav(false) runs BEFORE the popover toggle,
+                     not after: the popover functions call
+                     event.stopPropagation() as their first line, which would
+                     otherwise block the drawer's own document-level
+                     auto-close listener (line ~13218) from ever firing for
+                     these -- the drawer would stay open behind/on top of the
+                     popover (they share z-index 2000, DOM order breaks the
+                     tie in the drawer's favour). Closing it explicitly here
+                     avoids depending on that ordering at all. -->
+                <div class="nav-item" onclick="toggleMobileNav(false); toggleProfilePopover(event)">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </div>
+                <div class="nav-item" onclick="toggleMobileNav(false); toggleVpnPopover(event)">
+                    <i class="fas fa-shield-halved"></i>
+                    <span>VPN Status</span>
+                </div>
+                <div class="nav-item" onclick="toggleMobileNav(false); toggleUtilitiesPopover(event)">
+                    <i class="fas fa-sliders"></i>
+                    <span>Utilities</span>
+                </div>
+            </div>
+
             <div class="nav-section">
                 <div class="nav-title">Add-ons</div>
                 <div class="nav-item" onclick="showSection('settings')">
@@ -13569,7 +13604,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v141';
+        const LOUNGE_BUILD = 'lounge-shell-v142';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -14434,6 +14469,37 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             vpnChipTimer = setInterval(() => runVpnChipCheck(false), 5 * 60 * 1000);
         }
 
+        // Shared positioning helper, 2026-08-20 (mobile reachability fix --
+        // see the sub-900px gap note on .header-widgets). Every popover used
+        // to anchor to its trigger chip's getBoundingClientRect() with no
+        // fallback -- fine while the chip is visible, but below 900px the
+        // whole header-widgets cluster (except the bare VPN dot) is
+        // display:none, so a hidden chip has a zero-size rect and the
+        // popover would render pinned to the top-left corner instead of
+        // anywhere sensible. Centering on screen when the trigger has no
+        // real size is the general, correct fix -- it also covers any
+        // future trigger that legitimately isn't on screen, not just this
+        // one breakpoint.
+        function positionPopoverNearChip(pop, chip) {
+            const rect = chip.getBoundingClientRect();
+            const hasSize = rect.width > 0 && rect.height > 0 && chip.offsetParent !== null;
+            if (hasSize) {
+                pop.style.top = (rect.bottom + 8) + 'px';
+                // Right-align to the chip so it never runs off the left edge
+                // of a narrow viewport.
+                pop.style.right = (window.innerWidth - rect.right) + 'px';
+                pop.style.left = 'auto';
+                pop.style.bottom = 'auto';
+                pop.style.transform = 'none';
+            } else {
+                pop.style.top = '50%';
+                pop.style.left = '50%';
+                pop.style.right = 'auto';
+                pop.style.bottom = 'auto';
+                pop.style.transform = 'translate(-50%, -50%)';
+            }
+        }
+
         function toggleVpnPopover(event) {
             event.stopPropagation();
             const pop = document.getElementById('vpnPopover');
@@ -14445,13 +14511,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             document.getElementById('utilitiesPopover')?.classList.remove('open');
             if (!opening) { pop.classList.remove('open'); return; }
 
-            const rect = chip.getBoundingClientRect();
-            pop.style.top = (rect.bottom + 8) + 'px';
-            // Right-align to the chip so it never runs off the left edge of a
-            // narrow viewport -- the chip sits near the left of the widget
-            // cluster, a left-aligned popover would clip under 340px of room.
-            pop.style.right = (window.innerWidth - rect.right) + 'px';
-            pop.style.left = 'auto';
+            positionPopoverNearChip(pop, chip);
             pop.classList.add('open');
 
             const first = !localStorage.getItem(VPN_LIVE_KEY);
@@ -14483,10 +14543,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             document.getElementById('wtPopover')?.classList.remove('open');
             if (!opening) { pop.classList.remove('open'); return; }
 
-            const rect = chip.getBoundingClientRect();
-            pop.style.top = (rect.bottom + 8) + 'px';
-            pop.style.right = (window.innerWidth - rect.right) + 'px';
-            pop.style.left = 'auto';
+            positionPopoverNearChip(pop, chip);
             pop.classList.add('open');
         }
 
@@ -14574,10 +14631,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             document.getElementById('utilitiesPopover')?.classList.remove('open');
             if (!opening) { pop.classList.remove('open'); return; }
             renderProfileList();
-            const rect = chip.getBoundingClientRect();
-            pop.style.top = (rect.bottom + 8) + 'px';
-            pop.style.right = (window.innerWidth - rect.right) + 'px';
-            pop.style.left = 'auto';
+            positionPopoverNearChip(pop, chip);
             pop.classList.add('open');
         }
 

@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v141"
+      "cacheName": "lounge-shell-v142"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.32",
+      "versionCode": 30,
+      "web": "lounge-shell-v142",
+      "date": "2026-08-20",
+      "title": "Mobile header reachability fix — Profile/VPN/Utilities now reachable below 900px",
+      "changes": [
+        "Fixed a real, previously-flagged-but-unfixed gap: below 900px viewport width (any phone, including the Android app's own WebView), .header-widgets collapsed to icon-dot-only, leaving Profile, VPN detail, and Utilities completely unreachable -- no other path to them existed.",
+        "Added a 'Status' section to the mobile nav drawer with Profile/VPN Status/Utilities entries that call the exact same functions the header chips use.",
+        "Root fix: popover positioning used to anchor to its trigger chip's on-screen rect with no fallback -- a hidden chip (zero-size rect) pinned the popover to the top-left corner. New shared positionPopoverNearChip() helper centers the popover on screen instead when its trigger has no real size, which is the correct general fix, not a one-off patch for just the drawer entries."
+      ]
+    },
     {
       "version": "0.1.32",
       "versionCode": 30,
