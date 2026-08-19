@@ -1629,6 +1629,21 @@
                nav's own scroll masks elsewhere in this file. */
             mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
             -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+            /* Click-and-drag scroll, 2026-08-19 (Deep: "you cannot click &
+               hold left mouse button then move it to the left to move the
+               poster tiles"). Rows only ever supported wheel/trackpad scroll
+               and the arrow buttons -- a plain mouse with no horizontal wheel
+               had no way to drag a rail at all, despite the grab cursor being
+               the expected affordance for a horizontal-scroll row on desktop.
+               initRailDragScroll() below does the actual drag tracking; this
+               just sets the resting-state cursor. */
+            cursor: grab;
+        }
+        body.rail-layout-horizontal .content-rail.rail-dragging {
+            cursor: grabbing;
+            scroll-snap-type: none;
+            scroll-behavior: auto;
+            user-select: none;
         }
         body.rail-layout-horizontal .content-rail::-webkit-scrollbar { display: none; }
         body.rail-layout-horizontal .content-rail .card {
@@ -11846,6 +11861,48 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             el.scrollBy({ left: Math.round(el.clientWidth * 0.85) * dir, behavior: 'smooth' });
         }
 
+        // Click-and-drag rail scroll, 2026-08-19 -- see the .content-rail
+        // cursor:grab comment above for why this exists. Delegated on
+        // document rather than per-rail listeners since rails are rebuilt
+        // constantly (renderGrid/renderGenreDiscoveryRails re-render whole
+        // sections), and a 4px move threshold before engaging drag mode is
+        // what keeps a real click on a poster still opening its detail page
+        // -- without it, every click would register as a zero-distance drag
+        // and the card's own onclick would still fire normally anyway, so
+        // the threshold is really about not fighting native text/scroll
+        // gestures on a genuine click, not about preventing false positives.
+        (function initRailDragScroll() {
+            let drag = null; // { el, startX, startScrollLeft, moved }
+            document.addEventListener('mousedown', (e) => {
+                if (e.button !== 0 || !document.body.classList.contains('rail-layout-horizontal')) return;
+                const rail = e.target.closest('.content-rail');
+                if (!rail) return;
+                drag = { el: rail, startX: e.clientX, startScrollLeft: rail.scrollLeft, moved: false };
+            });
+            document.addEventListener('mousemove', (e) => {
+                if (!drag) return;
+                const dx = e.clientX - drag.startX;
+                if (!drag.moved && Math.abs(dx) > 4) { drag.moved = true; drag.el.classList.add('rail-dragging'); }
+                if (drag.moved) { drag.el.scrollLeft = drag.startScrollLeft - dx; e.preventDefault(); }
+            });
+            const endDrag = () => {
+                if (!drag) return;
+                const { el, moved } = drag;
+                el.classList.remove('rail-dragging');
+                if (moved) {
+                    // A real drag just happened -- swallow the click event
+                    // the mouseup is about to generate on whatever card is
+                    // under the cursor, so dragging a rail never also opens
+                    // the title it happened to end on top of.
+                    const suppressClick = (ce) => { ce.stopPropagation(); ce.preventDefault(); };
+                    document.addEventListener('click', suppressClick, { capture: true, once: true });
+                }
+                drag = null;
+            };
+            document.addEventListener('mouseup', endDrag);
+            document.addEventListener('mouseleave', endDrag);
+        })();
+
         function trendingHeroGoTo(idx) {
             const slidesWrap = document.getElementById('trendingHeroSlides');
             const dotsWrap = document.getElementById('trendingHeroDots');
@@ -12808,7 +12865,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v132';
+        const LOUNGE_BUILD = 'lounge-shell-v133';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';

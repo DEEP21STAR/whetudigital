@@ -33,10 +33,20 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v132"
+      "cacheName": "lounge-shell-v133"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.30",
+      "versionCode": 28,
+      "web": "lounge-shell-v133",
+      "date": "2026-08-19",
+      "title": "Click-and-drag rail scrolling (mouse) -- horizontal rails only supported wheel/trackpad and the arrow buttons",
+      "changes": [
+        "Deep's report: click-hold-drag on a horizontal rail did nothing. Rails never had drag-scroll wired at all -- the CSS already implied it (overflow-x:auto reads as draggable) but only wheel/trackpad scroll and the arrow buttons actually worked. Added real click-and-drag: mousedown+move on any rail now drags it, with a 4px move threshold so a genuine click on a poster still opens its detail page normally (a real drag suppresses the trailing click so dragging never also opens whatever card it ends on top of). Delegated on document since rails are rebuilt constantly by renderGrid()."
+      ]
+    },
     {
       "version": "0.1.30",
       "versionCode": 28,
