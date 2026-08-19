@@ -33,10 +33,20 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v124"
+      "cacheName": "lounge-shell-v125"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.29",
+      "versionCode": 27,
+      "web": "lounge-shell-v125",
+      "date": "2026-08-19",
+      "title": "Fix: Settings page could scroll horizontally on any phone -- flexbox min-width trap",
+      "changes": [
+        "Found while building the First-Time Setup Help Guide GIF: measured document.documentElement.scrollWidth at 729px on a 414px mobile viewport -- the Settings page genuinely scrolled sideways. Root cause was the classic CSS flexbox trap: a flex item's default min-width is auto (its own max-content size), not 0 -- .settings-row-text (holding long unbroken strings like the real-debrid.com/apitoken links) refused to shrink below that width, so every one of the ~18 rows on the page pushed wider than the screen. Fixed with min-width:0 + overflow-wrap:anywhere on .settings-row-text and flex-shrink:0 on the row's button so it can't get squeezed either. Verified live: scrollWidth now matches the viewport, no horizontal scroll anywhere on the page."
+      ]
+    },
     {
       "version": "0.1.29",
       "versionCode": 27,

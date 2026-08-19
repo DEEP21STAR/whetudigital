@@ -5182,6 +5182,24 @@
             margin-bottom: 15px;
         }
 
+        /* Real bug found 2026-08-19 (Playwright measurement, not a guess):
+           document.documentElement.scrollWidth was 729px on a 414px mobile
+           viewport -- the whole Settings page could be horizontally scrolled.
+           Root cause is the classic flexbox trap: a flex item's default
+           min-width is auto, not 0, which equals its content's own
+           max-content width -- so .settings-row-text (containing long
+           unbroken strings like "real-debrid.com/apitoken" in its <p> links)
+           refused to shrink below that width and pushed every one of the
+           ~18 rows on this page wider than the viewport. Every row on this
+           page shares the bug since none had an explicit width rule at all. */
+        .settings-row-text {
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+        .settings-row > .btn {
+            flex-shrink: 0;
+        }
+
         .help-block {
             background: #111;
             border: 1px solid #1a1a1a;
