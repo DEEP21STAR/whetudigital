@@ -104,7 +104,16 @@ async function resolveFallbackMaster(embedUrl) {
     // fingerprint), then close the browser before returning -- only the
     // resolved text needs to survive, not the browser process.
     const masterRes = await page.request.get(master, { headers: { Referer: embedUrl } });
-    if (!masterRes.ok()) throw new Error(`master fetch HTTP ${masterRes.status()}`);
+    if (!masterRes.ok()) {
+      // Temporary rich diagnostics (2026-08-19) -- a bare "HTTP 403" wasn't
+      // enough to tell IP-reputation blocking apart from a Referer/header
+      // mismatch or an expired signed token. Captures exactly what's needed
+      // to tell those apart, then this block comes back out once resolved.
+      let bodySnippet = '';
+      try { bodySnippet = (await masterRes.text()).slice(0, 300); } catch (e) {}
+      const respHeaders = masterRes.headers();
+      throw new Error(`master fetch HTTP ${masterRes.status()} | url=${master} | referer=${embedUrl} | server=${respHeaders['server'] || 'n/a'} | cf-ray=${respHeaders['cf-ray'] || 'n/a'} | body=${JSON.stringify(bodySnippet)}`);
+    }
     const masterBody = await masterRes.text();
     const lines = masterBody.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
     if (!lines.length) throw new Error('fallback master playlist had no variants');
