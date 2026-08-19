@@ -33,10 +33,21 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v133"
+      "cacheName": "lounge-shell-v134"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.30",
+      "versionCode": 28,
+      "web": "lounge-shell-v134",
+      "date": "2026-08-19",
+      "title": "Cinematic Intro finally gets real sound -- an earlier changelog claiming it already had some was wrong",
+      "changes": [
+        "Deep asked directly: does the intro need sound? Checked the actual code rather than trusting memory -- a 2026-08-17 changelog entry claimed the intro 'already works' for sound and was deliberately left alone. It was wrong (or described something later reverted): there was zero audio code anywhere in playIntro(). The intro has been silent the entire time.",
+        "Fixed for real: a synthesized cinema sting (rising swell + resolving perfect-fifth chime, Web Audio API, zero asset download -- same zero-deps approach as the existing UI Sound Effects tones) fires on triggerEnter(), the actual user gesture (press/click on 'Press Any Key to Take a Seat') -- the only point autoplay policy allows audio to start from at all. Same §7b contract as UI Sound Effects: OFF by default, one visible Settings toggle ('Intro Sound', separate from the general UI Sound Effects toggle since this is a once-per-session cinematic beat, not a per-click tone), ducks on visibilitychange."
+      ]
+    },
     {
       "version": "0.1.30",
       "versionCode": 28,

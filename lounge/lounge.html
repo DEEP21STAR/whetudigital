@@ -8358,6 +8358,17 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
                 <div class="settings-row">
                     <div class="settings-row-text">
+                        <h4>Intro Sound</h4>
+                        <p>A short cinema-style sting plays the moment you press Enter on the boot intro. Off by default (UI_STANDARD §7b). Synthesized (Web Audio), no audio file. Separate from UI Sound Effects below -- this is a once-per-session cinematic beat, not a per-click tone.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="introSoundToggle" onchange="toggleIntroSound(this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-row-text">
                         <h4>UI Sound Effects</h4>
                         <p>Soft synthesized tones on primary buttons. Off by default (UI_STANDARD §7b). Doesn't affect the intro's own sting, which is a separate feature you already set up.</p>
                     </div>
@@ -9557,6 +9568,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const triggerEnter = () => {
                 if (!enterArmed) return;
                 disarmEnterKey();
+                playIntroSting();
                 tl.play();
             };
 
@@ -12582,6 +12594,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
             // UI_STANDARD §7b: OFF by default, one visible toggle, persisted.
             document.getElementById('uiSoundToggle').checked = uiSoundEnabled();
+            document.getElementById('introSoundToggle').checked = localStorage.getItem('nexus_intro_sound') === 'true';
 
             document.getElementById('fabEnabledToggle').checked = localStorage.getItem('nexus_fab_enabled') !== '0';
 
@@ -12667,6 +12680,73 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && uiAudioCtx && uiAudioCtx.state === 'running') uiAudioCtx.suspend();
             else if (!document.hidden && uiAudioCtx && uiAudioCtx.state === 'suspended') uiAudioCtx.resume();
+        });
+
+        // Cinematic Intro sting, 2026-08-19 (Deep asked directly: "does the
+        // Cinematic Intro need to improve & have sound?"). Real answer found
+        // by actually grepping this file: an earlier changelog entry (2026-
+        // 08-17, "21 Extras batch 4") claimed the intro "already works" for
+        // sound and this build deliberately left it alone -- but there was
+        // never any audio code anywhere in playIntro() or the couch-mark
+        // sequence. That claim was wrong (or described something that got
+        // reverted later); the intro has been silent the whole time. Fixed
+        // for real: a synthesized cinema sting (swell + resolving fifth
+        // chord, Web Audio, zero asset download -- same zero-deps approach
+        // as playUiTone above) fires exactly on triggerEnter(), the real
+        // user gesture (keypress/click on "Press Any Key to Take a Seat"),
+        // which is the only point in the whole intro autoplay policy allows
+        // audio to start from at all. Same §7b contract as UI Sound Effects:
+        // OFF by default, one visible Settings toggle, own localStorage key
+        // (kept separate from nexus_ui_sound -- this is a once-per-session
+        // cinematic beat, not a per-click UI tone, different enough to want
+        // independent control), ducks on visibilitychange.
+        let loungeIntroAudioCtx = null;
+        function introSoundEnabled() {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+            return localStorage.getItem('nexus_intro_sound') === 'true';
+        }
+        function playIntroSting() {
+            if (!introSoundEnabled()) return;
+            try {
+                const ctx = loungeIntroAudioCtx = loungeIntroAudioCtx || new (window.AudioContext || window.webkitAudioContext)();
+                const now = ctx.currentTime;
+                // Rising swell -- a low sine sweeping up under the couch-mark
+                // reveal, the "curtain lifting" half of the beat.
+                const swellOsc = ctx.createOscillator();
+                const swellGain = ctx.createGain();
+                swellOsc.type = 'sine';
+                swellOsc.frequency.setValueAtTime(180, now);
+                swellOsc.frequency.exponentialRampToValueAtTime(440, now + 0.5);
+                swellGain.gain.setValueAtTime(0.0001, now);
+                swellGain.gain.exponentialRampToValueAtTime(0.09, now + 0.45);
+                swellGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.75);
+                swellOsc.connect(swellGain).connect(ctx.destination);
+                swellOsc.start(now);
+                swellOsc.stop(now + 0.8);
+                // Resolving perfect-fifth chime lands as the swell peaks --
+                // the "seat found" half, a clean landing rather than a fade.
+                [523.25, 784.0].forEach((freq) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    const start = now + 0.38;
+                    gain.gain.setValueAtTime(0.0001, start);
+                    gain.gain.exponentialRampToValueAtTime(0.05, start + 0.06);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.7);
+                    osc.connect(gain).connect(ctx.destination);
+                    osc.start(start);
+                    osc.stop(start + 0.75);
+                });
+            } catch (e) { /* Web Audio unavailable -- silently skip, never block the intro */ }
+        }
+        function toggleIntroSound(on) {
+            localStorage.setItem('nexus_intro_sound', on);
+            if (on) playIntroSting(); // audible confirmation the toggle itself worked, same pattern as toggleUiSound
+        }
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && loungeIntroAudioCtx && loungeIntroAudioCtx.state === 'running') loungeIntroAudioCtx.suspend();
+            else if (!document.hidden && loungeIntroAudioCtx && loungeIntroAudioCtx.state === 'suspended') loungeIntroAudioCtx.resume();
         });
         // Scoped to .hero-cta only (Watch Now / More Info / Resume/Start
         // Watching) -- the app's real primary actions, not every button on
@@ -12865,7 +12945,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v133';
+        const LOUNGE_BUILD = 'lounge-shell-v134';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
