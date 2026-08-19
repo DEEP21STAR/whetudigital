@@ -22,8 +22,8 @@
   "generated": "2026-08-16",
   "latest": {
     "android": {
-      "versionCode": 30,
-      "versionName": "0.1.32",
+      "versionCode": 31,
+      "versionName": "0.1.33",
       "minSdk": 23,
       "certSha256": "082961c7cc1097dfb4f76239947becb18cd98f88eca3da6585e504d6f523352f",
       "apk": {
@@ -37,6 +37,19 @@
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v142",
+      "date": "2026-08-20",
+      "title": "Cross-device sweep: status-bar/nav-bar inset fixes across all 3 custom-layout Activities",
+      "changes": [
+        "SettingsActivity had the exact same status-bar-overlap bug just found in RestrictedSection -- no WindowInsets handling at all, so the top label sat under the notification area. Fixed with the same ViewCompat pattern, inset added on top of the existing 32dp padding.",
+        "PlayerActivity's touch-controls overlay (added 2026-08-10) bottom-docks the transport row/seekbar/time label with a fixed 16dp pad and no bottom inset -- could sit flush against a gesture-nav bar or 3-button nav on modern phones. Added the real bottom system-bar inset. Video itself stays full-bleed under the status bar on purpose (correct player UX, left untouched).",
+        "MainActivity already had this fix (applySystemBarInsets) -- all 4 Activities with custom-drawn root views are now consistent.",
+        "Real rebuild via ./gradlew assembleRelease, BUILD SUCCESSFUL both times (before and after the versionCode/Name bump)."
+      ]
+    },
     {
       "version": "0.1.32",
       "versionCode": 30,
