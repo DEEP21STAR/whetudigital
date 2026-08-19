@@ -33,10 +33,21 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v142"
+      "cacheName": "lounge-shell-v143"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v143",
+      "date": "2026-08-20",
+      "title": "Bulk \"Download Whole Season\" via Real-Debrid (Android app only)",
+      "changes": [
+        "Real, frequently-cited Plex/Jellyfin gap (Reddit research confirmed it was genuinely missing here too, not just a competitor complaint): the episode picker now has a 'Download Whole Season' row when the native Android download bridge is available. Loops every episode, queries streams, picks the best non-embed torrent result, resolves it through Real-Debrid, and queues the download -- with a live per-episode status list (Searching/Adding to RD/Resolving %/Download started/failed) and a Cancel button for anything still queued.",
+        "Extracted the existing single-episode Real-Debrid resolve sequence (addMagnet -> selectFiles -> poll -> unrestrict) into a pure, UI-decoupled function so the batch loop could reuse the exact same logic without colliding with the single-episode picker's own globals. The single-episode path itself is untouched -- purely additive."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,

@@ -13604,7 +13604,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v142';
+        const LOUNGE_BUILD = 'lounge-shell-v143';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -20637,7 +20637,24 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             seasonEpisodesCache[`${tmdbId}:${seasonNumber}`] = episodes;
 
             const backRow = `<div class="stream-picker-row" onclick="openSeasonPicker(currentPickerItem)" style="opacity:0.7;"><div><i class="fas fa-chevron-left"></i> Back to seasons</div></div>`;
-            body.innerHTML = backRow + episodes.map(ep => `
+            // Bulk season download, 2026-08-20 -- real, frequently-cited
+            // Plex/Jellyfin gap (see task #39 research). Android-app-only,
+            // same reason single-episode download already is; hidden
+            // entirely in a browser rather than showing a dead button.
+            // JS-string-literal escaping (backslash then quote, that order),
+            // not JSON.stringify+HTML-entity: the title goes inside a
+            // single-quoted JS literal that itself sits inside a
+            // double-quoted HTML onclick attribute, so only backslashes and
+            // single quotes need escaping here -- double quotes don't
+            // conflict with the outer attribute at all.
+            const seasonTitleJs = (currentPickerItem ? currentPickerItem.title : '')
+                .replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+            const downloadSeasonRow = (window.LoungeNative && typeof window.LoungeNative.downloadMovie === 'function')
+                ? `<div class="stream-picker-row" onclick="downloadWholeSeason(${tmdbId}, ${seasonNumber}, '${seasonTitleJs}')" style="color:#00d4ff;">
+                       <div><i class="fas fa-download"></i> Download Whole Season (${episodes.length} episodes)</div>
+                   </div>`
+                : '';
+            body.innerHTML = backRow + downloadSeasonRow + episodes.map(ep => `
                 <div class="stream-picker-row" onclick="openEpisodeStreamPicker(${tmdbId}, ${seasonNumber}, ${ep.episode_number})">
                     <div>
                         <div>${ep.episode_number}. ${escapeHtml(ep.name || 'Episode ' + ep.episode_number)}</div>
@@ -21461,6 +21478,192 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 console.error('cancelRdDownload failed:', e);
             }
             if (body) body.innerHTML = '<div class="stream-picker-empty">Download cancelled.</div>';
+        }
+
+        // Extracted 2026-08-20 for bulk season download (task from Deep's
+        // community-research ask -- "downloading entire seasons" is a real,
+        // frequently-cited Plex/Jellyfin gap, confirmed absent here too).
+        // This is the SAME Real-Debrid sequence resolveAndPlay() below has
+        // always used (addMagnet -> selectFiles largest video -> poll info
+        // until downloaded -> unrestrict/link), pulled out as a pure
+        // function with no picker-UI writes and no dependency on picker-
+        // scoped globals (currentRdTorrentId, pickerGeneration,
+        // currentPickerItem), so a batch loop can call it repeatedly
+        // without colliding with the single-episode picker flow. That flow
+        // still has its own inline copy below, unchanged -- not worth the
+        // risk of refactoring a working single-item path this late at
+        // night; this is purely additive.
+        async function resolveRdMagnetToDirectUrl(magnet, onProgress) {
+            const rdKey = localStorage.getItem('nexus_rd_key');
+            if (!rdKey) return { ok: false, error: 'No Real-Debrid API key configured.' };
+            const report = (msg) => { if (onProgress) try { onProgress(msg); } catch (e) {} };
+
+            let torrentId;
+            try {
+                report('Adding to Real-Debrid...');
+                const addRes = await fetch(rdUrl('torrents/addMagnet'), {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${rdKey}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `magnet=${encodeURIComponent(magnet)}`,
+                    signal: AbortSignal.timeout(30000)
+                });
+                if (!addRes.ok) {
+                    const msg = addRes.status === 451
+                        ? 'Blocked by Real-Debrid for legal reasons (HTTP 451).'
+                        : (addRes.status === 401 || addRes.status === 403)
+                            ? `Real-Debrid rejected the request (HTTP ${addRes.status}) — check your API key.`
+                            : `Real-Debrid rejected the request (HTTP ${addRes.status}).`;
+                    return { ok: false, error: msg };
+                }
+                const addData = await addRes.json();
+                torrentId = addData.id;
+            } catch (e) {
+                return { ok: false, error: 'Could not reach Real-Debrid to add the magnet.' };
+            }
+
+            let selectBody = 'files=all';
+            try {
+                const filesInfoRes = await fetch(rdUrl(`torrents/info/${torrentId}`), {
+                    headers: { 'Authorization': `Bearer ${rdKey}` }, signal: AbortSignal.timeout(30000)
+                });
+                if (filesInfoRes.ok) {
+                    const filesInfo = await filesInfoRes.json();
+                    const VIDEO_EXT = /\.(mp4|mkv|avi|mov|webm|m4v|ts|wmv|flv)$/i;
+                    const videoFiles = (filesInfo.files || []).filter(f => VIDEO_EXT.test(f.path || ''));
+                    if (videoFiles.length) {
+                        const largest = videoFiles.reduce((a, b) => (b.bytes > a.bytes ? b : a));
+                        selectBody = `files=${largest.id}`;
+                    }
+                }
+            } catch (e) { /* falls back to files=all */ }
+
+            try {
+                const selectRes = await fetch(rdUrl(`torrents/selectFiles/${torrentId}`), {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${rdKey}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: selectBody, signal: AbortSignal.timeout(30000)
+                });
+                if (!selectRes.ok) return { ok: false, error: `Real-Debrid file selection failed (HTTP ${selectRes.status}).` };
+            } catch (e) {
+                return { ok: false, error: 'Could not reach Real-Debrid to select files.' };
+            }
+
+            report('Resolving on Real-Debrid...');
+            let info = null;
+            for (let attempt = 0; attempt < 30; attempt++) {
+                let infoRes;
+                try {
+                    infoRes = await fetch(rdUrl(`torrents/info/${torrentId}`), {
+                        headers: { 'Authorization': `Bearer ${rdKey}` }, signal: AbortSignal.timeout(30000)
+                    });
+                } catch (e) {
+                    return { ok: false, error: 'Real-Debrid status check failed (network).' };
+                }
+                if (!infoRes.ok) return { ok: false, error: `Real-Debrid status check failed (HTTP ${infoRes.status}).` };
+                info = await infoRes.json();
+                if (info.status === 'downloaded') break;
+                if (info.status === 'error' || info.status === 'magnet_error' || info.status === 'dead') {
+                    return { ok: false, error: `Real-Debrid couldn't resolve this torrent (status: ${info.status}).` };
+                }
+                report(`Resolving on Real-Debrid... ${info.progress || 0}%`);
+                await new Promise(r => setTimeout(r, 2000));
+            }
+            if (!info || info.status !== 'downloaded') {
+                return { ok: false, error: 'Timed out waiting for Real-Debrid.' };
+            }
+
+            try {
+                const unrestrictRes = await fetch(rdUrl('unrestrict/link'), {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${rdKey}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `link=${encodeURIComponent(info.links[0])}`, signal: AbortSignal.timeout(30000)
+                });
+                if (!unrestrictRes.ok) return { ok: false, error: `Real-Debrid link resolution failed (HTTP ${unrestrictRes.status}).` };
+                const unrestrictData = await unrestrictRes.json();
+                return { ok: true, directUrl: unrestrictData.download };
+            } catch (e) {
+                return { ok: false, error: 'Could not reach Real-Debrid to unrestrict the link.' };
+            }
+        }
+
+        // ===== BULK SEASON DOWNLOAD (Android-app-only, same as single-episode
+        // download -- LoungeNative.downloadMovie has no browser equivalent) =====
+        let seasonDownloadCancelled = false;
+
+        async function downloadWholeSeason(tmdbId, seasonNumber, showTitle) {
+            const n = window.LoungeNative;
+            if (!n || typeof n.downloadMovie !== 'function') {
+                showRemoteToast('Offline download is only available in the Lounge Android app.');
+                return;
+            }
+            if (!localStorage.getItem('nexus_rd_key')) {
+                showRemoteToast('Add your Real-Debrid API key in Settings first.');
+                return;
+            }
+            const episodes = seasonEpisodesCache[`${tmdbId}:${seasonNumber}`];
+            if (!episodes || !episodes.length) {
+                showRemoteToast('Open the episode list first so Lounge knows what\'s in this season.');
+                return;
+            }
+
+            seasonDownloadCancelled = false;
+            const body = document.getElementById('stream-picker-body');
+            const rows = episodes.map(ep => ({ ep, status: 'Queued' }));
+            const renderRows = () => {
+                body.innerHTML = `
+                    <div class="stream-picker-empty" style="text-align:left;">
+                        <button class="btn btn-secondary" style="margin-bottom:12px;" onclick="seasonDownloadCancelled=true;">
+                            <i class="fas fa-xmark"></i> Cancel remaining
+                        </button>
+                        ${rows.map(r => `
+                            <div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #222;">
+                                <span>${r.ep.episode_number}. ${escapeHtml(r.ep.name || 'Episode ' + r.ep.episode_number)}</span>
+                                <span style="color:#9fb3c0;white-space:nowrap;">${escapeHtml(r.status)}</span>
+                            </div>
+                        `).join('')}
+                    </div>`;
+            };
+            renderRows();
+
+            const tmdbKey = localStorage.getItem('nexus_tmdb_key');
+            let imdbId = null;
+            try {
+                const extRes = await fetch(`https://api.themoviedb.org/3/tv/${tmdbId}/external_ids?api_key=${tmdbKey}`, { signal: AbortSignal.timeout(15000) });
+                if (extRes.ok) imdbId = (await extRes.json()).imdb_id || null;
+            } catch (e) { /* free-embed sources below still need only tmdbId, but bulk RD download needs imdbId */ }
+
+            for (let i = 0; i < rows.length; i++) {
+                if (seasonDownloadCancelled) { rows[i].status = 'Cancelled'; renderRows(); continue; }
+                const r = rows[i];
+                r.status = 'Searching...';
+                renderRows();
+
+                let streams;
+                try {
+                    streams = await queryStreams(imdbId, 'series', tmdbId, seasonNumber, r.ep.episode_number);
+                } catch (e) {
+                    r.status = 'Search failed'; renderRows(); continue;
+                }
+                // Bulk mode can't show a per-episode picker -- take the first
+                // real torrent/magnet result (queryStreams already sorts by
+                // quality/seeds), skipping free-embed entries since those
+                // have no direct file to hand to downloadMovie().
+                const best = (streams || []).find(s => !s.isFreeEmbed && s.magnet);
+                if (!best) { r.status = 'No source found'; renderRows(); continue; }
+
+                r.status = 'Adding to RD...';
+                renderRows();
+                const result = await resolveRdMagnetToDirectUrl(best.magnet, (msg) => { r.status = msg; renderRows(); });
+                if (!result.ok) { r.status = result.error; renderRows(); continue; }
+
+                const dlName = `${showTitle} S${seasonNumber}E${r.ep.episode_number}`;
+                let dlResult = 'failed';
+                try { dlResult = String(n.downloadMovie(result.directUrl, dlName, dlName)); } catch (e) { dlResult = 'failed'; }
+                r.status = dlResult === 'started' ? 'Download started'
+                    : dlResult === 'permission-needed' ? 'Storage permission needed'
+                    : 'Could not start download';
+                renderRows();
+            }
         }
 
         async function resolveAndPlay(streamIdx, downloadInstead) {
