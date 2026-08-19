@@ -1929,7 +1929,20 @@
            -- the YouTube IFrame API replaces the target element with its own
            iframe (dropping any class we put on the div), so this has to
            target the tag generically inside .chb-media rather than a class
-           on the (now-gone) mount div. */
+           on the (now-gone) mount div.
+           Real bug found 2026-08-19 (Deep's screenshot): a bare min-width/
+           min-height:100% cover-crop has ZERO safety margin -- it crops
+           exactly to the container edge, so YouTube's own title-card flash
+           (shows briefly on load even with controls:0/modestbranding:1 --
+           a YouTube embed quirk, not something playerVars can fully suppress)
+           was peeking through right at the frame edges instead of being
+           safely outside the visible crop. Bumped the effective zoom to 128%
+           so any such flash lands well outside frame regardless of the
+           source card's exact aspect ratio. Paired with a top vignette below
+           (matching the existing bottom .chb-info gradient) as a second,
+           belt-and-braces guard against any residual UI bleed at the very
+           top edge -- consistent cinematic framing either way, not just a
+           crop-math fix. */
         .chb-overlay .chb-media iframe {
             position: absolute;
             top: 50%;
@@ -1937,8 +1950,8 @@
             transform: translate(-50%, -50%);
             width: auto;
             height: auto;
-            min-width: 100%;
-            min-height: 100%;
+            min-width: 128%;
+            min-height: 128%;
             aspect-ratio: 16 / 9;
             border: 0;
             opacity: 0;
@@ -1946,6 +1959,17 @@
             pointer-events: none;
         }
         .chb-overlay.chb-video-ready .chb-media iframe { opacity: 1; }
+        .chb-overlay .chb-media::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 30%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+        .chb-overlay.chb-video-ready .chb-media::after { opacity: 1; }
         .chb-overlay .chb-info {
             position: absolute;
             left: 0; right: 0; bottom: 0;
@@ -12736,7 +12760,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v130';
+        const LOUNGE_BUILD = 'lounge-shell-v131';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';

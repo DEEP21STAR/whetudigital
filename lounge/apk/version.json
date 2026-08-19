@@ -33,10 +33,21 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v130"
+      "cacheName": "lounge-shell-v131"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.30",
+      "versionCode": 28,
+      "web": "lounge-shell-v131",
+      "date": "2026-08-19",
+      "title": "Fix: Hover Break-Out trailer frame -- YouTube's own title-card UI was peeking through the crop",
+      "changes": [
+        "Deep's screenshot: the auto-playing hover trailer showed YouTube's own title bar and player chrome instead of a clean cropped video. Root cause: the min-width/min-height:100% cover-crop trick had zero safety margin -- it crops exactly to the container edge, and YouTube's title-card flash (shows briefly on load even with controls:0/modestbranding:1, a known embed quirk that playerVars can't fully suppress) was landing right at that edge instead of safely outside it.",
+        "Fixed with two layers: bumped the effective crop zoom to 128% (any UI flash now lands well outside the visible frame regardless of the source card's exact aspect ratio), plus a cinematic top vignette gradient (matching the existing bottom info-panel gradient) as a second guard against any residual bleed at the very top edge -- a deliberate framing choice, not just a crop-math patch."
+      ]
+    },
     {
       "version": "0.1.30",
       "versionCode": 28,
