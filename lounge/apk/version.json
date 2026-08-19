@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v139"
+      "cacheName": "lounge-shell-v140"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.31",
+      "versionCode": 29,
+      "web": "lounge-shell-v140",
+      "date": "2026-08-19",
+      "title": "Quick Actions repositioned + header decluttered + Matrix-drop timing fixed",
+      "changes": [
+        "Quick Actions panel moved from bottom-anchored (bottom:90px) to vertically centered on the right edge (top:50%) -- Deep's screenshot showed the collapsed rail sitting directly on top of the hero's own slide-position dots, which only happens with a bottom-anchored control behind a tall hero. Vertical-center is immune to hero height, scroll position, and mobile system-nav safe-areas.",
+        "Header decluttered: Watch Together, Sleep Timer and Rail Layout were 3 separate always-visible chips in the nav-widgets row (Deep: the row looked 'too busy'). Folded behind one new 'Utilities' chip/popover -- same 3 controls, zero JS logic changed, one extra click for 3 occasional-use toggles instead of them permanently eating header width next to VPN/Profile/weather/clock.",
+        "Matrix-drop tagline decode (shipped in v139) had a real timing bug: the whole 23-char cascade was squeezed into a 0.48s budget, giving each glyph a ~12ms flicker -- too fast to perceive, so it looked identical to a flat fade (Deep reloaded and reported no effect visible). Rebuilt with real timing: 45ms stagger, 3 flips at 60ms each (180ms of visible flicker per character), and the Enter-prompt pause / portal-out exit pushed later to make room."
+      ]
+    },
     {
       "version": "0.1.31",
       "versionCode": 29,

@@ -985,6 +985,12 @@
             transition: border-color 0.2s ease, background 0.2s ease;
         }
         .vpn-chip:hover { border-color: #3a3a3a; background: #181818; }
+        /* Utilities popover, 2026-08-19: the 3 relocated chips (Together/
+           Sleep/Layout) stack full-width inside the 300px popover instead of
+           sitting side by side in the header's horizontal flex row -- same
+           .vpn-chip look, just a vertical list context. */
+        .vpn-popover .vpn-chip { width: 100%; margin-bottom: 8px; white-space: normal; }
+        .vpn-popover .vpn-chip:last-child { margin-bottom: 0; }
         /* Icon-badge redesign, 2026-08-17 (Deep: the 4 chips "look terrible
            with no purpose either" -- at any width under 1300px, which is
            every phone including the app itself, .vpn-chip-label/-sub were
@@ -7762,42 +7768,21 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <div class="vpn-chip-sub" id="profileChipName">Main</div>
                     </div>
                 </div>
-                <!-- Watch Together, added 2026-08-16. Works with the "This
-                     device" browser player only -- honestly scoped the same
-                     way the sleep timer's Cast/native-TV limits are, rather
-                     than implying it covers every surface. -->
-                <div class="vpn-chip" id="wtChip" data-state="off" onclick="toggleWtPopover(event)" role="button" tabindex="0" aria-label="Watch Together" title="Watch Together -- share a room code to sync playback">
-                    <div class="vpn-chip-icon"><i class="fas fa-users"></i><span class="vpn-chip-dot" id="wtDot" style="background:#555;"></span></div>
+                <!-- Header decluttering, 2026-08-19 (Deep, after a "too busy"
+                     screenshot of this exact row): Watch Together, Sleep
+                     Timer and Rail Layout were 3 separate always-visible
+                     chips -- all three are occasional-use toggles, not
+                     glanceable status like VPN/Profile/weather/clock, so
+                     they're folded behind one "Utilities" chip below. Their
+                     own divs (still id="wtChip"/"sleepTimerChip"/
+                     "railLayoutToggle", zero JS changes needed) now live
+                     inside #utilitiesPopover instead of here -- see the
+                     popover block further down, right after #profilePopover. -->
+                <div class="vpn-chip" id="utilitiesChip" onclick="toggleUtilitiesPopover(event)" role="button" tabindex="0" aria-label="More utilities" title="Watch Together, Sleep Timer, Poster Layout">
+                    <div class="vpn-chip-icon"><i class="fas fa-sliders"></i></div>
                     <div>
-                        <div class="vpn-chip-label">Together</div>
-                        <div class="vpn-chip-sub" id="wtSub">Off</div>
-                    </div>
-                </div>
-                <!-- Sleep timer, added 2026-08-16. Reachable surfaces only,
-                     stated honestly rather than implied to cover everything:
-                     the in-page video/live player (video.pause() directly),
-                     mpv on the PC (existing sendRemoteControl('stop') relay
-                     call, same one the remote's own stop button uses), and
-                     an active Cast session. NOT the native TV player
-                     (PlayerActivity) -- that's a separate Android Activity;
-                     this page's JS timer does not keep running once it's on
-                     top, so there is nothing honest this could do there. -->
-                <div class="vpn-chip" id="sleepTimerChip" data-state="off" onclick="toggleSleepTimerPopover(event)" role="button" tabindex="0" aria-label="Sleep timer" title="Sleep timer -- auto-stop playback after a set time">
-                    <div class="vpn-chip-icon"><i class="fas fa-moon"></i><span class="vpn-chip-dot" id="sleepTimerDot" style="background:#555;"></span></div>
-                    <div>
-                        <div class="vpn-chip-label">Sleep</div>
-                        <div class="vpn-chip-sub" id="sleepTimerSub">Off</div>
-                    </div>
-                </div>
-                <!-- Rail layout toggle, 2026-08-18 (Deep's ask). One global
-                     switch, not per-rail -- a control on every rail would be
-                     visual clutter and inconsistent state across a page with
-                     a dozen rails on it. -->
-                <div class="vpn-chip" id="railLayoutToggle" onclick="toggleRailLayout()" role="button" tabindex="0" aria-label="Switch poster layout to horizontal rows" title="Poster layout: top-to-bottom (click for left-to-right rows)">
-                    <div class="vpn-chip-icon"><i class="fas fa-table-cells-large" id="railLayoutIcon"></i></div>
-                    <div>
-                        <div class="vpn-chip-label">Layout</div>
-                        <div class="vpn-chip-sub" id="railLayoutSub">Grid</div>
+                        <div class="vpn-chip-label">Utilities</div>
+                        <div class="vpn-chip-sub">3 tools</div>
                     </div>
                 </div>
                 <div class="weather-widget">
@@ -7840,6 +7825,37 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         <div id="profileList"></div>
         <div class="vpn-popover-actions">
             <button onclick="addProfile()"><i class="fas fa-plus"></i> Add profile</button>
+        </div>
+    </div>
+
+    <!-- Utilities popover, 2026-08-19 -- see the comment on #utilitiesChip in
+         the header. Same 3 divs that used to sit directly in the header row,
+         relocated unchanged: each still owns its own onclick/state/dot, so
+         wtChip still opens #wtPopover and sleepTimerChip still opens
+         #sleepTimerPopover as their own flyouts -- one extra click deep for
+         3 rarely-used toggles, same click depth VPN/Profile/etc. always had. -->
+    <div class="vpn-popover" id="utilitiesPopover">
+        <div class="vpn-popover-verdict" style="margin-top:0;">Grouped here to keep the header tidy -- each of these still opens its own panel.</div>
+        <div class="vpn-chip" id="wtChip" data-state="off" onclick="toggleWtPopover(event)" role="button" tabindex="0" aria-label="Watch Together" title="Watch Together -- share a room code to sync playback">
+            <div class="vpn-chip-icon"><i class="fas fa-users"></i><span class="vpn-chip-dot" id="wtDot" style="background:#555;"></span></div>
+            <div>
+                <div class="vpn-chip-label">Together</div>
+                <div class="vpn-chip-sub" id="wtSub">Off</div>
+            </div>
+        </div>
+        <div class="vpn-chip" id="sleepTimerChip" data-state="off" onclick="toggleSleepTimerPopover(event)" role="button" tabindex="0" aria-label="Sleep timer" title="Sleep timer -- auto-stop playback after a set time">
+            <div class="vpn-chip-icon"><i class="fas fa-moon"></i><span class="vpn-chip-dot" id="sleepTimerDot" style="background:#555;"></span></div>
+            <div>
+                <div class="vpn-chip-label">Sleep</div>
+                <div class="vpn-chip-sub" id="sleepTimerSub">Off</div>
+            </div>
+        </div>
+        <div class="vpn-chip" id="railLayoutToggle" onclick="toggleRailLayout()" role="button" tabindex="0" aria-label="Switch poster layout to horizontal rows" title="Poster layout: top-to-bottom (click for left-to-right rows)">
+            <div class="vpn-chip-icon"><i class="fas fa-table-cells-large" id="railLayoutIcon"></i></div>
+            <div>
+                <div class="vpn-chip-label">Layout</div>
+                <div class="vpn-chip-sub" id="railLayoutSub">Grid</div>
+            </div>
         </div>
     </div>
 
@@ -9863,19 +9879,28 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // Scheduled entirely as tl.call() entries on the intro's own GSAP
         // timeline (not setTimeout) so Skip's tl.kill() cancels every
         // in-flight glyph flip for free, same as the rest of the intro.
-        function scheduleTaglineDecode(tl, chars, startAt, windowSec) {
+        //
+        // FIRST PASS BUG (Deep, 2026-08-19 -- reloaded and saw a flat pop-in,
+        // not a scramble): the whole 23-char cascade was squeezed into a
+        // 0.48s budget to fit before the existing Enter-prompt pause, giving
+        // each glyph a ~12ms flicker -- below what a human eye registers as
+        // "scrambling" rather than "instant". Fixed with real, independent
+        // timing (3 flips x 60ms = 180ms of visible flicker per character,
+        // 45ms stagger so neighbours overlap into an actual left-to-right
+        // wave) and the pause/Enter/portal-out beats moved later to make
+        // room -- see the SETTLE block below.
+        function scheduleTaglineDecode(tl, chars, startAt, stagger, flipMs, flips) {
             if (!chars.length) return;
-            const stagger = windowSec / chars.length;
-            const flipMs = Math.min(0.045, stagger * 0.6);
             chars.forEach((c, i) => {
                 const base = startAt + i * stagger;
                 if (!c.scrambles) {
-                    tl.call(() => { c.el.textContent = c.final === ' ' ? ' ' : c.final; }, null, base);
+                    tl.call(() => { c.el.textContent = c.final === ' ' ? ' ' : c.final; }, null, base);
                     return;
                 }
-                tl.call(() => { c.el.textContent = TAGLINE_GLYPHS[Math.floor(Math.random() * TAGLINE_GLYPHS.length)]; }, null, base);
-                tl.call(() => { c.el.textContent = TAGLINE_GLYPHS[Math.floor(Math.random() * TAGLINE_GLYPHS.length)]; }, null, base + flipMs);
-                tl.call(() => { c.el.textContent = c.final; }, null, base + flipMs * 2);
+                for (let f = 0; f < flips; f++) {
+                    tl.call(() => { c.el.textContent = TAGLINE_GLYPHS[Math.floor(Math.random() * TAGLINE_GLYPHS.length)]; }, null, base + f * flipMs);
+                }
+                tl.call(() => { c.el.textContent = c.final; }, null, base + flips * flipMs);
             });
         }
 
@@ -10364,9 +10389,12 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
             // L4: tagline + particle field land on the settle. The SVG
             // itself pops visible near-instantly (0.08s) and the gold layer
-            // resolves out of scrambled glyphs across the remaining window --
-            // budget capped at 0.48s so the cascade finishes before the
-            // addPause() below parks the playhead at SETTLE+0.52.
+            // resolves out of scrambled glyphs across the next ~1.17s -- 45ms
+            // stagger x 23 chars + 3x60ms flips on the last one, tuned to
+            // actually be visible (see FIRST PASS BUG note on
+            // scheduleTaglineDecode above). Everything after this beat
+            // (Enter fade-in, the pause, the portal-out) is pushed later to
+            // give the cascade room -- was SETTLE+0.52/0.62, now SETTLE+1.3+.
             const SETTLE = POP_CLIMAX + 0.44;
             const taglineSheenEl = document.querySelector('#intro-tagline-svg .tagline-sheen');
             // Sheen sits UNDER the gold layer showing the finished string --
@@ -10374,8 +10402,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // reveal by shining through the flicker with the answer already visible.
             if (taglineSheenEl) gsap.set(taglineSheenEl, { opacity: 0 });
             tl.to(taglineEl, { opacity: 1, duration: 0.08 }, SETTLE);
-            scheduleTaglineDecode(tl, taglineChars, SETTLE, 0.48);
-            if (taglineSheenEl) tl.to(taglineSheenEl, { opacity: 0.58, duration: 0.25 }, SETTLE + 0.48);
+            scheduleTaglineDecode(tl, taglineChars, SETTLE, 0.045, 0.06, 3);
+            if (taglineSheenEl) tl.to(taglineSheenEl, { opacity: 0.58, duration: 0.25 }, SETTLE + 1.2);
             // Particles come up WITH the couch, not after it. Held to the settle
             // they made the canvas read as static through the whole climax
             // (motion judge LIVING CANVAS: 5, "minimal particles appear late").
@@ -10393,10 +10421,10 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // in a 15s wait. Same class of defect as the original "no time to
             // click Enter" bug, so it gets the same treatment: button first,
             // pause second, and the pause waits indefinitely.
-            tl.to(enterBtn, { opacity: 1, duration: 0.35 }, SETTLE + 0.15);
+            tl.to(enterBtn, { opacity: 1, duration: 0.35 }, SETTLE + 1.3);
             // addPause's callback runs the moment the playhead parks here, which
             // is exactly the window the key listener should be alive for.
-            tl.addPause(SETTLE + 0.52, () => {
+            tl.addPause(SETTLE + 1.67, () => {
                 enterArmed = true;
                 window.addEventListener('keydown', onIntroKey);
             });
@@ -10416,8 +10444,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
             // L6: portal out -- a quick counter-flash on exit too, so the close
             // reads as deliberate rather than an abrupt cut.
-            tl.to(flashEl, { opacity: 0.7, duration: 0.1 }, SETTLE + 0.62);
-            tl.to(intro, { scale: 3, opacity: 0, duration: 0.6, ease: 'power2.in' }, SETTLE + 0.62);
+            tl.to(flashEl, { opacity: 0.7, duration: 0.1 }, SETTLE + 1.77);
+            tl.to(intro, { scale: 3, opacity: 0, duration: 0.6, ease: 'power2.in' }, SETTLE + 1.77);
 
             // Skip kills the WHOLE sequence (montage, popcorn, wordmark, portal),
             // not just the tail: the timeline is killed outright and the shared
@@ -13541,7 +13569,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v139';
+        const LOUNGE_BUILD = 'lounge-shell-v140';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -14413,6 +14441,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const opening = !pop.classList.contains('open');
             document.getElementById('sleepTimerPopover')?.classList.remove('open');
             document.getElementById('profilePopover')?.classList.remove('open');
+            document.getElementById('utilitiesPopover')?.classList.remove('open');
             if (!opening) { pop.classList.remove('open'); return; }
 
             const rect = chip.getBoundingClientRect();
@@ -14434,6 +14463,30 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 vpnChipArmLive();
             }
             runVpnChipCheck(true);
+        }
+
+        // Utilities popover, 2026-08-19 -- see #utilitiesChip comment in the
+        // header. Same positioning pattern as toggleVpnPopover; the 3 rows
+        // inside (wtChip/sleepTimerChip/railLayoutToggle) keep their own
+        // onclick handlers unchanged, so this function only owns showing/
+        // hiding the container itself.
+        function toggleUtilitiesPopover(event) {
+            event.stopPropagation();
+            const pop = document.getElementById('utilitiesPopover');
+            const chip = document.getElementById('utilitiesChip');
+            if (!pop || !chip) return;
+            const opening = !pop.classList.contains('open');
+            document.getElementById('vpnPopover')?.classList.remove('open');
+            document.getElementById('sleepTimerPopover')?.classList.remove('open');
+            document.getElementById('profilePopover')?.classList.remove('open');
+            document.getElementById('wtPopover')?.classList.remove('open');
+            if (!opening) { pop.classList.remove('open'); return; }
+
+            const rect = chip.getBoundingClientRect();
+            pop.style.top = (rect.bottom + 8) + 'px';
+            pop.style.right = (window.innerWidth - rect.right) + 'px';
+            pop.style.left = 'auto';
+            pop.classList.add('open');
         }
 
         // ===== MULTI-PROFILE ("Who's watching"), added 2026-08-16 =====
@@ -14517,6 +14570,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const opening = !pop.classList.contains('open');
             document.getElementById('vpnPopover')?.classList.remove('open');
             document.getElementById('sleepTimerPopover')?.classList.remove('open');
+            document.getElementById('utilitiesPopover')?.classList.remove('open');
             if (!opening) { pop.classList.remove('open'); return; }
             renderProfileList();
             const rect = chip.getBoundingClientRect();
@@ -22899,8 +22953,20 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                    robot=violet-to-cyan gradient matching .ai-btn's own
                    identity so the relocated control still reads as "the
                    same AI button", not a new one. */
-                #lounge-fab { position: fixed; right: 20px; bottom: 90px; z-index: 500;
+                /* Vertically centred on the right edge, not bottom-anchored
+                   (Deep, 2026-08-19, after a screenshot showed the collapsed
+                   rail sitting right on top of the hero's own slide-position
+                   dots -- .trending-hero-dots lives at the hero's own
+                   bottom-right, and a tall hero puts that corner well inside
+                   the fold). top:50%+translateY is immune to hero height,
+                   scroll position, AND the mobile system-nav safe-area that a
+                   bottom-anchored control has to fight (env(safe-area-inset-
+                   bottom) -- see .ai-btn below, which needs it precisely
+                   because it's bottom-anchored). Max-height + overflow guard
+                   the expanded panel on short landscape-phone viewports. */
+                #lounge-fab { position: fixed; right: 20px; top: 50%; transform: translateY(-50%); z-index: 500;
                     width: 236px; border-radius: 16px; overflow: hidden;
+                    max-height: calc(100vh - 40px); overflow-y: auto;
                     background: rgba(16,16,20,0.88); backdrop-filter: blur(10px);
                     border: 1px solid rgba(0,212,255,0.18);
                     box-shadow: 0 12px 34px rgba(0,0,0,0.5), 0 0 24px rgba(0,212,255,0.08); }
