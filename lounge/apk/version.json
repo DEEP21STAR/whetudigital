@@ -22,8 +22,8 @@
   "generated": "2026-08-16",
   "latest": {
     "android": {
-      "versionCode": 28,
-      "versionName": "0.1.30",
+      "versionCode": 29,
+      "versionName": "0.1.31",
       "minSdk": 23,
       "certSha256": "082961c7cc1097dfb4f76239947becb18cd98f88eca3da6585e504d6f523352f",
       "apk": {
@@ -37,6 +37,16 @@
     }
   },
   "changelog": [
+    {
+      "version": "0.1.31",
+      "versionCode": 29,
+      "web": "lounge-shell-v138",
+      "date": "2026-08-19",
+      "title": "Restricted Area visual restyle -- native Android",
+      "changes": [
+        "Restricted Section rebuilt from flat grey Android buttons/text to Lounge's own cyan/violet glass language -- dark translucent panels, thin accent borders, the same cyan-to-violet gradient accent rule used in the web app's windowed-Settings cards tonight. A persistent branded header (Lounge mark + accent rule) now stays visible across every screen this Activity shows, including while browsing an external site in the embedded WebView, so it still reads as being inside Lounge rather than having left for a raw browser tab -- Deep's ask. Real rebuild via ./gradlew assembleRelease, confirmed compiling clean (pre-existing onBackPressed deprecation warning only, unrelated to this change)."
+      ]
+    },
     {
       "version": "0.1.30",
       "versionCode": 28,
