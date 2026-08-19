@@ -7,8 +7,12 @@ export const config = { runtime: 'edge' };
 //                  -> iframe <host>/premiumtv/daddy4.php?id=N
 //                  -> that page contains atob('<base64>') = the master .m3u8
 // The SEGMENTS in the resolved playlist are absolute pre-signed Cloudflare R2
-// URLs needing no headers, so this only ever hands back a playlist -- it
-// never proxies video bytes itself.
+// URLs. 2026-08-19: confirmed R2 sends no Access-Control-Allow-Origin (OPTIONS
+// preflight = 403, plain GET = no ACAO header at all), so a browser's hls.js
+// silently drops every segment fetch -- curl doesn't enforce CORS so this
+// looked fine under manual testing. Segment URIs are now rewritten to
+// /api/lounge/skysegment, which fetches server-side (no CORS applies) and
+// re-serves with CORS headers. See skysegment.js.
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
 const DLHD_BASE = 'https://dlhd.st';
 const TTL_MS = 120 * 1000; // master URL is token-signed; re-resolve often enough to stay ahead of expiry
@@ -73,10 +77,12 @@ export default async function handler(req) {
     if (!lines.length) throw new Error('master playlist had no variants');
     const mediaUrl = new URL(lines[0], master).href;
     const media = await fetchText(mediaUrl, referer);
+    const proxyBase = `${url.origin}/api/lounge/skysegment?u=`;
     const out = media.split('\n').map(line => {
       const s = line.trim();
-      if (s && !s.startsWith('#') && !s.startsWith('http')) return new URL(s, mediaUrl).href;
-      return line;
+      if (!s || s.startsWith('#')) return line;
+      const abs = s.startsWith('http') ? s : new URL(s, mediaUrl).href;
+      return proxyBase + encodeURIComponent(abs);
     });
     return new Response(out.join('\n'), {
       status: 200,
