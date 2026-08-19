@@ -33,10 +33,21 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v138"
+      "cacheName": "lounge-shell-v139"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.31",
+      "versionCode": 29,
+      "web": "lounge-shell-v139",
+      "date": "2026-08-19",
+      "title": "Matrix-drop intro tagline + hero-rail touch-tap hardening",
+      "changes": [
+        "Intro tagline (\"YOUR CINEMA, EVERYWHERE\") now resolves out of scrambled glyphs letter-by-letter left to right instead of a flat fade -- Deep's idea, same gold arc-marquee palette, no new hue. The specular sheen layer underneath is held invisible until the scramble finishes so it can't show the finished word early through the flicker. Whole cascade fits inside the existing 0.48s settle window before the intro pauses at the Enter prompt, so total intro runtime is unchanged.",
+        "Hardened initRailDragScroll() (the desktop mouse-drag-to-scroll handler for horizontal rail layout) against Chrome's synthetic mousedown/mouseup/click events that fire after every touch tap -- added an e.sourceCapabilities.firesTouchEvents guard so a tap on a poster near the hero on mobile can never get misread as a drag-then-release and have its click suppressed. Investigated as the leading candidate for the hero/poster-tile swipe interference Deep reported; no live touch device was available to reproduce directly, so this closes the most plausible code-level risk rather than confirming a single root cause."
+      ]
+    },
     {
       "version": "0.1.31",
       "versionCode": 29,

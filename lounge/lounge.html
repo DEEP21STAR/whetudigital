@@ -9841,6 +9841,44 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             }
         }
 
+        // Matrix-drop tagline reveal (Deep's idea, 2026-08-19): "YOUR CINEMA,
+        // EVERYWHERE" resolves letter-by-letter out of scrambled glyphs, left
+        // to right, instead of a flat fade -- same gold palette, no new hue
+        // (DESIGN_DNA A4). Only the primary gold <textPath> is split into
+        // per-char tspans; the sheen highlight layer stays a flat string
+        // underneath (0.58 opacity, so a one-frame mismatch during the
+        // scramble is invisible) and keeps its existing simple fade.
+        const TAGLINE_TEXT = 'YOUR CINEMA, EVERYWHERE';
+        const TAGLINE_GLYPHS = '01XZQKVWM#%&$*+=<>?/';
+        function buildTaglineChars(textPathEl) {
+            if (!textPathEl) return [];
+            textPathEl.textContent = '';
+            return TAGLINE_TEXT.split('').map((ch) => {
+                const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+                tspan.textContent = ch === ' ' ? ' ' : ch;
+                textPathEl.appendChild(tspan);
+                return { el: tspan, final: ch, scrambles: /[A-Z]/.test(ch) };
+            });
+        }
+        // Scheduled entirely as tl.call() entries on the intro's own GSAP
+        // timeline (not setTimeout) so Skip's tl.kill() cancels every
+        // in-flight glyph flip for free, same as the rest of the intro.
+        function scheduleTaglineDecode(tl, chars, startAt, windowSec) {
+            if (!chars.length) return;
+            const stagger = windowSec / chars.length;
+            const flipMs = Math.min(0.045, stagger * 0.6);
+            chars.forEach((c, i) => {
+                const base = startAt + i * stagger;
+                if (!c.scrambles) {
+                    tl.call(() => { c.el.textContent = c.final === ' ' ? ' ' : c.final; }, null, base);
+                    return;
+                }
+                tl.call(() => { c.el.textContent = TAGLINE_GLYPHS[Math.floor(Math.random() * TAGLINE_GLYPHS.length)]; }, null, base);
+                tl.call(() => { c.el.textContent = TAGLINE_GLYPHS[Math.floor(Math.random() * TAGLINE_GLYPHS.length)]; }, null, base + flipMs);
+                tl.call(() => { c.el.textContent = c.final; }, null, base + flipMs * 2);
+            });
+        }
+
         function playIntro(onComplete) {
             const intro = document.getElementById('intro');
             const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -9860,6 +9898,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const titleWrap = document.getElementById('intro-title-wrap');
             const couchWrap = document.getElementById('intro-couch');
             const taglineEl = document.getElementById('intro-tagline');
+            const taglinePathEl = document.querySelector('#intro-tagline-svg text:not(.tagline-sheen) > textPath');
+            const taglineChars = buildTaglineChars(taglinePathEl);
             const enterBtn = document.getElementById('intro-enter');
             const particlesEl = document.getElementById('intro-particles');
             const flashEl = document.getElementById('intro-flash');
@@ -10322,9 +10362,20 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 }, at + 0.38);
             });
 
-            // L4: tagline + particle field land on the settle
+            // L4: tagline + particle field land on the settle. The SVG
+            // itself pops visible near-instantly (0.08s) and the gold layer
+            // resolves out of scrambled glyphs across the remaining window --
+            // budget capped at 0.48s so the cascade finishes before the
+            // addPause() below parks the playhead at SETTLE+0.52.
             const SETTLE = POP_CLIMAX + 0.44;
-            tl.to(taglineEl, { opacity: 1, duration: 0.4 }, SETTLE);
+            const taglineSheenEl = document.querySelector('#intro-tagline-svg .tagline-sheen');
+            // Sheen sits UNDER the gold layer showing the finished string --
+            // held at 0 until the scramble resolves, so it can't spoil the
+            // reveal by shining through the flicker with the answer already visible.
+            if (taglineSheenEl) gsap.set(taglineSheenEl, { opacity: 0 });
+            tl.to(taglineEl, { opacity: 1, duration: 0.08 }, SETTLE);
+            scheduleTaglineDecode(tl, taglineChars, SETTLE, 0.48);
+            if (taglineSheenEl) tl.to(taglineSheenEl, { opacity: 0.58, duration: 0.25 }, SETTLE + 0.48);
             // Particles come up WITH the couch, not after it. Held to the settle
             // they made the canvas read as static through the whole climax
             // (motion judge LIVING CANVAS: 5, "minimal particles appear late").
@@ -12324,6 +12375,14 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         (function initRailDragScroll() {
             let drag = null; // { el, startX, startScrollLeft, moved }
             document.addEventListener('mousedown', (e) => {
+                // Chrome synthesizes a mousedown/mouseup/click triplet after
+                // every touch tap. sourceCapabilities.firesTouchEvents is the
+                // documented way to tell a synthetic one from a real mouse
+                // click -- without this guard, a tap near a rail on mobile
+                // can arm `drag`, and if the OS also delivers a hair of
+                // coordinate jitter between the synthetic down/up, endDrag()
+                // swallows the tap's click and the poster fails to open.
+                if (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents) return;
                 if (e.button !== 0 || !document.body.classList.contains('rail-layout-horizontal')) return;
                 const rail = e.target.closest('.content-rail');
                 if (!rail) return;
@@ -13482,7 +13541,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v138';
+        const LOUNGE_BUILD = 'lounge-shell-v139';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
