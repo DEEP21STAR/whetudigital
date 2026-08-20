@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v154"
+      "cacheName": "lounge-shell-v155"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v155",
+      "date": "2026-08-20",
+      "title": "TVNZ 1/2/Duke DASH+Widevine player built -- real root cause fixed, DRM playback itself [UNTESTED]",
+      "changes": [
+        "Real root cause (researched, confirmed via i.mjh.nz's own source data): this app's channel list points TVNZ 1/2/Duke at iptv-org's legacy CDN URL, which TVNZ has retired -- their current live feed is DASH (.mpd) + Widevine DRM, a different protocol and encryption scheme hls.js (this app's only player until now) has no path for at all. That's the actual, structural reason these ever showed \"[Geo-blocked]\" -- not geography, not a header.",
+        "Added Shaka Player 4.11.0 (Google's own DASH+EME/Widevine player, MIT-licensed) alongside hls.js. New DRM_CHANNEL_MAP + drmEntryFor() in lounge.html routes exactly 3 channels (TVNZ 1/2/Duke, matched by the same normEpgId() the EPG system already uses) to Shaka instead of hls.js; every other Live TV channel is completely unchanged. Manifest + Widevine license URLs (matthuisman/i.mjh.nz, same free NZ source already powering EPG) independently verified live via curl before wiring in: both fully CORS-open (Access-Control-Allow-Origin:*), the license endpoint redirects to a pre-signed TVNZ Freeview-partner URL with embedded auth -- genuinely playable straight from a browser, no server relay needed.",
+        "[UNTESTED: the actual decrypt-and-play step]. Real, hard limitation hit and documented rather than glossed over: EVERY automation browser available this session (Playwright's bundled Chromium, the claude-in-chrome extension's Chrome) has no Widevine CDM at all -- navigator.requestMediaKeySystemAccess doesn't even exist in either. This isn't a code gap, it's an open-source/automation Chromium build limitation (Google's licensing keeps Widevine out of vanilla Chromium). Confirmed everything short of that boundary: manifest and license URLs live and reachable, Shaka Player library loads correctly, code path syntax-clean and wired to the exact right channels. The final step needs Deep's own real Chrome or Edge install (both ship Widevine by default) -- ask him to try TVNZ 1 and report exactly what happens."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,

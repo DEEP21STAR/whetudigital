@@ -32,6 +32,17 @@
          Pinned explicitly, same as every other CDN lib here — never @latest.
          Used ONLY by the in-page live-channel player; mpv still handles Movies/TV. -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.6.17/dist/hls.min.js"></script>
+    <!-- Shaka Player 4.11.0, added 2026-08-20 for the NZ Freeview DRM channels
+         (TVNZ 1/2/Duke). Real root cause researched, not guessed: TVNZ dropped
+         plain HLS entirely -- their live feed is now DASH (.mpd) + Widevine
+         DRM, a different protocol AND encryption scheme hls.js has no path
+         for. Shaka is Google's own DASH+EME/Widevine player, MIT-licensed,
+         the standard choice for exactly this combination in a browser (no
+         native app/CDM install needed -- Chrome/Edge ship Widevine L3
+         built in). jsDelivr 200 verified before wiring. Used ONLY by the
+         handful of channels in DRM_CHANNEL_MAP (see openLivePlayer) -- every
+         other Live TV channel keeps using hls.js exactly as before. -->
+    <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.11.0/dist/shaka-player.compiled.js"></script>
     <!-- Google Cast Web Sender (CAF). Version-less by Google's own instruction --
          gstatic serves the only supported build and pinning is not offered.
          __onGCastApiAvailable MUST be defined BEFORE the script tag (documented
@@ -13989,7 +14000,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v154';
+        const LOUNGE_BUILD = 'lounge-shell-v155';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -19851,6 +19862,10 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // so a browser can fetch them directly -- that CORS header is the whole
         // reason this is possible without proxying every segment.
         let lpHls = null;          // live hls.js instance (at most ONE, ever)
+        let lpShaka = null;        // live shaka.Player instance, for DRM_CHANNEL_MAP
+                                    // channels only -- see openLivePlayer. Same
+                                    // "at most ONE, ever" rule as lpHls; the two
+                                    // are mutually exclusive per channel.
         let lpGen = 0;             // bumped on every open/teardown; async callbacks
                                    // from a previous channel compare against it and
                                    // bail, so a fast A->B switch can't cross wires.
@@ -19927,6 +19942,10 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             if (lpHls) {
                 try { lpHls.destroy(); } catch (e) { console.warn('hls destroy:', e); }
                 lpHls = null;
+            }
+            if (lpShaka) {
+                try { lpShaka.destroy(); } catch (e) { console.warn('shaka destroy:', e); }
+                lpShaka = null;
             }
             const v = lpEl('lp-video');
             if (v) {
@@ -20155,6 +20174,30 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             return isApple || !(window.Hls && window.Hls.isSupported());
         }
 
+        // NZ Freeview DRM channels (2026-08-20, Deep: "get it right... use the
+        // internet to find working solutions"). Root cause researched, not
+        // guessed: TVNZ dropped plain HLS entirely -- this account's iptv-org
+        // playlist entry for these channels points at a dead/legacy CDN URL,
+        // which is the real reason they show as "[Geo-blocked]" and never
+        // play. TVNZ's CURRENT live feed is DASH (.mpd) + Widevine DRM,
+        // served by matthuisman/i.mjh.nz (the same free, community-maintained
+        // NZ source already used for EPG) via a fully CORS-open redirector --
+        // manifest and license URLs both verified live with
+        // Access-Control-Allow-Origin:* before wiring this in, no server
+        // relay needed, this plays straight from the browser.
+        // Keyed by the SAME normEpgId() used for EPG matching, so a channel
+        // is identified by its tvg-id regardless of exact source-list naming
+        // drift ("TVNZ1.nz", "TVNZ 1.nz", etc. all normalize the same way).
+        const DRM_CHANNEL_MAP = {
+            tvnz1:     { mpd: 'https://i.mjh.nz/.r/tvnz-1.mpd',     license: 'https://c.mjh.nz/tvnz-1-wv' },
+            tvnz2:     { mpd: 'https://i.mjh.nz/.r/tvnz-2.mpd',     license: 'https://c.mjh.nz/tvnz-2-wv' },
+            tvnzduke:  { mpd: 'https://i.mjh.nz/.r/tvnz-duke.mpd',  license: 'https://c.mjh.nz/tvnz-duke-wv' },
+        };
+        function drmEntryFor(channel) {
+            if (!channel || !channel.tvgId) return null;
+            return DRM_CHANNEL_MAP[normEpgId(channel.tvgId)] || null;
+        }
+
         // Investigated 2026-08-20 (Deep: "LIVE NZ Channel one doesnt work
         // all with geo lock"): confirmed live that HLS.js plays this exact
         // stream correctly in a real foregrounded browser, so it's not a
@@ -20379,6 +20422,48 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 }
             }, 2000);
 
+            // NZ Freeview DRM channels (TVNZ 1/2/Duke) branch BEFORE the
+            // native/hls.js fork -- they need a completely different player
+            // (DASH manifest, Widevine license request), not just a
+            // different source URL. channel.url (the app's normal iptv-org
+            // field) is deliberately ignored here; it points at TVNZ's dead
+            // pre-DRM CDN, which is the actual reason these ever showed
+            // "[Geo-blocked]" in the first place.
+            const drm = drmEntryFor(channel);
+            if (drm) {
+                if (!(window.shaka && shaka.Player.isBrowserSupported())) {
+                    lpShowState('error', 'This browser cannot play this channel.',
+                        'TVNZ requires Widevine DRM playback, which this browser does not support.');
+                    return;
+                }
+                shaka.polyfill.installAll();
+                const player = new shaka.Player();
+                lpShaka = player;
+                player.addEventListener('error', (event) => {
+                    if (gen !== lpGen) return;
+                    const detail = event.detail || {};
+                    lpShowState('error', "This channel wouldn't play in the browser.",
+                        `Shaka error ${detail.code || ''} (severity ${detail.severity || '?'})${detail.message ? ' — ' + detail.message : ''} — TVNZ's DRM/CDN chain may have changed.`);
+                    lpTeardownKeepOpen();
+                });
+                player.configure({
+                    drm: { servers: { 'com.widevine.alpha': drm.license } }
+                });
+                player.attach(video)
+                    .then(() => player.load(drm.mpd))
+                    .then(() => {
+                        if (gen !== lpGen) return;
+                        lpStartPlayback(video);
+                    })
+                    .catch((err) => {
+                        if (gen !== lpGen) return;
+                        lpShowState('error', "This channel wouldn't play in the browser.",
+                            `Shaka load error ${err.code || ''}${err.message ? ' — ' + err.message : ''} — TVNZ's DRM/CDN chain may have changed.`);
+                        lpTeardownKeepOpen();
+                    });
+                return;
+            }
+
             if (lpUseNative(video)) {
                 video.src = src;
                 video.addEventListener('error', () => {
@@ -20434,6 +20519,10 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             if (lpHls) {
                 try { lpHls.destroy(); } catch (e) { console.warn('hls destroy:', e); }
                 lpHls = null;
+            }
+            if (lpShaka) {
+                try { lpShaka.destroy(); } catch (e) { console.warn('shaka destroy:', e); }
+                lpShaka = null;
             }
         }
 
