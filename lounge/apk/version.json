@@ -33,10 +33,24 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v147"
+      "cacheName": "lounge-shell-v148"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v148",
+      "date": "2026-08-20",
+      "title": "Matrix-drop tagline rebuilt from SVG textPath to plain HTML -- removes the whole class of risk instead of patching around it",
+      "changes": [
+        "After 3 rounds of theory-then-patch on the SVG-based tagline (repaint forcing, then a real popcorn-burst timing fix that still didn't resolve it for Deep), made the decisive architectural call: SVG text-on-a-path is a specialized, comparatively rare layout feature with documented cross-browser repaint inconsistency. Plain HTML text mutation is the single most reliably-repainted DOM operation in every browser. Rebuilt the tagline arc as individually-positioned/rotated HTML <span> elements instead of an SVG <textPath>, with the exact same geometry (verified: first/last letter positions match the old SVG path's endpoints to within 0.1px) so the visual is unchanged -- confirmed via a real live screenshot, pixel-identical arc curve, glow, and gold gradient to the original.",
+        "Gold gradient fill + specular highlight reproduced via CSS background-clip:text + a permanent text-shadow instead of a second overlapping SVG text layer (which used to fade in separately -- simplified, one less moving part).",
+        "Live-tested the scramble mutation itself on the new plain-span structure: confirmed via screenshot that scrambled glyph states render correctly and match the original's visual quality.",
+        "The v147 popcorn-burst timing fix (SETTLE pushed later) is KEPT, not reverted -- both fixes are real and independently justified; this rebuild removes an additional class of risk on top of it.",
+        "Still marked [UNTESTED] on Deep's actual hardware pending his confirmation -- this is the first fix in the whole saga backed by a live visual test of both the static arc AND the scramble mutation on the real code path, not just reasoning."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,

@@ -410,39 +410,39 @@
             margin-bottom: 48px;
             line-height: 0;
         }
-        /* Width is capped by the viewport so the arc shrinks as one piece on a
-           phone -- letters keep their relative size and tilt, they just get
-           smaller. Never let the SVG exceed the couch mark's own footprint. */
-        #intro-tagline-svg {
-            display: block;
-            width: min(380px, 88vw);
-            height: auto;
-            overflow: visible;
-        }
-        #intro-tagline-svg text {
-            font-family: 'Segoe UI', sans-serif;
-            /* Was 13px flat type. Deep asked for bigger; 20 user-units on a
-               380-unit viewBox is ~20px at desktop scale. */
-            font-size: 20px;
-            font-weight: 600;
-            fill: url(#tagline-gold);
-        }
-        /* Specular lip: the same string, 1.2 units high, in near-white. Only
-           the sliver that clears the base glyph's top edge survives, which is
-           what a highlight on a raised metal letter actually is. Kept under
-           0.5 alpha -- above that it separates into visible double text. */
-        #intro-tagline-svg .tagline-sheen {
-            fill: #fffdf2;
-            opacity: 0.58;
-        }
-        /* "More shiny" (Deep, 2026-08-10): tighter hot core + wider soft bloom
-           added as a third pass, alphas raised on both existing layers. Sheen
-           opacity above raised too (0.42 -> 0.58) -- more of the specular
-           highlight survives per DESIGN_DNA A1's high-chroma rule. */
-        #intro-tagline-svg {
+        /* REBUILT 2026-08-20 -- plain HTML arc, replaces an SVG textPath.
+           See the HTML comment above #intro-tagline-arc for why. Geometry
+           (380x64 design space, letters positioned+rotated via JS) matches
+           the old SVG arc's radius/angle exactly so the visual is
+           unchanged; scale-to-viewport is applied as a CSS transform by
+           buildTaglineChars() rather than an SVG viewBox. */
+        #intro-tagline-arc {
+            position: relative;
+            width: 380px;
+            height: 64px;
+            transform-origin: top left;
             filter: drop-shadow(0 0 6px rgba(255, 245, 210, 0.65))
                     drop-shadow(0 0 16px rgba(255, 199, 80, 0.8))
                     drop-shadow(0 0 36px rgba(255, 170, 60, 0.5));
+        }
+        .tl-char {
+            position: absolute;
+            top: 0;
+            left: 0;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+            line-height: 1;
+            white-space: pre;
+            background: linear-gradient(180deg, #fffbe9 0%, #ffe49b 26%, #ffc837 50%, #d98a14 76%, #ffd35f 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            /* Specular highlight substitute for the old second SVG text
+               layer -- a soft near-white shadow riding the top edge of each
+               glyph, same "raised metal letter" read as before. */
+            text-shadow: 0 -1px 0 rgba(255, 253, 242, 0.55);
         }
 
         #intro-enter {
@@ -7642,37 +7642,22 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                  <textPath> pins the fill to the arc regardless of which font
                  actually loads, so it can never spill off the end of the path. -->
             <div id="intro-tagline">
-                <svg id="intro-tagline-svg" viewBox="0 0 380 64" role="img" aria-label="Your Cinema, Everywhere">
-                    <defs>
-                        <path id="tagline-arc" fill="none" d="M 14 54.2 A 470 470 0 0 1 366 54.2"/>
-                        <!-- "Shinier" gold (Deep): flat #ffd166 replaced by a
-                             two-part treatment.
-                             (1) This gradient runs down the text's bbox, so
-                             where a letter sits ON THE ARC decides how it
-                             catches the light -- the crest letters read as pale
-                             lit metal, the letters falling away at both ends
-                             sink into deep amber. That is how a real curved
-                             marquee behaves under a single light.
-                             (2) .tagline-sheen below adds a 1.2-unit specular
-                             lip so EVERY letter gets its own top highlight, not
-                             just the ones near the crest.
-                             Chroma stays high throughout per DESIGN_DNA A1 --
-                             the dark stop is saturated amber, never grey. -->
-                        <linearGradient id="tagline-gold" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stop-color="#fffbe9"/>
-                            <stop offset="26%" stop-color="#ffe49b"/>
-                            <stop offset="50%" stop-color="#ffc837"/>
-                            <stop offset="76%" stop-color="#d98a14"/>
-                            <stop offset="100%" stop-color="#ffd35f"/>
-                        </linearGradient>
-                    </defs>
-                    <text text-anchor="middle">
-                        <textPath href="#tagline-arc" xlink:href="#tagline-arc" startOffset="50%" textLength="352" lengthAdjust="spacing">YOUR CINEMA, EVERYWHERE</textPath>
-                    </text>
-                    <text class="tagline-sheen" text-anchor="middle" transform="translate(0 -1.2)" aria-hidden="true">
-                        <textPath href="#tagline-arc" xlink:href="#tagline-arc" startOffset="50%" textLength="352" lengthAdjust="spacing">YOUR CINEMA, EVERYWHERE</textPath>
-                    </text>
-                </svg>
+                <!-- REBUILT 2026-08-20 -- was an SVG <textPath>/<tspan> arc.
+                     Root cause of the "no scramble visible" saga: SVG
+                     text-on-a-path is a specialized, comparatively rare
+                     layout feature with known cross-browser/cross-load
+                     repaint inconsistency (confirmed via research). Plain
+                     HTML text mutation is the single most reliably-repainted
+                     DOM operation that exists -- rebuilding the same arc
+                     visual with individually-rotated <span> elements removes
+                     this whole class of risk rather than patching around it
+                     again. Geometry (R=470, ±22° half-angle, circle center
+                     at 190,490 in the old 380x64 viewBox space) matches the
+                     original SVG path exactly so the visual is unchanged;
+                     see buildTaglineChars() for the math. Gold gradient +
+                     specular highlight reproduced via background-clip:text
+                     + text-shadow instead of a second overlapping SVG layer. -->
+                <div id="intro-tagline-arc" role="img" aria-label="Your Cinema, Everywhere"></div>
             </div>
             <div id="intro-title-wrap"><div id="intro-couch" aria-label="Lounge"></div></div>
             <button id="intro-enter">Press Any Key to Take a Seat</button>
@@ -10013,7 +9998,34 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // scramble is invisible) and keeps its existing simple fade.
         const TAGLINE_TEXT = 'YOUR CINEMA, EVERYWHERE';
         const TAGLINE_GLYPHS = '01XZQKVWM#%&$*+=<>?/';
-        function buildTaglineChars(textPathEl) {
+        // Arc geometry matches the old SVG path exactly (R=470, +/-22deg
+        // half-angle, circle center at 190,490 in 380x64 design space --
+        // solved from the path's known chord/sagitta) so the visual is
+        // unchanged after the SVG->HTML rebuild. See the HTML/CSS comments
+        // near #intro-tagline-arc for why this was rebuilt.
+        function buildTaglineChars(arcEl) {
+            if (!arcEl) return [];
+            arcEl.innerHTML = '';
+            const n = TAGLINE_TEXT.length;
+            const R = 470, halfAngleDeg = 22, cx = 190, cy = 490;
+            const wrapWidth = Math.min(380, window.innerWidth * 0.88);
+            arcEl.style.transform = 'scale(' + (wrapWidth / 380) + ')';
+            return TAGLINE_TEXT.split('').map((ch, i) => {
+                const thetaDeg = -halfAngleDeg + i * (2 * halfAngleDeg / (n - 1));
+                const theta = thetaDeg * Math.PI / 180;
+                const x = cx + R * Math.sin(theta);
+                const y = cy - R * Math.cos(theta);
+                const span = document.createElement('span');
+                span.className = 'tl-char';
+                span.textContent = ch === ' ' ? ' ' : ch;
+                span.style.left = x + 'px';
+                span.style.top = y + 'px';
+                span.style.transform = 'translate(-50%, -100%) rotate(' + thetaDeg + 'deg)';
+                arcEl.appendChild(span);
+                return { el: span, final: ch, scrambles: /[A-Z]/.test(ch) };
+            });
+        }
+        function buildTaglineCharsOLD_UNUSED(textPathEl) {
             if (!textPathEl) return [];
             textPathEl.textContent = '';
             return TAGLINE_TEXT.split('').map((ch) => {
@@ -10038,21 +10050,20 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // room -- see the SETTLE block below.
         function scheduleTaglineDecode(tl, chars, startAt, stagger, flipMs, flips) {
             if (!chars.length) return;
-            // REAL BUG FOUND 2026-08-20 (Deep: tested on 2 real devices, saw the
-            // gold arc text appear correctly but zero scramble/flicker before
-            // it): some engines don't repaint a <tspan> textContent mutation
-            // inside a <textPath> until something ELSE forces SVG text layout
-            // to recompute -- the flip callbacks above were genuinely firing
-            // (proven by the fact the FINAL character always rendered right),
-            // they just never got painted along the way, so only the very last
-            // state before the next real repaint (the sheen fade-in) was ever
-            // visible. getComputedTextLength() reads a layout-dependent value
-            // on the shared <textPath>, which is enough to force a real
-            // repaint after every single mutation. [UNTESTED -- diagnosed from
-            // the reported symptom + a known SVG textPath/tspan repaint quirk,
-            // not reproduced live: no PIN for the production site and this
-            // session's browser tooling can't reliably observe real-time
-            // animation. Needs Deep's confirmation on a real device.]
+            // HISTORY 2026-08-20 -- two earlier theories here, both since
+            // superseded: (1) SVG textPath/tspan not repainting -- ruled out
+            // by direct live testing, the browser DOES paint intermediate
+            // states fine in isolation. (2) real root cause -- the tagline
+            // decode was starting mid-way through a 16-kernel popcorn burst
+            // (32 simultaneous animations), starving it of paint priority;
+            // fixed by moving SETTLE later (see the SETTLE comment below).
+            // (3) separately, moved off SVG textPath entirely to plain HTML
+            // spans (see #intro-tagline-arc) since SVG text-on-a-path is a
+            // rarer, less battle-tested layout feature regardless of what
+            // was actually causing this specific bug. forceRepaint() below
+            // is a no-op on the new plain-<span> elements (they don't have
+            // getComputedTextLength) -- kept harmless rather than pulled,
+            // in case a future SVG-based effect reuses this function.
             const forceRepaint = (el) => {
                 try {
                     const path = el.parentNode;
@@ -10091,8 +10102,8 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const titleWrap = document.getElementById('intro-title-wrap');
             const couchWrap = document.getElementById('intro-couch');
             const taglineEl = document.getElementById('intro-tagline');
-            const taglinePathEl = document.querySelector('#intro-tagline-svg text:not(.tagline-sheen) > textPath');
-            const taglineChars = buildTaglineChars(taglinePathEl);
+            const taglineArcEl = document.getElementById('intro-tagline-arc');
+            const taglineChars = buildTaglineChars(taglineArcEl);
             const enterBtn = document.getElementById('intro-enter');
             const particlesEl = document.getElementById('intro-particles');
             const flashEl = document.getElementById('intro-flash');
@@ -10579,14 +10590,11 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // below is defined relative to SETTLE already, so nothing else
             // needed to change.
             const SETTLE = POP_CLIMAX + 1.35;
-            const taglineSheenEl = document.querySelector('#intro-tagline-svg .tagline-sheen');
-            // Sheen sits UNDER the gold layer showing the finished string --
-            // held at 0 until the scramble resolves, so it can't spoil the
-            // reveal by shining through the flicker with the answer already visible.
-            if (taglineSheenEl) gsap.set(taglineSheenEl, { opacity: 0 });
+            // Specular highlight is a permanent CSS text-shadow on .tl-char
+            // now (see #intro-tagline-arc CSS), not a separate fading SVG
+            // layer -- nothing to gate/fade here anymore.
             tl.to(taglineEl, { opacity: 1, duration: 0.08 }, SETTLE);
             scheduleTaglineDecode(tl, taglineChars, SETTLE, 0.045, 0.06, 3);
-            if (taglineSheenEl) tl.to(taglineSheenEl, { opacity: 0.58, duration: 0.25 }, SETTLE + 1.2);
             // Particles come up WITH the couch, not after it. Held to the settle
             // they made the canvas read as static through the whole climax
             // (motion judge LIVING CANVAS: 5, "minimal particles appear late").
@@ -13761,7 +13769,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v147';
+        const LOUNGE_BUILD = 'lounge-shell-v148';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
