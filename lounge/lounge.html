@@ -11957,7 +11957,18 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             target.classList.add('active');
             currentSection = section;
             syncNavActive(section);
-            if (section === 'settings') animateSettingsWindowsIn();
+            // previous !== section guard restored 2026-08-20 alongside removing
+            // animateSettingsWindowsIn's own once-ever flag: showSection() does
+            // NOT early-return on a same-section re-click, so clicking the
+            // Settings nav icon again while already on Settings used to be a
+            // silent no-op (the once-ever flag absorbed it) -- the exact
+            // "re-triggering a fade-in on an already-visible panel reads as a
+            // glitch" case the removed flag's own comment warned about. Moving
+            // the guard here (checking for a genuine transition INTO the
+            // section) preserves that protection while still allowing the
+            // reveal to replay on every REAL revisit from elsewhere, not just
+            // the first one ever.
+            if (section === 'settings' && previous !== 'settings') animateSettingsWindowsIn();
             // The section was display:none until the line above, so this is the
             // first moment its rail has real geometry to measure. Not animated:
             // the ink should already be in place when the section paints, not
@@ -13721,23 +13732,37 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
         // Entrance stagger for the windowed Settings groups (UI_STANDARD §6:
         // all interactive-adjacent entrances go through GSAP, not CSS-only).
-        // Guarded so it only ever plays once per page load -- initSettings()
-        // itself can re-run (e.g. after a toggle changes a value elsewhere),
-        // and re-triggering a fade-in on an already-visible panel would read
-        // as a glitch, not a reveal.
-        let settingsWindowsAnimated = false;
+        // Was once-only (settingsWindowsAnimated flag, first visit ever) --
+        // every REVISIT to Settings then fell back to the plain base .section
+        // fadeIn (Settings is deliberately excluded from playChangeover's
+        // shared choreography, see the note above NAV_ORDER: its
+        // .settings-window children risked double-animating against
+        // whichever system touched them second). Read that risk through
+        // properly rather than leaving Settings permanently plainer than
+        // every other section (Deep, 2026-08-20: "premium feel... everywhere
+        // it makes sense"): the two systems only actually conflict if BOTH
+        // run against the same elements in the same visit, so this just
+        // needed to stop being a "first time only" special case and start
+        // being a real fromTo -- explicit start state instead of relying on
+        // .settings-window's base CSS opacity:0 (which only exists pre-first-
+        // paint; a second run with no explicit "from" would be a no-op,
+        // since the elements are already sitting at their end state).
+        // settingsChoreoTl tracked the same way changeoverTl is, so a second
+        // rapid Settings visit kills the first tween cleanly instead of
+        // fighting it.
+        let settingsChoreoTl = null;
         function animateSettingsWindowsIn() {
-            if (settingsWindowsAnimated) return;
             const windows = document.querySelectorAll('#settings-section .settings-window');
             if (!windows.length) return;
-            settingsWindowsAnimated = true;
+            if (settingsChoreoTl) { settingsChoreoTl.kill(); settingsChoreoTl = null; }
             if (typeof gsap === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
                 windows.forEach(w => { w.style.opacity = '1'; w.style.transform = 'none'; });
                 return;
             }
-            gsap.to(windows, {
-                opacity: 1, y: 0, duration: 0.5, ease: 'power3.out', stagger: 0.06
-            });
+            settingsChoreoTl = gsap.fromTo(windows,
+                { opacity: 0, y: 16 },
+                { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out', stagger: 0.06,
+                  onComplete: () => { settingsChoreoTl = null; } });
         }
 
         // Nav drawer: the "More" dropdown on desktop and the off-canvas drawer on
@@ -14132,7 +14157,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v163';
+        const LOUNGE_BUILD = 'lounge-shell-v164';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';

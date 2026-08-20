@@ -33,10 +33,24 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v163"
+      "cacheName": "lounge-shell-v164"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v164",
+      "date": "2026-08-20",
+      "title": "Settings gets its staggered reveal on every real revisit, not just the first visit ever",
+      "changes": [
+        "animateSettingsWindowsIn() (the .settings-window stagger-fade) was gated by a once-per-page-load flag, so every revisit to Settings after the first ever fell back to the plain base .section fadeIn -- Settings was permanently plainer than every other section (Deep: 'premium feel... everywhere it makes sense').",
+        "Read through the ORIGINAL reason for the once-only guard before touching it (its own comment warned re-triggering could 'read as a glitch, not a reveal') -- traced the actual call graph and found there is exactly one call site (showSection()'s settings branch), which does NOT early-return on a same-section re-click. So the real risk was a repeat click on the Settings nav icon while already on Settings, not a general re-run.",
+        "Fixed properly: removed the once-ever flag, switched to an explicit gsap.fromTo() (the old .to() relied on .settings-window's base CSS opacity:0, which only exists pre-first-paint -- a second .to() with no explicit start would be a no-op), and moved the actual guard to showSection() itself (previous !== 'settings'), so the reveal replays on every genuine revisit from elsewhere but a same-page re-click still does nothing, preserving the exact protection the original flag existed for.",
+        "Live-verified all three cases via Playwright: fresh visit animates 0->1, re-clicking Settings while already there stays at 1 (no glitch), navigating away and back replays 0->1 correctly.",
+        "Syntax-checked (0 errors, 4 inline script blocks)."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,
