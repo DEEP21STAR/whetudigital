@@ -3078,17 +3078,28 @@
             gap: 6px;
         }
         .lfy-card {
+            position: relative;
             text-align: left;
             background: linear-gradient(135deg, rgba(255,215,0,0.14), rgba(0,0,0,0.4));
             border: 1px solid rgba(255,215,0,0.4);
             border-radius: 10px;
             padding: 10px 16px;
+            padding-right: 44px;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             gap: 2px;
             box-shadow: 0 0 10px rgba(255,215,0,0.15);
             transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .lfy-badge {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 4px rgba(255,215,0,0.35));
         }
         .lfy-card:hover {
             transform: translateY(-2px);
@@ -13625,7 +13636,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v144';
+        const LOUNGE_BUILD = 'lounge-shell-v145';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -20231,11 +20242,35 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // scans Sky Sport NZ's own guide text, which never carries NFL
         // content -- the ambiguity that would exist against a general/US
         // sports source doesn't apply to this data.
+        // Badge URLs, 2026-08-20 -- real crest/logo images, not placeholders.
+        // Sourced from TheSportsDB (thesportsdb.com/documentation, the
+        // standard free team/league badge API -- the same one Kodi/media-app
+        // builds commonly use) via its public free-tier key, verified live
+        // before wiring in: each URL was actually fetched and confirmed a
+        // real badge came back, not assumed from a search result. Formula 1
+        // isn't in TheSportsDB (it indexes team/league sports, not
+        // motorsport championships) -- that one is the official F1
+        // wordmark from Wikimedia Commons instead, also verified live.
         const LIVE_FOR_YOU_TEAMS = [
-            { key: 'arsenal', label: 'Arsenal', match: /\barsenal\b/i },
-            { key: 'warriors', label: 'Warriors', match: /\bwarriors\b/i },
-            { key: 'blackcaps', label: 'Black Caps', match: /\bblack\s?caps\b/i },
-            { key: 'chiefs', label: 'Chiefs', match: /\bchiefs\b/i }
+            { key: 'arsenal', label: 'Arsenal', match: /\barsenal\b/i,
+              badge: 'https://r2.thesportsdb.com/images/media/team/badge/uyhbfe1612467038.png' },
+            { key: 'warriors', label: 'Warriors', match: /\bwarriors\b/i,
+              badge: 'https://r2.thesportsdb.com/images/media/team/badge/w8b9kw1646347767.png' },
+            { key: 'blackcaps', label: 'Black Caps', match: /\bblack\s?caps\b/i,
+              badge: 'https://r2.thesportsdb.com/images/media/team/badge/1yyh9s1646775166.png' },
+            { key: 'chiefs', label: 'Chiefs', match: /\bchiefs\b/i,
+              badge: 'https://r2.thesportsdb.com/images/media/team/badge/ut9cpz1555142819.png' },
+            // Added 2026-08-20 (Deep's "level these in" ask, sports logo rail):
+            // same safety reasoning as "chiefs" above -- this only ever scans
+            // Sky Sport NZ's own guide text, so "all blacks"/"formula 1"/
+            // "premier league" don't carry the false-positive risk they would
+            // against a general/US sports source.
+            { key: 'allblacks', label: 'All Blacks', match: /\ball\s?blacks\b/i,
+              badge: 'https://r2.thesportsdb.com/images/media/team/badge/fhr0ys1566381231.png' },
+            { key: 'f1', label: 'Formula 1', match: /\bformula\s?1\b|\bf1\b/i,
+              badge: 'https://upload.wikimedia.org/wikipedia/commons/3/33/F1.svg' },
+            { key: 'epl', label: 'Premier League', match: /\bpremier\s?league\b/i,
+              badge: 'https://r2.thesportsdb.com/images/media/league/badge/gasy9d1737743125.png' }
         ];
 
         function computeLiveTeamMatches() {
@@ -20249,6 +20284,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     if (team.match.test(title)) {
                         matches.push({
                             team: team.label,
+                            badge: team.badge,
                             title,
                             channelName: channel.name,
                             cardId: channel.__cardId,
@@ -20270,6 +20306,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             el.innerHTML = `<div class="lfy-heading"><i class="fas fa-star"></i> Live now for you</div>` +
                 matches.map(m => `
                     <button class="lfy-card" onclick="playChannel('${m.cardId}')">
+                        ${m.badge ? `<img class="lfy-badge" src="${escapeHtml(m.badge)}" alt="" loading="lazy" onerror="this.remove()">` : ''}
                         <span class="lfy-team">${escapeHtml(m.team)}</span>
                         <span class="lfy-title">${escapeHtml(m.title)}</span>
                         <span class="lfy-channel">${escapeHtml(m.channelName)} — until ${epgTime(m.endsAt)}</span>

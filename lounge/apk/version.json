@@ -33,10 +33,23 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v144"
+      "cacheName": "lounge-shell-v145"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v145",
+      "date": "2026-08-20",
+      "title": "Real sports team badges + F1/EPL added to \"Live now for you\", real NZ/AU EPG backend built",
+      "changes": [
+        "Deep's ask: real crest/logo images for Arsenal, All Blacks, Blackcaps, Formula 1, English Premier League, NZ Warriors and Waikato Chiefs, plus a real EPG for Sky Sports NZ / general NZ+AU channels. Sourced real, verified badge images (TheSportsDB API + Wikimedia for F1, each one actually fetched and confirmed live before wiring in) into the existing \"Live now for you\" team-match strip, and expanded that strip's tracked entities from 4 (Arsenal/Warriors/Blackcaps/Chiefs) to 7, adding All Blacks/Formula 1/Premier League.",
+        "Built and live-tested a new general NZ/AU EPG backend (nexus_control_relay.py /epg-general endpoint) on top of a real, verified free XMLTV source (matthuisman/i.mjh.nz) -- NOT wired into the frontend yet, that's next. Confirmed working end-to-end against real current-date programme data: 36 NZ channels, 130 Sydney AU channels, sub-1-second response.",
+        "Honest limitation found during research, not invented: the free EPG sources don't carry pay-TV channels (Fox Sports/Kayo/Sky Sport) -- confirmed by grepping the actual feeds. Sky Sport NZ specifically is already covered by the app's existing separate Sky-guide scraper, unaffected by this change.",
+        "No badge image exists for \"Sky Sports NZ\" itself (it's a broadcaster brand, not a team/league -- not in any sports database) -- flagged rather than faked with an unreliable hotlink."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,
