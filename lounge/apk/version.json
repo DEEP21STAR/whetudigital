@@ -33,10 +33,24 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v160"
+      "cacheName": "lounge-shell-v161"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v161",
+      "date": "2026-08-20",
+      "title": "Header VPN chip clipped off-screen on mobile -- root-caused and live-verified at 390px, not guessed from a screenshot",
+      "changes": [
+        "Deep's Telegram photo (21:06) showed the VPN shield icon overlapping/clipped in the header on Mobile LMC. Traced live in a real Playwright browser resized to 390px (iPhone-class width), not guessed from CSS reading alone: two compounding causes measured with actual getBoundingClientRect() calls.",
+        "Cause 1: #windscribeToggleBtn (documented 'PC browser only' -- it talks to a relay that only runs on the PC) was gated purely on relay reachability, with no device/viewport check. On a phone sharing the PC's home WiFi, the relay IS reachable, so this ~72px-wide button rendered anyway, on a phone. Fixed: added the same <900px check already used to collapse the rest of .header-widgets for phones, so this PC-only control now actually stays PC-only.",
+        "Cause 2 (still overflowing after fixing #1, measured 41-61px past the viewport edge): .topnav-tools (the search box + VPN chip wrapper) has flex-shrink:0 by design on desktop/tablet, so .topnav-links absorbs the squeeze instead -- correct there, but .topnav-links is already display:none below 900px, leaving nothing to squeeze. Fixed: added flex-shrink:1/min-width:0 to .topnav-tools and its .search-box child, scoped to the existing <=768px breakpoint only, so desktop/tablet behaviour is untouched.",
+        "Live-verified end to end: re-measured after each fix at 390px until vpnChip.getBoundingClientRect().right (362.7px) was confirmed inside innerWidth (390px), then screenshotted to visually confirm the chip renders fully on-screen with clean padding either side.",
+        "Syntax-checked (0 errors, 4 inline script blocks)."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,

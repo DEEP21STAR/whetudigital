@@ -6826,7 +6826,21 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             .resume-hero .btn { padding: 13px 22px; }
             .content-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
             .channels-grid { grid-template-columns: repeat(2, 1fr); }
-            .search-box { width: 100%; }
+            /* Real bug found 2026-08-20 (Deep, Mobile LMC screenshot): traced
+               live at 390px with actual getBoundingClientRect() measurements,
+               not guessed. The true culprit is .topnav-tools's base rule
+               (flex-shrink:0, "so .topnav-links absorbs the squeeze instead" --
+               correct on desktop/tablet, where .topnav-links is still visible
+               and DOES have room to give). Below 900px .topnav-links is already
+               display:none (see that breakpoint above), so there is nothing
+               left to squeeze, and .topnav-tools (search box + VPN chip
+               together) just overflowed the row instead -- measured 41-61px
+               past the viewport's right edge, clipping the VPN chip exactly
+               the way Deep's screenshot showed. Scoped to this breakpoint only
+               so the desktop/tablet "hold width, squeeze the links" behaviour
+               the base rule documents is untouched. */
+            .topnav-tools { flex-shrink: 1; min-width: 0; }
+            .search-box { width: auto; flex: 1 1 auto; min-width: 0; }
             .mini-player { width: calc(100% - 40px); right: 20px; }
         }
 
@@ -14059,7 +14073,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v160';
+        const LOUNGE_BUILD = 'lounge-shell-v161';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -14565,6 +14579,19 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const label = document.getElementById('windscribeToggleLabel');
             if (!btn) return;
             if (windscribeToggleBusy) return; // don't fight an in-flight toggle's own repaint
+            // Real bug found 2026-08-20 (Deep, Mobile LMC screenshot: VPN chip
+            // clipped off the right edge of the header): this button is
+            // documented "PC browser only" because the relay it talks to only
+            // ever runs on the PC -- but the ONLY gate here was relay
+            // reachability, which also succeeds from a PHONE on the same home
+            // WiFi/LAN as the PC. It then rendered at its full ~72px width
+            // inside a header row measured for phone width, overflowing the
+            // row and pushing/clipping #vpnChip off-screen. Same breakpoint
+            // already used to collapse the rest of .header-widgets for phones
+            // (see the max-width:900px block), so this stays consistent with
+            // an existing, already-tested boundary rather than inventing a
+            // new one.
+            if (window.innerWidth < 900) { btn.style.display = 'none'; return; }
             try {
                 const res = await fetch(`${getRelayBase()}/vpn-status`, { signal: AbortSignal.timeout(4000) });
                 const data = await res.json();
