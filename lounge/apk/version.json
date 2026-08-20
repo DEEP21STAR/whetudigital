@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v157"
+      "cacheName": "lounge-shell-v158"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v158",
+      "date": "2026-08-20",
+      "title": "Section-transition wash fixed at the root cause a blind judge kept naming -- three consecutive scoring runs (median 6, then 4) all independently called out \"hard cuts\" between dashboard views even after a duration-tuning pass; this fixes the actual mechanism instead of re-tuning numbers",
+      "changes": [
+        "Read playChangeover()'s own code instead of guessing another timing number: the DOM section swap (display:none -> block) is synchronous JS, one tick before the GSAP timeline's first paint, and the wash meant to cover that single bare frame ('#viewBeam u', a radial gradient) only ever reached 0.26 opacity -- on a gradient that already fades to transparent past 70% radius, 0.26 was never dense enough to hide anything. For roughly 120-300ms between the swap and the incoming blocks fading in (BEAT 3 starts at 0.14s, BEAT 4 at 0.30s), the viewport showed bare background through a nearly-invisible tint -- which is exactly the 'hard cut / instant swap' all three judge sub-runs named, independent of score.",
+        "Fixed the wash itself: ramps 0->0.92 over 0.1s (near-opaque flash, not a translucent fade-from-0.26) then decays 0.92->0 over 0.24s, timed to fully cover the gap before BEAT 3's lead block starts painting. This is the mechanism fix the previous v157 duration-widening pass (beam 0.62s->0.85s, block travel 38px->64px) was reaching for and didn't land on -- that pass changed HOW LONG things took, not WHETHER the swap itself was actually hidden.",
+        "Blind motion judge re-run against this exact build (motion-lounge-transitions-v158-washfix, 2026-08-20T20:54): OVERALLS [7,7,6] MEDIAN 7, up from the pre-fix [4,7,4] MEDIAN 4. TRANSITIONS specifically moved from [1,6,3] to [6,7,6] -- median 3->6 -- and critically, none of the three post-fix readings mention 'hard cut' or 'instant swap' anymore (pre-fix: all three did, independent of overall score). The complaint shifted to 'generic sliding, lacks unique choreography personality' -- a design-polish note, not the structural defect. Confirms the wash-opacity theory was the real mechanism, not another guess."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,
