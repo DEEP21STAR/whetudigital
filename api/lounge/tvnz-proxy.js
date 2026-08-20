@@ -32,6 +32,18 @@
 export const config = { runtime: 'edge' };
 
 const ALLOWED_HOST_RX = /^[a-z0-9-]+\.streaming-live-api\.tvnz\.co\.nz$/i;
+// i.mjh.nz's own redirect response DOES send a wildcard ACAO -- but the
+// FINAL destination it 302s to (streaming-live-api.tvnz.co.nz) does not, and
+// the fetch spec checks CORS against the final response after redirects are
+// followed, not the redirect itself. That makes the browser's own request to
+// i.mjh.nz/.r/tvnz-*.mpd fail with a CORS-flavoured net::ERR_FAILED before
+// this proxy ever gets a chance to help -- confirmed live 2026-08-21 via a
+// real device repro after the streaming-live-api-only fix above was proven
+// only up to the manifest/segment layer, never traced back to this earlier
+// hop. Allowing i.mjh.nz here lets THIS server follow the redirect itself
+// (fetch() does that natively, no CORS applies to server-to-server calls)
+// and re-serve the final TVNZ response, same as any other proxied request.
+const ALLOWED_REDIRECTOR_RX = /^i\.mjh\.nz$/i;
 
 export async function GET(req) {
   const url = new URL(req.url);
@@ -44,8 +56,17 @@ export async function GET(req) {
       status: 400, headers: { ...headers, 'Content-Type': 'application/json' },
     });
   }
-  if (targetUrl.protocol !== 'https:' || !ALLOWED_HOST_RX.test(targetUrl.hostname)) {
-    return new Response(JSON.stringify({ error: 'u must be a *.streaming-live-api.tvnz.co.nz https URL' }), {
+  const isRedirector = ALLOWED_REDIRECTOR_RX.test(targetUrl.hostname);
+  if (targetUrl.protocol !== 'https:' || !(ALLOWED_HOST_RX.test(targetUrl.hostname) || isRedirector)) {
+    return new Response(JSON.stringify({ error: 'u must be a *.streaming-live-api.tvnz.co.nz or i.mjh.nz https URL' }), {
+      status: 400, headers: { ...headers, 'Content-Type': 'application/json' },
+    });
+  }
+  // i.mjh.nz is a general redirector for many broadcasters, not just TVNZ --
+  // pinning the path here means this proxy can only ever be pointed at a
+  // TVNZ redirect through it, never an arbitrary third-party stream.
+  if (isRedirector && !/^\/\.r\/tvnz-/i.test(targetUrl.pathname)) {
+    return new Response(JSON.stringify({ error: 'i.mjh.nz path must be a /.r/tvnz-* redirect' }), {
       status: 400, headers: { ...headers, 'Content-Type': 'application/json' },
     });
   }
@@ -97,7 +118,12 @@ export async function GET(req) {
   const isManifest = contentType.includes('dash+xml') || targetUrl.pathname.endsWith('.mpd');
   if (isManifest) {
     const text = await res.text();
-    const baseUrl = targetUrl.href.slice(0, targetUrl.href.lastIndexOf('/') + 1);
+    // res.url is the FINAL URL after fetch() follows any redirect (e.g. the
+    // i.mjh.nz -> streaming-live-api.tvnz.co.nz hop) -- using targetUrl.href
+    // here would inject the wrong base when the request came in via the
+    // redirector, since that URL was never where the manifest actually lives.
+    const finalUrl = res.url || targetUrl.href;
+    const baseUrl = finalUrl.slice(0, finalUrl.lastIndexOf('/') + 1);
     const rewritten = /<BaseURL>/i.test(text)
       ? text
       : text.replace(/(<MPD\b[^>]*>)/i, `$1<BaseURL>${baseUrl}</BaseURL>`);
