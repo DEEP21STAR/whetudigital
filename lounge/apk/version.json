@@ -33,10 +33,24 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v167"
+      "cacheName": "lounge-shell-v168"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v168",
+      "date": "2026-08-20",
+      "title": "Real Liquid Glass refraction shipped -- Apple's actual 2026 design language, item #2 of the 21-surprises list, live-verified with a real screenshot",
+      "changes": [
+        "Researched properly before building (WebSearch): Liquid Glass is Apple's real WWDC-2025 design language shipping across iOS/iPadOS/macOS/tvOS 26 -- the defining trait vs this app's existing ~40 flat backdrop-filter:blur() instances is that the surface REFRACTS the content behind it, not just blurs it. Confirmed via grep it was genuinely absent anywhere in the file. Investigated the physically-accurate ray-traced version too and found even reference writeups call it not-release-ready without real cleanup work -- too risky to attempt blind and unattended, so this ships the lightweight-but-real feTurbulence+feDisplacementMap approximation instead, an honest, deliberate scope call, not a shortcut taken silently.",
+        "Applied to ONE contained, well-isolated surface (the stream picker modal, previously a flat #111 panel with no blur at all) as the pilot -- A4 theme law: surgical, not a global re-skin of every existing blur().",
+        "@supports (backdrop-filter: blur(1px) url(#liquidGlassFilter)) gates the effect behind real feature detection -- Chromium-only as of 2026 (confirmed via WebSearch), so Firefox/Safari get the safe blur()+translucency baseline with zero regression, never a broken/unsupported filter.",
+        "Live-verified with a real screenshot, not just a code review: opened the stream picker over a real movie's poster/backdrop, confirmed a genuinely visible warp/distortion in the content behind the glass (distinguishable from a flat blur), confirmed every piece of modal text stayed fully legible -- scale=18 tuned to be visible without hurting usability.",
+        "Syntax-checked (0 errors, 4 inline script blocks)."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,

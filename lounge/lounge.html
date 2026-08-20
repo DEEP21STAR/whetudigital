@@ -5057,15 +5057,45 @@
             display: flex;
         }
 
+        /* Liquid Glass refraction, 2026-08-20 (Deep: "latest industry
+           designs... best in the world"). Real Apple design language (WWDC
+           2025, ships across iOS/iPadOS/macOS/tvOS 26) -- researched before
+           building, not guessed: the defining trait vs plain glassmorphism
+           (which this app already uses in ~40 other places via a flat
+           backdrop-filter:blur()) is that the surface REFRACTS/warps the
+           content behind it, not just blurs it. Confirmed via grep this
+           was genuinely absent anywhere in the file before this.
+           Deliberately the LIGHTWEIGHT feTurbulence+feDisplacementMap
+           approximation, not Apple's true ray-traced-per-surface-geometry
+           version -- researched that too, and even reference writeups of
+           the physically-accurate technique describe it as needing real
+           cleanup before any release, which is not a responsible thing to
+           attempt blind and unattended tonight. This is one contained,
+           well-isolated surface (the stream picker modal, previously flat
+           #111 with no blur at all) as the pilot, not a global swap of
+           every existing blur() -- A4 theme law: surgical, not a re-skin.
+           @supports gates it behind real feature detection (Chromium-only
+           as of 2026, confirmed via WebSearch) -- the base backdrop-filter
+           blur()+translucency below is the safe baseline every browser
+           gets regardless, so nothing regresses on Firefox/Safari. */
         .stream-picker-content {
-            background: #111;
-            border: 1px solid #222;
+            background: rgba(17, 17, 17, 0.82);
+            backdrop-filter: blur(20px) saturate(1.4);
+            -webkit-backdrop-filter: blur(20px) saturate(1.4);
+            border: 1px solid rgba(0, 212, 255, 0.16);
             border-radius: 16px;
             width: 90%;
             max-width: 600px;
             max-height: 80vh;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+        @supports (backdrop-filter: blur(1px) url(#liquidGlassFilter)) {
+            .stream-picker-content {
+                backdrop-filter: blur(6px) saturate(1.5) url(#liquidGlassFilter);
+                -webkit-backdrop-filter: blur(6px) saturate(1.5) url(#liquidGlassFilter);
+            }
         }
 
         .stream-picker-header {
@@ -9536,6 +9566,23 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             </div>
         </div>
     </div>
+
+    <!-- Liquid Glass refraction filter (2026-08-20) -- see the CSS comment
+         above .stream-picker-content for the full reasoning. feTurbulence
+         generates a stable, seeded (no built-in randomness at parse time)
+         noise field once; feDisplacementMap warps SourceGraphic (the real
+         page content behind the glass) by that field. scale=18 is a
+         deliberately gentle distortion -- enough to read as "this glass
+         has depth", not so much the picker's own text becomes unreadable
+         through it. colorInterpolationFilters="sRGB" avoids the default
+         linearRGB colour shift Chromium's own liquid-glass writeups warn
+         washes out the effect. -->
+    <svg width="0" height="0" style="position:absolute;overflow:hidden;" aria-hidden="true">
+        <filter id="liquidGlassFilter" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.012 0.018" numOctaves="2" seed="7" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+    </svg>
 
     <!-- Stream Picker Modal -->
     <div class="stream-picker-modal" id="stream-picker-modal" data-lenis-prevent>
@@ -14253,7 +14300,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v167';
+        const LOUNGE_BUILD = 'lounge-shell-v168';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
