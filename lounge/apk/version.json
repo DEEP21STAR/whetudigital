@@ -33,10 +33,23 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v166"
+      "cacheName": "lounge-shell-v167"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v167",
+      "date": "2026-08-20",
+      "title": "Departure-board flip-clock countdown for Coming Soon titles (first of Deep's '21 surprises' premium pass)",
+      "changes": [
+        "Deep asked for a fresh round of premium/cinematic upgrades ('21 surprises', latest industry design). Audited the existing canonical DESIGN_DNA 21-extras menu against the real code first (grep, not assumption): 18 of 21 were already built. Coming Soon release dates were confirmed genuinely static text with no countdown of any kind anywhere in the app.",
+        "Added a departure-board style flip-clock countdown ('118 DAYS TO GO') to the detail page's release info for unreleased titles -- digit tiles with a split hairline (real flip-card cue, not just a rounded box), GSAP rotateX flip-in entrance on first paint. Deliberately a one-time flip-in rather than a live ticking clock: no interval to leak, no drift to get wrong, still reads as premium because the flip-in animation IS the moment.",
+        "Live-verified against a real TMDB title (Avengers: Doomsday, real Dec 2026 release date): screenshotted the actual rendered countdown, correct day count, correct animation, no console errors from the change (2 unrelated pre-existing ad-network DNS failures aside).",
+        "Syntax-checked (0 errors, 4 inline script blocks). First of several premium passes tonight -- full researched 21-item list to follow."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,

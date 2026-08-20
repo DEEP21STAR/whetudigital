@@ -2662,6 +2662,67 @@
            scheduled, this one is coming to you" from cinema/digital. */
         .cs-next { color: #00ff88; }
 
+        /* Countdown flip-clock, 2026-08-20 (Deep: "premium... cinematic
+           presence throughout... latest industry designs"). Coming Soon
+           titles only ever showed a static date line -- confirmed via grep
+           there was no countdown of any kind anywhere in the app before
+           this. Departure-board digit tiles, GSAP-flipped in on the detail
+           page's first paint for that title (not a live ticking clock --
+           deliberately simpler and safer for an unattended pass: no
+           interval to leak, no drift to get wrong, still reads as
+           "premium" because the flip-in IS the moment, the number itself
+           doesn't need to move again after that). Voltage-compliant accent
+           (--accent-cyan family, chroma matches the rest of the app, not a
+           muted "subtle" grey the A1 axiom explicitly bans). */
+        .cs-countdown {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 4px 0 10px;
+        }
+        .cs-countdown-digits {
+            display: flex;
+            gap: 3px;
+            perspective: 300px;
+        }
+        .cs-countdown-digit {
+            width: 26px;
+            height: 34px;
+            border-radius: 5px;
+            background: linear-gradient(180deg, #1c2530 0%, #10161d 100%);
+            border: 1px solid rgba(0, 212, 255, 0.28);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.12), inset 0 1px 0 rgba(255,255,255,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px;
+            font-weight: 700;
+            color: #00e5ff;
+            text-shadow: 0 0 8px rgba(0, 229, 255, 0.6);
+            position: relative;
+            overflow: hidden;
+        }
+        /* The split hairline is the one detail that sells "flip card" over
+           "just a rounded rectangle with a number in it". */
+        .cs-countdown-digit::after {
+            content: '';
+            position: absolute;
+            left: 0; right: 0; top: 50%;
+            height: 1px;
+            background: rgba(0, 0, 0, 0.5);
+            transform: translateY(-0.5px);
+        }
+        .cs-countdown-label {
+            font-size: 11px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #7fb8c4;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .cs-countdown-digit { transform: none !important; }
+        }
+
         /* Narrow poster columns: shed the label text and the not-yet-rated chip
            rather than let a 3-line wrap push the grid rows out of alignment. The
            detail page keeps full labels at every width. */
@@ -13409,6 +13470,33 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             return d.toLocaleDateString('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' });
         }
 
+        // Flip-clock countdown for the detail page's Coming Soon release info
+        // -- see the .cs-countdown CSS block for why this exists and why it's
+        // a one-time flip-in rather than a live ticking clock. Returns '' for
+        // a past/invalid/today date (a countdown showing "0 days" or a
+        // negative number reads as broken, not premium).
+        function flipCountdownHtml(iso) {
+            const target = new Date(`${iso}T00:00:00`);
+            if (isNaN(target.getTime())) return '';
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+            const days = Math.round((target - today) / 86400000);
+            if (days <= 0 || days > 999) return '';
+            const digits = String(days).split('');
+            const digitsHtml = digits.map(d => `<span class="cs-countdown-digit">${d}</span>`).join('');
+            return `<div class="cs-countdown"><div class="cs-countdown-digits">${digitsHtml}</div>` +
+                `<span class="cs-countdown-label">day${days === 1 ? '' : 's'} to go</span></div>`;
+        }
+
+        function animateFlipCountdown(container) {
+            if (typeof gsap === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const digits = container.querySelectorAll('.cs-countdown-digit');
+            if (!digits.length) return;
+            gsap.fromTo(digits,
+                { rotationX: -90, opacity: 0 },
+                { rotationX: 0, opacity: 1, duration: 0.5, stagger: 0.08, ease: 'back.out(1.7)',
+                  transformOrigin: '50% 50%', transformPerspective: 300 });
+        }
+
         // Digital dates usually aren't announced until close to the cinema run, so
         // the common case is cinema-only. Missing fields are omitted entirely --
         // never rendered as an empty "Digital:" label.
@@ -14165,7 +14253,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v166';
+        const LOUNGE_BUILD = 'lounge-shell-v167';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -23468,10 +23556,12 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             } else {
                 const relInfo = (type === 'movie' && d.release_dates) ? pickReleaseDates(d.release_dates.results) : null;
                 if (unreleased || (relInfo && relInfo.digital && detailItem && detailItem.comingSoon)) {
-                    let html = releaseLinesHtml(relInfo, d.release_date);
+                    const cinemaDate = (relInfo && relInfo.cinema) || d.release_date;
+                    let html = flipCountdownHtml(cinemaDate) + releaseLinesHtml(relInfo, d.release_date);
                     if (unreleased) html += '<span class="cs-date-line cs-pending"><i class="fas fa-circle-info"></i> Not released yet — no stream available</span>';
                     relEl.innerHTML = html;
                     relEl.hidden = false;
+                    animateFlipCountdown(relEl);
                 } else {
                     relEl.hidden = true;
                 }
