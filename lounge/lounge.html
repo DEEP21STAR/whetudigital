@@ -10985,6 +10985,14 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 const ch = logoChannels[i];
                 if (!ch) return;
                 img.alt = chipLabel(ch.name);
+                // Same imgur-hotlink-403 fix as hydrateChannelLogos() below --
+                // this one already had a text fallback via the error listener,
+                // so it never surfaced as a defect the way the unhandled
+                // Channels grid case did, but it's the identical root cause
+                // (confirmed via curl: 403 with any Referer, 200 with none)
+                // and fixing it here means the real logo shows instead of
+                // silently falling back to text on every single load.
+                img.referrerPolicy = 'no-referrer';
                 img.addEventListener('error', () => {
                     const b = document.createElement('b');
                     b.textContent = chipLabel(ch.name);
@@ -14157,7 +14165,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v165';
+        const LOUNGE_BUILD = 'lounge-shell-v166';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -18622,6 +18630,20 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     const logo = el.dataset.logoUrl;
                     if (!logo) continue;
                     const img = new Image();
+                    // Real bug found 2026-08-20 during an interaction sweep
+                    // (23 console errors surfaced, all i.imgur.com 403s):
+                    // imgur (and other hotlink-guarded hosts) reject the
+                    // request whenever a Referer header is present at all --
+                    // confirmed with curl, same URL 403s WITH any Referer and
+                    // 200s with none. This had no onerror either, so a
+                    // blocked logo silently never got .has-poster and the
+                    // tile sat in whatever default state it started in,
+                    // forever, with nothing distinguishing "still loading"
+                    // from "never going to load". no-referrer fixes the root
+                    // cause for referer-checking hosts (the actual imgur
+                    // case); onerror is defense in depth for hosts that
+                    // block for some other reason entirely.
+                    img.referrerPolicy = 'no-referrer';
                     img.onload = () => {
                         el.classList.add('has-poster');
                         el.style.backgroundImage = `url('${logo}')`;
@@ -18634,6 +18656,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         el.style.backgroundPosition = 'center';
                         el.style.backgroundColor = '#101010';
                     };
+                    img.onerror = () => { el.classList.add('logo-load-failed'); };
                     img.src = logo;
                 }
             }, { rootMargin: '200px' });

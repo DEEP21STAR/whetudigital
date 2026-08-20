@@ -33,10 +33,24 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v165"
+      "cacheName": "lounge-shell-v166"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v166",
+      "date": "2026-08-20",
+      "title": "22 channel logos were silently failing to load -- found in a routine interaction sweep, not reported, fixed anyway",
+      "changes": [
+        "Ran a full nav-sweep interaction audit (Home->Movies->TV->Settings->Sports->Channels->Home, with console monitoring throughout) to check tonight's other changes hadn't regressed anything. Found 22 console errors unrelated to any of tonight's work: i.imgur.com returning 403 on every channel logo hosted there.",
+        "Root-caused with curl, not guessed: the same imgur URL returns 403 when a Referer header is present (any referer, even a bare local one) and 200 with none at all -- standard hotlink protection. hydrateChannelLogos()'s Channels-grid logo loader had no onerror handler at all, so a blocked logo silently never got its .has-poster class and the tile sat in an indistinguishable 'still loading vs never loading' state forever, with zero visual signal either way.",
+        "Fixed at the root: img.referrerPolicy = 'no-referrer' on both logo loaders (the Channels grid one, and the intro montage chip one which had a text fallback so never surfaced as visibly broken, but was hitting the identical 403 on every single load). Added a real onerror handler to the previously-unhandled Channels grid path as defense in depth for hosts that block for some other reason.",
+        "Live-verified via Playwright: re-ran the same nav sweep after the fix, 0 console errors (down from 22), confirmed 32 channel logos actually rendered with the .has-poster class.",
+        "Syntax-checked (0 errors, 4 inline script blocks)."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,
