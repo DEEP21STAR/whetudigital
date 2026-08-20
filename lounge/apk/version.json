@@ -42,6 +42,18 @@
       "versionCode": 31,
       "web": "lounge-shell-v153",
       "date": "2026-08-20",
+      "title": "NZ/AU EPG coverage: 13% -> 80% -- fixed the real key-matching bug (backend only, no web build bump)",
+      "changes": [
+        "The v152 EPG merge shipped with a key that could never have matched most channels: it normalized the source's OPAQUE internal id (\"mjh-tvnz-1\") instead of the real broadcast display-name (\"TVNZ 1\"), so only 2 of 15 NZ channels ever got live guide data (both via the unrelated, pre-existing epgshare01 source). Caught by capturing every real epgEntryFor() call the live app actually makes and comparing against what the merge produced -- not assumed fixed from the earlier 120-channel count, which included many keys that were silently never looked up by anything.",
+        "Rewired fetch_general_epg() to key on _epg_norm(display-name) instead -- verified by hand against the feed's own entries for every channel Deep reported broken (TVNZ 1/2/Duke, Sky Open, Te Reo) before shipping. Live-verified end to end after a relay restart: NZ Guide Coverage went from 13% (2/15) to 80% (12/15) on the real channel grid. The 3 remaining (Channel 200, Kordia TV, and one other) genuinely aren't in either free source -- an honest data gap, not a bug.",
+        "This is a relay-only (Python) fix -- no lounge.html/service-worker change, so no web build/cache bump was needed for it to take effect; it applies the moment the relay restarts."
+      ]
+    },
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v153",
+      "date": "2026-08-20",
       "title": "Poster loading visibility fixed for real + corrected the v152 VPN diagnostic's false-positive",
       "changes": [
         "Poster \"missing\" report (Deep's mobile screenshots): NOT a broken image bug -- the loading-shimmer infrastructure from the 2026-08-19 fix was already wired correctly, but at 8% cyan alpha on a near-black card background it survives fine live and crushes to invisible in a compressed phone screenshot/Telegram JPEG. This is a DESIGN_DNA A1 voltage-law violation (chroma floor is .19-.22 everywhere else in this codebase, this was .08), made worse by the 2026-08-18 vertical-rail redesign putting many more simultaneously-pending cards on screen at once than the old horizontal layout did. Base gradient brightened one stop, shimmer band tripled in opacity and widened -- now reads as \"loading\" even in a single static screenshot caught between sweeps, not just during the live animation.",
