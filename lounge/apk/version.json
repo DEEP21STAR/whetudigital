@@ -33,10 +33,23 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v156"
+      "cacheName": "lounge-shell-v157"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v157",
+      "date": "2026-08-20",
+      "title": "General NZ+AU dead-stream resolver -- replaces the 3-channel hardcoded fix with one that covers both countries and keeps working",
+      "changes": [
+        "The v156 fix (Sky Open/Te Reo/Juice TV) worked but didn't scale -- it was 3 channels found and hand-verified one Deep report at a time, and a spot-check of AU found the exact same pattern: 9Gem and 9Go! (Nine Network) both return real HTTP errors (400) on their direct URLs. AU has 51+ channels; hand-fixing each on report is not \"the best LMC that exists\".",
+        "Built a general resolver instead: nexus_control_relay.py's new /stream-map endpoint parses matthuisman/i.mjh.nz's NZ and AU (per-city) playlists into {normalized-channel-name: working-url}, skipping DRM entries (those stay on the separate Shaka/DASH path). lounge.html's new loadStreamMap()/resolveStreamUrl() fetch it once per country (6h cache, same TTL class as EPG), and openLivePlayer() now tries this map BEFORE falling back to the app's own (often-stale) iptv-org URL for every NZ/AU channel, not just 3 hardcoded ones. Removed the v156 hardcoded map entirely -- this replaces it, not layers on top.",
+        "This keeps working as broadcasters change CDNs, since it resolves against a live, community-maintained source at request time rather than a URL baked into this file that would need re-patching every time something moves -- the actual fix for \"best LMC\", not another patch.",
+        "Live-verified end to end in a real foregrounded browser: NZ Sky Open (readyState 2, live position, playing) and AU 9Gem (readyState 1, currentTime genuinely advancing, playing) both resolved through the NEW dynamic map, not the old hardcoded one (which no longer exists in this build)."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,

@@ -14000,7 +14000,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v156';
+        const LOUNGE_BUILD = 'lounge-shell-v157';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -17314,6 +17314,64 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         const EPG_TTL_MS = 3 * 60 * 60 * 1000;
         let epgData = null;
 
+        // ===== NZ/AU live-stream URL resolver (2026-08-20) =====
+        // Replaces the hand-rolled STREAM_URL_OVERRIDE map (Sky Open/Te
+        // Reo/Juice TV, found broken one report at a time) with a general,
+        // self-updating fetch against the relay's /stream-map -- see
+        // fetch_stream_map()'s docstring in nexus_control_relay.py for the
+        // full reasoning. Same cache-TTL shape as EPG, deliberately a
+        // SEPARATE localStorage key/promise so a stale/failed EPG fetch can
+        // never block or corrupt stream resolution and vice versa.
+        const STREAM_MAP_TTL_MS = 6 * 60 * 60 * 1000;
+        let streamMapCache = { nz: null, au: null };
+        let streamMapPromise = { nz: null, au: null };
+
+        async function loadStreamMap(region) {
+            region = region === 'au' ? 'au' : 'nz';
+            if (streamMapCache[region]) return streamMapCache[region];
+            const cacheKey = `nexus_stream_map_${region}_v1`;
+            try {
+                const c = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+                if (c && c.map && Date.now() - c.fetchedAt < STREAM_MAP_TTL_MS) {
+                    streamMapCache[region] = c.map;
+                    return c.map;
+                }
+            } catch (e) { /* corrupt cache is just a cache miss */ }
+            // De-duped: openLivePlayer can call this for several channels in
+            // quick succession before the first fetch lands (fast repeat
+            // clicks) -- share one in-flight promise rather than firing N
+            // redundant relay requests.
+            if (streamMapPromise[region]) return streamMapPromise[region];
+            streamMapPromise[region] = (async () => {
+                try {
+                    const res = await fetch(`${getRelayBase()}/stream-map?region=${region}`,
+                        { signal: AbortSignal.timeout(10000) });
+                    const data = await res.json();
+                    const map = data.map || {};
+                    streamMapCache[region] = map;
+                    localStorage.setItem(cacheKey, JSON.stringify({ map, fetchedAt: Date.now() }));
+                    return map;
+                } catch (e) {
+                    return {};   // relay unreachable -- resolver is an enhancement, never a blocker
+                } finally {
+                    streamMapPromise[region] = null;
+                }
+            })();
+            return streamMapPromise[region];
+        }
+
+        // Async because the map may need a first-ever fetch. Callers already
+        // await openLivePlayer, so this doesn't add a new blocking point --
+        // worst case it adds one relay round-trip the FIRST time Deep opens
+        // an nz/au channel this session; every one after is instant from
+        // localStorage.
+        async function resolveStreamUrl(channel) {
+            if (!channel || (channel.country !== 'nz' && channel.country !== 'au')) return null;
+            if (/\+\s*1\b/.test(channel.name || '')) return null;   // same "no +1 source exists" guard as before
+            const map = await loadStreamMap(channel.country);
+            return (channel.tvgId && map[normEpgId(channel.tvgId)]) || null;
+        }
+
         // MUST stay equivalent to _epg_norm() in nexus_control_relay.py.
         // Change one without the other and every channel silently stops matching.
         function normEpgId(s) {
@@ -20198,32 +20256,14 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             return DRM_CHANNEL_MAP[normEpgId(channel.tvgId)] || null;
         }
 
-        // Dead-URL overrides for NZ channels whose iptv-org source entry
-        // points at a retired/blocked CDN host but has a live, working
-        // replacement via the SAME free i.mjh.nz redirector already used for
-        // TVNZ/EPG. Found by testing each NZ channel's real .url field
-        // directly (2026-08-20): Sky Open's direct akamaized.net URL 403s
-        // (a genuine block, unlike the other "[Geo-blocked]"-labelled
-        // channels checked this session), Juice TV's juicex.nz URL 404s
-        // outright -- both have a live i.mjh.nz equivalent, verified 200
-        // before wiring in. Bravo+1 and HGTV already point at i.mjh.nz
-        // directly in the source data, which is exactly why they were
-        // already working with no fix needed.
-        // "Sky Open" and "Sky open +1" share ONE tvg-id (SkyOpen.nz) in this
-        // account's channel list, so a plain tvgId key would wrongly hand
-        // the SAME (non-+1) stream to both cards -- i.mjh.nz has no +1
-        // variant of this channel at all, so that one stays genuinely
-        // unfixed. Guarded by name below rather than baked into the map key.
-        const STREAM_URL_OVERRIDE = {
-            skyopen:  'https://i.mjh.nz/.r/prime.m3u8',
-            tereo:    'https://i.mjh.nz/.r/te-reo.m3u8',
-            juicetv:  'https://i.mjh.nz/.r/mood-1290.m3u8',
-        };
-        function streamUrlOverrideFor(channel) {
-            if (!channel || !channel.tvgId) return null;
-            if (/\+\s*1\b/.test(channel.name || '')) return null;   // no +1 replacement exists
-            return STREAM_URL_OVERRIDE[normEpgId(channel.tvgId)] || null;
-        }
+        // NOTE: the original NZ-only STREAM_URL_OVERRIDE map (Sky Open/Te
+        // Reo/Juice TV, found and fixed one report at a time) was replaced
+        // 2026-08-20 by the general resolveStreamUrl()/loadStreamMap()
+        // pair further up this file, which covers NZ AND AU dynamically
+        // against the relay's /stream-map endpoint instead of a hand-rolled
+        // list that would need re-patching every time a broadcaster's CDN
+        // changes again. See fetch_stream_map()'s docstring in
+        // nexus_control_relay.py for the full reasoning.
 
         // Investigated 2026-08-20 (Deep: "LIVE NZ Channel one doesnt work
         // all with geo lock"): confirmed live that HLS.js plays this exact
@@ -20311,7 +20351,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // whether or not the PC is on. Pre-check separates "cloud relay
             // unreachable" (network/DNS issue, rare) from "stream itself won't
             // play" (DaddyLive's chain changed, real error state).
-            let src = streamUrlOverrideFor(channel) || channel.url;
+            let src = (await resolveStreamUrl(channel)) || channel.url;
             if (channel.externalWatch && channel.dlhdId) {
                 const relayUrl = `${getContentBase()}/skystream?id=${encodeURIComponent(channel.dlhdId)}`;
                 try {
