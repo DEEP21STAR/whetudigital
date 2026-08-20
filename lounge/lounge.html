@@ -5045,6 +5045,35 @@
             color: #888;
         }
 
+        /* Episode thumbnail + synopsis, 2026-08-20 (Deep: "more features to
+           add", researched via WebSearch -- "vertical episode lists" is a
+           real, repeated Plex/Jellyfin Reddit request; Lounge's episode
+           picker was already vertical, but the actual gap was richness: rows
+           showed only a number, name and air date, no still or synopsis, so
+           picking the right episode from a dense season meant guessing from
+           a title alone. TMDB's season endpoint already returns still_path
+           and overview per episode -- this app was fetching and discarding
+           both fields, no new API call needed. */
+        .ep-row-still {
+            width: 96px;
+            height: 54px;
+            flex-shrink: 0;
+            border-radius: 6px;
+            background-color: #0d0d0d;
+            background-size: cover;
+            background-position: center;
+            margin-right: 14px;
+        }
+        .ep-row-overview {
+            font-size: 12px;
+            color: #777;
+            margin-top: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
         .quality-filter-tabs {
             display: flex;
             gap: 8px;
@@ -14073,7 +14102,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v161';
+        const LOUNGE_BUILD = 'lounge-shell-v162';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -21413,15 +21442,21 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                        <div><i class="fas fa-download"></i> Download Whole Season (${episodes.length} episodes)</div>
                    </div>`
                 : '';
-            body.innerHTML = backRow + downloadSeasonRow + episodes.map(ep => `
+            body.innerHTML = backRow + downloadSeasonRow + episodes.map(ep => {
+                const stillUrl = ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : null;
+                const overview = (ep.overview || '').trim();
+                return `
                 <div class="stream-picker-row" onclick="openEpisodeStreamPicker(${tmdbId}, ${seasonNumber}, ${ep.episode_number})">
-                    <div>
+                    <div class="ep-row-still" style="${stillUrl ? `background-image:url('${stillUrl}')` : ''}"></div>
+                    <div style="flex:1 1 auto;min-width:0;">
                         <div>${ep.episode_number}. ${escapeHtml(ep.name || 'Episode ' + ep.episode_number)}</div>
                         <div class="stream-picker-meta">${escapeHtml(ep.air_date || '')}</div>
+                        ${overview ? `<div class="ep-row-overview">${escapeHtml(overview)}</div>` : ''}
                     </div>
-                    <i class="fas fa-play"></i>
+                    <i class="fas fa-play" style="flex-shrink:0;margin-left:10px;"></i>
                 </div>
-            `).join('');
+            `;
+            }).join('');
         }
 
         // ===== SOURCE AVAILABILITY =====

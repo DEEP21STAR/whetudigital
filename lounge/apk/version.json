@@ -33,10 +33,24 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v161"
+      "cacheName": "lounge-shell-v162"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v162",
+      "date": "2026-08-20",
+      "title": "Episode picker rows get real thumbnails + synopsis -- researched Plex/Jellyfin gap, live-verified",
+      "changes": [
+        "Researched (WebSearch, 2026): 'vertical episode lists' is a real, repeated Plex/Jellyfin Reddit request. Lounge's episode picker was already vertical -- the actual gap was richness: rows showed only a number, name and air date, nothing to help pick the right episode in a dense season without guessing from a bare title.",
+        "TMDB's season endpoint already returns still_path and overview per episode -- this app was fetching and silently discarding both, no new API call needed. Added a 96x54 still thumbnail (falls back to a dark placeholder box if TMDB has none for that episode) and a 2-line-clamped synopsis to each row.",
+        "Corrected a stale internal note in the process: 'bulk season download' was flagged as an open gap in yesterday's research, but downloadWholeSeason() (real, wired to a live button) already covers it -- verified by reading the actual function before building anything, not re-implementing what already exists.",
+        "Live-verified end to end via Playwright against real TMDB data (Breaking Bad S1): screenshotted the actual rendered picker, confirmed real still images and synopsis text render correctly in the row layout, not just a code review.",
+        "Syntax-checked (0 errors, 4 inline script blocks)."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,
