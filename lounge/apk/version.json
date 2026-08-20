@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v155"
+      "cacheName": "lounge-shell-v156"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v156",
+      "date": "2026-08-20",
+      "title": "Sky Open, Te Reo, Juice TV fixed for real -- dead source URLs swapped for live ones",
+      "changes": [
+        "Root cause found by testing each NZ channel's actual .url field directly rather than guessing further: Sky Open's direct URL (primetv-prod.akamaized.net) returns a genuine HTTP 403 (an actual block, unlike most of the other \"[Geo-blocked]\"-labelled channels checked this session, which turned out to be stale metadata), and Juice TV's URL (juicex.nz) 404s outright -- both are simply dead/retired source entries in this account's iptv-org-derived channel list.",
+        "Bravo+1 and HGTV already pointed at the free i.mjh.nz redirector directly in the source data, which is exactly why they already worked with no fix needed -- same redirector network already powering TVNZ's EPG. Added a STREAM_URL_OVERRIDE map + streamUrlOverrideFor() that swaps in the live i.mjh.nz equivalent for Sky Open, Te Reo, and Juice TV specifically (each URL independently verified 200 via curl before wiring in). \"Sky Open +1\" shares one tvg-id with \"Sky Open\" in this account's channel list and has no live +1-specific source anywhere -- explicitly guarded out of the override so it doesn't silently get handed the wrong (non-delayed) feed; it stays genuinely unfixed, an honest gap.",
+        "Live-verified all three end to end in a real foregrounded browser: Sky Open, Te Reo, and Juice TV all reached readyState 4 (fully buffered) with currentTime genuinely advancing -- real playback, not just a resolved manifest."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,

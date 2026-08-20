@@ -14000,7 +14000,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v155';
+        const LOUNGE_BUILD = 'lounge-shell-v156';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -20198,6 +20198,33 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             return DRM_CHANNEL_MAP[normEpgId(channel.tvgId)] || null;
         }
 
+        // Dead-URL overrides for NZ channels whose iptv-org source entry
+        // points at a retired/blocked CDN host but has a live, working
+        // replacement via the SAME free i.mjh.nz redirector already used for
+        // TVNZ/EPG. Found by testing each NZ channel's real .url field
+        // directly (2026-08-20): Sky Open's direct akamaized.net URL 403s
+        // (a genuine block, unlike the other "[Geo-blocked]"-labelled
+        // channels checked this session), Juice TV's juicex.nz URL 404s
+        // outright -- both have a live i.mjh.nz equivalent, verified 200
+        // before wiring in. Bravo+1 and HGTV already point at i.mjh.nz
+        // directly in the source data, which is exactly why they were
+        // already working with no fix needed.
+        // "Sky Open" and "Sky open +1" share ONE tvg-id (SkyOpen.nz) in this
+        // account's channel list, so a plain tvgId key would wrongly hand
+        // the SAME (non-+1) stream to both cards -- i.mjh.nz has no +1
+        // variant of this channel at all, so that one stays genuinely
+        // unfixed. Guarded by name below rather than baked into the map key.
+        const STREAM_URL_OVERRIDE = {
+            skyopen:  'https://i.mjh.nz/.r/prime.m3u8',
+            tereo:    'https://i.mjh.nz/.r/te-reo.m3u8',
+            juicetv:  'https://i.mjh.nz/.r/mood-1290.m3u8',
+        };
+        function streamUrlOverrideFor(channel) {
+            if (!channel || !channel.tvgId) return null;
+            if (/\+\s*1\b/.test(channel.name || '')) return null;   // no +1 replacement exists
+            return STREAM_URL_OVERRIDE[normEpgId(channel.tvgId)] || null;
+        }
+
         // Investigated 2026-08-20 (Deep: "LIVE NZ Channel one doesnt work
         // all with geo lock"): confirmed live that HLS.js plays this exact
         // stream correctly in a real foregrounded browser, so it's not a
@@ -20284,7 +20311,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // whether or not the PC is on. Pre-check separates "cloud relay
             // unreachable" (network/DNS issue, rare) from "stream itself won't
             // play" (DaddyLive's chain changed, real error state).
-            let src = channel.url;
+            let src = streamUrlOverrideFor(channel) || channel.url;
             if (channel.externalWatch && channel.dlhdId) {
                 const relayUrl = `${getContentBase()}/skystream?id=${encodeURIComponent(channel.dlhdId)}`;
                 try {
