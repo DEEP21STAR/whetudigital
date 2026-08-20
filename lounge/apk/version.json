@@ -33,10 +33,24 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v169"
+      "cacheName": "lounge-shell-v170"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v170",
+      "date": "2026-08-21",
+      "title": "Time-aware micro-copy on Home (item #11 of the 21-surprises list) -- live-verified at the actual current hour",
+      "changes": [
+        "Confirmed via grep: initTimeAwareTheming() already computes a real dawn/day/dusk/night band and applies a colour wash, but no copy reacted to it anywhere in the app.",
+        "Added a small, easy-to-ignore line below the hero (A2 3-second rule: never competes with the hero's own title/CTA) that only appears for two of the four bands -- late night (23:00+ and pre-5am get different lines, since 9pm and 2am don't read the same) and early dawn. Day/dusk deliberately get nothing, since a line on every single load regardless of time is noise, not a genuine tonal touch.",
+        "Considered and skipped a header trending-ticker idea (#19) this cycle: the header row is already measured to the pixel (confirmed via this session's own earlier v161 overflow-collision fix), and adding more content there risks reintroducing exactly that class of bug. Also confirmed #9 mini-player dock, #4 badges, #7 genre ambient, #17 letterbox bars, #20 weather particles, and #14's audio-reactive idea (infeasible -- trailer preview uses a YouTube iframe, which doesn't expose raw audio to a page-level AnalyserNode) were already built or architecturally blocked -- not guessed at further.",
+        "Live-verified against the real current system clock (04:43 NZT, Pacific/Auckland confirmed via Intl.DateTimeFormat in the actual browser): screenshotted the real rendered line, correctly gated, correctly positioned, no layout collision with the hero or the rail below it.",
+        "Syntax-checked (0 errors, 4 inline script blocks)."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,
