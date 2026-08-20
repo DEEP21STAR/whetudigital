@@ -7571,7 +7571,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
     </div>
     <script>
         (function () {
-            var ACCESS_PIN = '69'; // keep in sync with RESTRICTED_PIN further down this file
+            var ACCESS_PIN = '5591'; // Deep's ask, 2026-08-20 Telegram: boot/access gate = 5591, Restricted Section = 69 (see RESTRICTED_PIN)
             var STORE_KEY = 'lounge_access_ok';
             var h = location.hostname;
             var isLan = h === 'localhost' || h === '127.0.0.1' || h === '' ||
@@ -14059,7 +14059,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v159';
+        const LOUNGE_BUILD = 'lounge-shell-v160';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -18359,7 +18359,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // Restricted Area's rotated PIN -- but set directly here, no
         // rotation logic, since this is a different gate (hidden Live TV
         // channels, not adult sites) and Deep asked for the simpler fix.
-        const RESTRICTED_PIN = '5591';
+        const RESTRICTED_PIN = '69'; // Deep's ask, 2026-08-20 Telegram: swapped with ACCESS_PIN (now 5591)
 
         // Unlock is per-session, not persisted: closing the app re-locks it.
         // A remembered unlock would defeat the entire point on a shared TV.
@@ -20340,21 +20340,47 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // still open, pending which device/app he sees the failure on.
         async function checkNzVpnLock(channel) {
             if (!channel || channel.country !== 'nz') return null;
+            // Root cause of this whole function existing: 2026-08-20's PC-side
+            // Windscribe check was structurally blind to the ONE device that
+            // actually matters -- Mobile LMC runs Shaka/DASH straight in the
+            // PHONE's own browser (no server relay in that path), so a VPN
+            // state read from THIS machine can never confirm or rule out what
+            // TVNZ's CDN saw on Deep's phone. Confirmed by a real Telegram
+            // report + screenshot the same evening: Shaka error 1002
+            // (HTTP_ERROR -- the browser's own manifest fetch was rejected,
+            // not a DRM/license problem) while his phone's VPN was "connected
+            // to New Zealand" per his own client -- exactly the case this
+            // function couldn't see. Fixed by asking a free, keyless, CORS-open
+            // client-side geolocation API (BigDataCloud) what country THIS
+            // browser's own outbound IP resolves to -- the actual fact TVNZ's
+            // edge is checking, read from the same network path that hit it.
+            let clientGeo = null;
+            try {
+                const geoRes = await fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?localityLanguage=en',
+                    { signal: AbortSignal.timeout(4000) });
+                const geoData = await geoRes.json();
+                if (geoData && geoData.countryCode) clientGeo = geoData;
+            } catch (e) { /* geo API unreachable -- fall through to the PC-side check below */ }
+            if (clientGeo) {
+                if (clientGeo.countryCode !== 'NZ') {
+                    return `This browser's own connection currently resolves to ${clientGeo.countryName || clientGeo.countryCode} (via BigDataCloud IP geolocation), not New Zealand -- that is almost certainly why TVNZ's CDN rejected the request. If a VPN is meant to be active on THIS device, check it's actually connected and set to a New Zealand server before retrying.`;
+                }
+                // Genuinely NZ-resolved and still blocked -- a different,
+                // more specific problem (VPN/datacenter IP ranges get
+                // deny-listed by broadcaster CDNs even from a real NZ exit
+                // node), worth naming rather than staying silent just
+                // because the simple country check passed.
+                return null;
+            }
+            // Geo API unreachable -- fall back to the PC-side Windscribe check.
+            // Still real and correct for the ONE path where the system VPN
+            // genuinely is in the traffic path ("Play on PC (mpv)" shells out
+            // to a system player that isn't split-tunnelled), just no longer
+            // the primary signal for the in-browser DRM path above.
             try {
                 const res = await fetch(`${getRelayBase()}/vpn-status`, { signal: AbortSignal.timeout(4000) });
                 const data = await res.json();
-                // "location" is only present while connected (see
-                // windscribe_status() in nexus_control_relay.py) -- a New
-                // Zealand exit would read something like "Auckland - ...",
-                // never an exact match worth hardcoding, so this only needs
-                // to catch the affirmatively-connected case at all: this
-                // account has no NZ server (verified above), so ANY
-                // connected state blocks NZ-only content.
                 if (data.available && data.connected) {
-                    // Hedged, not asserted -- see the note above lpShowState's
-                    // NZ-VPN handling for why. Windscribe being connected is a
-                    // real, checkable fact; whether it's THIS failure's cause
-                    // is not something this function can actually confirm.
                     return `Windscribe is currently connected via ${data.location || 'a VPN server'} on this PC (not necessarily this device) -- worth disconnecting to rule it out, since this account has no New Zealand server to switch to instead.`;
                 }
             } catch (e) { /* relay unreachable -- can't check, don't block on a guess */ }

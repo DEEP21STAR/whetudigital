@@ -33,10 +33,24 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v159"
+      "cacheName": "lounge-shell-v160"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v160",
+      "date": "2026-08-20",
+      "title": "PIN swap (Deep's Telegram ask) + real client-side geo check for the TVNZ DRM failure Deep photographed on Mobile LMC",
+      "changes": [
+        "PIN swap: ACCESS_PIN (the boot/access gate shown after 'Press Any Key to Take a Seat' on a non-LAN device) was '69', RESTRICTED_PIN (menu -> Restricted Section) was '5591' -- exactly backwards from Deep's Telegram ask (2026-08-20T19:19). Swapped: ACCESS_PIN='5591', RESTRICTED_PIN='69'.",
+        "TVNZ 1 DRM failure diagnosed from Deep's own screenshot (Mobile LMC, 21:06 Telegram): 'Shaka load error 1002'. Researched, not guessed -- Shaka error 1002 is HTTP_ERROR, meaning the BROWSER's own manifest fetch was rejected (commonly CORS/geo-block at the CDN edge), not a Widevine/license problem. Deep's own message said his phone's VPN was 'connected to New Zealand' at the time, which the app's existing checkNzVpnLock() could not have caught: that function only ever read Windscribe's status on the PC nexus_control_relay.py runs on, and Shaka/DASH playback runs entirely client-side in the requesting browser with no server relay in the path -- a structural blind spot already flagged in the code's own comments earlier this session ('It is NOT what Deep is hitting in his own browser session; that cause is still open').",
+        "Fixed by adding a real client-side geo check to checkNzVpnLock(): fetches BigDataCloud's free, keyless, CORS-open reverse-geocode-client API directly from the SAME browser hitting the CDN, and if it doesn't resolve to NZ, tells Deep exactly what country it saw instead of guessing. Falls back to the original PC-side Windscribe check only if the geo API is unreachable. Live-verified the API itself from this PC (curl): correctly resolved NZ/Auckland.",
+        "Honest limit: this surfaces the real fact (what country this browser's own IP resolves to) so Deep can act on it -- it cannot fix a VPN exit IP that broadcaster CDNs deny-list even when genuinely NZ-geolocated, which is a separate, harder problem some VPN providers are known to hit against exactly this class of service. [UNTESTED: not yet re-verified against Deep's own phone/VPN combination -- the fix targets the diagnosed mechanism, but the next real signal is whether the error message on his device now names a country.]",
+        "Syntax-checked (0 errors, 4 inline script blocks)."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,
