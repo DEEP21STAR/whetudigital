@@ -1,4 +1,5 @@
 {
+  "id": "/lounge.html",
   "name": "Lounge",
   "short_name": "Lounge",
   "description": "Your Cinema, Everywhere — movies, TV, anime, Bollywood, and live sports.",
@@ -13,5 +14,9 @@
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
     { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    { "src": "screenshots/wide-home.jpg", "sizes": "1088x897", "type": "image/jpeg", "form_factor": "wide", "label": "Lounge home screen on desktop — trending hero and genre rails" },
+    { "src": "screenshots/narrow-home.jpg", "sizes": "579x1280", "type": "image/jpeg", "form_factor": "narrow", "label": "Lounge home screen on mobile — trending hero and For You rail" }
   ]
 }

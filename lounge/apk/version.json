@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v149"
+      "cacheName": "lounge-shell-v150"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v150",
+      "date": "2026-08-20",
+      "title": "PWA installability -- manifest id + real screenshots (wide desktop + narrow mobile)",
+      "changes": [
+        "Added the required \"id\" field (/lounge.html) to manifest.json -- fixes an installability warning some browsers surface without it.",
+        "Added a \"screenshots\" array: a real 1088x897 desktop screenshot (captured live off the LAN dev build, Quick Actions panel hidden for a clean shot of the Trending hero + Action rail) tagged form_factor \"wide\", and a real 579x1280 mobile screenshot Deep sent earlier (his own phone, Home page) tagged form_factor \"narrow\" -- richer install UI on Chrome/Edge instead of the plain icon-only install prompt. Reused a genuine device photo for the mobile shot rather than faking a resize.",
+        "Both images copied into /screenshots in NEXUS and mirrored to WHETU; manifest.json mirrored too."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,
