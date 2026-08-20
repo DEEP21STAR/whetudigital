@@ -14401,7 +14401,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v171';
+        const LOUNGE_BUILD = 'lounge-shell-v172';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -20984,8 +20984,20 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 // authored, this filter only swaps the already-resolved
                 // absolute URI right before the fetch fires.
                 const TVNZ_CDN_RX = /^https:\/\/[a-z0-9-]+\.streaming-live-api\.tvnz\.co\.nz\//i;
+                // The VERY FIRST manifest request (drm.mpd) goes to
+                // i.mjh.nz's redirector, not the CDN directly -- its own 302
+                // sends a wildcard ACAO, but the FINAL destination it points
+                // at doesn't, so the browser's own redirect-follow fails
+                // CORS before TVNZ_CDN_RX above ever sees the real host.
+                // Found 2026-08-21 via a live device repro after the
+                // CDN-only fix was proven only up to the manifest/segment
+                // layer, never traced back to this earlier hop -- catching
+                // this one too routes it through the same proxy, which
+                // follows the redirect itself server-side (no CORS applies
+                // to server-to-server fetches).
+                const TVNZ_REDIRECTOR_RX = /^https:\/\/i\.mjh\.nz\/\.r\/tvnz-/i;
                 player.getNetworkingEngine().registerRequestFilter((type, request) => {
-                    request.uris = request.uris.map(u => TVNZ_CDN_RX.test(u)
+                    request.uris = request.uris.map(u => (TVNZ_CDN_RX.test(u) || TVNZ_REDIRECTOR_RX.test(u))
                         ? `${getContentBase()}/tvnz-proxy?u=${encodeURIComponent(u)}`
                         : u);
                 });

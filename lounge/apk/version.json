@@ -33,10 +33,24 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v171"
+      "cacheName": "lounge-shell-v172"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v172",
+      "date": "2026-08-21",
+      "title": "TVNZ Live TV real fix, part 2 -- segment 404s + i.mjh.nz redirector CORS both root-caused and fixed",
+      "changes": [
+        "v165 proved the CDN-level CORS fix with curl but never traced the fix through Shaka's actual relative-URL resolution -- live device repro (Deep, 2026-08-21) still showed Shaka error 1002. Two real bugs found: (1) the proxied manifest had no <BaseURL>, so Shaka resolved segment/init URLs against the PROXY's own URL instead of TVNZ's real CDN directory, producing 404s on our own domain for every segment; (2) the very first manifest request goes to i.mjh.nz's redirector, which sends a wildcard ACAO on its own 302 but redirects to a destination that does NOT allow arbitrary origins -- the browser's own redirect-follow fails CORS before the existing TVNZ_CDN_RX filter (which only matched streaming-live-api.tvnz.co.nz) ever saw the real host.",
+        "Fixed both server-side (tvnz-proxy.js): injects an explicit <BaseURL> into the manifest response using res.url (the FINAL URL after fetch() follows any redirect, not the original request URL) so Shaka resolves segments as absolute TVNZ URLs; and accepts i.mjh.nz/.r/tvnz-* redirect URLs directly (pinned to that exact path pattern, not a general open redirector), following the redirect server-side where no browser CORS applies.",
+        "Fixed client-side (lounge.html): added TVNZ_REDIRECTOR_RX alongside the existing TVNZ_CDN_RX so the initial i.mjh.nz manifest request also routes through the proxy, not just the resolved CDN URLs.",
+        "Live-verified end-to-end with real bytes at every hop: manifest fetch via i.mjh.nz through the proxy returns a real MPD with the correct injected <BaseURL>; a real segment URL resolved from that manifest (video-234p25-300 init segment) returns 200 with real content both directly against TVNZ and via the proxy.",
+        "[UNTESTED: actual Widevine decrypt+render in a real browser] -- the CORS/URL-resolution chain that was producing the visible error is now proven correct with real data at every layer Shaka touches before DRM, but no automation environment here has a working Widevine CDM. This is the same limitation flagged since v165 -- genuinely needs Deep's real device to confirm playback starts."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,
