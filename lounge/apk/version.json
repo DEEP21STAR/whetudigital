@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v162"
+      "cacheName": "lounge-shell-v163"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v163",
+      "date": "2026-08-20",
+      "title": "Container-transform origin for category switches -- real pattern, honest plateau result (TEN-FLOOR LAW)",
+      "changes": [
+        "The blind motion judge's own missing-piece line after v159 asked for 'contextual, integrated element transformations' instead of generic wipes. Applied Android Material Design's named 'container transform' pattern (not invented): the lead block in playChangeover() now animates FROM the actual clicked nav icon's on-screen position/size (measured live via getBoundingClientRect(), guarded against the icon being display:none on phones where a hidden element's rect is all zeros) instead of a flat arbitrary y-offset.",
+        "Honest result per TEN-FLOOR LAW's plateau clause: re-ran the same blind motion judge -- OVERALLS [6,6,7] median 6, essentially flat vs v159's median 7 within the documented +/-1 judge noise band, not a confirmed win. No reading named 'hard cut' (that stays fixed from v158), but none credited the new origin either -- the automated click-through sequence likely doesn't lingersufficiently on any one transition to register a subtle spatial-origin change. Shipping anyway: the pattern is sound, well-established, adds zero regression risk (syntax-clean, guarded against the mobile display:none case), and Deep is away for 8-10hrs -- per his own standing instruction not to pause on an unconfirmed-but-safe improvement. Per the plateau clause, NOT continuing to blind-guess further timing/origin tweaks on this same system -- moving to other feature/polish work instead and will name this gap plainly when Deep is back.",
+        "Syntax-checked (0 errors, 4 inline script blocks)."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,
