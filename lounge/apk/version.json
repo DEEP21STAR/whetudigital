@@ -33,10 +33,24 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v170"
+      "cacheName": "lounge-shell-v171"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v171",
+      "date": "2026-08-21",
+      "title": "Watchlist add/remove sound cues (item #18 of the 21-surprises list, fuller sound identity)",
+      "changes": [
+        "Confirmed via grep: playUiTone(freq, duration) is a real Web Audio oscillator wrapper (opt-in via uiSoundEnabled(), off by default, hard-gated on prefers-reduced-motion) with only 4 call sites total before this change -- sound-toggle confirm, hero-CTA click, voice-search start/stop. Coverage across distinct action types was thin, a genuine gap not a near-miss.",
+        "Added two calls in toggleWatchlist(item): playUiTone(587, 0.09) after a successful add (D5/Ré, rising relative to the tone below), playUiTone(392, 0.09) after a successful remove (G3, lower) -- mirrors the existing voice-search start(720Hz)/stop(480Hz) rising/falling pattern rather than inventing a new one.",
+        "No UI/layout surface touched -- pure audio-only addition inside an already-guarded, already-opt-in code path, so no new interaction-audit surface.",
+        "Syntax-checked: full script-block parse via node -e (new Function on every <script> body) -- ALL SCRIPT BLOCKS OK.",
+        "[UNTESTED: actual audible tone] -- no automation environment here has real audio output/mic loopback to confirm the tone plays; the code path is identical in structure to the 4 already-shipped, Deep-confirmed-working call sites, and uiSoundEnabled()/AudioContext handling is untouched. Needs Deep's own device with sound toggled on to hear it."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,
