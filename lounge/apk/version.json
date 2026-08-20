@@ -33,10 +33,24 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v164"
+      "cacheName": "lounge-shell-v165"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v165",
+      "date": "2026-08-20",
+      "title": "TVNZ DRM playback: found the REAL root cause (CORS, not geo/VPN) and fixed it -- verified live against the deployed proxy",
+      "changes": [
+        "Went back to 'Shaka load error 1002' with curl instead of trusting the earlier v160 diagnosis. Real cause: TVNZ's manifest/segment CDN (streaming-live-api.tvnz.co.nz) only answers Access-Control-Allow-Origin for tvnz.co.nz's own site -- confirmed by sending real Origin headers both ways (arbitrary origin -> no ACAO at all; https://www.tvnz.co.nz -> ACAO echoed). A pure CORS rejection, unrelated to VPN/geography -- v160's geo-check was correct to rule that out but hadn't found the actual mechanism yet. The Widevine LICENSE endpoint (c.mjh.nz/tvnz-1-wv -> switch.tv) was separately confirmed to send a genuine wildcard ACAO -- that path was never broken and is untouched by this fix.",
+        "Built api/lounge/tvnz-proxy.js (Vercel Edge Function, WHETU-only infra, not mirrored to NEXUS), mirroring the existing skystream.js/skysegment.js server-side-fetch-and-re-serve pattern already proven in this codebase. Locked to the one real TVNZ CDN host, not a general open proxy.",
+        "Wired in via Shaka's own registerRequestFilter() API rather than rewriting the manifest XML -- the player still resolves the DASH SegmentTemplate against the real upstream base URL exactly as authored; the filter only swaps each already-resolved absolute request URI to route through the proxy right before the fetch fires.",
+        "Live-verified against the actually-deployed proxy (not a local mock): manifest request returns 200 + correct application/dash+xml + wildcard ACAO with real MPD content; a real segment URL returns 200 + video/mp4 + wildcard ACAO with 204KB of real segment bytes; an arbitrary non-TVNZ URL is correctly rejected with 400. [UNTESTED: end-to-end playback through Shaka in a real browser with a working Widevine CDM still needs Deep's own device -- no automation environment tried this session has one -- but every individual network hop this fix touches is now confirmed working with real bytes, not simulated.]",
+        "Syntax-checked (0 errors, 4 inline script blocks + the new edge function)."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,

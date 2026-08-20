@@ -14157,7 +14157,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v164';
+        const LOUNGE_BUILD = 'lounge-shell-v165';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -20702,6 +20702,32 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 shaka.polyfill.installAll();
                 const player = new shaka.Player();
                 lpShaka = player;
+                // CORS proxy for TVNZ's manifest+segment CDN, 2026-08-20.
+                // Root-caused with curl, not guessed: TVNZ's own MediaPackage/
+                // CloudFront endpoint (streaming-live-api.tvnz.co.nz, both the
+                // .mpd manifest AND every segment it references live there)
+                // only answers Access-Control-Allow-Origin for their own
+                // site's origin -- confirmed by sending a real Origin header
+                // both ways (curl -I -H "Origin: https://www.tvnz.co.nz" gets
+                // ACAO echoed back; any other Origin gets none at all). That
+                // is Shaka error 1002 (HTTP_ERROR) -- a CORS rejection, not a
+                // DRM/license problem (the Widevine license endpoint DOES
+                // send ACAO:* to any origin, confirmed separately, and is
+                // NOT proxied here) and nothing to do with VPN/geography
+                // (which the v160 pass had already, separately, correctly
+                // ruled out). Routes every request to that one CDN host
+                // through api/lounge/tvnz-proxy.js (server-to-server fetch,
+                // no CORS applies, re-served with a wildcard ACAO) instead of
+                // rewriting the manifest XML -- Shaka still resolves the
+                // DASH SegmentTemplate against the REAL base URL exactly as
+                // authored, this filter only swaps the already-resolved
+                // absolute URI right before the fetch fires.
+                const TVNZ_CDN_RX = /^https:\/\/[a-z0-9-]+\.streaming-live-api\.tvnz\.co\.nz\//i;
+                player.getNetworkingEngine().registerRequestFilter((type, request) => {
+                    request.uris = request.uris.map(u => TVNZ_CDN_RX.test(u)
+                        ? `${getContentBase()}/tvnz-proxy?u=${encodeURIComponent(u)}`
+                        : u);
+                });
                 player.addEventListener('error', (event) => {
                     if (gen !== lpGen) return;
                     const detail = event.detail || {};
