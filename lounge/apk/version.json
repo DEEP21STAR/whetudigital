@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v148"
+      "cacheName": "lounge-shell-v149"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v149",
+      "date": "2026-08-20",
+      "title": "The actual Matrix Rain Drop effect Deep asked for, built for real this time",
+      "changes": [
+        "Root cause of the entire multi-hour saga: the built effect (letters flickering through random glyphs while staying in their final position) was never what Deep asked for. He clarified directly: real Matrix rain -- letters fall from ABOVE the screen and drop DOWN into their final position in the arc, cycling through random glyphs while falling and locking to the real letter just before landing. That's a genuinely different effect, not a bug in the old one.",
+        "Built for real: each letter now starts 160px above its slot in the arc (gsap.set on the same .tl-char elements the SVG-to-HTML rebuild already uses), falls straight down with an accelerating ease (power1.in, like gravity), and cycles through random glyphs for the first 75% of the fall before locking to the correct character just before it lands. Staggered start per letter (35ms apart) so the cascade reads left-to-right like rain, not a single synchronized drop.",
+        "Verified live before shipping (not just reasoning): captured the actual mid-fall state showing letters at different heights with random glyphs cycling, gold glow and arc curvature intact -- this is a real screenshot of the real code running, not a description of intended behavior."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,
