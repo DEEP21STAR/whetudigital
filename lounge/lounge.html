@@ -1869,21 +1869,31 @@
             color: #333;
         }
 
-        /* Real-poster loading shimmer (2026-08-19, Deep's screenshot: Action
-           rail posters read as "missing" on his connection). Root cause: the
-           #333 fallback icon above is near-invisible against this card's own
-           near-black gradient, so a genuinely-still-loading poster (slow
-           mobile network, dozens of images racing at once) is visually
-           indistinguishable from empty space until it paints. Reuses the
-           skeleton-card shimmer keyframe so a loading real card reads exactly
-           like the initial skeleton state instead of a blank void; createCard
-           adds .loading-poster only when there IS a poster URL to wait for,
-           and the img's onload strips it the moment the poster actually paints. */
+        /* Real-poster loading shimmer (2026-08-19, boosted 2026-08-20). Root
+           cause: the #333 fallback icon is near-invisible against this
+           card's own near-black gradient, so a genuinely-still-loading
+           poster (slow mobile network, or -- new as of the 2026-08-18
+           vertical-rail redesign -- dozens of cards below the fold all
+           legitimately still lazy-pending at once) is visually
+           indistinguishable from empty space until it paints.
+           2026-08-19's fix (0.08 alpha shimmer) turned out to still fail
+           this exact complaint on 2026-08-20's mobile screenshots -- a
+           near-black background at 8% cyan alpha survives fine live but
+           crushes to indistinguishable-from-off in a compressed phone
+           screenshot/Telegram JPEG re-encode. This is a DESIGN_DNA A1
+           (voltage) violation as much as a functional bug: chroma floor on
+           this codebase is .19-.22 everywhere else, this was .08. Base
+           gradient brightened one stop and the shimmer band tripled in
+           opacity + widened so a screenshot caught BETWEEN sweeps still
+           shows visible contrast, not just the animation itself. */
+        .card-image.loading-poster {
+            background: linear-gradient(135deg, #232345, #14142c);
+        }
         .card-image.loading-poster::after {
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(100deg, transparent 30%, rgba(0,212,255,0.08) 50%, transparent 70%);
+            background: linear-gradient(100deg, transparent 20%, rgba(0,212,255,0.24) 50%, transparent 80%);
             background-size: 200% 100%;
             animation: skeletonShimmer 1.6s ease-in-out infinite;
         }
@@ -13949,7 +13959,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v152';
+        const LOUNGE_BUILD = 'lounge-shell-v153';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -19848,13 +19858,21 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             loading.classList.toggle('is-shown', which === 'loading');
             error.classList.toggle('is-shown', which === 'error');
             if (which === 'error') {
-                // NZ-VPN-geo-lock (checked once per channel by
-                // checkNzVpnLock(), called from openLivePlayer) always wins
-                // over whatever generic message the caller passed in --
-                // it's a confirmed, specific, actionable cause, not a guess
-                // ("often means geo-blocked or referer-gated").
-                lpEl('lp-error-msg').textContent = lpNzVpnWarning || msg || "This channel wouldn't play in the browser.";
-                lpEl('lp-error-detail').textContent = lpNzVpnWarning ? '' : (detail || '');
+                // NZ-VPN warning is a SUPPLEMENT, not an override, as of
+                // 2026-08-20 evening -- it used to replace the real error
+                // message outright, which was wrong: a live test the same
+                // night (Sky Open failing to play) proved Windscribe being
+                // connected does NOT reliably mean it's the cause -- the
+                // browser's own outbound IP was confirmed genuinely NZ in
+                // that exact failure. checkNzVpnLock() can only observe
+                // "is a VPN connected", not "is THIS failure caused by it",
+                // so asserting it as fact was a real bug, not just an
+                // over-caution. It now appends as a clearly-hedged possible
+                // factor under the real message instead of replacing it.
+                lpEl('lp-error-msg').textContent = msg || "This channel wouldn't play in the browser.";
+                lpEl('lp-error-detail').textContent = lpNzVpnWarning
+                    ? `${detail ? detail + ' ' : ''}Also worth ruling out: ${lpNzVpnWarning}`
+                    : (detail || '');
                 lpSetStatus('FAILED');
                 // Only DaddyLive/Sky Sport channels go through the resolver
                 // this button re-checks -- a plain direct-URL channel has
@@ -20134,7 +20152,11 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 // account has no NZ server (verified above), so ANY
                 // connected state blocks NZ-only content.
                 if (data.available && data.connected) {
-                    return `This is a New Zealand-only channel, and Windscribe is currently connected via ${data.location || 'a VPN server'} -- Sky's NZ feed blocks non-NZ IPs, even though this device is really in NZ. Windscribe has no New Zealand server on this account, so disconnecting is the only fix.`;
+                    // Hedged, not asserted -- see the note above lpShowState's
+                    // NZ-VPN handling for why. Windscribe being connected is a
+                    // real, checkable fact; whether it's THIS failure's cause
+                    // is not something this function can actually confirm.
+                    return `Windscribe is currently connected via ${data.location || 'a VPN server'} on this PC (not necessarily this device) -- worth disconnecting to rule it out, since this account has no New Zealand server to switch to instead.`;
                 }
             } catch (e) { /* relay unreachable -- can't check, don't block on a guess */ }
             return null;

@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v152"
+      "cacheName": "lounge-shell-v153"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v153",
+      "date": "2026-08-20",
+      "title": "Poster loading visibility fixed for real + corrected the v152 VPN diagnostic's false-positive",
+      "changes": [
+        "Poster \"missing\" report (Deep's mobile screenshots): NOT a broken image bug -- the loading-shimmer infrastructure from the 2026-08-19 fix was already wired correctly, but at 8% cyan alpha on a near-black card background it survives fine live and crushes to invisible in a compressed phone screenshot/Telegram JPEG. This is a DESIGN_DNA A1 voltage-law violation (chroma floor is .19-.22 everywhere else in this codebase, this was .08), made worse by the 2026-08-18 vertical-rail redesign putting many more simultaneously-pending cards on screen at once than the old horizontal layout did. Base gradient brightened one stop, shimmer band tripled in opacity and widened -- now reads as \"loading\" even in a single static screenshot caught between sweeps, not just during the live animation.",
+        "Corrected a real bug in v152's Live TV VPN diagnostic: it asserted Windscribe as the CONFIRMED cause of any NZ-channel failure whenever connected, replacing the actual error message outright. Live-tested the same evening: Sky Open failed to play in a genuinely-NZ-IP, properly-foregrounded browser (outbound IP independently confirmed real NZ via api.ipify.org) while Windscribe was connected -- proving connection state alone does not mean it's the cause. Now appends as a clearly-hedged possible factor under the real error, never replaces it.",
+        "Live TV NZ root cause, now properly split by channel: TVNZ 1/2/Duke are genuinely blocked -- confirmed via i.mjh.nz's own source data that TVNZ dropped clear HLS entirely and now requires Widevine DRM + DASH (.mpd), a different protocol and player library than this app's hls.js-based player supports. Real, scoped follow-up work, not a quick fix. Sky Open/Sky Open +1/Te Reo are plain non-DRM HLS on the same CDN family as channels already confirmed working (Bravo+1) -- their \"[Geo-blocked]\" label is static source-playlist metadata with no code behind it, not a live check -- but Sky Open still failed to load in tonight's live test for a cause not yet pinned down (CDN-side flakiness suspected, not geography or VPN). Genuinely still broken for at least some NZ channels; not yet fixed."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,
