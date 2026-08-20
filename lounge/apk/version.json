@@ -33,10 +33,21 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v151"
+      "cacheName": "lounge-shell-v152"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v152",
+      "date": "2026-08-20",
+      "title": "NZ/AU EPG wired into the live guide + VPN geo-lock diagnostic for Live TV",
+      "changes": [
+        "EPG: the matthuisman/i.mjh.nz NZ/AU feed built earlier today is now merged server-side into the SAME /epg?cc=... pipeline the app's guide already uses (nexus_control_relay.py: fetch_general_epg() rewritten to key by _epg_norm(channel id) instead of display name -- the first cut couldn't have matched anything, the frontend joins on tvg-id, never a name -- caught before it shipped to any UI). No frontend changes needed: loadEpg() already calls this endpoint. Live-verified after restarting the relay: /epg?cc=nz now returns 120 channels with real now/next programme data, including genuine NZ-specific entries (tvnz1, three, trackside1/2, whakaatamori, firstlight and more).",
+        "Live TV investigated (Deep: \"geo lock\"): confirmed via a real foregrounded Playwright browser that HLS.js plays NZ streams correctly -- not a playback bug. Windscribe VPN (connected via a US exit on the PC) was the first theory but DISPROVEN by testing the browser's actual outbound IP directly -- it stayed the real NZ address regardless of Windscribe's state, so Windscribe does not tunnel this app's browser traffic. Added a real diagnostic anyway for the one place a system VPN genuinely IS in the path -- \"Play on PC (mpv)\" shells out to a non-split-tunnelled player -- via a new checkNzVpnLock()/lp-vpn-fix-btn pair reusing the existing Windscribe status/toggle relay endpoints. This does NOT explain Deep's actual failure in his own browser session; still open pending which device/app he sees it on."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,

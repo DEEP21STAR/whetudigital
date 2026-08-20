@@ -9534,6 +9534,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     <button class="lp-action" onclick="retryLivePlayer()"><i class="fas fa-rotate-right"></i> Try again</button>
                     <button class="lp-action alt" onclick="livePlayerFallbackToMpv()"><i class="fas fa-desktop"></i> Play on PC (mpv)</button>
                     <button id="lp-diagnose-btn" class="lp-action alt" onclick="diagnoseSkyStream()" style="display:none;"><i class="fas fa-stethoscope"></i> Diagnose</button>
+                    <button id="lp-vpn-fix-btn" class="lp-action alt" onclick="fixNzVpnLockAndRetry()" style="display:none;"><i class="fas fa-shield-halved"></i> Disconnect VPN &amp; retry</button>
                 </div>
                 <div id="lp-cdn-down-note" class="lp-cdn-down-note" style="display:none;">
                     DaddyLive's own servers are down, not just this channel — every Sky Sport tile will show this
@@ -13948,7 +13949,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v151';
+        const LOUNGE_BUILD = 'lounge-shell-v152';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -19818,6 +19819,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         let lpWatchdog = null;
         let lpTick = null;
         let lpRecovered = 0;
+        let lpNzVpnWarning = null;   // set per-channel by checkNzVpnLock(), read by every error surface below
 
         function lpEl(id) { return document.getElementById(id); }
 
@@ -19846,14 +19848,21 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             loading.classList.toggle('is-shown', which === 'loading');
             error.classList.toggle('is-shown', which === 'error');
             if (which === 'error') {
-                lpEl('lp-error-msg').textContent = msg || "This channel wouldn't play in the browser.";
-                lpEl('lp-error-detail').textContent = detail || '';
+                // NZ-VPN-geo-lock (checked once per channel by
+                // checkNzVpnLock(), called from openLivePlayer) always wins
+                // over whatever generic message the caller passed in --
+                // it's a confirmed, specific, actionable cause, not a guess
+                // ("often means geo-blocked or referer-gated").
+                lpEl('lp-error-msg').textContent = lpNzVpnWarning || msg || "This channel wouldn't play in the browser.";
+                lpEl('lp-error-detail').textContent = lpNzVpnWarning ? '' : (detail || '');
                 lpSetStatus('FAILED');
                 // Only DaddyLive/Sky Sport channels go through the resolver
                 // this button re-checks -- a plain direct-URL channel has
                 // nothing for it to diagnose.
                 const diagBtn = lpEl('lp-diagnose-btn');
                 if (diagBtn) diagBtn.style.display = (lpChannel && lpChannel.externalWatch && lpChannel.dlhdId) ? '' : 'none';
+                const vpnFixBtn = lpEl('lp-vpn-fix-btn');
+                if (vpnFixBtn) vpnFixBtn.style.display = lpNzVpnWarning ? '' : 'none';
                 renderCdnDownNote(!!altSources);
             } else {
                 renderCdnDownNote(false);
@@ -20098,12 +20107,62 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             return isApple || !(window.Hls && window.Hls.isSupported());
         }
 
+        // Investigated 2026-08-20 (Deep: "LIVE NZ Channel one doesnt work
+        // all with geo lock"): confirmed live that HLS.js plays this exact
+        // stream correctly in a real foregrounded browser, so it's not a
+        // playback/hls.js bug. Windscribe VPN being connected via a
+        // non-NZ exit (verified: "Los Angeles - Dogg") was the first theory,
+        // but DISPROVEN by testing the browser's own outbound IP directly --
+        // it stayed the real NZ address regardless of Windscribe's state, so
+        // Windscribe on the PC does not tunnel this app's browser traffic
+        // (split tunnel, most likely). This check is still real and correct
+        // for the ONE path where the system VPN genuinely is in the traffic
+        // path -- "Play on PC (mpv)" shells out to a system player that
+        // isn't split-tunnelled -- so it stays wired in for that case. It is
+        // NOT what Deep is hitting in his own browser session; that cause is
+        // still open, pending which device/app he sees the failure on.
+        async function checkNzVpnLock(channel) {
+            if (!channel || channel.country !== 'nz') return null;
+            try {
+                const res = await fetch(`${getRelayBase()}/vpn-status`, { signal: AbortSignal.timeout(4000) });
+                const data = await res.json();
+                // "location" is only present while connected (see
+                // windscribe_status() in nexus_control_relay.py) -- a New
+                // Zealand exit would read something like "Auckland - ...",
+                // never an exact match worth hardcoding, so this only needs
+                // to catch the affirmatively-connected case at all: this
+                // account has no NZ server (verified above), so ANY
+                // connected state blocks NZ-only content.
+                if (data.available && data.connected) {
+                    return `This is a New Zealand-only channel, and Windscribe is currently connected via ${data.location || 'a VPN server'} -- Sky's NZ feed blocks non-NZ IPs, even though this device is really in NZ. Windscribe has no New Zealand server on this account, so disconnecting is the only fix.`;
+                }
+            } catch (e) { /* relay unreachable -- can't check, don't block on a guess */ }
+            return null;
+        }
+
+        async function fixNzVpnLockAndRetry() {
+            const btn = lpEl('lp-vpn-fix-btn');
+            if (!btn) return;
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Disconnecting…';
+            try {
+                await refreshWindscribeStatus();   // sync the header button's dataset.connected before toggling
+                await toggleWindscribeVpn();       // it's connected (that's why this button is showing), so this disconnects
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+            retryLivePlayer();
+        }
+
         async function openLivePlayer(channel) {
             // Any previous stream dies before the next one is even resolved.
             lpTeardown();
             lpChannel = channel;
             lpSrc = null;
             lpRecovered = 0;
+            lpNzVpnWarning = await checkNzVpnLock(channel);
 
             const wrap = lpEl('live-player');
             const video = lpEl('lp-video');
