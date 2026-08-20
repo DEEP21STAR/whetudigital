@@ -33,10 +33,21 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v145"
+      "cacheName": "lounge-shell-v146"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v146",
+      "date": "2026-08-20",
+      "title": "Real fix: GSAP rotateX/rotateY property-name bug found via Deep's real console screenshots",
+      "changes": [
+        "Deep sent real DevTools console screenshots showing repeated 'rotateX/rotateY not eligible for reset' warnings from gsap.min.js. Root cause: the trailer-hover card-tilt effect used the CSS transform-function names ('rotateX'/'rotateY') as GSAP property names instead of GSAP's own naming ('rotationX'/'rotationY') -- GSAP is lenient enough to still animate with the wrong name going in, but its internal reset/recompute path doesn't recognize it, throwing on every single quickTo call while hovering an expanded trailer card. Fixed to the correct property names.",
+        "Matrix-drop tagline scramble: still investigating -- confirmed via direct live testing this session (real GSAP timeline, real screenshots one second apart) that the underlying mechanism DOES paint correctly in a clean/isolated test on this same machine, which rules out both earlier theories (SVG repaint bug, stale cache -- Deep confirmed he's on v145 in Incognito). Current leading theory: the real intro's tagline decode window overlaps with several OTHER simultaneous animations (popcorn burst, couch bounce, particle field) that may be starving it of paint time on real hardware under real load, unlike my isolated test which had no competing animations. Sent Deep a console diagnostic script to get hard mutation-count data from his actual devices before shipping another fix attempt."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,

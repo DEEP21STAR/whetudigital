@@ -3060,6 +3060,61 @@
         .epgcov.is-active-filter .epgcov-clear { color: #00ff88; }
 
         /* "What's Live Now" strip */
+        /* "Your Teams" badge rail, 2026-08-20 -- real crest images, Lounge's
+           own cyan/violet glass language (A4 theme law), not the neon-pink
+           reference Deep sent as inspiration. */
+        .team-badge-rail {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .team-badge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            width: 84px;
+            padding: 12px 8px 10px;
+            background: linear-gradient(160deg, rgba(0,212,255,0.12), rgba(157,78,221,0.10));
+            border: 1px solid rgba(0,212,255,0.3);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+        }
+        .team-badge:hover {
+            transform: translateY(-3px);
+            border-color: rgba(0,212,255,0.7);
+            box-shadow: 0 0 16px rgba(0,212,255,0.3);
+        }
+        .team-badge img {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 5px rgba(0,212,255,0.35));
+        }
+        .team-badge-text {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: 800;
+            line-height: 1.15;
+            text-align: center;
+            letter-spacing: 0.5px;
+            color: #001a2e;
+            background: linear-gradient(160deg, #00d4ff, #6a5cff);
+            border-radius: 6px;
+        }
+        .team-badge span:last-child {
+            font-size: 10px;
+            font-weight: 600;
+            color: #d8d8e0;
+            text-align: center;
+            line-height: 1.2;
+        }
         #liveForYouStrip {
             flex-wrap: wrap;
             align-items: center;
@@ -9180,6 +9235,52 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <i class="fas fa-futbol"></i> Live Sports
                     </div>
                 </div>
+                <!-- "Your Teams" badge rail, 2026-08-20 (Deep's ask). Real
+                     crest images -- see LIVE_FOR_YOU_TEAMS' own comment in
+                     the script for exactly where each one came from and how
+                     it was verified. Clicking a badge reuses the SAME
+                     filterSportsChannels() the search box calls -- one code
+                     path, not a parallel one that could drift out of sync.
+                     Sky Sports NZ has no real logo anywhere (it's a
+                     broadcaster brand, not a team/league -- not in any
+                     sports database) so it gets a styled wordmark instead of
+                     a faked hotlink, and clicking it clears the filter to
+                     show the full live guide rather than pretending to
+                     filter to something that doesn't exist as a search term. -->
+                <div class="team-badge-rail" id="teamBadgeRail">
+                    <button class="team-badge" onclick="playTeamBadge('Arsenal')">
+                        <img src="https://r2.thesportsdb.com/images/media/team/badge/uyhbfe1612467038.png" alt="" loading="lazy" onerror="this.style.display='none'">
+                        <span>Arsenal</span>
+                    </button>
+                    <button class="team-badge" onclick="playTeamBadge('')">
+                        <span class="team-badge-text">SKY<br>SPORT</span>
+                        <span>Sky Sports NZ</span>
+                    </button>
+                    <button class="team-badge" onclick="playTeamBadge('All Blacks')">
+                        <img src="https://r2.thesportsdb.com/images/media/team/badge/fhr0ys1566381231.png" alt="" loading="lazy" onerror="this.style.display='none'">
+                        <span>All Blacks</span>
+                    </button>
+                    <button class="team-badge" onclick="playTeamBadge('Black Caps')">
+                        <img src="https://r2.thesportsdb.com/images/media/team/badge/1yyh9s1646775166.png" alt="" loading="lazy" onerror="this.style.display='none'">
+                        <span>Blackcaps</span>
+                    </button>
+                    <button class="team-badge" onclick="playTeamBadge('Formula 1')">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/33/F1.svg" alt="" loading="lazy" onerror="this.style.display='none'">
+                        <span>Formula 1</span>
+                    </button>
+                    <button class="team-badge" onclick="playTeamBadge('Premier League')">
+                        <img src="https://r2.thesportsdb.com/images/media/league/badge/gasy9d1737743125.png" alt="" loading="lazy" onerror="this.style.display='none'">
+                        <span>Premier League</span>
+                    </button>
+                    <button class="team-badge" onclick="playTeamBadge('Warriors')">
+                        <img src="https://r2.thesportsdb.com/images/media/team/badge/w8b9kw1646347767.png" alt="" loading="lazy" onerror="this.style.display='none'">
+                        <span>Warriors</span>
+                    </button>
+                    <button class="team-badge" onclick="playTeamBadge('Chiefs')">
+                        <img src="https://r2.thesportsdb.com/images/media/team/badge/ut9cpz1555142819.png" alt="" loading="lazy" onerror="this.style.display='none'">
+                        <span>Chiefs</span>
+                    </button>
+                </div>
                 <!-- "What's Live Now" strip, added 2026-08-17: cross-references
                      Sky's real guide against Deep's followed teams so the
                      answer to "is anything I care about on right now" doesn't
@@ -11228,9 +11329,18 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // is rebuilt fresh per hover (see chbTriggerExpand), so this
             // listener is garbage-collected with it on teardown -- no
             // explicit removeEventListener needed.
+            // REAL BUG FOUND 2026-08-20 (Deep sent real console screenshots):
+            // 'rotateX'/'rotateY' are the CSS transform-function names, not
+            // GSAP's own property names -- GSAP's CSSPlugin wants
+            // 'rotationX'/'rotationY'. Using the CSS names still animates
+            // (GSAP is lenient about accepting them going in) but its reset/
+            // recompute path doesn't recognize them, throwing "not eligible
+            // for reset" on every single quickTo call -- confirmed spamming
+            // the console repeatedly in Deep's screenshot, once per
+            // mousemove tick while hovering an expanded trailer card.
             gsap.set(overlay, { transformPerspective: 700, transformStyle: 'preserve-3d' });
-            const tiltX = gsap.quickTo(overlay, 'rotateX', { duration: 0.4, ease: 'power2.out' });
-            const tiltY = gsap.quickTo(overlay, 'rotateY', { duration: 0.4, ease: 'power2.out' });
+            const tiltX = gsap.quickTo(overlay, 'rotationX', { duration: 0.4, ease: 'power2.out' });
+            const tiltY = gsap.quickTo(overlay, 'rotationY', { duration: 0.4, ease: 'power2.out' });
             overlay.addEventListener('mousemove', (e) => {
                 const r = overlay.getBoundingClientRect();
                 const px = (e.clientX - r.left) / r.width - 0.5;
@@ -13636,7 +13746,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v145';
+        const LOUNGE_BUILD = 'lounge-shell-v146';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -20554,6 +20664,16 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         }
 
         function filterSportsChannels(query) { applyEpgSearch('sports', query); }
+
+        // "Your Teams" badge rail click handler, 2026-08-20. Navigates to
+        // Live Sports (in case a badge is ever surfaced from another
+        // section later) then reuses filterSportsChannels -- deliberately
+        // NOT a separate filtering path, so this can never drift out of
+        // sync with what the search box itself does.
+        function playTeamBadge(term) {
+            showSection('sports');
+            filterSportsChannels(term);
+        }
         function filterAllChannels(query)    { applyEpgSearch('livetv', query); }
 
         // ===== IMDB ID RESOLUTION (for Torrentio/MediaFusion queries) =====
