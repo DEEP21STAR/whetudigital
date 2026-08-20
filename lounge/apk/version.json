@@ -33,10 +33,23 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v153"
+      "cacheName": "lounge-shell-v154"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v154",
+      "date": "2026-08-20",
+      "title": "Intro dolly rebuilt as true 2.5D parallax -- 3 depth layers, not 1",
+      "changes": [
+        "Researched real camera-department technique before rebuilding (Deep's explicit ask): a dolly shot reads as depth because near and far objects move at DIFFERENT rates as the camera travels -- that differential is what an eye reads as \"distance\". v151's portal-out scaled the whole #intro overlay as one rigid block, which is a zoom with easing, not a camera move, no matter how it's dressed up.",
+        "Rebuilt across the DOM's existing 3 depth planes, sharing one CSS perspective declared on the shared parent so they read as one continuous 3D space instead of 3 independent zooms: starfield (farthest, scale 1->1.12, 1.5px blur), projector rays (mid, 1->1.55, 5px blur), couch/tagline/mark -- the actual subject (nearest, 1->2.6 + rotationX tilt + z-push, 11px blur, same numbers v151 used but now isolated to the one layer meant to be close).",
+        "Verified live by directly seeking the real GSAP timeline mid-push (not simulated): captured a genuine screenshot showing sharp background stars, moderately-soft mid-ground rays, and a heavily-blurred foreground mark simultaneously in one frame -- real depth-of-field, not a uniform blur. judge_harness floor unchanged at 9.64/10, 0 new console errors.",
+        "[BLIND JUDGE PENDING] -- still no full Gemini stills+motion judge loop run. This is a real, verified technical upgrade (genuine parallax vs. a flat scale), not a claim of reaching any specific score -- that needs the actual judge loop, not a self-assessment."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,

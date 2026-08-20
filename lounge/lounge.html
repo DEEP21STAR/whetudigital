@@ -10248,6 +10248,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const montageEl = document.getElementById('intro-montage');
             const popcornEl = document.getElementById('intro-popcorn');
             const raysEl = document.getElementById('intro-rays');
+            const introContentEl = document.getElementById('intro-content');
             const beatEls = buildIntroMontage(montageEl);
             const kernelEls = buildPopcornKernels(popcornEl);
             const { rays: rayEls, motes: moteEls } = buildIntroRays(raysEl);
@@ -10364,7 +10365,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 // transform. Cheap, and it's exactly the class of residual-
                 // state bug the whole SVG->HTML tagline rebuild this session
                 // was written to eliminate elsewhere.
-                gsap.set(intro, { clearProps: 'transform,filter,opacity' });
+                gsap.set([intro, particlesEl, raysEl, introContentEl], { clearProps: 'transform,filter,opacity' });
                 onComplete();
                 gsap.from('.section.active .card', { y: 30, opacity: 0, duration: 0.5, stagger: 0.08, ease: 'power2.out' });
                 // Real bug found 2026-08-17 (Deep's DevTools inspection): a card
@@ -10758,7 +10759,14 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // changed, so the ~10s of already-tuned montage/couch/tagline
             // choreography above is untouched.
             const PORTAL_AT = SETTLE + 1.77;
-            gsap.set(intro, { transformPerspective: 1400, transformOrigin: '50% 46%' });
+            // Shared perspective on the PARENT, not transformPerspective on
+            // each child individually -- this is what makes the layers below
+            // read as one 3D space with one vanishing point rather than three
+            // independent zooms. Plain style write (not gsap.set) because
+            // it's static setup, not something animated.
+            intro.style.perspective = '1400px';
+            intro.style.transformStyle = 'preserve-3d';
+            gsap.set([particlesEl, raysEl, introContentEl], { transformOrigin: '50% 46%' });
 
             // Rays ignite in a tight ripple (12ms apart, not simultaneous) so
             // they read as a beam SPREADING from the vanishing point rather
@@ -10777,23 +10785,45 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 }, PORTAL_AT);
             });
 
-            // The dolly push itself -- depth, not a flat zoom. rotationX is
-            // deliberately small (-6deg): enough to read as a real camera
-            // tilt into the push, not so much the couch/tagline distort into
-            // unreadability before the blur takes over anyway.
+            // THE DOLLY PUSH -- rebuilt 2026-08-20 (2nd pass) from a single
+            // rigid-block scale into genuine 2.5D parallax. Research finding
+            // (real camera-department technique, not a guess): a dolly shot
+            // reads as real depth specifically BECAUSE near and far objects
+            // move at DIFFERENT rates as the camera travels -- that
+            // differential IS what a human eye reads as "distance", a
+            // uniform scale on one flat layer is a zoom, not a move, no
+            // matter how it's eased. v151 scaled #intro (everything) as one
+            // element. This splits the same beat across the three depth
+            // planes the DOM already has, sharing ONE perspective declared
+            // on the parent (see PORTAL_AT block above) so they read as one
+            // continuous space:
+            //   FAR   particlesEl (starfield)   -- barely moves, stays sharp
+            //   MID   raysEl (projector beams)  -- moderate push, light blur
+            //   NEAR  introContentEl (couch/tagline/mark, the actual
+            //         subject) -- the big push + tilt + heavy blur, exactly
+            //         what v151 did to the whole scene, now isolated to the
+            //         one layer that's actually meant to be "close".
             tl.to(flashEl, { opacity: 0.4, duration: 0.14 }, PORTAL_AT);
-            tl.to(intro, {
+            tl.to(particlesEl, {
+                scale: 1.12, filter: 'blur(1.5px)', duration: 0.62, ease: 'power2.in'
+            }, PORTAL_AT + 0.06);
+            tl.to(raysEl, {
+                scale: 1.55, filter: 'blur(5px)', duration: 0.62, ease: 'power2.in'
+            }, PORTAL_AT + 0.06);
+            tl.to(introContentEl, {
                 scale: 2.6, rotationX: -6, z: 220, filter: 'blur(11px)',
                 duration: 0.62, ease: 'power2.in'
             }, PORTAL_AT + 0.06);
 
             // IMPACT -- the exact frame the dolly "lands". Shake is 4
             // hand-placed keyframes (decaying amplitude, alternating
-            // direction) on the SAME element as the push, so the jolt reads
-            // as the push's own momentum hitting a stop, not a separate
-            // effect glued on after. Every keyframe returns to x:0/y:0 by
-            // the last step so nothing is left mid-shake when finishIntro's
-            // clearProps runs.
+            // direction). Now applied to #intro itself (the shared parent)
+            // rather than any one depth layer -- a camera jolt should move
+            // every plane together, same as it did before the parallax
+            // split, otherwise the layers visibly separate at the one
+            // moment they most need to read as one hit. Every keyframe
+            // returns to x:0/y:0 by the last step so nothing is left
+            // mid-shake when finishIntro's clearProps runs.
             const IMPACT_AT = PORTAL_AT + 0.62;
             tl.to(flashEl, { opacity: 1, duration: 0.08, ease: 'power1.out' }, IMPACT_AT);
             tl.to(flashEl, { opacity: 0, duration: 0.34, ease: 'power2.in' }, IMPACT_AT + 0.08);
@@ -13959,7 +13989,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v153';
+        const LOUNGE_BUILD = 'lounge-shell-v154';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
