@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v146"
+      "cacheName": "lounge-shell-v147"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v147",
+      "date": "2026-08-20",
+      "title": "Real fix: Matrix-drop scramble was starting mid-popcorn-burst, competing for frames with 16 simultaneous kernel animations",
+      "changes": [
+        "Deep confirmed via a live console test that the scramble mechanism DOES work on his real hardware in isolation (\"had a text flicker\") -- but never during the real, full intro on 2 real devices. Root cause found by actually computing the timeline's own numbers: the tagline decode (SETTLE) used to start at POP_CLIMAX+0.44, but the 16-kernel popcorn burst (32 simultaneous tweens: each kernel has its own rise+fall animation, staggered 35ms apart) doesn't finish until POP_CLIMAX+~1.25 -- so the decode's ~85 scheduled character mutations were competing for paint time against 32 other active animations for almost the entire scramble window.",
+        "Fixed by pushing SETTLE to POP_CLIMAX+1.35, after the popcorn burst is fully finished, giving the decode a clear runway. Every other intro beat (Enter fade-in, the pause, portal-out) is defined relative to SETTLE already, so nothing else needed to change -- same pattern the original v140 timing fix used.",
+        "This makes the intro run ~0.9s longer overall. [UNTESTED on Deep's real hardware yet -- reasoned from the timeline's own numbers and confirmed real contention exists, but the actual visual fix needs his confirmation like everything else in this saga.]"
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,

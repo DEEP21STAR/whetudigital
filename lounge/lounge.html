@@ -10563,7 +10563,22 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // scheduleTaglineDecode above). Everything after this beat
             // (Enter fade-in, the pause, the portal-out) is pushed later to
             // give the cascade room -- was SETTLE+0.52/0.62, now SETTLE+1.3+.
-            const SETTLE = POP_CLIMAX + 0.44;
+            //
+            // REAL BUG FOUND 2026-08-20 (Deep confirmed on 2 real devices: no
+            // scramble visible; confirmed the underlying mechanism DOES work
+            // when run in isolation via a console test -- "had a text
+            // flicker"). Root cause: SETTLE used to be POP_CLIMAX + 0.44, but
+            // the 16-kernel popcorn burst (POPCORN_AT = POP_CLIMAX - 0.06,
+            // last kernel staggered +0.525, its own rise+fall taking 0.78s)
+            // doesn't actually finish animating until POP_CLIMAX + ~1.25 --
+            // meaning the tagline decode was starting WHILE 16 simultaneous
+            // kernel tweens (32 active animations) were still mid-flight,
+            // competing for the same frames as ~85 scheduled character
+            // mutations. Pushed SETTLE past the point the popcorn burst is
+            // fully finished so the decode gets a clear runway -- every beat
+            // below is defined relative to SETTLE already, so nothing else
+            // needed to change.
+            const SETTLE = POP_CLIMAX + 1.35;
             const taglineSheenEl = document.querySelector('#intro-tagline-svg .tagline-sheen');
             // Sheen sits UNDER the gold layer showing the finished string --
             // held at 0 until the scramble resolves, so it can't spoil the
@@ -13746,7 +13761,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v146';
+        const LOUNGE_BUILD = 'lounge-shell-v147';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
