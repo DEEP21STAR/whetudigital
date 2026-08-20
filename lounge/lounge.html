@@ -4771,7 +4771,62 @@
             min-width: 0;
         }
 
-        .detail-cast-member { text-align: center; }
+        .detail-cast-member { text-align: center; position: relative; }
+
+        /* Actor hover mini-carousel, 2026-08-21 (Deep's "21 surprises" ask).
+           Confirmed via grep before building: cast members were plain
+           static portrait+name+role, no interaction of any kind. Real TMDB
+           combined_credits data, cached per person so re-hovering the same
+           actor never re-fetches. Dwell-gated (280ms) so a mouse merely
+           passing over the cast row on the way somewhere else doesn't fire
+           a fetch for every face it crosses. */
+        .cast-hover-pop {
+            position: absolute;
+            bottom: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%) translateY(6px);
+            width: 220px;
+            background: rgba(17, 20, 26, 0.95);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(0, 212, 255, 0.22);
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.18s ease, transform 0.18s ease;
+            z-index: 20;
+            text-align: left;
+        }
+        .detail-cast-member:hover .cast-hover-pop.is-ready {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .cast-hover-pop-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #7fb8c4;
+            margin-bottom: 6px;
+        }
+        .cast-hover-pop-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+        }
+        .cast-hover-pop-grid img {
+            width: 100%;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+            border-radius: 4px;
+            background: #0d0d10;
+        }
+        @media (hover: none) {
+            /* No hover on touch -- the popover would stick open with no way
+               to dismiss it. Same reasoning .card-spotlight already uses
+               elsewhere in this file for touch devices. */
+            .cast-hover-pop { display: none; }
+        }
 
         .detail-cast-member img {
             width: 100%;
@@ -14300,7 +14355,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v168';
+        const LOUNGE_BUILD = 'lounge-shell-v169';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -23618,15 +23673,66 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const castWrap = document.getElementById('detail-cast-wrap');
             if (cast.length) {
                 document.getElementById('detail-cast').innerHTML = cast.map(c => `
-                    <div class="detail-cast-member">
+                    <div class="detail-cast-member" data-person-id="${c.id}" data-person-name="${escapeHtml(c.name || '')}">
                         <img src="${c.profile_path ? `https://image.tmdb.org/t/p/w185${c.profile_path}` : 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='}" alt="" loading="lazy">
                         <div class="detail-cast-name">${escapeHtml(c.name || '')}</div>
                         <div class="detail-cast-role">${escapeHtml(c.character || '')}</div>
+                        <div class="cast-hover-pop"></div>
                     </div>`).join('');
                 castWrap.hidden = false;
+                wireCastHoverCarousels();
             } else {
                 castWrap.hidden = true;
             }
+        }
+
+        // Cache is per tmdbId, survives across different titles' detail
+        // pages in the same session -- an actor hovered from two different
+        // movies only ever costs one real fetch.
+        const castCreditsCache = new Map();
+        let castHoverTimer = null;
+
+        async function fetchPersonKnownFor(personId) {
+            if (castCreditsCache.has(personId)) return castCreditsCache.get(personId);
+            const key = localStorage.getItem('nexus_tmdb_key');
+            if (!key) return null;
+            try {
+                const data = await tmdbFetch(`person/${personId}/combined_credits`, {}, key);
+                const items = (data.cast || [])
+                    .filter(c => c.poster_path && (c.title || c.name))
+                    .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
+                    .slice(0, 8);
+                castCreditsCache.set(personId, items);
+                return items;
+            } catch (e) {
+                castCreditsCache.set(personId, null); // don't hammer a failing lookup on every re-hover
+                return null;
+            }
+        }
+
+        function wireCastHoverCarousels() {
+            document.querySelectorAll('.detail-cast-member').forEach(member => {
+                if (member.dataset.hoverWired === '1') return;
+                member.dataset.hoverWired = '1';
+                const personId = member.dataset.personId;
+                const pop = member.querySelector('.cast-hover-pop');
+                if (!personId || !pop) return;
+                member.addEventListener('mouseenter', () => {
+                    clearTimeout(castHoverTimer);
+                    castHoverTimer = setTimeout(async () => {
+                        if (pop.dataset.loaded === '1') { pop.classList.add('is-ready'); return; }
+                        const items = await fetchPersonKnownFor(personId);
+                        if (!items || !items.length) return; // no real data -- stay hidden rather than show an empty box
+                        pop.innerHTML = `<div class="cast-hover-pop-label">More from ${member.dataset.personName}</div>` +
+                            `<div class="cast-hover-pop-grid">${items.map(it =>
+                                `<img src="https://image.tmdb.org/t/p/w185${it.poster_path}" alt="${escapeHtml(it.title || it.name || '')}" title="${escapeHtml(it.title || it.name || '')}" loading="lazy">`
+                            ).join('')}</div>`;
+                        pop.dataset.loaded = '1';
+                        pop.classList.add('is-ready');
+                    }, 280);
+                });
+                member.addEventListener('mouseleave', () => clearTimeout(castHoverTimer));
+            });
         }
 
         function detailWatch() {

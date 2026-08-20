@@ -33,10 +33,23 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v168"
+      "cacheName": "lounge-shell-v169"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v169",
+      "date": "2026-08-21",
+      "title": "Actor hover mini-carousel on the detail page (item #21 of the 21-surprises list) -- real TMDB data, live-verified",
+      "changes": [
+        "Confirmed via grep before building: cast members on the detail page were plain static portrait+name+role with zero interaction. Checked several other candidates first this cycle (#9 mini-player dock, #16 presence indicator) and found #9 was ALREADY fully built (livePlayerEnterMini()/ExitMini(), a manual toggle button, 'browse behind it' PiP-style mode) -- an entirely separate, unused <div id=\"mini-player\"> scaffold was left over from an earlier prototype, now identified as dead markup, not touched this pass. #16 (live cross-device presence) would need real server-side infrastructure (heartbeat/websocket store) -- correctly out of scope for a UI-only pass.",
+        "Built the actor carousel: hovering a cast member (280ms dwell-gated, matching the existing chb trailer-preview dwell pattern) fetches that person's real TMDB combined_credits, shows their top 8 posters by popularity in a glass popover. Cached per person so re-hovering the same actor across different titles in one session never re-fetches. No fake/placeholder data -- if the fetch fails or returns nothing, the popover simply never appears rather than showing an empty box.",
+        "Live-verified with a real screenshot: hovered Tom Holland on Spider-Man: Brand New Day's real detail page, confirmed a genuine 'More from Tom Holland' popover with real poster thumbnails from his actual filmography, correctly positioned, no layout collision with surrounding cast members or the trailer player above it.",
+        "Syntax-checked (0 errors, 4 inline script blocks)."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,
