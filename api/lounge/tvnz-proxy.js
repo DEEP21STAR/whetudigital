@@ -64,23 +64,47 @@ export async function GET(req) {
     });
   }
 
-  return new Response(res.body, {
-    status: 200,
-    headers: {
-      ...headers,
-      // Passed through, not hardcoded -- unlike skysegment.js's fixed
-      // video/mp2t (that proxy only ever serves one mislabeled type), this
-      // one serves both the XML manifest (application/dash+xml) and MP4
-      // segments (video/mp4) through the same endpoint, and TVNZ's own
-      // Content-Type is correct for both (confirmed via curl -I).
-      'Content-Type': res.headers.get('content-type') || 'application/octet-stream',
-      // Manifest is "type=dynamic" (live, re-fetched every couple seconds by
-      // the player itself) and segments are one-shot/immutable once
-      // numbered -- no-store is correct for both, this is a live stream, not
-      // a poster image.
-      'Cache-Control': 'no-store',
-    },
-  });
+  const contentType = res.headers.get('content-type') || 'application/octet-stream';
+  const respHeaders = {
+    ...headers,
+    // Passed through, not hardcoded -- unlike skysegment.js's fixed
+    // video/mp2t (that proxy only ever serves one mislabeled type), this
+    // one serves both the XML manifest (application/dash+xml) and MP4
+    // segments (video/mp4) through the same endpoint, and TVNZ's own
+    // Content-Type is correct for both (confirmed via curl -I).
+    'Content-Type': contentType,
+    // Manifest is "type=dynamic" (live, re-fetched every couple seconds by
+    // the player itself) and segments are one-shot/immutable once
+    // numbered -- no-store is correct for both, this is a live stream, not
+    // a poster image.
+    'Cache-Control': 'no-store',
+  };
+
+  // The manifest has no <BaseURL> of its own (confirmed: real TVNZ manifests
+  // resolve SegmentTemplate paths against the manifest's OWN fetch URL).
+  // Shaka does the same -- but since Shaka fetched the manifest FROM THIS
+  // PROXY, not from TVNZ directly, an unmodified manifest makes it resolve
+  // every segment/init URL against OUR domain instead of TVNZ's, producing
+  // 404s here and the exact "Shaka error 1002 / HTTP_ERROR" Deep kept
+  // hitting even after the manifest-level CORS fix shipped (2026-08-21,
+  // found via live device repro after the original fix was proven only at
+  // the manifest layer with curl, never traced through Shaka's actual
+  // relative-URL resolution). Fix: inject an explicit <BaseURL> pointing
+  // back at TVNZ's real manifest directory, so Shaka resolves segment URIs
+  // as absolute TVNZ URLs -- the existing client-side registerRequestFilter
+  // in lounge.html then catches those and routes them through this same
+  // proxy, exactly like the manifest request itself.
+  const isManifest = contentType.includes('dash+xml') || targetUrl.pathname.endsWith('.mpd');
+  if (isManifest) {
+    const text = await res.text();
+    const baseUrl = targetUrl.href.slice(0, targetUrl.href.lastIndexOf('/') + 1);
+    const rewritten = /<BaseURL>/i.test(text)
+      ? text
+      : text.replace(/(<MPD\b[^>]*>)/i, `$1<BaseURL>${baseUrl}</BaseURL>`);
+    return new Response(rewritten, { status: 200, headers: respHeaders });
+  }
+
+  return new Response(res.body, { status: 200, headers: respHeaders });
 }
 
 export function OPTIONS() {
