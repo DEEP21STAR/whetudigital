@@ -22,8 +22,8 @@
   "generated": "2026-08-16",
   "latest": {
     "android": {
-      "versionCode": 31,
-      "versionName": "0.1.33",
+      "versionCode": 32,
+      "versionName": "0.1.34",
       "minSdk": 23,
       "certSha256": "082961c7cc1097dfb4f76239947becb18cd98f88eca3da6585e504d6f523352f",
       "apk": {
@@ -37,6 +37,19 @@
     }
   },
   "changelog": [
+    {
+      "version": "0.1.34",
+      "versionCode": 32,
+      "web": "lounge-shell-v178",
+      "date": "2026-08-21",
+      "title": "REAL fix for TVNZ mobile DRM -- native permission grant was missing (needs this APK install)",
+      "changes": [
+        "v177's device probe gave a definitive answer: navigator.requestMediaKeySystemAccess itself threw NotSupportedError on Deep's phone -- the browser was refusing to even negotiate a key system, before any Shaka/Lounge code ran. Researched what causes THAT specific low-level rejection in an embedded Android WebView (not a mobile browser app, which handles this natively): the WebView's WebChromeClient must explicitly override onPermissionRequest() and grant PermissionRequest.RESOURCE_PROTECTED_MEDIA_ID, or Android's DEFAULT behaviour is to silently DENY every permission request the page makes. Checked MainActivity.kt directly -- confirmed this override never existed anywhere in the file. This is why v176's robustness fix and v177's probe were both correct and necessary, but couldn't fix it alone: they addressed Shaka's config, but the OS never even let Widevine's CDM initialize in the first place.",
+        "Fixed in MainActivity.kt: added onPermissionRequest() to the existing WebChromeClient, granting RESOURCE_PROTECTED_MEDIA_ID (needed for Widevine EME) and RESOURCE_AUDIO_CAPTURE (needed for the existing voice-search feature), denying everything else since nothing in the app uses other browser permissions.",
+        "THIS IS A NATIVE CODE CHANGE -- unlike every other fix this session, it cannot reach Deep's phone through a normal page reload. Built and verified: Gradle release build succeeded clean, new APK's signing certificate SHA-256 confirmed IDENTICAL to the currently-installed app's (082961c7...3352f) -- this installs as a normal update over the existing app, no uninstall or data loss.",
+        "[UNTESTED: real device] -- this is the first fix all session that could not be verified with Playwright/curl at all (permission-grant behavior only exists inside a real Android WebView, no way to simulate it from this environment). High confidence given it directly explains the exact NotSupportedError text from v177's probe, but genuinely unproven until Deep installs this build and tries TVNZ again."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,
