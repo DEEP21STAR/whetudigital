@@ -14411,7 +14411,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v176';
+        const LOUNGE_BUILD = 'lounge-shell-v177';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -21047,28 +21047,36 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         ? `${getContentBase()}/tvnz-proxy?u=${encodeURIComponent(u)}`
                         : u);
                 });
+                // Shared by BOTH failure paths below -- a live Shaka 'error'
+                // EVENT (player already running) and a player.load() PROMISE
+                // REJECTION (failed before playback started) are different
+                // code paths that used to carry two different hand-written
+                // messages. Found 2026-08-21 the hard way: shipped a
+                // 6001-specific diagnostic only on the 'error' event handler,
+                // but Deep's real device hit the .catch() below instead --
+                // his screenshot showed the OLD generic "Shaka load error"
+                // text verbatim, meaning the diagnostic never even ran. One
+                // function now, called from both places, so this can't
+                // silently miss a path again. tvnzDrmProbe (populated below,
+                // before player.load() fires) carries REAL capability data
+                // instead of a third blind guess.
+                let tvnzDrmProbe = null;
+                function tvnzShakaErrorMessage(code, severity, message, prefix) {
+                    if (code === 6001) {
+                        if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+                            return `This device is loading Lounge over ${location.protocol.replace(':', '')}, not https -- Widevine DRM refuses to run on an insecure connection. Check Settings for the server address and switch it to the https:// one.`;
+                        }
+                        const probe = tvnzDrmProbe ? ` [Device probe: ${tvnzDrmProbe}]` : '';
+                        return `Shaka error 6001 — this device's browser/WebView could not get a usable Widevine DRM config, even with an explicit software-security robustness request and a secure connection. This looks like a device/OS-level DRM limitation, not something fixable in Lounge's code.${probe}`;
+                    }
+                    const sev = severity !== undefined ? ` (severity ${severity})` : '';
+                    return `${prefix} ${code || ''}${sev}${message ? ' — ' + message : ''} — TVNZ's DRM/CDN chain may have changed.`;
+                }
                 player.addEventListener('error', (event) => {
                     if (gen !== lpGen) return;
                     const detail = event.detail || {};
-                    // 6001 = REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE -- researched
-                    // 2026-08-21, NOT a CDN/manifest problem like 1002/6007 above.
-                    // Its two well-documented real causes: (1) the page isn't on a
-                    // secure origin (EME/Widevine refuses to init over plain http,
-                    // only https or localhost) -- relevant here because the
-                    // Android APK's host address is a user-changeable setting
-                    // (Prefs.host, defaults to the https public site but can be
-                    // pointed at a LAN http:// relay), and (2) some Android
-                    // WebView builds have incomplete/no Widevine support even on
-                    // https, independent of anything this app's code controls.
-                    // Surfacing the real cause here since the generic "DRM/CDN
-                    // chain may have changed" message actively misleads for this
-                    // specific code -- it isn't a CDN issue at all.
-                    const msg = detail.code === 6001
-                        ? (location.protocol !== 'https:' && location.hostname !== 'localhost'
-                            ? `This device is loading Lounge over ${location.protocol.replace(':', '')}, not https -- Widevine DRM refuses to run on an insecure connection. Check Settings for the server address and switch it to the https:// one.`
-                            : `Shaka error 6001 — this device's browser/WebView doesn't have a usable Widevine DRM module, even though the connection is secure. This is a device/OS limitation TVNZ's DRM requires, not something Lounge's code can route around.`)
-                        : `Shaka error ${detail.code || ''} (severity ${detail.severity || '?'})${detail.message ? ' — ' + detail.message : ''} — TVNZ's DRM/CDN chain may have changed.`;
-                    lpShowState('error', "This channel wouldn't play in the browser.", msg);
+                    lpShowState('error', "This channel wouldn't play in the browser.",
+                        tvnzShakaErrorMessage(detail.code, detail.severity, detail.message, 'Shaka error'));
                     lpTeardownKeepOpen();
                 });
                 player.configure({
@@ -21105,6 +21113,31 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         }
                     }
                 });
+                // Real capability probe, not a guess -- run once before
+                // player.load() so a 6001 from EITHER failure path below can
+                // report what this specific device's EME actually supports,
+                // instead of Lounge (and Deep) having to guess again from a
+                // generic error code alone. navigator.requestMediaKeySystem
+                // Access is the same low-level API Shaka itself calls
+                // internally; probing it directly here is diagnostic only --
+                // it does not change what Shaka does.
+                (async () => {
+                    if (!navigator.requestMediaKeySystemAccess) {
+                        tvnzDrmProbe = 'navigator.requestMediaKeySystemAccess does not exist on this browser at all — no EME support.';
+                        return;
+                    }
+                    const configs = [{
+                        initDataTypes: ['cenc'],
+                        videoCapabilities: [{ contentType: 'video/mp4; codecs="avc1.4D400D"', robustness: 'SW_SECURE_CRYPTO' }],
+                        audioCapabilities: [{ contentType: 'audio/mp4; codecs="mp4a.40.2"', robustness: 'SW_SECURE_CRYPTO' }]
+                    }];
+                    try {
+                        await navigator.requestMediaKeySystemAccess('com.widevine.alpha', configs);
+                        tvnzDrmProbe = 'requestMediaKeySystemAccess succeeded standalone for SW_SECURE_CRYPTO -- Widevine itself works on this device, so the failure is specific to Shaka/the manifest, not the DRM module.';
+                    } catch (e) {
+                        tvnzDrmProbe = `requestMediaKeySystemAccess itself rejected (${e.name}: ${e.message}) -- this device's Widevine module genuinely cannot satisfy even a software-security request.`;
+                    }
+                })();
                 player.attach(video)
                     .then(() => player.load(drm.mpd))
                     .then(() => {
@@ -21114,7 +21147,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     .catch((err) => {
                         if (gen !== lpGen) return;
                         lpShowState('error', "This channel wouldn't play in the browser.",
-                            `Shaka load error ${err.code || ''}${err.message ? ' — ' + err.message : ''} — TVNZ's DRM/CDN chain may have changed.`);
+                            tvnzShakaErrorMessage(err.code, err.severity, err.message, 'Shaka load error'));
                         lpTeardownKeepOpen();
                     });
                 return;

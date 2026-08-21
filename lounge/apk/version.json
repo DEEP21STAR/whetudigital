@@ -33,10 +33,24 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v176"
+      "cacheName": "lounge-shell-v177"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v177",
+      "date": "2026-08-21",
+      "title": "Real bug found in my own v176 fix: wrong error handler patched, plus a real DRM capability probe",
+      "changes": [
+        "Deep sent proof he was genuinely on v176 (his screenshot showed v176's own changelog text) and TVNZ 1 still failed with the exact OLD generic message -- traced this to a mistake in v176: openLivePlayer()'s DRM branch has TWO separate failure paths (a live Shaka 'error' EVENT, and a player.load() PROMISE REJECTION), and v176 only added the 6001-specific diagnostic message to the event handler. Deep's device was hitting the promise-rejection .catch() block, which still used the old hand-written generic template -- so the diagnostic never even ran, and this screenshot says nothing about whether the SW_SECURE_CRYPTO robustness fix itself actually worked or not.",
+        "Refactored both paths to share one tvnzShakaErrorMessage() function so this can't happen again -- one message builder, both failure sites call it.",
+        "Added a real device capability probe: calls navigator.requestMediaKeySystemAccess('com.widevine.alpha', ...) directly (the same low-level API Shaka itself uses) BEFORE player.load(), and includes its real result in the next 6001 message -- either 'Widevine itself works standalone, the failure is Shaka/manifest-specific' or the exact rejection reason from the browser itself. This turns the next report into real diagnostic data instead of a fourth guess.",
+        "Live-verified via Playwright: forced a genuine player.load() rejection (bad manifest URL) and confirmed the .catch() path now renders through the shared function correctly (real severity/message included, correct prefix) -- proves the refactor works end-to-end, though a live 6001 specifically can only be reproduced on real DRM-capable hardware.",
+        "[UNTESTED: whether v176's robustness fix actually resolved anything] -- genuinely unknown until Deep's NEXT attempt, since this screenshot's message came from the unpatched path. The next failure (if any) will carry real probe data instead of another blind theory."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,
