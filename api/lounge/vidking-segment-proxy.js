@@ -71,7 +71,18 @@ export async function GET(req) {
     });
   }
 
-  const respHeaders = { ...headers, 'Cache-Control': 'public, max-age=2592000, immutable' };
+  // REAL BUG, found live via Playwright: 'public, max-age=..., immutable' let
+  // Vercel's own edge cache store a 206 response (whatever Range the FIRST
+  // request happened to ask for) and then serve that same truncated partial
+  // back to every later request for the same URL regardless of its own
+  // Range header -- hls.js's init-segment fetch got a cached 1000-of-1212-byte
+  // fragment from an earlier `bytes=0-999` test request, and its demuxer threw
+  // "Cannot read properties of undefined (reading 'subarray')" trying to
+  // parse the truncated moov box. no-store trades away CDN caching (each
+  // segment is normally fetched once per playback anyway, so the loss is
+  // small) for correctness -- same choice tvnz-proxy.js already makes for its
+  // segments.
+  const respHeaders = { ...headers, 'Cache-Control': 'no-store' };
   // Passed through, not hardcoded: video/mp4 for both init and media segments
   // here, but Content-Range/Accept-Ranges only exist on the 206 path and
   // must survive for hls.js's own byte-range logic to work.
