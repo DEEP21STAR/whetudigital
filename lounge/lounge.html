@@ -14401,7 +14401,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v173';
+        const LOUNGE_BUILD = 'lounge-shell-v174';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -18658,7 +18658,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         <span class="card-badge live">LIVE</span>
                     </div>
                     <div class="card-info">
-                        <div class="card-title">${escapeHtml(channel.name)}</div>
+                        <div class="card-title">${escapeHtml(displayChannelName(channel))}</div>
                         <div class="card-meta">
                             <span>${escapeHtml(channel.group)}</span>
                             ${channel.externalWatch ? '<span title="Resolved by the local relay, then played in-page; falls back to mpv on the PC if the browser cannot play it"><i class="fas fa-tower-broadcast" style="font-size:10px;opacity:0.6;"></i></span>' : ''}
@@ -20687,6 +20687,19 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             return DRM_CHANNEL_MAP[normEpgId(channel.tvgId)] || null;
         }
 
+        // iptv-org's own channel-name metadata still carries the "[Geo-blocked]"
+        // tag for TVNZ 1/2/Duke from before the DASH+Widevine proxy fix (v172/
+        // v173) -- that source list isn't ours to edit and won't re-tag itself.
+        // Any channel drmEntryFor() resolves is proven playable via the DRM
+        // path regardless of what the stale upstream label says, so strip just
+        // that one suffix for those three channels specifically -- everything
+        // else (Bravo +1, other genuinely still-broken channels) keeps its real
+        // iptv-org tag untouched.
+        function displayChannelName(channel) {
+            const name = (channel && channel.name) || '';
+            return drmEntryFor(channel) ? name.replace(/\s*\[Geo-blocked\]\s*/i, '').trim() : name;
+        }
+
         // NOTE: the original NZ-only STREAM_URL_OVERRIDE map (Sky Open/Te
         // Reo/Juice TV, found and fixed one report at a time) was replaced
         // 2026-08-20 by the general resolveStreamUrl()/loadStreamMap()
@@ -20785,7 +20798,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
             const wrap = lpEl('live-player');
             const video = lpEl('lp-video');
-            lpEl('lp-title').textContent = channel.name || 'Live channel';
+            lpEl('lp-title').textContent = displayChannelName(channel) || 'Live channel';
             // A new channel always opens at full size -- otherwise picking one
             // while minified drops it into a 360px corner box with no obvious
             // way back.
@@ -21014,8 +21027,25 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 player.addEventListener('error', (event) => {
                     if (gen !== lpGen) return;
                     const detail = event.detail || {};
-                    lpShowState('error', "This channel wouldn't play in the browser.",
-                        `Shaka error ${detail.code || ''} (severity ${detail.severity || '?'})${detail.message ? ' — ' + detail.message : ''} — TVNZ's DRM/CDN chain may have changed.`);
+                    // 6001 = REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE -- researched
+                    // 2026-08-21, NOT a CDN/manifest problem like 1002/6007 above.
+                    // Its two well-documented real causes: (1) the page isn't on a
+                    // secure origin (EME/Widevine refuses to init over plain http,
+                    // only https or localhost) -- relevant here because the
+                    // Android APK's host address is a user-changeable setting
+                    // (Prefs.host, defaults to the https public site but can be
+                    // pointed at a LAN http:// relay), and (2) some Android
+                    // WebView builds have incomplete/no Widevine support even on
+                    // https, independent of anything this app's code controls.
+                    // Surfacing the real cause here since the generic "DRM/CDN
+                    // chain may have changed" message actively misleads for this
+                    // specific code -- it isn't a CDN issue at all.
+                    const msg = detail.code === 6001
+                        ? (location.protocol !== 'https:' && location.hostname !== 'localhost'
+                            ? `This device is loading Lounge over ${location.protocol.replace(':', '')}, not https -- Widevine DRM refuses to run on an insecure connection. Check Settings for the server address and switch it to the https:// one.`
+                            : `Shaka error 6001 — this device's browser/WebView doesn't have a usable Widevine DRM module, even though the connection is secure. This is a device/OS limitation TVNZ's DRM requires, not something Lounge's code can route around.`)
+                        : `Shaka error ${detail.code || ''} (severity ${detail.severity || '?'})${detail.message ? ' — ' + detail.message : ''} — TVNZ's DRM/CDN chain may have changed.`;
+                    lpShowState('error', "This channel wouldn't play in the browser.", msg);
                     lpTeardownKeepOpen();
                 });
                 player.configure({

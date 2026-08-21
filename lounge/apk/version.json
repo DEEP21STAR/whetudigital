@@ -33,10 +33,23 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v173"
+      "cacheName": "lounge-shell-v174"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v174",
+      "date": "2026-08-21",
+      "title": "TVNZ 1/2 name cleanup + real diagnosis for the mobile Shaka 6001 failure",
+      "changes": [
+        "Deep confirmed TVNZ 1/2 now WORKING on Windows (v173) but the channel grid and live-player title still show the stale iptv-org \"[Geo-blocked]\" tag from before the fix. Added displayChannelName(channel) -- strips that one suffix ONLY for channels drmEntryFor() resolves (proven playable via the DRM path), leaving every other genuinely-still-broken channel's real tag untouched. Applied at the channel grid card title and the live-player header.",
+        "Mobile still failing with a DIFFERENT error: Shaka 6001 (REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE), not 1002/6007 -- researched via WebSearch, this is NOT a CDN/manifest problem like the ones just fixed. Two documented real causes: (1) EME/Widevine refuses to init on an insecure origin (only https or localhost) -- relevant because the Android APK's server address is a user-changeable setting that can be pointed at a plain-http LAN relay; (2) some Android WebView builds have no usable Widevine module even on https, a device/OS limitation outside this app's control.",
+        "Replaced the generic \"DRM/CDN chain may have changed\" message (actively wrong for this code) with a 6001-specific one: checks location.protocol live and tells Deep directly whether his device is on an insecure connection (fixable in Settings) or hitting a genuine WebView DRM limitation (not fixable in-app) -- turns a dead-end error into an actionable one instead of guessing at a third theory blind.",
+        "[UNTESTED: which of the two 6001 causes is actually true on Deep's phone] -- couldn't inspect his device's configured host setting remotely; the improved error message itself will tell him which one on next attempt, which is the fastest real path to knowing for certain."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,
