@@ -33,10 +33,23 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v174"
+      "cacheName": "lounge-shell-v175"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v175",
+      "date": "2026-08-21",
+      "title": "Cast-to-TV option added to the playback fallback dialog + mobile diagnosis on 3 more reports",
+      "changes": [
+        "Deep's screenshots (movie 'Format not supported' dialog) showed only 'Play on this device (VLC)' and 'Play on Laptop (mpv)' -- no cast option at all, even though the main stream picker already offers Chromecast. Added a 'Cast to TV' button to the same recovery dialog, gated on the same castTargetAvailable() check the main picker already uses, wired to the existing castPlayback() function -- no new cast logic, just exposing the already-working path from a second entry point. A cast receiver decodes far more formats than a phone's WebView, so this is often the actual fix for exactly the files landing on this dialog.",
+        "Investigated the still-generic Shaka 6001 message Deep saw on mobile (not the new v174 message): strong evidence this is a stale WebView cache, not a code failure -- MainActivity.kt already has a documented cache-bust (?v=timestamp) fix from 2026-08-17 for exactly this class of bug, but that only forces a fresh fetch on a genuine cold app launch. If the app was merely backgrounded (not fully closed) between v172-v174 shipping and this test, the WebView keeps whatever page was already loaded in memory regardless of server updates. [UNVERIFIED] -- could not confirm this remotely; asked Deep to fully close and reopen the app before the next test.",
+        "The 'Format not supported' dialog itself is confirmed correct, working behavior (not a bug) for files whose codec/container the phone's browser genuinely can't decode (4K/x265, some MKV/AC3 tracks) -- this is the same documented limitation the stream picker's own copy already names, and the dialog's job is exactly to offer the working alternatives, which it does (now including cast).",
+        "The native top-right Chromecast button (Android, added 2026-08-16) is explicitly hidden by CastStateListener whenever CastState.NO_DEVICES_AVAILABLE -- if Deep was away from his TV's network when testing, that's correct behaviour, not a missing feature. Flagged as the likely explanation rather than guess-fixing a non-bug."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,

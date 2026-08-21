@@ -9954,6 +9954,16 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                      2026-08-10 -- landed on 'Play on Laptop' after browser
                      playback failed, even though native VLC was available). -->
                 <button class="lp-action" id="pt-fallback-tv-btn" onclick="playbackFallbackToTv()" style="display:none"><i class="fas fa-tv"></i> Play on this device (VLC)</button>
+                <!-- Hidden by default; shown by showPlaybackFallback() when a
+                     Chromecast target is reachable. The main stream picker
+                     already offers "TV (Chromecast)" as a play target, but
+                     this recovery dialog -- which fires specifically when a
+                     format failed IN-BROWSER -- never offered it at all
+                     (Deep, 2026-08-21 screenshot: only VLC/mpv options shown).
+                     A cast receiver handles far more codecs than a phone's
+                     WebView decoder, so it is often the actual fix for
+                     exactly the files that land here. -->
+                <button class="lp-action" id="pt-fallback-cast-btn" onclick="playbackFallbackToCast()" style="display:none"><i class="fas fa-tv"></i> Cast to TV</button>
                 <button class="lp-action" onclick="playbackFallbackToMpv()"><i class="fas fa-laptop"></i> Play on Laptop (mpv)</button>
                 <button class="lp-action alt" onclick="dismissPlaybackFallback()"><i class="fas fa-xmark"></i> Not now</button>
             </div>
@@ -14401,7 +14411,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v174';
+        const LOUNGE_BUILD = 'lounge-shell-v175';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -19071,6 +19081,11 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // dispatchPlayback's own 'tv' branch already tried and refused).
             const tvBtn = document.getElementById('pt-fallback-tv-btn');
             if (tvBtn) tvBtn.style.display = (where !== 'TV' && nativeTvAvailable()) ? '' : 'none';
+            // Same reasoning as the VLC button above: don't re-offer casting
+            // after castPlayback() itself already called this fallback with
+            // where === 'TV' (already tried, already failed/unreachable).
+            const castBtn = document.getElementById('pt-fallback-cast-btn');
+            if (castBtn) castBtn.style.display = (where !== 'TV' && castTargetAvailable()) ? '' : 'none';
             document.getElementById('pt-fallback').classList.add('is-open');
         }
 
@@ -19093,6 +19108,14 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             if (!a) return;
             const ok = nativeReelPlay(a.videoUrl, a.subUrl, a.startPos, a.title);
             if (!ok) showPlaybackFallback('TV', 'The native player refused the link.', a);
+        }
+
+        function playbackFallbackToCast() {
+            const a = pendingFallback;
+            dismissPlaybackFallback();
+            closeDevicePlayer();
+            if (!a) return;
+            castPlayback(a.videoUrl, a.subUrl, a.startPos, a.title || currentPickerItem?.title);
         }
 
         // ----- "This device" (in-browser) -----
