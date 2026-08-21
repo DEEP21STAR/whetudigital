@@ -13,12 +13,16 @@
 //
 // What's real vs. what's gated (verified with direct curl, 2026-08-21):
 //   - The manifest (index-*.m3u8 on moon.peakstorm.top) 403s without
-//     `Referer: https://www.vidking.net/` -- that's the ONE real gate.
-//   - The init segment + every media segment (primecrown.top) returned 200
-//     with Access-Control-Allow-Origin: * and NO Referer requirement at all
-//     (tested with no header and with a foreign Referer, both 200) -- so
-//     only the manifest needs proxying. Segments are fetched directly by the
-//     browser's own hls.js instance; this endpoint never touches them.
+//     `Referer: https://www.vidking.net/`.
+//   - The init segment + every media segment (primecrown.top) look openly
+//     CORS'd on a plain whole-file GET (200, no Referer needed) -- but hls.js
+//     never sends a plain GET for fMP4, it sends Range-header byte requests,
+//     and THIS CDN gates ranged requests specifically by Origin (Range +
+//     this app's Origin -> 403, Range + Origin: vidking.net -> 206, found
+//     live via Playwright after the first deploy tried the "segments are
+//     open" assumption and 403'd). So every segment/init URL is rewritten
+//     below to route through vidking-segment-proxy.js, which forwards Range
+//     with a spoofed Origin -- not just the manifest.
 export const config = { runtime: 'nodejs', maxDuration: 60 };
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
@@ -34,7 +38,7 @@ function embedUrl(type, tmdbId, season, episode) {
   return `https://www.vidking.net/embed/${path}?color=00d4ff&autoPlay=true`;
 }
 
-async function resolveManifest(cacheKey, type, tmdbId, season, episode) {
+async function resolveManifest(cacheKey, type, tmdbId, season, episode, host) {
   const cached = masterCache.get(cacheKey);
   if (cached && Date.now() - cached.ts < MASTER_TTL_MS) return cached;
 
@@ -69,14 +73,24 @@ async function resolveManifest(cacheKey, type, tmdbId, season, episode) {
     }, manifestUrl);
     if (!manifestFetch.ok) throw new Error(`manifest fetch failed | status=${manifestFetch.status} | err=${manifestFetch.errMsg || 'n/a'}`);
 
-    // Segment/init lines in this manifest are already absolute CDN URLs
-    // (verified live) and are openly CORS-gated with no Referer requirement,
-    // so they're left untouched -- the browser's own hls.js fetches them
-    // directly, no proxying needed. Any relative line is resolved defensively
-    // in case a future title/CDN combo emits one.
+    // REAL BUG, found live via Playwright after the first v182 deploy: segment
+    // and init URLs are NOT openly accessible the way a plain curl GET
+    // suggested -- hls.js's actual requests are Range-header byte fetches,
+    // and this CDN gates those specifically by Origin (confirmed: Range +
+    // this app's Origin -> 403, Range + Origin: vidking.net -> 206). Every
+    // absolute CDN URL in the manifest, including the one hidden inside
+    // #EXT-X-MAP's URI="..." attribute (not a plain line, easy to miss --
+    // the first version of this rewrite only handled non-# lines and left
+    // the init segment unproxied), now routes through
+    // vidking-segment-proxy.js, which forwards Range with a spoofed Origin.
+    const proxyBase = `https://${host}/api/lounge/vidking-segment-proxy`;
+    const toProxied = (absUrl) => `${proxyBase}?u=${encodeURIComponent(absUrl)}`;
+
     const rewritten = manifestFetch.text.split('\n').map((line) => {
+      const mapMatch = line.match(/^(#EXT-X-MAP:URI=")([^"]+)(".*)$/);
+      if (mapMatch) return `${mapMatch[1]}${toProxied(new URL(mapMatch[2], manifestUrl).href)}${mapMatch[3]}`;
       const s = line.trim();
-      if (s && !s.startsWith('#') && !s.startsWith('http')) return new URL(s, manifestUrl).href;
+      if (s && !s.startsWith('#')) return toProxied(new URL(s, manifestUrl).href);
       return line;
     }).join('\n');
 
@@ -107,8 +121,12 @@ export async function GET(req) {
   }
 
   const cacheKey = `${type}:${tmdbId}:${season}:${episode}`;
+  // req.url is a relative path on Vercel's Node runtime (same quirk noted in
+  // daddylive-mirror-stream.js) -- the real public host only comes from the
+  // Host header, needed here to build absolute proxy URLs for the manifest.
+  const host = req.headers.get('host');
   try {
-    const { playlist } = await resolveManifest(cacheKey, type, tmdbId, season, episode);
+    const { playlist } = await resolveManifest(cacheKey, type, tmdbId, season, episode, host);
     return new Response(playlist, {
       status: 200,
       headers: { ...headers, 'Content-Type': 'application/vnd.apple.mpegurl', 'Cache-Control': 'no-store' },
