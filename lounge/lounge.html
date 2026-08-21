@@ -9676,7 +9676,20 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             </div>
             <div class="stream-picker-body" style="padding:0;">
                 <div style="position:relative;width:100%;aspect-ratio:16/9;background:#000;">
-                    <iframe id="altSourceFrame" src="" allowfullscreen loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;border:0;"></iframe>
+                    <!-- Deep, 2026-08-21 (Telegram photo): vidking's own
+                         in-player fullscreen button opened a new browser tab
+                         instead of going fullscreen in place. allowfullscreen
+                         is the legacy boolean attribute; modern Chromium
+                         checks the Permissions Policy `allow` attribute for
+                         the actual fullscreen grant, and without it some
+                         embeds detect fullscreen as unavailable and fall
+                         back to window.open() as their "best effort"
+                         alternative -- exactly this symptom. Added the
+                         explicit allow list (also covers autoplay/PiP/
+                         encrypted-media, all things a video embed legitimately
+                         needs) so the real in-place fullscreen path is what
+                         gets used instead of the new-tab fallback. -->
+                    <iframe id="altSourceFrame" src="" allow="fullscreen; autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;border:0;"></iframe>
                 </div>
             </div>
         </div>
@@ -14444,7 +14457,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v179';
+        const LOUNGE_BUILD = 'lounge-shell-v180';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';

@@ -33,10 +33,23 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v179"
+      "cacheName": "lounge-shell-v180"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.34",
+      "versionCode": 32,
+      "web": "lounge-shell-v180",
+      "date": "2026-08-21",
+      "title": "Free Stream fullscreen button was opening a new browser tab instead of going fullscreen",
+      "changes": [
+        "Deep's Telegram photo (Toy Story 5, Free Stream lane) showed the embedded vidking.net player's own fullscreen button opening a new tab instead of expanding in place. Root cause: the iframe only had the legacy allowfullscreen boolean attribute -- modern Chromium checks the Permissions Policy allow attribute for the real fullscreen grant, and some embeds fall back to window.open() when they detect fullscreen isn't actually available through the policy.",
+        "Added allow=\"fullscreen; autoplay; encrypted-media; picture-in-picture\" to the altSourceFrame iframe -- the modern, correct way to delegate these permissions, alongside the existing legacy attribute for older engines.",
+        "This is the only manually-authored iframe in the app (the YouTube trailer uses Google's managed IFrame Player API, which sets its own permissions) -- confirmed via grep, nothing else needed the same fix.",
+        "Live-verified the attribute renders correctly via Playwright. [UNTESTED: real fullscreen behavior] -- vidking.net's internal JS is cross-origin and can't be inspected/driven from here; needs Deep's real device to confirm the fullscreen button now works in place instead of opening a tab."
+      ]
+    },
     {
       "version": "0.1.34",
       "versionCode": 32,
