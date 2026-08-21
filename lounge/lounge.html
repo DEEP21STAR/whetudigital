@@ -504,6 +504,7 @@
         }
 
         #intro-enter {
+            position: relative; /* anchors #intro-enter-flash's centered bloom */
             margin-top: 30px; /* was 16px -- Deep found the couch mark and this button too close 2026-08-14 */
             padding: 12px 34px;
             max-width: 92vw;
@@ -522,6 +523,37 @@
 
         #intro-enter:hover {
             background: rgba(0, 212, 255, 0.1);
+        }
+
+        /* Cinematic marquee breathing pulse (Deep, Telegram 2026-08-21: "Press
+           Any Key" should feel cinematic) -- idle glow that swells and fades
+           once armed, like a lit cinema marquee button rather than a flat
+           static CTA. Starts only once .is-ready is added (the same moment
+           enterArmed flips true) so it never pulses before the prompt is
+           actually pressable. */
+        @keyframes intro-enter-pulse {
+            0%, 100% { box-shadow: 0 0 0 rgba(0, 212, 255, 0); border-color: rgba(0, 212, 255, 0.4); }
+            50% { box-shadow: 0 0 26px 2px rgba(0, 212, 255, 0.5); border-color: rgba(0, 212, 255, 0.85); }
+        }
+        #intro-enter.is-ready { animation: intro-enter-pulse 2.4s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+            #intro-enter.is-ready { animation: none; }
+        }
+
+        /* One-shot bloom flash fired from triggerEnter() -- the visual half of
+           the "curtain rises" beat that already existed as audio-only
+           (playIntroSting). Centered on the button, expands and fades over
+           the same ~0.6s window the sting's swell resolves in. */
+        #intro-enter-flash {
+            position: absolute;
+            left: 50%; top: 50%;
+            width: 40px; height: 40px;
+            margin-left: -20px; margin-top: -20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.85) 0%, rgba(0, 212, 255, 0) 70%);
+            pointer-events: none;
+            opacity: 0;
+            z-index: 5;
         }
 
         /* Kept (the intro is long now and repeat visits need an out) but pushed
@@ -7958,7 +7990,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 <div id="intro-tagline-arc" role="img" aria-label="Your Cinema, Everywhere"></div>
             </div>
             <div id="intro-title-wrap"><div id="intro-couch" aria-label="Lounge"></div></div>
-            <button id="intro-enter">Press Any Key to Take a Seat</button>
+            <button id="intro-enter"><span id="intro-enter-flash" aria-hidden="true"></span>Press Any Key to Take a Seat</button>
         </div>
         <!-- Category montage + popcorn beat sit OUTSIDE #intro-content so they
              can own the centre of the screen while the wordmark is still
@@ -10648,7 +10680,22 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const triggerEnter = () => {
                 if (!enterArmed) return;
                 disarmEnterKey();
+                enterBtn.classList.remove('is-ready'); // pulse stops the instant it's pressed, not mid-fade
                 playIntroSting();
+                // Visual half of the "curtain rises" beat (audio-only until
+                // now, Deep's Telegram ask 2026-08-21): a bright bloom expands
+                // from the button and a brief scale-punch on the button itself,
+                // timed to the same ~0.6s window playIntroSting's swell
+                // resolves in, before tl.play() takes the screen over.
+                const flashEl = document.getElementById('intro-enter-flash');
+                if (flashEl && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                    gsap.fromTo(flashEl,
+                        { opacity: 0.9, scale: 0.4 },
+                        { opacity: 0, scale: 14, duration: 0.6, ease: 'power2.out' });
+                    gsap.fromTo(enterBtn,
+                        { scale: 1 },
+                        { scale: 1.06, duration: 0.14, ease: 'power2.out', yoyo: true, repeat: 1 });
+                }
                 tl.play();
             };
 
@@ -11067,6 +11114,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             tl.addPause(SETTLE + 1.67, () => {
                 enterArmed = true;
                 window.addEventListener('keydown', onIntroKey);
+                enterBtn.classList.add('is-ready'); // starts the marquee breathing pulse
             });
             enterBtn.onclick = triggerEnter;
             // Click/tap ANYWHERE to proceed (Deep, 2026-08-17) -- "press any key"
@@ -14458,7 +14506,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v181';
+        const LOUNGE_BUILD = 'lounge-shell-v182';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -19167,6 +19215,11 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
         // ----- "This device" (in-browser) -----
         let dvWatchdog = null;
+        // hls.js instance for the Free Stream native-player lane (2026-08-21):
+        // at most one, ever, same single-instance rule as lpHls (the Live TV
+        // player) -- an orphaned instance keeps fetching segments after the
+        // wrap closes if this isn't torn down in closeDevicePlayer().
+        let dvHls = null;
 
         // Set by resolveAndPlay() immediately before dispatch, so every surface
         // can attribute a position to the right title. dispatchPlayback() only
@@ -19203,10 +19256,10 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         let dvLastReport = 0;
 
         let dvCurrentArgs = null;
-        function openDevicePlayer(videoUrl, subUrl, startPos, title) {
+        function openDevicePlayer(videoUrl, subUrl, startPos, title, opts) {
             const wrap = document.getElementById('device-player');
             const video = document.getElementById('dv-video');
-            const args = { videoUrl, subUrl, startPos, title };
+            const args = { videoUrl, subUrl, startPos, title, opts };
             dvCurrentArgs = args;
 
             // Title is passed in, not read from currentPickerItem: the caller
@@ -19274,7 +19327,30 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 showPlaybackFallback('in-browser', 'Nothing started decoding after 25 seconds.', args);
             }, 25000);
 
-            video.src = videoUrl;
+            // Free Stream native lane (2026-08-21): videoUrl here is an HLS
+            // manifest (our own vidking-resolve proxy), not a progressive
+            // file -- needs hls.js/native-HLS attach instead of a bare
+            // video.src, same split lpUseNative() already makes for Live TV.
+            if (dvHls) { try { dvHls.destroy(); } catch (e) { /* already gone */ } dvHls = null; }
+            if (opts && opts.isHls && !lpUseNative(video)) {
+                if (!(window.Hls && window.Hls.isSupported())) {
+                    closeDevicePlayer();
+                    showPlaybackFallback('in-browser', 'This browser cannot play HLS streams (no Media Source Extensions).', args);
+                    return;
+                }
+                const hls = new Hls({ enableWorker: true, backBufferLength: 60 });
+                dvHls = hls;
+                hls.on(Hls.Events.ERROR, (_evt, data) => {
+                    if (!data.fatal) return;
+                    closeDevicePlayer();
+                    showPlaybackFallback('in-browser',
+                        `${data.type}${data.details ? ' · ' + data.details : ''} — the Free Stream source could not be decoded.`, args);
+                });
+                hls.loadSource(videoUrl);
+                hls.attachMedia(video);
+            } else {
+                video.src = videoUrl;
+            }
             video.play().catch(() => {
                 // Autoplay refusal is not a format failure -- the centre popcorn
                 // button is on screen, so leave it paused and ready rather than
@@ -19297,6 +19373,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const wrap = document.getElementById('device-player');
             const video = document.getElementById('dv-video');
             if (dvWatchdog) { clearTimeout(dvWatchdog); dvWatchdog = null; }
+            if (dvHls) { try { dvHls.destroy(); } catch (e) { console.warn('dv hls destroy:', e); } dvHls = null; }
             dvUpnextHide();
             dvTeardownScrubPreview();
             const recap = document.getElementById('dv-recap');
@@ -22371,7 +22448,14 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     quality: 'HD',
                     isFreeEmbed: true,
                     source: 'Free Embed',
-                    freeEmbedUrl: freeEmbedUrl(type === 'series' ? 'tv' : 'movie', tmdbId, season, episode)
+                    freeEmbedUrl: freeEmbedUrl(type === 'series' ? 'tv' : 'movie', tmdbId, season, episode),
+                    // Raw params kept alongside the iframe URL so resolveAndPlay
+                    // can try the native-player resolver (vidking-resolve.js)
+                    // first without re-parsing the embed URL back apart.
+                    freeEmbedType: type === 'series' ? 'tv' : 'movie',
+                    freeEmbedTmdbId: tmdbId,
+                    freeEmbedSeason: season,
+                    freeEmbedEpisode: episode
                 });
             }
 
@@ -23051,9 +23135,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 const title = currentPickerItem
                     ? currentPickerItem.title + (currentPickerEpisode ? ` — S${currentPickerEpisode.season}E${currentPickerEpisode.episode}` : '')
                     : 'Free Stream';
-                const url = stream.freeEmbedUrl;
-                closeStreamPicker();
-                openEmbedPlayer(url, title);
+                openFreeStreamNative(stream, title);
                 return;
             }
 
@@ -23573,6 +23655,50 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             const url = altSourceForItem(detailItem);
             if (!url) return;
             openEmbedPlayer(url, 'Alternate Source -- ' + (detailItem.title || ''));
+        }
+
+        // Free Stream NATIVE resolver (2026-08-21) -- plays vidking.net's
+        // content through Lounge's own Kernel Pop player (cast, fullscreen,
+        // auto-rotate, all the same chrome the RD lane gets) instead of
+        // handing off to their iframe. Researched and verified live: vidking's
+        // manifest is real HLS on an open CDN gated only by a Referer check on
+        // the .m3u8 itself (segments are openly CORS'd, no gate at all) --
+        // but the manifest URL is only produced by vidking's own JS after
+        // decrypting an API response, so api/lounge/vidking-resolve.js runs a
+        // headless browser once to sniff it out, same pattern already proven
+        // for the DaddyLive mirror resolver.
+        //
+        // Cold-start headless Chromium can take 10-20s, and any title without
+        // a real Free Stream source 502s -- both are handled the same way:
+        // fall back to the existing iframe lane silently. Deep never sees a
+        // dead end, only ever a slightly slower "Resolving..." wait before
+        // either the native player or the iframe takes over.
+        async function openFreeStreamNative(stream, title) {
+            const body = document.getElementById('stream-picker-body');
+            if (body) body.innerHTML = '<div class="stream-picker-empty">Resolving Free Stream for native playback (up to 20s)...</div>';
+
+            const params = new URLSearchParams({ type: stream.freeEmbedType, tmdbId: String(stream.freeEmbedTmdbId) });
+            if (stream.freeEmbedSeason) { params.set('season', stream.freeEmbedSeason); params.set('episode', stream.freeEmbedEpisode); }
+            const resolverUrl = `${getContentBase()}/vidking-resolve?${params.toString()}`;
+
+            try {
+                const res = await fetch(resolverUrl, { signal: AbortSignal.timeout(45000) });
+                if (!res.ok) throw new Error(`resolver HTTP ${res.status}`);
+                const manifestText = await res.text();
+                if (!manifestText.includes('#EXTM3U')) throw new Error('resolver did not return a manifest');
+
+                // Blob URL, not the resolver URL itself: hls.js re-fetching the
+                // resolver directly would re-trigger a second headless resolve
+                // if the 90s server cache had already expired mid-playback --
+                // handing it the manifest bytes it already has avoids that.
+                const blobUrl = URL.createObjectURL(new Blob([manifestText], { type: 'application/vnd.apple.mpegurl' }));
+                closeStreamPicker();
+                openDevicePlayer(blobUrl, null, 0, title, { isHls: true, isFreeStreamNative: true });
+            } catch (e) {
+                console.warn('Free Stream native resolve failed, falling back to embed iframe:', e);
+                closeStreamPicker();
+                openEmbedPlayer(stream.freeEmbedUrl, title);
+            }
         }
 
         // Shared iframe-embed modal -- used by the manual per-title alt-source

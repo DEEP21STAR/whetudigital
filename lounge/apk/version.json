@@ -33,10 +33,24 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v181"
+      "cacheName": "lounge-shell-v182"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.34",
+      "versionCode": 32,
+      "web": "lounge-shell-v182",
+      "date": "2026-08-21",
+      "title": "Free Stream now plays through Lounge's own native player + cinematic Press-Any-Key beat",
+      "changes": [
+        "Deep asked to research whether Free Stream (vidking.net) content could play through Lounge's own Kernel Pop player instead of handing off to their iframe. Researched live: vidking's frontend calls its own api.speedracelight.com backend, but the response is an encrypted blob only vidking's own JS can decrypt into the real manifest URL -- no plaintext API shortcut exists. Confirmed by direct curl that the underlying CDN (moon.peakstorm.top manifest + primecrown.top segments) is genuine open HLS, gated ONLY by a Referer check on the manifest itself (segments returned 200 with no Referer at all, re-verified twice).",
+        "Built api/lounge/vidking-resolve.js: a headless-browser resolver (same @sparticuz/chromium + playwright-core pattern already proven for the DaddyLive mirror resolver) that loads vidking's embed page once, sniffs the real .m3u8 manifest URL from network traffic, and returns the manifest text directly -- no iframe, no vidking chrome.",
+        "Wired the Free Stream lane (resolveAndPlay's isFreeEmbed branch) to try this resolver first via a new openFreeStreamNative(): on success, the manifest is handed to hls.js inside the app's own This Device player (dv-video), gaining the cast button, fullscreen, and auto-rotate-to-landscape the RD lane already has. On any failure (title has no source, resolver cold-start times out) it falls back to the existing iframe silently -- Deep never sees a dead end, only a 'Resolving...' wait before one path or the other takes over.",
+        "Honest limitation: headless Chromium cold-start can take 10-20s on first resolve for a title (cached 90s server-side after that) -- slower than the iframe's instant load. [UNTESTED: real device end-to-end] -- verified server-side logic and the CDN's open access via direct curl, but the full resolve-to-native-playback path needs a real title played on Deep's phone/laptop to confirm.",
+        "Also fixed Deep's Telegram ask (2026-08-21, photo of the splash screen): 'Press Any Key to Take a Seat' had no cinematic effect of its own -- the audio sting (playIntroSting) existed but nothing visual matched it. Added a marquee breathing glow pulse while the button is armed and waiting, and a bright bloom flash + button scale-punch fired exactly on press, timed to the sting's swell-to-chime resolve. Both respect prefers-reduced-motion."
+      ]
+    },
     {
       "version": "0.1.34",
       "versionCode": 32,
