@@ -33,10 +33,24 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v180"
+      "cacheName": "lounge-shell-v181"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.34",
+      "versionCode": 32,
+      "web": "lounge-shell-v181",
+      "date": "2026-08-21",
+      "title": "Cast button added to This Device player + auto rotate-to-landscape on fullscreen",
+      "changes": [
+        "Deep reported the real fullscreen (v180) has no way back to Chromecast, and mobile has no auto-rotate to landscape. Confirmed via grep: the This Device player's own transport bar (dv-video) had no cast button at all -- the only cast entry point was the stream-picker BEFORE playback started, unreachable once actually playing (and completely hidden in true fullscreen, since the Fullscreen API hides everything outside the fullscreened element, including this app's own header).",
+        "Added a Cast to TV button to the This Device transport bar, same castTargetAvailable() gate and castPlayback() call the picker already uses -- picks up from the live position (video.currentTime), not just where it opened.",
+        "Added screen.orientation.lock('landscape') on entering fullscreen and .unlock() on every exit path (button, ESC key, back gesture -- wired through the fullscreenchange listener, not just the toggle function, so a phone can't get stuck pinned in landscape after an ESC exit). Android-only: iOS Safari has zero support for the Orientation Lock API (Apple's own decision, no workaround exists), silently no-ops there rather than showing an error for a platform that was never going to support it.",
+        "Honest limitation: none of this reaches the Free Stream (vidking.net) lane -- that's a third-party cross-origin iframe with its own fullscreen chrome this app cannot inject a cast button into or control the orientation of. This fix covers RD/direct-file playback (This Device) only.",
+        "Live-verified via Playwright: cast button renders correctly (hidden with no cast target, as expected in this environment), dvCastCurrent() and dvToggleFullscreen() both execute cleanly with 0 new console errors. [UNTESTED: real device] -- orientation lock and actual cast handoff can only be confirmed on Deep's phone."
+      ]
+    },
     {
       "version": "0.1.34",
       "versionCode": 32,

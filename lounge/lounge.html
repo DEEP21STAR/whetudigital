@@ -9975,6 +9975,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
             <button id="dv-mark-intro" class="dt-btn" onclick="dvMarkIntroEnd()" title="Mark where this show's intro ends (used to Skip Intro on future episodes)" aria-label="Mark intro end" hidden><i class="fas fa-bookmark"></i></button>
             <button id="dv-pip" class="dt-btn" onclick="dvTogglePip()" title="Mini player (picture-in-picture)" aria-label="Mini player (picture-in-picture)" hidden><i class="fas fa-clone"></i></button>
+            <button id="dv-cast" class="dt-btn" onclick="dvCastCurrent()" title="Cast to TV" aria-label="Cast to TV" hidden><i class="fas fa-tv"></i></button>
             <button id="dv-fs" class="dt-btn" onclick="dvToggleFullscreen()" title="Fullscreen" aria-label="Toggle fullscreen"><i class="fas fa-expand"></i></button>
             <button class="lp-action alt" style="padding:7px 14px;font-size:12px;" onclick="devicePlayerToMpv()"><i class="fas fa-laptop"></i> <span class="dv-mpv-label">Switch to Laptop (mpv)</span></button>
             <span id="dv-note" class="lp-live-dot"></span>
@@ -14457,7 +14458,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v180';
+        const LOUNGE_BUILD = 'lounge-shell-v181';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -19201,10 +19202,12 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         }
         let dvLastReport = 0;
 
+        let dvCurrentArgs = null;
         function openDevicePlayer(videoUrl, subUrl, startPos, title) {
             const wrap = document.getElementById('device-player');
             const video = document.getElementById('dv-video');
             const args = { videoUrl, subUrl, startPos, title };
+            dvCurrentArgs = args;
 
             // Title is passed in, not read from currentPickerItem: the caller
             // closes the picker (clearing it) before dispatching.
@@ -19324,6 +19327,20 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             if (a) launchPlayback(a.videoUrl, a.subUrl, a.startPos);
         }
 
+        // Casts the file already playing in "This device", picking up
+        // exactly where the viewer is right now -- dvCurrentArgs.startPos is
+        // only the position it OPENED at, not necessarily where playback
+        // is now, so the live element's currentTime wins whenever it has a
+        // real value.
+        function dvCastCurrent() {
+            if (!dvCurrentArgs) return;
+            const video = document.getElementById('dv-video');
+            const startPos = (video && isFinite(video.currentTime) && video.currentTime > 0)
+                ? video.currentTime : dvCurrentArgs.startPos;
+            const title = document.getElementById('dv-title').textContent || dvCurrentArgs.title;
+            castPlayback(dvCurrentArgs.videoUrl, dvCurrentArgs.subUrl, startPos, title);
+        }
+
         /* ================= DEVICE PLAYER TRANSPORT =========================
            The <video> keeps `playsinline` and its src; `controls` is gone. Every
            control below drives the same element the native strip did, so
@@ -19415,6 +19432,16 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // OS-level Activity PiP, handled natively.
             const pip = dvEl('dv-pip');
             if (pip) pip.hidden = !dvPipAvailable(video);
+            // Real gap, Deep 2026-08-21: the ONLY way to cast was the
+            // stream-picker's "TV (Chromecast)" option BEFORE playback
+            // starts -- once actually playing (especially in true
+            // fullscreen, where the page's own header is hidden entirely by
+            // the Fullscreen API), there was no way back to a cast target
+            // without closing the player first. Same castTargetAvailable()
+            // gate and castPlayback() call the picker already uses -- no new
+            // cast logic, just a second reachable entry point.
+            const cast = dvEl('dv-cast');
+            if (cast) cast.hidden = !castTargetAvailable();
 
             if (dvTransportBound) return;
             dvTransportBound = true;
@@ -19686,14 +19713,38 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // leaves this whole transport bar behind and hands the user the
             // native chrome again -- which is the bug being fixed.
             const wrap = dvWrap();
-            if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-            else if (wrap && wrap.requestFullscreen) wrap.requestFullscreen().catch(() => {});
+            if (document.fullscreenElement) {
+                document.exitFullscreen().catch(() => {});
+            } else if (wrap && wrap.requestFullscreen) {
+                wrap.requestFullscreen().then(() => {
+                    // Real gap, Deep 2026-08-21: no rotate-to-landscape on
+                    // mobile once fullscreen. The Orientation Lock API only
+                    // works FROM an active fullscreen element (calling it
+                    // outside fullscreen throws on every browser that
+                    // supports it at all) -- iOS Safari has no support
+                    // whatsoever (Apple's own decision, no polyfill exists),
+                    // so this is Android-only and silently no-ops elsewhere
+                    // rather than surfacing an error for a device that was
+                    // never going to support it.
+                    if (screen.orientation && screen.orientation.lock) {
+                        screen.orientation.lock('landscape').catch(() => {});
+                    }
+                }).catch(() => {});
+            }
         }
 
         function dvSyncFullscreen() {
             const icon = document.querySelector('#dv-fs i');
-            if (!icon) return;
             const on = document.fullscreenElement === dvWrap();
+            // Fires on EVERY exit path (ESC key, back gesture, the button
+            // itself) since this is the fullscreenchange listener, not just
+            // the toggle function -- releasing the lock only from the button
+            // handler would leave a phone pinned in landscape after an ESC-
+            // key exit, which is worse than never locking at all.
+            if (!on && screen.orientation && screen.orientation.unlock) {
+                try { screen.orientation.unlock(); } catch (e) {}
+            }
+            if (!icon) return;
             icon.className = 'fas ' + (on ? 'fa-compress' : 'fa-expand');
         }
 
