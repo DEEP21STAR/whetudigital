@@ -33,10 +33,23 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v178"
+      "cacheName": "lounge-shell-v179"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.34",
+      "versionCode": 32,
+      "web": "lounge-shell-v179",
+      "date": "2026-08-21",
+      "title": "Nav icon glow -- start of an ongoing visual/UX sweep",
+      "changes": [
+        "Deep asked to keep improving LMC visually and feature-wise, error-free and user-friendly throughout -- began with a real interaction/error sweep (Home, Movies, Settings) via Playwright before touching anything, per DESIGN_DNA's grep/test-first discipline. 0 console errors found across the sections checked.",
+        "First concrete change: active/hover nav icons now carry a cyan glow (text-shadow) + subtle scale, matching the voltage language already used elsewhere (hero numbers, LIVE badges) instead of a flat colour swap. prefers-reduced-motion turns off the scale/transition, keeps the colour change only.",
+        "Noted but NOT touched: two separate VPN controls sit side-by-side in the header (windscribeToggleBtn + a Proton VPN status chip) -- both are live, functional code, not dead leftovers, so removing either without confirming the intended architecture would be a guess, not a fix. Flagging for Deep rather than acting blind.",
+        "Live-verified via Playwright: glow renders correctly on the active Home icon, 0 console errors after the change. This is the first item of an ongoing pass -- more to follow."
+      ]
+    },
     {
       "version": "0.1.34",
       "versionCode": 32,

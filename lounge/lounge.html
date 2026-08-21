@@ -870,10 +870,24 @@
             color: #888;
             width: 24px;
             text-align: center;
+            transition: color 0.3s, text-shadow 0.3s, transform 0.3s;
         }
-        
+
+        /* A1 voltage: a plain colour swap on active read as flat next to the
+           rest of the app's glow language (hero numbers, LIVE badges) --
+           matching it here rather than leaving nav the one un-lit surface. */
         .nav-item:hover i, .nav-item.active i {
             color: #00d4ff;
+            text-shadow: 0 0 12px rgba(0, 212, 255, 0.75);
+        }
+
+        .nav-item.active i {
+            transform: scale(1.12);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .nav-item i { transition: none; }
+            .nav-item.active i { transform: none; }
         }
         
         .nav-item span {
@@ -14430,7 +14444,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v178';
+        const LOUNGE_BUILD = 'lounge-shell-v179';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
