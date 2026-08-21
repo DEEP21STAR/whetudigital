@@ -33,10 +33,23 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v172"
+      "cacheName": "lounge-shell-v173"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v173",
+      "date": "2026-08-21",
+      "title": "TVNZ Live TV real fix, part 3 -- Widevine license request had the same CORS bug as the manifest",
+      "changes": [
+        "Deep's real device hit a NEW error after v172 (Shaka 6007, LICENSE_REQUEST_FAILED) -- genuine progress, not a regression: it means playback now gets past manifest+segment resolution into the DRM layer. Investigated with a real POST (garbage Widevine challenge, expected+got a real INVALID_LICENSE_CHALLENGE reply from the actual endpoint): the license redirector (c.mjh.nz/tvnz-1-wv) 307s to fvnz-capi-prod.switch.tv, whose CORS policy only allows \"https://fvnz-smart-tile-prod.switch.tv\" (TVNZ's own web player) -- an old code comment claiming this endpoint sent a wildcard ACAO was WRONG, it only checked the redirect response's headers, never followed through to the real destination's policy.",
+        "Extended tvnz-proxy.js to support POST (forwards the binary Widevine challenge body + content-type as-is) and accept c.mjh.nz/tvnz-*-wv license redirects (pinned to that path, same reasoning as the i.mjh.nz manifest pin). lounge.html's request filter gained a third regex (TVNZ_LICENSE_REDIRECTOR_RX) so the license POST also routes through the proxy.",
+        "Live-verified the CORS/reachability chain with real bytes: license redirector fetched via the proxy, real error body returned matching what a direct request produces (confirms the proxy forwards POST bodies and follows the redirect correctly, not just GETs).",
+        "[UNTESTED: real Widevine decrypt with a genuine challenge] -- verification here used a garbage challenge (this proxy has no way to generate a real Widevine request without an actual browser CDM), so the CORS/routing layer is proven but Deep's real device is still the only way to confirm a genuine license is issued and playback starts."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,

@@ -15,13 +15,18 @@
 // for their own site's origin -- this is a CORS rejection, not a DRM,
 // license, or geography problem. It has nothing to do with any VPN.
 //
-// The Widevine LICENSE endpoint (c.mjh.nz/tvnz-1-wv -> switch.tv) was
-// separately confirmed to send Access-Control-Allow-Origin: * (wildcard,
-// genuine) via a real OPTIONS preflight check -- that path was never broken
-// and does NOT go through this proxy. Segment URLs live on the SAME
-// restricted CloudFront domain as the manifest (confirmed: a direct segment
-// URL also returns 200 with no ACAO header), so both need proxying, not just
-// the manifest.
+// UPDATE 2026-08-21: the Widevine LICENSE endpoint (c.mjh.nz/tvnz-1-wv) DOES
+// send a wildcard ACAO on its own OPTIONS preflight, but that's a 307
+// redirect to fvnz-capi-prod.switch.tv -- and THAT final destination only
+// allows "https://fvnz-smart-tile-prod.switch.tv" (TVNZ's own web player),
+// not an arbitrary origin. Confirmed with a real POST (garbage challenge
+// body, expected an INVALID_LICENSE_CHALLENGE reply, got exactly that --
+// the endpoint IS reachable and functioning, only CORS blocks it). Same
+// redirect-hides-the-real-CORS-failure shape as the i.mjh.nz manifest bug
+// above -- the OLD comment here was wrong (an OPTIONS preflight checks the
+// REDIRECT response's headers, never followed the 307 to see the real
+// destination's policy). License requests now proxy too, via POST support
+// below.
 //
 // Used via Shaka's registerRequestFilter() in lounge.html (not a manifest
 // XML rewrite): the player resolves the DASH SegmentTemplate against the
@@ -44,8 +49,12 @@ const ALLOWED_HOST_RX = /^[a-z0-9-]+\.streaming-live-api\.tvnz\.co\.nz$/i;
 // (fetch() does that natively, no CORS applies to server-to-server calls)
 // and re-serve the final TVNZ response, same as any other proxied request.
 const ALLOWED_REDIRECTOR_RX = /^i\.mjh\.nz$/i;
+// c.mjh.nz is the SAME redirector service as i.mjh.nz (mjh.nz runs both),
+// just for license requests instead of manifests -- pinned to /tvnz-*-wv
+// paths below, same reasoning as the i.mjh.nz manifest pin.
+const ALLOWED_LICENSE_REDIRECTOR_RX = /^c\.mjh\.nz$/i;
 
-export async function GET(req) {
+async function handleProxy(req, method) {
   const url = new URL(req.url);
   const target = url.searchParams.get('u') || '';
   const headers = { 'Access-Control-Allow-Origin': '*' };
@@ -57,23 +66,39 @@ export async function GET(req) {
     });
   }
   const isRedirector = ALLOWED_REDIRECTOR_RX.test(targetUrl.hostname);
-  if (targetUrl.protocol !== 'https:' || !(ALLOWED_HOST_RX.test(targetUrl.hostname) || isRedirector)) {
-    return new Response(JSON.stringify({ error: 'u must be a *.streaming-live-api.tvnz.co.nz or i.mjh.nz https URL' }), {
+  const isLicenseRedirector = ALLOWED_LICENSE_REDIRECTOR_RX.test(targetUrl.hostname);
+  if (targetUrl.protocol !== 'https:' || !(ALLOWED_HOST_RX.test(targetUrl.hostname) || isRedirector || isLicenseRedirector)) {
+    return new Response(JSON.stringify({ error: 'u must be a *.streaming-live-api.tvnz.co.nz, i.mjh.nz, or c.mjh.nz https URL' }), {
       status: 400, headers: { ...headers, 'Content-Type': 'application/json' },
     });
   }
-  // i.mjh.nz is a general redirector for many broadcasters, not just TVNZ --
-  // pinning the path here means this proxy can only ever be pointed at a
-  // TVNZ redirect through it, never an arbitrary third-party stream.
+  // i.mjh.nz/c.mjh.nz are general redirector services for many broadcasters,
+  // not just TVNZ -- pinning the path here means this proxy can only ever be
+  // pointed at a TVNZ redirect through them, never an arbitrary third-party
+  // stream or license server.
   if (isRedirector && !/^\/\.r\/tvnz-/i.test(targetUrl.pathname)) {
     return new Response(JSON.stringify({ error: 'i.mjh.nz path must be a /.r/tvnz-* redirect' }), {
+      status: 400, headers: { ...headers, 'Content-Type': 'application/json' },
+    });
+  }
+  if (isLicenseRedirector && !/^\/tvnz-.*-wv$/i.test(targetUrl.pathname)) {
+    return new Response(JSON.stringify({ error: 'c.mjh.nz path must be a /tvnz-*-wv license redirect' }), {
       status: 400, headers: { ...headers, 'Content-Type': 'application/json' },
     });
   }
 
   let res;
   try {
-    res = await fetch(targetUrl.href);
+    if (method === 'POST') {
+      // Shaka's Widevine license request: binary challenge body, whatever
+      // content-type it sent. Forwarded as-is -- this proxy re-serves
+      // exactly what the license server needs, not a guessed content-type.
+      const body = await req.arrayBuffer();
+      const reqContentType = req.headers.get('content-type') || 'application/octet-stream';
+      res = await fetch(targetUrl.href, { method: 'POST', body, headers: { 'Content-Type': reqContentType } });
+    } else {
+      res = await fetch(targetUrl.href);
+    }
   } catch (e) {
     return new Response(JSON.stringify({ error: `upstream fetch failed: ${e.message}` }), {
       status: 502, headers: { ...headers, 'Content-Type': 'application/json' },
@@ -133,6 +158,21 @@ export async function GET(req) {
   return new Response(res.body, { status: 200, headers: respHeaders });
 }
 
+export async function GET(req) {
+  return handleProxy(req, 'GET');
+}
+
+export async function POST(req) {
+  return handleProxy(req, 'POST');
+}
+
 export function OPTIONS() {
-  return new Response(null, { status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
 }
