@@ -33,10 +33,23 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v177"
+      "cacheName": "lounge-shell-v178"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v178",
+      "date": "2026-08-21",
+      "title": "Fixed Chromecast button covering the header search box on the Android APK",
+      "changes": [
+        "Deep's screenshot (Live TV Channels page) showed the native Cast icon overlapping the header's search box. Real cause: the Android app's native MediaRouteButton (MainActivity.kt, required by Google's Cast SDK) floats at a fixed top-right screen position OUTSIDE this page's DOM entirely -- the web page never knew it existed, so nothing reserved clearance for it.",
+        "Fixed on the web side, no APK rebuild needed: added an is-native-app class (set in <head>, before first paint, when window.LoungeNative is present) and 84px of header right-padding scoped to that class only -- desktop/browser layout is completely untouched (verified: class and padding both correctly absent without the native bridge).",
+        "Live-verified via Playwright: without LoungeNative present, no class/no padding change (0 regression risk to the existing 1.9M-pixel-tested desktop header); with the class force-added to simulate the native context, the 84px padding applies correctly.",
+        "[UNTESTED: real APK] -- can't fully simulate MediaRouteButton's actual rendered footprint without the real device; 84px is a generous estimate (real button ~48dp + 24dp margin) chosen to keep clearance rather than pixel-match exactly. Needs Deep's confirmation the search box is now fully clear."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,
