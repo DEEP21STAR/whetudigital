@@ -14506,7 +14506,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v182';
+        const LOUNGE_BUILD = 'lounge-shell-v183';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -15802,6 +15802,10 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             return localStorage.getItem('nexus_remote_mode') === '1';
         }
 
+        // The one real, live Cloudflare Tunnel in front of nexus_control_relay.py
+        // (confirmed reachable, 2026-08-22) -- the WAN-safe fallback below.
+        const CLOUD_RELAY_URL = 'https://lounge-relay.whetudigital.co.nz';
+
         function getRelayBase() {
             // A LAN entry ("192.168.1.30") still gets the old http://host:8898
             // treatment. A full URL (https://lounge-relay.whetudigital.co.nz,
@@ -15814,6 +15818,27 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 return stored.replace(/\/+$/, '');
             }
             const host = stored || location.hostname;
+            // REAL BUG, found live 2026-08-22: every passive/background caller
+            // of this function (EPG, vpn-status polling, reel/progress sync,
+            // channel metadata) is NOT gated behind the Remote Mode opt-in --
+            // they all fire automatically on load for EVERY visitor. Before
+            // this fix, an unconfigured device (anyone who'd never manually
+              // pasted the tunnel URL into Settings -- which is most visitors,
+            // since that field only exists to set up PC-control Remote Mode)
+            // defaulted to http://<public-domain>:8898, which the browser
+            // blocks outright as Mixed Content on the HTTPS-served app, AND
+            // which pointed at a host with nothing actually listening on 8898
+            // anyway (that's Vercel's domain, not Deep's PC). Every one of
+            // those features silently failed with no visible error, on WAN,
+            // on every device that hadn't been manually configured.
+            // Fix: only build the raw http://host:8898 form for an actual LAN
+            // host (same shape check the access-PIN gate already uses) or an
+            // explicit stored LAN IP; anything else (a public domain, i.e.
+            // WAN) falls back to the known-working Cloudflare Tunnel instead
+            // of a guaranteed-broken guess.
+            const isLanHost = host === 'localhost' || host === '127.0.0.1' || host === '' ||
+                /^192\.168\./.test(host) || /^10\./.test(host) || /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host);
+            if (!isLanHost) return CLOUD_RELAY_URL;
             return `http://${host}:8898`;
         }
 

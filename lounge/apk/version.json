@@ -33,10 +33,23 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v182"
+      "cacheName": "lounge-shell-v183"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.34",
+      "versionCode": 32,
+      "web": "lounge-shell-v183",
+      "date": "2026-08-22",
+      "title": "Real WAN access bug fixed -- EPG, VPN status, channel data all silently broken off-LAN until now",
+      "changes": [
+        "Deep asked to fix WAN deployment -- confirmed via live Playwright testing that on any device without the relay host manually configured in Settings (which is every device that's never touched the Remote Mode PC-control setup, i.e. almost everyone accessing over WAN), getRelayBase() defaulted to http://<public-domain>:8898. That's Mixed Content on the HTTPS-served app (browsers block it outright) AND pointed at a host with nothing listening on 8898 anyway (that's Vercel's domain, not Deep's PC) -- so EPG, VPN status polling, reel/progress sync, and live-channel metadata all silently failed with no visible error on WAN, every time.",
+        "Root cause: getRelayBase() is shared by both the deliberately-gated Remote Mode feature (PC control, correctly requires manual setup) AND several passive background callers that fire automatically for every visitor (EPG, vpn-status, channel data) -- those were never meant to require manual configuration at all.",
+        "Fix: getRelayBase() now only builds the raw http://host:8898 form for an actual LAN host (same detection shape the access-PIN gate already uses) or an explicit stored LAN IP. Any other host (i.e. WAN) falls back to the real, already-live Cloudflare Tunnel (lounge-relay.whetudigital.co.nz) instead of a guaranteed-broken guess -- confirmed reachable and serving real data server-side (curl: /epg, /channels/nz, /status all 200; /reel/progress correctly still 401 without the PIN, since that's personal watch-progress data and stays gated by design).",
+        "[TESTED, CONFIRMED] server-side via direct curl against the real tunnel endpoint for every affected route. [UNTESTED: real device on WAN] -- the client-side fallback logic is code-verified and the tunnel itself is proven live, but confirming EPG/VPN-status actually populate on Deep's phone off his home WiFi needs a real WAN device."
+      ]
+    },
     {
       "version": "0.1.34",
       "versionCode": 32,
