@@ -14411,7 +14411,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v175';
+        const LOUNGE_BUILD = 'lounge-shell-v176';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -21072,7 +21072,38 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     lpTeardownKeepOpen();
                 });
                 player.configure({
-                    drm: { servers: { 'com.widevine.alpha': drm.license } }
+                    drm: {
+                        servers: { 'com.widevine.alpha': drm.license },
+                        // Real cause of mobile-only Shaka 6001, researched
+                        // 2026-08-21 (not guessed -- desktop Chrome silently
+                        // negotiates a working robustness level when none is
+                        // specified, but Android WebView's EME implementation
+                        // does not: it only supports SW_SECURE_CRYPTO, and
+                        // leaving robustness unset makes requestMediaKeySystem
+                        // Access() fail outright with exactly
+                        // REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE (6001) on
+                        // WebView specifically, while desktop Chrome plays
+                        // fine either way -- this is why Deep saw 6001 only
+                        // on mobile, never on Windows. SW_SECURE_CRYPTO is a
+                        // baseline level every real Widevine implementation
+                        // supports (desktop included), so this is additive,
+                        // not a downgrade -- TVNZ's free-to-air content has no
+                        // reason to require hardware-level (L1) protection.
+                        // Pinned Shaka is 4.11.0 (UI_STANDARD CDN table) --
+                        // verified directly against that exact build's
+                        // compiled source (default value is the STRING "",
+                        // not []) before shipping: the array-of-fallbacks
+                        // format some Shaka docs describe is a LATER
+                        // version's config shape, confirmed the hard way when
+                        // the array form threw "Invalid config, wrong type"
+                        // in this exact build during testing.
+                        advanced: {
+                            'com.widevine.alpha': {
+                                videoRobustness: 'SW_SECURE_CRYPTO',
+                                audioRobustness: 'SW_SECURE_CRYPTO'
+                            }
+                        }
+                    }
                 });
                 player.attach(video)
                     .then(() => player.load(drm.mpd))

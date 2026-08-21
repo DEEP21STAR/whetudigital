@@ -33,10 +33,23 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v175"
+      "cacheName": "lounge-shell-v176"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.33",
+      "versionCode": 31,
+      "web": "lounge-shell-v176",
+      "date": "2026-08-21",
+      "title": "TVNZ mobile-only Shaka 6001 -- real root cause found: missing DRM robustness level",
+      "changes": [
+        "Deep confirmed a full force-close+reopen did NOT fix mobile TVNZ -- ruled out cache/staleness as the cause, meaning this was a genuine remaining bug, not the WebView-holding-an-old-page theory from v175's notes. Researched properly this time: desktop Chrome silently negotiates a working Widevine robustness level when the app doesn't specify one, but Android WebView's EME implementation does not -- it only supports SW_SECURE_CRYPTO, and leaving robustness unset makes requestMediaKeySystemAccess() fail outright with exactly REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE (6001), a documented, known Shaka-on-WebView issue. This is why it only ever showed on mobile, never on Windows -- both platforms hit the SAME code path, but only WebView's stricter EME enforcement rejects an unspecified config.",
+        "Added drm.advanced config requesting SW_SECURE_CRYPTO for both video and audio robustness -- a baseline level every real Widevine implementation supports (TVNZ's free-to-air content has no reason to need hardware-level L1 protection), so this is additive for desktop, not a downgrade.",
+        "Caught a real mistake before shipping: first attempt used an array format (['SW_SECURE_CRYPTO']) per generic Shaka docs, but live-testing threw 'Invalid config, wrong type' -- checked the ACTUAL pinned 4.11.0 compiled source directly (default value is the string \"\", not []) and found the array format is a LATER Shaka version's config shape. Fixed to a plain string, re-tested: 0 console errors, 0 warnings (the previously-constant 'recommended robustness' spam is also gone now, confirming the config is actually being read).",
+        "[UNTESTED: real device] -- this is the first fix this session that's structurally DIFFERENT from the CORS/proxy bugs already proven with real bytes; it can only be confirmed by Deep's own phone actually starting playback. High confidence given it's a well-documented, specifically-matching known issue, but flagged honestly rather than declared fixed."
+      ]
+    },
     {
       "version": "0.1.33",
       "versionCode": 31,
