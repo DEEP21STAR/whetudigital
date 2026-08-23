@@ -15856,10 +15856,32 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         function getContentBase() {
             const stored = (localStorage.getItem('nexus_content_host') || '').trim();
             if (stored) return stored.replace(/\/+$/, '');
-            // www, not bare -- bare whetudigital.co.nz 308-redirects here, which
-            // fetch() follows fine on GET but adds a needless hop and is a risk
-            // on DELETE (rd/torrents/delete) across some HTTP clients. Verified
-            // live 2026-08-10.
+            // Moved off Vercel to Cloudflare Pages 2026-08-23, after Vercel's
+            // whetu-digital TEAM (not just this project) got soft-blocked for
+            // exceeding the Hobby plan's Fast Origin Transfer quota -- these
+            // proxy routes stream video through themselves, exactly the shape
+            // that burns that quota fastest. Cloudflare Workers has no
+            // equivalent bandwidth cap on its free tier, so this both fixes
+            // the outage and stops it recurring monthly. Only the 3 routes that
+            // need a real headless browser (Playwright can't run in a Workers
+            // V8 isolate -- no filesystem, can't launch a binary) stay on
+            // Vercel; see getVercelContentBase() below and its 3 call sites.
+            return 'https://lounge-api.pages.dev';
+        }
+
+        // The 3 routes that genuinely cannot move to Cloudflare Workers --
+        // daddylive-mirror-stream, vidking-resolve, and fallback-stream all
+        // launch a real headless Chromium via Playwright to get past a
+        // TLS/JA3 fingerprint check, and Workers has no filesystem/binary
+        // execution at all (same limitation Vercel's own Edge runtime has,
+        // which is why these 3 were already forced onto Vercel's Node
+        // runtime specifically). These stay on Vercel and inherit whatever
+        // is left of Vercel's monthly quota after the softBlock resets --
+        // low-volume "resolve once per stream open" calls, not the
+        // per-segment traffic that caused the outage.
+        function getVercelContentBase() {
+            const stored = (localStorage.getItem('nexus_content_host') || '').trim();
+            if (stored) return stored.replace(/\/+$/, '');
             return 'https://www.whetudigital.co.nz/api/lounge';
         }
 
@@ -16153,7 +16175,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // for why. Host and viewer both use the "This device" (dv-video)
         // browser player only; mpv/native-TV/Cast are not reachable the
         // same way the sleep timer's docs already explain for those paths.
-        const WT_API = `${getContentBase().replace(/\/api\/lounge$/, '')}/api/lounge/watchtogether`;
+        const WT_API = `${getContentBase()}/watchtogether`;
         let wtRole = null;      // null | 'host' | 'viewer'
         let wtCode = null;
         let wtInterval = null;
@@ -21081,7 +21103,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                             const liveTitle = epgInfo && epgInfo.now && epgInfo.now.t;
                             if (liveTitle) {
                                 try {
-                                    const fbUrl = `${getContentBase()}/fallback-stream?title=${encodeURIComponent(liveTitle)}`;
+                                    const fbUrl = `${getVercelContentBase()}/fallback-stream?title=${encodeURIComponent(liveTitle)}`;
                                     const fbRes = await fetch(fbUrl, { signal: AbortSignal.timeout(45000) });
                                     if (gen !== lpGen) return;
                                     const fbBody = await fbRes.text();
@@ -21106,7 +21128,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         // can still be up when dlhd.st itself is having a bad day.
                         if ((!src || src === channel.url) && channel.dlhdId) {
                             try {
-                                const mirrorUrl = `${getContentBase()}/daddylive-mirror-stream?id=${encodeURIComponent(channel.dlhdId)}`;
+                                const mirrorUrl = `${getVercelContentBase()}/daddylive-mirror-stream?id=${encodeURIComponent(channel.dlhdId)}`;
                                 const mirrorRes = await fetch(mirrorUrl, { signal: AbortSignal.timeout(45000) });
                                 if (gen !== lpGen) return;
                                 const mirrorBody = await mirrorRes.text();
@@ -23704,7 +23726,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
             const params = new URLSearchParams({ type: stream.freeEmbedType, tmdbId: String(stream.freeEmbedTmdbId) });
             if (stream.freeEmbedSeason) { params.set('season', stream.freeEmbedSeason); params.set('episode', stream.freeEmbedEpisode); }
-            const resolverUrl = `${getContentBase()}/vidking-resolve?${params.toString()}`;
+            const resolverUrl = `${getVercelContentBase()}/vidking-resolve?${params.toString()}`;
 
             try {
                 const res = await fetch(resolverUrl, { signal: AbortSignal.timeout(45000) });
