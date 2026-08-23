@@ -20670,7 +20670,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 // factor under the real message instead of replacing it.
                 lpEl('lp-error-msg').textContent = msg || "This channel wouldn't play in the browser.";
                 lpEl('lp-error-detail').textContent = lpNzVpnWarning
-                    ? `${detail ? detail + ' ' : ''}Also worth ruling out: ${lpNzVpnWarning}`
+                    ? `${detail ? detail + ' ' : ''}Also worth ruling out: ${lpNzVpnWarning.text}`
                     : (detail || '');
                 lpSetStatus('FAILED');
                 // Only DaddyLive/Sky Sport channels go through the resolver
@@ -20678,8 +20678,21 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 // nothing for it to diagnose.
                 const diagBtn = lpEl('lp-diagnose-btn');
                 if (diagBtn) diagBtn.style.display = (lpChannel && lpChannel.externalWatch && lpChannel.dlhdId) ? '' : 'none';
+                // Label/icon switch by kind (see checkNzVpnLock/fixNzVpnLockAndRetry):
+                // 'geo' means CONNECT a VPN (Deep traveling, nothing to
+                // disconnect), 'windscribe' means an accidental PC-side VPN
+                // needs turning OFF -- showing the wrong verb here is worse
+                // than showing nothing, so the label is set every time the
+                // button's shown, not just once in the static HTML.
                 const vpnFixBtn = lpEl('lp-vpn-fix-btn');
-                if (vpnFixBtn) vpnFixBtn.style.display = lpNzVpnWarning ? '' : 'none';
+                if (vpnFixBtn) {
+                    vpnFixBtn.style.display = lpNzVpnWarning ? '' : 'none';
+                    if (lpNzVpnWarning) {
+                        vpnFixBtn.innerHTML = lpNzVpnWarning.kind === 'geo'
+                            ? '<i class="fas fa-shield-halved"></i> Open Proton VPN'
+                            : '<i class="fas fa-shield-halved"></i> Disconnect VPN &amp; retry';
+                    }
+                }
                 renderCdnDownNote(!!altSources);
             } else {
                 renderCdnDownNote(false);
@@ -21013,7 +21026,20 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             } catch (e) { /* geo API unreachable -- fall through to the PC-side check below */ }
             if (clientGeo) {
                 if (clientGeo.countryCode !== 'NZ') {
-                    return `This browser's own connection currently resolves to ${clientGeo.countryName || clientGeo.countryCode} (via BigDataCloud IP geolocation), not New Zealand -- that is almost certainly why TVNZ's CDN rejected the request. If a VPN is meant to be active on THIS device, check it's actually connected and set to a New Zealand server before retrying.`;
+                    // kind:'geo' -- the fix here is CONNECT a VPN, not disconnect
+                    // one. Originally this whole function only ever fired for
+                    // Deep at home with a VPN accidentally left on (see the
+                    // 2026-08-20 investigation above) -- 'kind' was added
+                    // 2026-08-23 once Deep started actually traveling abroad for
+                    // weeks at a time, where this same geo check now fires for
+                    // the OPPOSITE real cause: no VPN active at all. The old
+                    // single "Disconnect VPN & retry" button was giving
+                    // objectively wrong advice for that case (there's nothing
+                    // to disconnect on a phone with no VPN app running).
+                    return {
+                        kind: 'geo',
+                        text: `This browser's own connection currently resolves to ${clientGeo.countryName || clientGeo.countryCode} (via BigDataCloud IP geolocation), not New Zealand -- that is almost certainly why the CDN rejected the request. Connect Proton VPN to a New Zealand server, then retry.`,
+                    };
                 }
                 // Genuinely NZ-resolved and still blocked -- a different,
                 // more specific problem (VPN/datacenter IP ranges get
@@ -21031,7 +21057,12 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 const res = await fetch(`${getRelayBase()}/vpn-status`, { signal: AbortSignal.timeout(4000) });
                 const data = await res.json();
                 if (data.available && data.connected) {
-                    return `Windscribe is currently connected via ${data.location || 'a VPN server'} on this PC (not necessarily this device) -- worth disconnecting to rule it out, since this account has no New Zealand server to switch to instead.`;
+                    // kind:'windscribe' -- this IS the accidentally-on-at-home
+                    // case the disconnect button was originally built for.
+                    return {
+                        kind: 'windscribe',
+                        text: `Windscribe is currently connected via ${data.location || 'a VPN server'} on this PC (not necessarily this device) -- worth disconnecting to rule it out, since this account has no New Zealand server to switch to instead.`,
+                    };
                 }
             } catch (e) { /* relay unreachable -- can't check, don't block on a guess */ }
             return null;
@@ -21040,6 +21071,16 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         async function fixNzVpnLockAndRetry() {
             const btn = lpEl('lp-vpn-fix-btn');
             if (!btn) return;
+            if ((lpNzVpnWarning || {}).kind === 'geo') {
+                // Nothing to auto-toggle -- a web page can't detect or control a
+                // phone's system VPN state. Opens/installs Proton VPN (same
+                // action as the header VPN chip) and lets Deep retry himself
+                // once he's actually connected; auto-retrying immediately would
+                // just fail again since opening the app doesn't wait for it to
+                // connect.
+                openProtonVpn();
+                return;
+            }
             const originalHtml = btn.innerHTML;
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Disconnecting…';
@@ -21105,14 +21146,19 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                     if (!body.includes('#EXTM3U')) {
                         let reason = null;
                         try { reason = JSON.parse(body).error; } catch (e) { /* not JSON, e.g. a network edge error */ }
-                        // A "Backend fetch failed"/503 reason means DaddyLive's
+                        // A "Backend fetch failed"/5xx reason means DaddyLive's
                         // OWN CDN origin is down, not our resolver -- confirmed
                         // live 2026-08-17 (all 5 Sky Sport NZ ids failed
-                        // identically at the same upstream host). Only THAT
-                        // specific case is worth trying a fallback provider for;
-                        // other reasons (chain structure changed) aren't
-                        // something a different site fixes.
-                        const isCdnDown = /backend fetch failed|http error 50[0-9]/i.test(reason || '');
+                        // identically at the same upstream host). 403 added
+                        // 2026-08-23: confirmed live from Deep's own device in
+                        // Australia -- DaddyLive geo-blocks non-NZ IPs with a
+                        // plain 403, which this regex previously didn't count as
+                        // "worth trying a fallback for" even though the fallback
+                        // provider (streamed.pk) is a different company on a
+                        // different CDN and isn't necessarily NZ-only the same
+                        // way. Other reasons (chain structure changed) still
+                        // aren't something a different site fixes.
+                        const isCdnDown = /backend fetch failed|http error 50[0-9]|http.{0,15}\b403\b/i.test(reason || '');
 
                         // Auto fallback -- Deep was explicit (2026-08-17): no
                         // external tab, ever, and no extra click. If DaddyLive's
