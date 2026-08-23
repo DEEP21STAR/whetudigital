@@ -21191,7 +21191,17 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         // whenever the PRIMARY chain broke for any reason, not just
                         // the CDN-down case: a different domain in the same family
                         // can still be up when dlhd.st itself is having a bad day.
+                        // mirrorTried tracks whether this tier actually ran, separate
+                        // from isCdnDown -- the final error message below used to
+                        // only ever mention the fallback-stream attempt (tier 2) and
+                        // silently say nothing about this one, even when it ran and
+                        // failed too. Real gap Deep caught live 2026-08-23: he had no
+                        // way to tell from the error text whether the mirror was even
+                        // tried, so "was there really a backup search?" was a fair
+                        // question with the old wording.
+                        let mirrorTried = false;
                         if ((!src || src === channel.url) && channel.dlhdId) {
+                            mirrorTried = true;
                             try {
                                 const mirror = await resolveHlsRoute(`/daddylive-mirror-stream?id=${encodeURIComponent(channel.dlhdId)}`, 45000);
                                 if (gen !== lpGen) return;
@@ -21205,12 +21215,18 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         }
 
                         if (!src || src === channel.url) {
+                            const triedCount = (isCdnDown ? 1 : 0) + (mirrorTried ? 1 : 0);
+                            const backupNote = triedCount === 0
+                                ? ' — try again.'
+                                : triedCount === 1
+                                    ? ` A backup provider (${isCdnDown ? 'a different service' : 'an alternate DaddyLive mirror'}) was tried automatically but couldn't play this either.`
+                                    : ' 2 backup providers (a different streaming service, and an alternate DaddyLive mirror) were both tried automatically -- neither could play this either. This looks like a real outage on DaddyLive\'s end, not something a retry fixes.';
                             lpShowState('error', 'Sky Sport stream could not be resolved right now.',
                                 (reason
                                     ? `DaddyLive's chain broke at: ${reason}`
                                     : 'The cloud relay reached DaddyLive but got no playlist back. Their player chain changes often.')
-                                + (isCdnDown ? ' A backup provider was tried automatically but had no equivalent live event right now.' : ' — try again.'),
-                                isCdnDown);
+                                + backupNote,
+                                triedCount > 0);
                             return;
                         }
                     } else {
