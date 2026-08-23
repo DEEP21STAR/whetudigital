@@ -15885,6 +15885,27 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             return 'https://www.whetudigital.co.nz/api/lounge';
         }
 
+        // Tries the free PREDATOR relay (getRelayBase(), same Cloudflare
+        // Tunnel already used for mpv control/EPG fallback) before Vercel
+        // for the 3 routes that need a real headless browser. Added
+        // 2026-08-23 once those 2 of the 3 (daddylive-mirror-stream,
+        // vidking-resolve) got ported into nexus_control_relay.py --
+        // fallback-stream already existed there. Relay-first because it's
+        // free/unlimited and already running on a machine confirmed always-
+        // on; Vercel is the fallback for whatever's left of its monthly
+        // quota, not the primary path anymore.
+        async function resolveHlsRoute(routePath, timeoutMs) {
+            for (const base of [getRelayBase(), getVercelContentBase()]) {
+                try {
+                    const url = `${base}${routePath}`;
+                    const res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
+                    const body = await res.text();
+                    if (body.includes('#EXTM3U')) return { url, body };
+                } catch (e) { /* try the next base */ }
+            }
+            return null;
+        }
+
         // Real-Debrid sub-path travels as ?path=, not as URL segments -- Vercel's
         // catch-all route only matched a single path segment here, 404ing at the
         // platform level on anything with a slash in it (torrents/addMagnet).
@@ -21103,12 +21124,10 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                             const liveTitle = epgInfo && epgInfo.now && epgInfo.now.t;
                             if (liveTitle) {
                                 try {
-                                    const fbUrl = `${getVercelContentBase()}/fallback-stream?title=${encodeURIComponent(liveTitle)}`;
-                                    const fbRes = await fetch(fbUrl, { signal: AbortSignal.timeout(45000) });
+                                    const fb = await resolveHlsRoute(`/fallback-stream?title=${encodeURIComponent(liveTitle)}`, 45000);
                                     if (gen !== lpGen) return;
-                                    const fbBody = await fbRes.text();
-                                    if (fbBody.includes('#EXTM3U')) {
-                                        src = fbUrl;
+                                    if (fb) {
+                                        src = fb.url;
                                         lpStreamOrigin = { kind: 'Fallback source', detail: `DaddyLive was down -- playing "${liveTitle}" from a backup provider` };
                                     }
                                 } catch (e) {
@@ -21128,12 +21147,10 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         // can still be up when dlhd.st itself is having a bad day.
                         if ((!src || src === channel.url) && channel.dlhdId) {
                             try {
-                                const mirrorUrl = `${getVercelContentBase()}/daddylive-mirror-stream?id=${encodeURIComponent(channel.dlhdId)}`;
-                                const mirrorRes = await fetch(mirrorUrl, { signal: AbortSignal.timeout(45000) });
+                                const mirror = await resolveHlsRoute(`/daddylive-mirror-stream?id=${encodeURIComponent(channel.dlhdId)}`, 45000);
                                 if (gen !== lpGen) return;
-                                const mirrorBody = await mirrorRes.text();
-                                if (mirrorBody.includes('#EXTM3U')) {
-                                    src = mirrorUrl;
+                                if (mirror) {
+                                    src = mirror.url;
                                     lpStreamOrigin = { kind: 'Mirror source', detail: 'DaddyLive\'s main chain broke -- playing from an alternate DaddyLive mirror instead' };
                                 }
                             } catch (e) {
@@ -23726,13 +23743,12 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
             const params = new URLSearchParams({ type: stream.freeEmbedType, tmdbId: String(stream.freeEmbedTmdbId) });
             if (stream.freeEmbedSeason) { params.set('season', stream.freeEmbedSeason); params.set('episode', stream.freeEmbedEpisode); }
-            const resolverUrl = `${getVercelContentBase()}/vidking-resolve?${params.toString()}`;
+            const resolverPath = `/vidking-resolve?${params.toString()}`;
 
             try {
-                const res = await fetch(resolverUrl, { signal: AbortSignal.timeout(45000) });
-                if (!res.ok) throw new Error(`resolver HTTP ${res.status}`);
-                const manifestText = await res.text();
-                if (!manifestText.includes('#EXTM3U')) throw new Error('resolver did not return a manifest');
+                const resolved = await resolveHlsRoute(resolverPath, 45000);
+                if (!resolved) throw new Error('resolver unreachable or did not return a manifest (relay and Vercel both failed)');
+                const manifestText = resolved.body;
 
                 // Blob URL, not the resolver URL itself: hls.js re-fetching the
                 // resolver directly would re-trigger a second headless resolve
