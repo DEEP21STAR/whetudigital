@@ -33,10 +33,24 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v183"
+      "cacheName": "lounge-shell-v184"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.34",
+      "versionCode": 32,
+      "web": "lounge-shell-v184",
+      "date": "2026-08-29",
+      "title": "Poster image-proxy fallback -- fixes posters never loading on networks that block image.tmdb.org directly",
+      "changes": [
+        "Deep reported posters not loading on an Australian network (Zenith laptop, Omarchy OS) while everything else in the app worked fine -- API calls to api.themoviedb.org and the relay succeeded, only the image CDN subdomain failed.",
+        "Root cause: handlePosterError()'s retry chain (same-URL retry, then /original size retry) only ever targets image.tmdb.org directly. A host-level block of that specific domain (DNS/firewall/browser policy) fails all attempts identically -- the existing retries were only ever designed for transient TMDB blips, not a blocked host.",
+        "Fix: third retry now routes through the site's own image-proxy (already used for backdrop thumbnails) so the browser only talks to a whetudigital.co.nz host for image bytes, bypassing the block.",
+        "[TESTED, CONFIRMED] Forced a poster failure via console and verified it correctly falls through to the proxy URL and loads, live on production.",
+        "[UNTESTED: Deep's actual AU/Omarchy device] -- code-verified and proxy-path confirmed working, but the first report predates this fix; needs a real retest since this build also fixes the earlier bug where the deploy didn't bump LOUNGE_BUILD/CACHE_NAME, so the service worker kept serving a stale cached shell and Deep's fresh install never actually got the poster fix at all."
+      ]
+    },
     {
       "version": "0.1.34",
       "versionCode": 32,
