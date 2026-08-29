@@ -10105,6 +10105,12 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         function initIntroParticles() {
             const container = document.getElementById('intro-particles');
             if (!container) return;
+            // TV hardware (weak SoC, no discrete GPU) is real-hardware-verified
+            // slow to run this canvas layer indefinitely -- it's a purely
+            // ambient background, invisible from couch distance anyway, so it's
+            // skipped outright in tv-mode rather than just thinned out
+            // (Deep's Hisense/Google TV Streamer report, 2026-08-24).
+            if (document.documentElement.classList.contains('tv-mode')) return;
             container.innerHTML = '';
             const canvas = document.createElement('canvas');
             canvas.width = window.innerWidth;
@@ -10605,7 +10611,14 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             let badgeIdle = null;
             const startBadgeIdle = () => {
                 if (badgeIdle || !badgeCornEls.length) return;
-                badgeIdle = gsap.timeline({ repeat: -1, repeatDelay: 5.6, delay: 1.6 });
+                // TV hardware: capped at 3 pops instead of repeating forever.
+                // A remote-driven "Press Any Key" wait can sit far longer than
+                // a keyboard one, and an infinite GSAP timeline compounding
+                // with everything else in the intro is real sustained load on
+                // a weak SoC (Deep's Hisense/Google TV Streamer report,
+                // 2026-08-24). Desktop/phone keep the original indefinite pop.
+                const isTv = document.documentElement.classList.contains('tv-mode');
+                badgeIdle = gsap.timeline({ repeat: isTv ? 2 : -1, repeatDelay: 5.6, delay: 1.6 });
                 // THREE of the five kernels fire, never all of them: an earlier
                 // pass popped four and the peak frame showed a visibly EMPTY
                 // bucket, which reads as a bug rather than a flourish. Indices
@@ -11354,12 +11367,18 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // more machinery than the job needs).
         function buildIntroRays(container) {
             container.innerHTML = '';
-            const RAY_COUNT = 14;
+            // Halved on TV hardware -- same reasoning as initIntroParticles():
+            // weak SoC, no discrete GPU, real-hardware-verified slow with the
+            // full count (Deep's Hisense/Google TV Streamer report, 2026-08-24).
+            // Kept non-zero (unlike the particle canvas) because these are the
+            // Theatre Dolly-Through's signature moment, not ambient filler.
+            const isTv = document.documentElement.classList.contains('tv-mode');
+            const RAY_COUNT = isTv ? 7 : 14;
             const rayHtml = Array.from({ length: RAY_COUNT }, (_, i) => {
                 const angle = (360 / RAY_COUNT) * i;
                 return `<div class="intro-ray" style="transform:translateX(-50%) rotate(${angle}deg);"></div>`;
             }).join('');
-            const MOTE_COUNT = 18;
+            const MOTE_COUNT = isTv ? 9 : 18;
             const moteHtml = Array.from({ length: MOTE_COUNT }, () => {
                 const x = (20 + Math.random() * 60).toFixed(1);
                 const y = (15 + Math.random() * 55).toFixed(1);
@@ -23604,6 +23623,23 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 const originalUrl = tmdbSwapToOriginalSize(base);
                 img.dataset.posterFinalUrl = originalUrl; // remembered for the visibility retry below
                 setTimeout(() => { img.src = `${originalUrl}?retry=${Date.now()}`; }, 1200);
+                return;
+            }
+            if (retries === 2) {
+                // Both direct image.tmdb.org attempts failed -- covers transient
+                // TMDB blips, but not a network/DNS/extension-level block of the
+                // whole image.tmdb.org host (2026-08-29: reported from an AU
+                // network where every other Lounge request succeeded but posters
+                // never rendered -- API calls to api.themoviedb.org and the relay
+                // aren't blocked, only the image CDN subdomain). Route through the
+                // same image-proxy already used for backdrop thumbnails so the
+                // browser only ever talks to a whetudigital.co.nz host for the
+                // image bytes.
+                img.dataset.posterRetries = '3';
+                const proxyBase = tmdbSwapToOriginalSize(base);
+                img.dataset.posterFinalUrl = proxyBase;
+                const proxyUrl = `${getContentBase()}/image-proxy?url=${encodeURIComponent(proxyBase)}`;
+                setTimeout(() => { img.src = `${proxyUrl}&retry=${Date.now()}`; }, 900);
                 return;
             }
             const wrap = img.closest('.card-image');
