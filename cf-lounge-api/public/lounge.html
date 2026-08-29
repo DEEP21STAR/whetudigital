@@ -14525,7 +14525,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v184';
+        const LOUNGE_BUILD = 'lounge-shell-v185';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -23610,6 +23610,12 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         function tmdbSwapToOriginalSize(url) {
             return url.replace(/\/t\/p\/w\d+\//, '/t/p/original/');
         }
+        // Just the /xyz.jpg tail, for the proxy's path= form (2026-08-29) --
+        // never puts the literal "image.tmdb.org" string in the outgoing
+        // request to the proxy, unlike the legacy url= form.
+        function tmdbPathOf(url) {
+            return url.replace(/^https:\/\/image\.tmdb\.org\/t\/p\/\w+/, '');
+        }
         function handlePosterError(img) {
             const retries = parseInt(img.dataset.posterRetries || '0', 10);
             const base = img.dataset.posterBase || (img.dataset.posterBase = img.src.split('?')[0]);
@@ -23638,7 +23644,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 img.dataset.posterRetries = '3';
                 const proxyBase = tmdbSwapToOriginalSize(base);
                 img.dataset.posterFinalUrl = proxyBase;
-                const proxyUrl = `${getContentBase()}/image-proxy?url=${encodeURIComponent(proxyBase)}`;
+                const proxyUrl = `${getContentBase()}/image-proxy?path=${encodeURIComponent(tmdbPathOf(proxyBase))}&size=original`;
                 setTimeout(() => { img.src = `${proxyUrl}&retry=${Date.now()}`; }, 900);
                 return;
             }
@@ -24131,7 +24137,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         function extractDominantColor(backdropPath) {
             if (backdropPath in ambientColorCache) return Promise.resolve(ambientColorCache[backdropPath]);
             return new Promise((resolve) => {
-                const proxyUrl = `${getContentBase()}/image-proxy?url=${encodeURIComponent('https://image.tmdb.org/t/p/w92' + backdropPath)}`;
+                const proxyUrl = `${getContentBase()}/image-proxy?path=${encodeURIComponent(backdropPath)}&size=w92`;
                 const img = new Image();
                 img.crossOrigin = 'anonymous';
                 img.onload = () => {

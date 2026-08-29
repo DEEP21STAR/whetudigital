@@ -33,10 +33,23 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v184"
+      "cacheName": "lounge-shell-v185"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.34",
+      "versionCode": 32,
+      "web": "lounge-shell-v185",
+      "date": "2026-08-29",
+      "title": "Image-proxy no longer leaks \"image.tmdb.org\" as a literal string in the outgoing request",
+      "changes": [
+        "Deep still saw broken posters after v184 (posters + only-4-tiles-visible on an AU/Omarchy network). v184's proxy fallback (?url=<full tmdb URL>) still put the literal string image.tmdb.org in the query string sent to the proxy host -- a URL-keyword/DPI filter (common on stricter networks, not just simple DNS blocking) can match that substring regardless of which host it's actually addressed to, which would explain the fix not helping even though it worked in every test here.",
+        "Fix: image-proxy now accepts ?path=<poster path>&size=<size> and builds the TMDB URL server-side -- the client request to the proxy never contains \"tmdb\" anywhere. Legacy ?url= form kept working for backward compat.",
+        "Separately: the \"only 4 tiles visible per row\" report is very likely not a bug -- rails use overflow-x:auto and are natively touch/wheel-scrollable, 4 is just what fits before scrolling on that screen width. Flagged to Deep to confirm rather than assumed.",
+        "[TESTED, CONFIRMED] server-side: forced a poster failure via console, verified the new path=/size= request loads through the proxy correctly. [UNTESTED: Deep's actual AU/Omarchy device] -- still needs a real retest; if this ALSO doesn't fix it, the block is likely deeper than URL-keyword filtering (e.g. TLS SNI inspection or IP-range block on Cloudflare) and needs a different approach."
+      ]
+    },
     {
       "version": "0.1.34",
       "versionCode": 32,
