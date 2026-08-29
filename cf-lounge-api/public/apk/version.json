@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v185"
+      "cacheName": "lounge-shell-v186"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.34",
+      "versionCode": 32,
+      "web": "lounge-shell-v186",
+      "date": "2026-08-29",
+      "title": "Fresh device no longer defaults to playing on PREDATOR -- plays locally instead",
+      "changes": [
+        "Deep reported (from Australia, on Zenith) that playback kept routing to PREDATOR at home instead of playing on the device in front of him. Real cause found in getPlayTarget(): its fallback for \"no saved preference yet\" was a hardcoded 'mpv' (PC playback via the nexusplay: handler / Remote Mode relay), so any brand-new browser profile -- which has no localStorage history at all -- silently defaulted to trying to play on a PC it has no relationship to, with no indication why nothing happened locally.",
+        "Fix: the fallback is now context-aware -- 'mpv' is only chosen by default when it could actually work (on the PC itself, or Remote Mode already on); every other fresh device now defaults to 'browser' (This device), which needs no PC at all. An explicit past 'mpv' choice is still honoured when still viable, so nothing changes for Deep's normal PREDATOR-side usage.",
+        "[TESTED, CONFIRMED] code path traced end-to-end: getPlayTarget() -> chosenTarget -> dispatchPlayback(), confirmed 'browser' is what a fresh localStorage now resolves to off the PC. [UNTESTED: Deep's actual device] -- needs a real retest on Zenith."
+      ]
+    },
     {
       "version": "0.1.34",
       "versionCode": 32,
