@@ -7402,6 +7402,26 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             --tv-cols: 8;      /* poster columns — see note 2 */
             --tv-ch-cols: 6;   /* channel-logo columns (wider tiles) */
         }
+        /* ---- 0. TV performance: kill backdrop-filter site-wide -------
+           29 separate backdrop-filter:blur() surfaces across the app (nav,
+           cards, modals, the Liquid Glass panels' SVG refraction filter) --
+           real-time GPU blur/displacement, continuously, not just during
+           the intro. Weak TV SoCs (no discrete GPU) drop frames the whole
+           time any of these are on screen, which is the general "UI lag"
+           report (Deep, Hisense/Google TV Streamer, 2026-09-12) -- distinct
+           from the intro-specific ray/mote/particle fix already shipped
+           2026-08-24, which only covers the ~2s intro itself. Every
+           blurred surface already carries its own semi-transparent
+           background color underneath, so losing just the blur keeps them
+           readable (flat instead of frosted) -- same tradeoff already made
+           for the intro's particle canvas and ray/mote counts.
+           [UNTESTED: real Hisense/Google TV Streamer hardware] -- backdrop-
+           filter is a well-established GPU cost on weak SoCs, but this
+           hasn't been profiled on Deep's actual device; needs his retest. */
+        html.tv-mode * {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
         html.tv-mode body { padding-top: calc(58px + var(--tv-safe-y)); }
         html.tv-mode .topnav {
             top: var(--tv-safe-y);
@@ -11354,7 +11374,13 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
         function buildPopcornKernels(container) {
             const stage = container.querySelector('.pc-stage');
-            const html = Array.from({ length: 16 }, () => '<div class="pc-kernel"></div>').join('');
+            // Never had a tv-mode reduction (unlike the rays/motes/particle
+            // canvas) despite being 16 simultaneously GSAP-animated elements
+            // -- halved for the same weak-SoC reason. [UNTESTED: real
+            // hardware] needs Deep's retest (2026-09-12 general UI lag report).
+            const isTv = document.documentElement.classList.contains('tv-mode');
+            const KERNEL_COUNT = isTv ? 8 : 16;
+            const html = Array.from({ length: KERNEL_COUNT }, () => '<div class="pc-kernel"></div>').join('');
             stage.insertAdjacentHTML('beforeend', html);
             return Array.from(stage.querySelectorAll('.pc-kernel'));
         }
@@ -11373,12 +11399,16 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             // Kept non-zero (unlike the particle canvas) because these are the
             // Theatre Dolly-Through's signature moment, not ambient filler.
             const isTv = document.documentElement.classList.contains('tv-mode');
-            const RAY_COUNT = isTv ? 7 : 14;
+            // Halved once already (14->7, 18->9, 2026-08-24) and still
+            // reported laggy on the same Hisense/Google TV Streamer
+            // (2026-09-12) -- halved again rather than assumed fixed.
+            // [UNTESTED: real hardware] needs Deep's retest.
+            const RAY_COUNT = isTv ? 4 : 14;
             const rayHtml = Array.from({ length: RAY_COUNT }, (_, i) => {
                 const angle = (360 / RAY_COUNT) * i;
                 return `<div class="intro-ray" style="transform:translateX(-50%) rotate(${angle}deg);"></div>`;
             }).join('');
-            const MOTE_COUNT = isTv ? 9 : 18;
+            const MOTE_COUNT = isTv ? 5 : 18;
             const moteHtml = Array.from({ length: MOTE_COUNT }, () => {
                 const x = (20 + Math.random() * 60).toFixed(1);
                 const y = (15 + Math.random() * 55).toFixed(1);
@@ -14525,7 +14555,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v186';
+        const LOUNGE_BUILD = 'lounge-shell-v187';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';

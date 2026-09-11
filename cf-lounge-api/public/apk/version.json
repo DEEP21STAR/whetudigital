@@ -33,10 +33,23 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v186"
+      "cacheName": "lounge-shell-v187"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.34",
+      "versionCode": 32,
+      "web": "lounge-shell-v187",
+      "date": "2026-09-12",
+      "title": "TV performance pass -- backdrop-filter killed site-wide, intro assets cut further",
+      "changes": [
+        "Deep reported general UI lag + a laggy cinematic intro on his Hisense/Google TV Streamer, 13 days after the last web deploy. The 2026-08-24 intro fix (halved rays/motes, skipped the particle canvas) only covers the ~2s intro itself -- it never addressed the 29 separate backdrop-filter:blur() surfaces used throughout the whole app (nav, cards, modals, the Liquid Glass panels' SVG refraction filter), which run continuously on every screen, not just the intro. That's real-time GPU blur/displacement with zero tv-mode throttling until now -- the much more likely cause of lag outside the intro specifically.",
+        "Fix: html.tv-mode * { backdrop-filter: none !important } kills it site-wide in tv-mode (native APK only, activated via the TvNav bridge's UiModeManager/Leanback check -- never applies to a plain browser tab). Every blurred surface already has its own semi-transparent background color, so panels stay readable, just flat instead of frosted.",
+        "Also: intro ray/mote counts halved AGAIN (7->4, 9->5) since the 08-24 halving alone wasn't enough per this report, and the 16-kernel popcorn-burst animation -- never throttled for TV at all -- is now halved to 8 in tv-mode too.",
+        "[UNTESTED: Deep's actual Hisense/Google TV Streamer hardware] -- backdrop-filter is a well-established GPU cost on weak SoCs and this is the correct class of fix, but none of it has been profiled on the real device yet. Also depends on Deep using the native APK (just sent) rather than the TV's built-in browser -- tv-mode literally cannot activate outside the app."
+      ]
+    },
     {
       "version": "0.1.34",
       "versionCode": 32,
