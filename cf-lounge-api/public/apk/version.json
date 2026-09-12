@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v187"
+      "cacheName": "lounge-shell-v188"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.34",
+      "versionCode": 32,
+      "web": "lounge-shell-v188",
+      "date": "2026-09-12",
+      "title": "Manual 'Force TV Layout' override -- guaranteed fallback if auto-detection fails on your TV",
+      "changes": [
+        "Deep sent a real photo from his Hisense/Google TV Streamer: the topnav sat flush against the physical screen edge with zero overscan margin, and bottom content (genre pills) was cut off -- the tv-mode auto-detection (LoungeNative.isTelevision(), a 3-signal check: UiModeManager TELEVISION / FEATURE_LEANBACK / no-touchscreen) should have applied the overscan-safe layout automatically. Traced the whole chain end-to-end (Kotlin isTelevision() -> LoungeBridge -> confirmed compiled into the actual installed APK's classes.dex -> the early inline script that adds .tv-mode before first paint) and found no code-level bug -- root cause on this specific device/firmware not yet confirmed.",
+        "Rather than keep guessing blind without access to the real hardware, added Settings -> 'Force TV Layout' -- a manual toggle that applies .tv-mode/.dpad-mode independent of LoungeNative entirely, so it works regardless of what's actually wrong with auto-detection. Guaranteed fallback, not a diagnosis.",
+        "[UNTESTED: Deep's actual device] -- needs him to flip the toggle and confirm the overscan margin actually appears. If it does, auto-detection is the real bug (worth root-causing further); if it doesn't, the CSS/layout itself has a separate problem not yet found."
+      ]
+    },
     {
       "version": "0.1.34",
       "versionCode": 32,

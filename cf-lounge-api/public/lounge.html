@@ -7786,6 +7786,21 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
     <script>
         (function () {
             try {
+                // Manual override (2026-09-12): auto-detection via
+                // LoungeNative.isTelevision() is 3-signal-robust on paper
+                // (UiModeManager TELEVISION / FEATURE_LEANBACK / no
+                // touchscreen) but Deep's Hisense/Google TV Streamer still
+                // showed the topnav flush to the physical screen edge with
+                // zero overscan margin -- either that detection is failing
+                // on this specific device/firmware, or something else is
+                // interfering. Rather than keep guessing at the native side
+                // blind, a manual "Force TV Layout" toggle in Settings
+                // (setForceTvMode()) sets this flag and works independent of
+                // LoungeNative entirely -- applies before the native check
+                // below even runs, so it's the guaranteed-works fallback.
+                if (localStorage.getItem('nexus_force_tv_layout') === '1') {
+                    document.documentElement.classList.add('tv-mode', 'dpad-mode');
+                }
                 var n = window.LoungeNative;
                 if (!n) { return; }
                 var r = document.documentElement;
@@ -9194,6 +9209,26 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                         </div>
                     </div>
                     <div class="settings-window-body">
+                <!-- Force TV Layout -- 2026-09-12, Deep's Hisense/Google TV
+                     Streamer report: the app's auto-detection (LoungeNative.
+                     isTelevision(), 3-signal fallback) should have applied
+                     the overscan-safe TV layout automatically, but the topnav
+                     showed flush to the physical screen edge with no margin.
+                     Root cause not yet confirmed on the actual device -- this
+                     manual override works independent of auto-detection
+                     entirely (see the early inline script block up near the
+                     top of the page), so it's a
+                     guaranteed-works fallback while that gets diagnosed. -->
+                <div class="settings-row">
+                    <div class="settings-row-text">
+                        <h4>Force TV Layout</h4>
+                        <p>Turn this on if the app doesn't automatically switch to the TV layout (overscan-safe margins, larger focus rings, fewer poster columns) on your TV. Takes effect on next reload.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="forceTvModeToggle" onchange="toggleForceTvMode(this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
                 <!-- Data Usage -- 2026-08-19 extras batch. Real measurement via
                      the Resource Timing API on video segment/manifest fetches
                      that route through this browser -- not a guess. Honestly
@@ -14103,6 +14138,9 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
             document.getElementById('osubKeyInput').value = localStorage.getItem('nexus_osub_key') || '';
             renderSourceStatus();
 
+            const forceTvEl = document.getElementById('forceTvModeToggle');
+            if (forceTvEl) forceTvEl.checked = localStorage.getItem('nexus_force_tv_layout') === '1';
+
             const remoteOn = isRemoteMode();
             document.getElementById('remoteModeToggle').checked = remoteOn;
             document.body.classList.toggle('remote-mode', remoteOn);
@@ -14555,7 +14593,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v187';
+        const LOUNGE_BUILD = 'lounge-shell-v188';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -16062,6 +16100,18 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
                 el.classList.remove('show', 'actionable');
                 el.onclick = null;
             }, action ? 7000 : 2600);
+        }
+
+        function toggleForceTvMode(on) {
+            localStorage.setItem('nexus_force_tv_layout', on ? '1' : '0');
+            // Applied live too, not just on next reload as the Settings copy
+            // says -- the copy is cautious because a couple of tv-mode
+            // consumers (buildIntroRays/buildPopcornKernels' isTv checks)
+            // only run once, at intro build time, so a genuinely full effect
+            // still wants a reload; the layout/overscan CSS itself is a
+            // live class toggle and reacts immediately either way.
+            document.documentElement.classList.toggle('tv-mode', on);
+            document.documentElement.classList.toggle('dpad-mode', on);
         }
 
         function toggleRemoteMode(on) {
