@@ -14603,7 +14603,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v190';
+        const LOUNGE_BUILD = 'lounge-shell-v191';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
@@ -14688,12 +14688,20 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
 
         function currentBuildLabel() {
             const native = nativeBuildInfo();
+            // TV-mode/dpad-mode diagnostic suffix (2026-09-16) -- added after
+            // several rounds of TV-only bugs (stuck D-pad focus, intro not
+            // skipping) turned out to hinge entirely on whether
+            // LoungeNative.isTelevision() actually fired on Deep's specific
+            // Google TV Streamer, which had no way to confirm from a photo
+            // alone. This makes it a one-glance fact instead of a guess.
+            const html = document.documentElement;
+            const tvState = ` [tv:${html.classList.contains('tv-mode') ? 'Y' : 'N'} dpad:${html.classList.contains('dpad-mode') ? 'Y' : 'N'}]`;
             if (native) {
-                return native.versionCode != null
+                return (native.versionCode != null
                     ? `Lounge ${native.versionName} · build ${native.versionCode}`
-                    : `Lounge ${native.versionName}`;
+                    : `Lounge ${native.versionName}`) + tvState;
             }
-            return `web · ${LOUNGE_BUILD}`;
+            return `web · ${LOUNGE_BUILD}${tvState}`;
         }
 
         function paintUpdateUi(state) {

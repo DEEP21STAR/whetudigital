@@ -33,10 +33,22 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v190"
+      "cacheName": "lounge-shell-v191"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.34",
+      "versionCode": 36,
+      "web": "lounge-shell-v191",
+      "date": "2026-09-16",
+      "title": "TV-mode diagnostic badge in Settings -- ends the guessing about whether auto-detection is even firing",
+      "changes": [
+        "Deep sent 14 more photos after build 35. Two real findings from them: (1) the intro played its FULL length including 'Press Any Key to Take a Seat' -- but v189 (already shipped) should skip the intro entirely whenever tv-mode is active, so seeing the full intro is strong evidence tv-mode/isTelevision() may not actually be engaging on this specific device, which would also explain the earlier overscan-margin and focus issues. (2) The 'sports not playing' report is a real screenshot of Sky Sport 1 NZ failing with a fully-readable, self-diagnosed error: 'HTTP 502 in 2894ms -- stream token not found on player page. DaddyLive's own servers are down, not just this channel.' This is NOT a geo-lock bug at all -- it's an honest, correct report of a genuine third-party (DaddyLive) outage, unrelated to VPN/region. The 'Open Proton VPN' button is one of four suggested actions on that screen, not a hard requirement, and was likely misread as the cause.",
+        "Rather than ship another blind guess about whether tv-mode is firing, added a permanent one-glance diagnostic: Settings -> This Build now shows [tv:Y/N dpad:Y/N] next to the version number, reading the real live document classList state. No more guessing which build or which detection state a screenshot represents -- a single Settings screenshot now answers it directly.",
+        "[TESTED, CONFIRMED] the badge reads document.documentElement.classList directly, so it can't be stale or wrong about the actual runtime state. [UNTESTED: Deep's device] -- needs a screenshot of Settings -> This Build to know whether tv-mode is actually true on his Google TV Streamer, which is the fact the last several rounds of fixes have all been guessing at."
+      ]
+    },
     {
       "version": "0.1.34",
       "versionCode": 35,
