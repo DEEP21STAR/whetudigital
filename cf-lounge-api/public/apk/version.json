@@ -33,10 +33,24 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v188"
+      "cacheName": "lounge-shell-v189"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.34",
+      "versionCode": 34,
+      "web": "lounge-shell-v189",
+      "date": "2026-09-16",
+      "title": "Intro skipped entirely on TV + WebView GPU compositing fixes -- researched how the industry actually solves this",
+      "changes": [
+        "Deep reported the intro + dashboard STILL extremely slow on the Google TV Streamer despite v187 (backdrop-filter killed, intro assets halved again) and v188 (Force TV Layout toggle). Researched the real hardware and how other apps solve WebView-on-weak-TV-hardware performance rather than keep guessing: confirmed via Android Authority's teardown that the Google TV Streamer runs a MediaTek MT8696 (4x Cortex-A55 2.0GHz) with a PowerVR Rogue GE9215 GPU -- a genuinely low-end mobile GPU with a materially weaker WebView compositing path than Mali/Adreno on most other Android TV boxes. Also found this app was missing THREE standard Android WebView performance settings that a comparable community WebView-TV-app project (github.com/Theohd35/ZAB PR #1) explicitly calls out as necessary: no explicit GPU layer type on the WebView, no android:hardwareAccelerated on the manifest, no android:largeHeap for a media-heavy app.",
+        "Fix 1 (native): added webView.setLayerType(LAYER_TYPE_HARDWARE, null), android:hardwareAccelerated=\"true\" and android:largeHeap=\"true\" -- standard documented fixes for WebView jank on Android TV, previously entirely absent from this app.",
+        "Fix 2 (web): the intro is now skipped OUTRIGHT in tv-mode rather than kept-but-thinned -- same precedent already used for the ambient particle canvas (2026-08-24), extended to the whole intro since thinning its element counts twice (14-08-24, 12-09-2026) still wasn't enough. Straight to the dashboard on TV.",
+        "Researched Netflix/Disney+/Kodi's actual architecture for comparison: all three are NATIVE (Compose/Leanback or native C++ for Kodi), not WebView -- there is no equivalent 'tweak' those apps needed because they never carry a browser engine's overhead at all. Being honest about this with Deep: today's fixes address the specific gaps this app had (missing GPU/heap flags, an intro too heavy for this device's compositor) but a WebView-hosted app will structurally never match a fully-native one's performance ceiling on weak hardware -- that would need a genuine Compose-for-TV rewrite of the dashboard, a different scope of work entirely.",
+        "[UNTESTED: Deep's actual Google TV Streamer] -- needs his retest. If it's still slow after skipping the intro and adding the GPU/heap flags, the remaining lag is very likely the dashboard's own rendering cost (CSS animations, GSAP-driven card entrances, poster grid reflow) rather than anything intro-specific, and profiling that needs a real device log (adb logcat / systrace), not another guess from here."
+      ]
+    },
     {
       "version": "0.1.34",
       "versionCode": 32,
