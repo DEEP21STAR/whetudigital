@@ -33,10 +33,23 @@
       "apkNote": "arm64-v8a for Fire TV 4K/4K Max, Google TV Streamer, Shield and any 2019+ phone. armeabi-v7a only for older Fire TV Sticks and low-end boxes."
     },
     "web": {
-      "cacheName": "lounge-shell-v189"
+      "cacheName": "lounge-shell-v190"
     }
   },
   "changelog": [
+    {
+      "version": "0.1.34",
+      "versionCode": 35,
+      "web": "lounge-shell-v190",
+      "date": "2026-09-16",
+      "title": "Real root cause found for stuck D-pad focus: the stream picker was missing aria-modal",
+      "changes": [
+        "Deep sent 7 photos showing the actual failure live: the 'Play On' source picker opens, but the D-pad focus ring stays lit on the topnav (More/VPN pills) instead of moving into the picker -- confirmed across every photo, focus never once landed on a picker button. Traced this to the native TvNav.kt spatial navigator (already in the app, already TV-aware) and found its own code comments already document the exact defect: '.topnav' is position:fixed z-index 2200, '.stream-picker-modal' is z-index 1000, so the nav visually paints OVER the modal -- and TvNav's screen-owner detector has two paths to find an open modal: a reliable SEMANTIC check (element has role=dialog aria-modal=true) and a flakier GEOMETRIC fallback (hit-testing 5 viewport points). #stream-picker-modal -- the exact element in every screenshot -- had neither role nor aria-modal set, so it fell entirely to the flaky fallback, which is exactly what the photos show failing.",
+        "Real fix: added role=\"dialog\" aria-modal=\"true\" to #stream-picker-modal and #altSourceModal (the two source/stream pickers), plus #access-pin-gate, #remote-pin-gate and #restricted-pin-gate (the 3 PIN screens -- same gap, likely the cause of 'PIN entry lagging' too, all overlays audited against the app's 4 other modals that already had this set correctly). Confirmed each element's hide/show CSS (display:none or opacity:0 when closed) is compatible with TvNav's own laidOut() filter before adding the attribute, so this can't wrongly trap focus while the overlay is actually closed.",
+        "On 'sports not playing, geo-lock only applies to local channels': checked the code -- Sky Sport NZ channels ARE explicitly tagged country:'nz' on purpose, because Sky Sport genuinely is a New Zealand-only regional broadcaster that geo-restricts for real, same as free-to-air NZ channels. That part of the geo-check is correct behaviour, not a bug -- but I don't have a screenshot of the specific sports failure Deep hit (all 7 photos are Avatar Aang, a movie), so I can't yet tell if a DIFFERENT sports source (the worldwide iptv-org list, not Sky Sport NZ) is being wrongly caught by the same check. Needs a screenshot of the actual sports failure to fix precisely rather than guess.",
+        "[TESTED, CONFIRMED] the CSS/display-compatibility check for all 5 elements, and that the fix matches TvNav's own documented detection logic exactly. [UNTESTED: Deep's actual Google TV Streamer] -- needs his retest with a fresh install; the focus-trap symptom in every photo should be gone, but real D-pad behavior on his hardware hasn't been verified."
+      ]
+    },
     {
       "version": "0.1.34",
       "versionCode": 34,

@@ -7850,7 +7850,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
          ('69') is entered. Placed as the very first thing in <body> with its own
          synchronous script (not the big inline script further down) so it decides
          to show/hide itself before anything else paints -- no flash of real content. -->
-    <div id="access-pin-gate">
+    <div id="access-pin-gate" role="dialog" aria-modal="true" aria-label="Enter PIN">
         <div id="access-pin-box">
             <i class="fas fa-lock" id="access-pin-icon"></i>
             <h2>Lounge</h2>
@@ -7919,7 +7919,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
     <div class="c-glow" id="cGlow"></div>
 
     <!-- Remote Mode PIN Gate (mobile only -- gates entry into remote mode, not the PC session) -->
-    <div id="remote-pin-gate">
+    <div id="remote-pin-gate" role="dialog" aria-modal="true" aria-label="Remote Mode setup">
         <div id="remote-ip-box">
             <i class="fas fa-satellite-dish" id="remote-pin-icon"></i>
             <h2>Connect to Your PC</h2>
@@ -7954,7 +7954,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
     <!-- Restricted section PIN gate. Shares every CSS rule with the Remote Mode
          gate above (the selectors were extended rather than duplicated) so the
          two read as the same component, including the shake-on-wrong-PIN. -->
-    <div id="restricted-pin-gate">
+    <div id="restricted-pin-gate" role="dialog" aria-modal="true" aria-label="Restricted section PIN">
         <div id="restricted-pin-box">
             <i class="fas fa-lock" id="restricted-pin-icon"></i>
             <h2>Restricted</h2>
@@ -9755,7 +9755,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
     <!-- Alternate Source Modal (2026-08-17) -- one-off iframe embed player for
          titles Real-Debrid legally blocks (HTTP 451). Reuses the stream-picker
          modal's own overlay/card CSS rather than duplicating it. -->
-    <div class="stream-picker-modal" id="altSourceModal">
+    <div class="stream-picker-modal" id="altSourceModal" role="dialog" aria-modal="true" aria-labelledby="altSourceTitle">
         <div class="stream-picker-content" style="max-width:900px;">
             <div class="stream-picker-header">
                 <h3 id="altSourceTitle">Alternate Source</h3>
@@ -9800,7 +9800,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
     </svg>
 
     <!-- Stream Picker Modal -->
-    <div class="stream-picker-modal" id="stream-picker-modal" data-lenis-prevent>
+    <div class="stream-picker-modal" id="stream-picker-modal" data-lenis-prevent role="dialog" aria-modal="true" aria-labelledby="stream-picker-title">
         <div class="stream-picker-content">
             <div class="stream-picker-header">
                 <h3 id="stream-picker-title">Select a stream</h3>
@@ -14603,7 +14603,7 @@ body.kodi-mode .category-tab:hover, body.kodi-mode .category-tab.active {
         // to be known on a first paint, before any SW registration has settled,
         // and it must still be right when the SW is unavailable entirely --
         // file:// , a non-secure origin, or a TV WebView with SW disabled.)
-        const LOUNGE_BUILD = 'lounge-shell-v189';
+        const LOUNGE_BUILD = 'lounge-shell-v190';
 
         const UPDATE_MANIFEST_URL = '/apk/version.json';
         const SEEN_BUILD_KEY = 'lounge_seen_build';
