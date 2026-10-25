@@ -4,9 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Whetū Digital · Shop bespoke software</title>
+<meta name="theme-color" content="#05050e">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
 <meta name="description" content="Buy ready-made Whetū Digital templates, or commission a bespoke build. Personal dashboards, business apps, AI tools.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Geist:wght@300..700&family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.3/dist/lenis.min.js"></script>
@@ -14,10 +16,10 @@
 <style>
 *,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
 :root {
-  --bg: oklch(7% 0.03 280);
-  --primary: oklch(78% 0.22 280);
-  --primary-glow: oklch(78% 0.22 280 / 0.5);
-  --accent: oklch(82% 0.18 60);
+  --bg: oklch(7.5% 0.03 285);
+  --primary: oklch(68% 0.27 308);
+  --primary-glow: oklch(68% 0.27 308 / 0.5);
+  --accent: oklch(84% 0.165 205);
   --gold: oklch(84% 0.165 205);
   --text: oklch(96% 0.005 280);
   --text-dim: oklch(70% 0.02 280);
@@ -27,17 +29,17 @@
   --r: 16px;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
-body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6; }
+body { font-family: 'Geist', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6; }
 body::before { content:''; position:fixed; inset:0; z-index:-1; background:
-  radial-gradient(ellipse 800px 600px at 25% 15%, oklch(78% 0.22 280 / 0.22), transparent 60%),
-  radial-gradient(ellipse 600px 700px at 75% 35%, oklch(82% 0.18 60 / 0.16), transparent 60%); filter: blur(70px); }
+  radial-gradient(ellipse 900px 640px at 18% 8%, oklch(52% 0.26 305 / 0.45), transparent 60%),
+  radial-gradient(ellipse 700px 700px at 82% 30%, oklch(66% 0.17 220 / 0.32), transparent 60%); filter: blur(70px); }
 .topbar { position: sticky; top: 0; z-index: 100; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(180deg, rgba(0,0,0,0.8), rgba(0,0,0,0.4)); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); }
-.brand { font-family: 'Space Grotesk'; font-weight: 800; font-size: 1.3rem; letter-spacing: 0.05em; background: linear-gradient(135deg, var(--primary), var(--gold)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.brand { font-family: 'Bricolage Grotesque'; font-weight: 800; font-size: 1.3rem; letter-spacing: 0.05em; background: linear-gradient(135deg, var(--primary), var(--gold)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .topbar-links { display: flex; gap: 18px; align-items: center; }
-.cart { padding: 8px 18px; background: var(--primary); color: white; border-radius: 999px; font-family: 'Space Grotesk'; font-weight: 600; font-size: 0.88rem; cursor: pointer; box-shadow: 0 6px 18px var(--primary-glow); }
+.cart { padding: 8px 18px; background: var(--primary); color: white; border-radius: 999px; font-family: 'Bricolage Grotesque'; font-weight: 600; font-size: 0.88rem; cursor: pointer; box-shadow: 0 6px 18px var(--primary-glow); }
 .cart-badge { display: inline-block; background: white; color: var(--primary); padding: 1px 7px; border-radius: 10px; font-size: 0.7rem; margin-left: 6px; }
 .hero { padding: 80px 24px 60px; text-align: center; max-width: 900px; margin: 0 auto; }
-.hero h1 { font-family: 'Space Grotesk'; font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 800; line-height: 1.1; margin-bottom: 14px; }
+.hero h1 { font-family: 'Bricolage Grotesque'; font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 800; line-height: 1.1; margin-bottom: 14px; }
 .hero h1 .accent { background: linear-gradient(135deg, var(--primary), var(--gold)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .hero p { color: var(--text-dim); font-size: 1.1rem; }
 .filter-bar { max-width: 1200px; margin: 0 auto 28px; padding: 0 24px; display: flex; gap: 10px; flex-wrap: wrap; }
@@ -51,10 +53,10 @@ body::before { content:''; position:fixed; inset:0; z-index:-1; background:
 .prod:hover { transform: translateY(-4px); border-color: var(--primary); }
 .prod-img { aspect-ratio: 4/3; border-radius: 12px; background: linear-gradient(135deg, oklch(20% 0.05 280), oklch(10% 0.03 280)); display: flex; align-items: center; justify-content: center; font-size: 4rem; margin-bottom: 16px; box-shadow: inset 0 0 40px rgba(0,0,0,0.5); filter: drop-shadow(0 0 18px var(--primary-glow)); }
 .prod-cat { font-family: 'Geist Mono'; font-size: 0.65rem; letter-spacing: 2px; color: var(--primary); text-transform: uppercase; margin-bottom: 4px; }
-.prod-name { font-family: 'Space Grotesk'; font-weight: 700; font-size: 1.15rem; margin-bottom: 6px; }
+.prod-name { font-family: 'Bricolage Grotesque'; font-weight: 700; font-size: 1.15rem; margin-bottom: 6px; }
 .prod-desc { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 14px; min-height: 50px; }
 .prod-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--border); }
-.prod-price { font-family: 'Space Grotesk'; font-weight: 700; font-size: 1.3rem; }
+.prod-price { font-family: 'Bricolage Grotesque'; font-weight: 700; font-size: 1.3rem; }
 .prod-price .unit { font-size: 0.75rem; color: var(--text-dim); font-weight: 400; }
 .prod-add { padding: 8px 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-family: 'Geist Mono'; font-weight: 600; font-size: 0.72rem; cursor: pointer; letter-spacing: 1px; transition: transform 0.2s; }
 .prod-add:hover { transform: scale(1.05); }
@@ -63,36 +65,36 @@ body::before { content:''; position:fixed; inset:0; z-index:-1; background:
 .tier-badge.bespoke { background: var(--primary-glow); color: var(--text); border: 1px solid var(--primary); }
 .tier-badge.coming { background: oklch(78% 0.22 70 / 0.2); color: oklch(78% 0.22 70); border: 1px solid oklch(78% 0.22 70); }
 .section-title { max-width: 1200px; margin: 60px auto 24px; padding: 0 24px; }
-.section-title h2 { font-family: 'Space Grotesk'; font-weight: 700; font-size: 1.8rem; margin-bottom: 6px; }
+.section-title h2 { font-family: 'Bricolage Grotesque'; font-weight: 700; font-size: 1.8rem; margin-bottom: 6px; }
 .section-title p { color: var(--text-dim); font-size: 0.95rem; }
 .process { max-width: 1200px; margin: 0 auto; padding: 0 24px 60px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 @media(max-width:760px) { .process { grid-template-columns: 1fr 1fr; } }
 .step { padding: 24px; background: var(--glass); border: 1px solid var(--border); border-radius: 16px; text-align: center; position: relative; }
-.step-num { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: white; font-family: 'Space Grotesk'; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px var(--primary-glow); }
-.step-name { font-family: 'Space Grotesk'; font-weight: 600; margin-top: 10px; margin-bottom: 6px; }
+.step-num { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: white; font-family: 'Bricolage Grotesque'; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px var(--primary-glow); }
+.step-name { font-family: 'Bricolage Grotesque'; font-weight: 600; margin-top: 10px; margin-bottom: 6px; }
 .step-desc { font-size: 0.82rem; color: var(--text-dim); }
 footer { padding: 80px 24px 40px; border-top: 1px solid var(--border); margin-top: 60px; text-align: center; }
-.footer-logo { font-family: 'Space Grotesk'; font-weight: 800; font-size: clamp(2.4rem, 6vw, 4.5rem); letter-spacing: 0.04em; background: linear-gradient(90deg, var(--primary) 0%, var(--gold) 50%, var(--primary) 100%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 5s ease-in-out infinite; }
+.footer-logo { font-family: 'Bricolage Grotesque'; font-weight: 800; font-size: clamp(2.4rem, 6vw, 4.5rem); letter-spacing: 0.04em; background: linear-gradient(90deg, var(--primary) 0%, var(--gold) 50%, var(--primary) 100%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 5s ease-in-out infinite; }
 @keyframes shimmer { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 
 /* Cart drawer */
 .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 380px; max-width: 92vw; background: linear-gradient(180deg, oklch(11% 0.03 280), oklch(8% 0.02 280)); border-left: 1px solid var(--primary); transform: translateX(110%); transition: transform 0.4s var(--ease); z-index: 200; padding: 24px; display: flex; flex-direction: column; box-shadow: -20px 0 60px rgba(0,0,0,0.6); }
 .drawer.open { transform: translateX(0); }
 .drawer-close { position: absolute; top: 18px; right: 18px; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text); cursor: pointer; }
-.drawer h3 { font-family: 'Space Grotesk'; font-weight: 700; margin-bottom: 18px; }
+.drawer h3 { font-family: 'Bricolage Grotesque'; font-weight: 700; margin-bottom: 18px; }
 .cart-list { flex: 1; overflow-y: auto; }
 .cart-item { padding: 14px 0; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1fr auto; gap: 10px; }
-.cart-item-name { font-family: 'Space Grotesk'; font-weight: 600; font-size: 0.92rem; }
+.cart-item-name { font-family: 'Bricolage Grotesque'; font-weight: 600; font-size: 0.92rem; }
 .cart-item-price { font-family: 'Geist Mono'; color: var(--primary); }
-.cart-total { padding: 18px 0; border-top: 1px solid var(--border); display: flex; justify-content: space-between; font-family: 'Space Grotesk'; font-weight: 700; font-size: 1.15rem; }
-.checkout { padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-family: 'Space Grotesk'; font-weight: 600; cursor: pointer; box-shadow: 0 12px 32px var(--primary-glow); margin-top: 14px; }
+.cart-total { padding: 18px 0; border-top: 1px solid var(--border); display: flex; justify-content: space-between; font-family: 'Bricolage Grotesque'; font-weight: 700; font-size: 1.15rem; }
+.checkout { padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-family: 'Bricolage Grotesque'; font-weight: 600; cursor: pointer; box-shadow: 0 12px 32px var(--primary-glow); margin-top: 14px; }
 </style>
 </head>
 <body>
 
 <header class="topbar">
   <a href="./index.html" style="text-decoration:none"><div class="brand">WHETŪ DIGITAL</div></a>
-  <div class="topbar-links">
+  <div class="topbar-links"><a href="./index.html" style="font-family:'Geist Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);text-decoration:none">&larr; Back to home</a>
     <button class="cart" id="cartBtn">🛒 Cart <span class="cart-badge" id="cartBadge">0</span></button>
   </div>
 </header>

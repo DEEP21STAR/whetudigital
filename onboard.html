@@ -4,61 +4,71 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Client Onboarding — Whetū Digital</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<meta name="description" content="Tell Whetū Digital about your project in about 3 minutes. We reply within 24 hours with a clear proposal in NZD.">
+<meta name="theme-color" content="#05050e">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Geist:wght@300..700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:oklch(8% 0 0);--bg2:oklch(11% 0.01 270);--bg3:oklch(14% 0.015 270);--border:oklch(22% 0.02 270);--text:oklch(92% 0 0);--sub:oklch(65% 0 0);--pink:oklch(78% 0.18 320);--violet:oklch(65% 0.28 290);--cyan:oklch(72% 0.18 200);--radius:14px;--gap:20px}
+:root{--bg:oklch(7.5% .03 285);--bg2:oklch(11.5% .035 285);--bg3:oklch(15.5% .04 285);--border:oklch(100% 0 0/.12);--text:oklch(97.5% .008 285);--sub:oklch(74% .02 285);--pink:oklch(68% .27 308);--violet:oklch(68% .27 308);--cyan:oklch(84% .165 205);--grad:linear-gradient(100deg,oklch(84% .165 205),oklch(76% .2 262) 45%,oklch(68% .27 308));--radius:16px;--gap:18px}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;padding:40px 20px}
-.container{max-width:680px;margin:0 auto}
-.brand{display:flex;align-items:center;gap:12px;margin-bottom:40px}
-.brand-star{font-size:28px}
-.brand-name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;background:linear-gradient(135deg,var(--pink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.brand-tag{font-size:11px;color:var(--sub);letter-spacing:.06em;text-transform:uppercase}
-h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(24px,5vw,36px);font-weight:700;margin-bottom:8px;line-height:1.2}
-.subtitle{color:var(--sub);font-size:15px;margin-bottom:36px;line-height:1.6}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:var(--gap)}
-.card-title{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--pink);margin-bottom:18px}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font-family:'Geist',system-ui,sans-serif;min-height:100vh;padding:40px 20px 80px;position:relative;overflow-x:clip;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;background:radial-gradient(circle 46vmax at 8% 0%,oklch(52% .26 305/.55),transparent 62%),radial-gradient(circle 40vmax at 100% 18%,oklch(66% .17 220/.4),transparent 62%),radial-gradient(circle 36vmax at 40% 105%,oklch(60% .24 330/.3),transparent 60%)}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:8px}
+.container{max-width:700px;margin:0 auto}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:44px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
+.brand svg{width:30px;height:30px;flex:none}
+.brand-name{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;letter-spacing:.1em;text-transform:uppercase}
+.brand-name em{font-style:normal;color:var(--cyan)}
+.brand-tag{font-family:'Geist Mono',ui-monospace,monospace;font-size:10.5px;color:var(--sub);letter-spacing:.18em;text-transform:uppercase}
+.back{font-family:'Geist Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--sub);text-decoration:none;border:1px solid var(--border);border-radius:99px;padding:9px 16px;transition:all .25s}
+.back:hover{color:var(--cyan);border-color:var(--cyan)}
+h1{font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(30px,6vw,52px);font-weight:800;margin-bottom:12px;line-height:1.02;letter-spacing:-.03em;font-variation-settings:"opsz" 48,"wdth" 100}
+h1 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.subtitle{color:var(--sub);font-size:16px;margin-bottom:34px;line-height:1.6;max-width:52ch}
+.card{background:linear-gradient(170deg,oklch(100% 0 0/.055),oklch(100% 0 0/.015));border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:var(--gap)}
+.card-title{font-family:'Geist Mono',ui-monospace,monospace;font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.2em;color:var(--cyan);margin-bottom:20px}
 .field{margin-bottom:18px}
-.field label{display:block;font-size:13px;font-weight:500;color:var(--sub);margin-bottom:6px;letter-spacing:.02em}
-.field input,.field textarea,.field select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
-.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--pink)}
+.field label{display:block;font-size:13px;font-weight:500;color:var(--sub);margin-bottom:7px;letter-spacing:.02em}
+.field input,.field textarea,.field select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:13px 15px;color:var(--text);font-family:'Geist',sans-serif;font-size:15px;outline:none;transition:border-color .25s,box-shadow .25s}
+.field input::placeholder,.field textarea::placeholder{color:oklch(55% .02 285)}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px oklch(84% .165 205/.18)}
 .field select{cursor:pointer}
 .field select option{background:var(--bg3)}
-.field textarea{resize:vertical;min-height:100px}
+.field textarea{resize:vertical;min-height:104px}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:500px){.field-row{grid-template-columns:1fr}}
-.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-@media(max-width:400px){.check-grid{grid-template-columns:1fr}}
-.check-item{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;cursor:pointer;transition:border-color .2s}
-.check-item:hover{border-color:var(--border)}
-.check-item input[type=checkbox]{accent-color:var(--pink);width:15px;height:15px;cursor:pointer}
-.check-item.checked{border-color:var(--pink);background:oklch(14% 0.02 320)}
-.check-item span{font-size:13px}
-.budget-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.budget-btn{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;cursor:pointer;font-size:13px;font-weight:500;transition:all .2s}
-.budget-btn:hover,.budget-btn.active{border-color:var(--violet);background:oklch(14% 0.02 290);color:var(--violet)}
-.timeline-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.timeline-btn{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 8px;text-align:center;cursor:pointer;font-size:12px;font-weight:500;transition:all .2s;line-height:1.4}
-.timeline-btn:hover,.timeline-btn.active{border-color:var(--cyan);background:oklch(14% 0.02 200);color:var(--cyan)}
-.submit-btn{width:100%;background:linear-gradient(135deg,var(--pink),var(--violet));border:none;border-radius:var(--radius);padding:16px;color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;cursor:pointer;letter-spacing:.02em;transition:opacity .2s;margin-top:8px}
-.submit-btn:hover{opacity:.85}
-.success-box{display:none;background:oklch(14% 0.03 145);border:1px solid oklch(55% 0.2 145);border-radius:var(--radius);padding:24px;text-align:center;margin-top:20px}
-.success-box h3{font-family:'Space Grotesk',sans-serif;color:oklch(72% 0.2 145);margin-bottom:8px}
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:420px){.check-grid{grid-template-columns:1fr}}
+.check-item{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px 14px;cursor:pointer;transition:border-color .25s,background .25s,transform .3s}
+.check-item:hover{border-color:oklch(84% .165 205/.5);transform:translateY(-2px)}
+.check-item input[type=checkbox]{accent-color:var(--cyan);width:16px;height:16px;cursor:pointer}
+.check-item.checked{border-color:var(--cyan);background:oklch(84% .165 205/.1);box-shadow:0 0 24px oklch(84% .165 205/.12)}
+.check-item span{font-size:14px}
+.budget-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.budget-btn{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:13px 8px;text-align:center;cursor:pointer;font-size:14px;font-weight:500;transition:all .25s}
+.budget-btn:hover,.budget-btn.active{border-color:var(--violet);background:oklch(68% .27 308/.14);color:#fff;box-shadow:0 0 24px oklch(68% .27 308/.2)}
+.timeline-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.timeline-btn{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:13px 10px;text-align:center;cursor:pointer;font-size:13.5px;font-weight:500;transition:all .25s;line-height:1.4}
+.timeline-btn:hover,.timeline-btn.active{border-color:var(--cyan);background:oklch(84% .165 205/.1);color:#fff;box-shadow:0 0 24px oklch(84% .165 205/.16)}
+.submit-btn{width:100%;background:var(--grad);border:none;border-radius:99px;padding:17px;color:oklch(12% .05 285);font-family:'Geist',sans-serif;font-weight:600;font-size:16px;cursor:pointer;letter-spacing:.01em;transition:transform .35s,box-shadow .35s;margin-top:8px;box-shadow:0 0 0 1px oklch(100% 0 0/.25) inset,0 10px 40px oklch(68% .27 308/.38)}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 0 0 1px oklch(100% 0 0/.4) inset,0 14px 54px oklch(68% .27 308/.55)}
+.success-box{display:none;background:oklch(14% .04 160/.8);border:1px solid oklch(88% .21 160/.45);border-radius:var(--radius);padding:24px;text-align:center;margin-top:20px}
+.success-box h3{font-family:'Bricolage Grotesque',sans-serif;color:oklch(88% .21 160);margin-bottom:8px}
 .success-box p{font-size:14px;color:var(--sub)}
-.note{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.5}
+.note{font-size:12.5px;color:var(--sub);margin-top:6px;line-height:1.5}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
 </style>
 </head>
 <body>
 <div class="container">
-  <div class="brand">
-    <div class="brand-star">✦</div>
-    <div>
-      <div class="brand-name">Whetū Digital</div>
-      <div class="brand-tag">Client Onboarding</div>
-    </div>
+  <div class="top">
+    <a class="brand" href="./index.html" aria-label="Whetū Digital home"><svg viewBox="0 0 220 220" aria-hidden="true"><polygon fill="oklch(57% .12 225)" points="110,16 87,83 110,110"/><polygon fill="oklch(87% .16 205)" points="110,16 110,110 133,83"/><polygon fill="oklch(51% .27 292)" points="204,110 133,83 110,110"/><polygon fill="oklch(38% .24 296)" points="204,110 110,110 133,137"/><polygon fill="oklch(64% .3 316)" points="110,204 133,137 110,110"/><polygon fill="oklch(50% .27 310)" points="110,204 110,110 87,137"/><polygon fill="oklch(49% .11 240)" points="16,110 87,137 110,110"/><polygon fill="oklch(73% .15 225)" points="16,110 110,110 87,83"/></svg><span><span class="brand-name">Whetū <em>Digital</em></span><br><span class="brand-tag">Client Onboarding</span></span></a>
+    <a class="back" href="./index.html">← Back to home</a>
   </div>
 
-  <h1>Let's build something great together</h1>
+  <h1>Let's build something <em>great together</em></h1>
   <p class="subtitle">Fill this in and I'll prepare a proposal tailored to your project. Takes about 3 minutes.</p>
 
   <form id="onboardForm">
@@ -66,28 +76,28 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(24px,5vw,36px);font-we
       <div class="card-title">About you</div>
       <div class="field-row">
         <div class="field">
-          <label>First name *</label>
+          <label for="firstName">First name *</label>
           <input type="text" id="firstName" placeholder="Jane" required>
         </div>
         <div class="field">
-          <label>Last name *</label>
+          <label for="lastName">Last name *</label>
           <input type="text" id="lastName" placeholder="Smith" required>
         </div>
       </div>
       <div class="field">
-        <label>Email address *</label>
+        <label for="email">Email address *</label>
         <input type="email" id="email" placeholder="jane@yourcompany.co.nz" required>
       </div>
       <div class="field">
-        <label>Phone (optional)</label>
+        <label for="phone">Phone (optional)</label>
         <input type="tel" id="phone" placeholder="+64 21 000 0000">
       </div>
       <div class="field">
-        <label>Business / Organisation name</label>
+        <label for="business">Business / Organisation name</label>
         <input type="text" id="business" placeholder="Smith & Co Ltd">
       </div>
       <div class="field">
-        <label>Industry</label>
+        <label for="industry">Industry</label>
         <select id="industry">
           <option value="">Select your industry…</option>
           <option>Property / Real Estate</option>
@@ -121,12 +131,12 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(24px,5vw,36px);font-we
     <div class="card">
       <div class="card-title">Budget range (NZD)</div>
       <div class="budget-grid" id="budgetGrid">
-        <div class="budget-btn" data-v="Under $500">Under $500</div>
-        <div class="budget-btn" data-v="$500–$1,500">$500–$1,500</div>
-        <div class="budget-btn" data-v="$1,500–$3,000">$1,500–$3k</div>
-        <div class="budget-btn" data-v="$3,000–$6,000">$3k–$6k</div>
-        <div class="budget-btn" data-v="$6,000–$12,000">$6k–$12k</div>
-        <div class="budget-btn" data-v="$12,000+">$12k+</div>
+        <div class="budget-btn" role="button" tabindex="0" data-v="Under $500">Under $500</div>
+        <div class="budget-btn" role="button" tabindex="0" data-v="$500–$1,500">$500–$1,500</div>
+        <div class="budget-btn" role="button" tabindex="0" data-v="$1,500–$3,000">$1,500–$3k</div>
+        <div class="budget-btn" role="button" tabindex="0" data-v="$3,000–$6,000">$3k–$6k</div>
+        <div class="budget-btn" role="button" tabindex="0" data-v="$6,000–$12,000">$6k–$12k</div>
+        <div class="budget-btn" role="button" tabindex="0" data-v="$12,000+">$12k+</div>
       </div>
       <input type="hidden" id="budgetValue">
     </div>
@@ -134,10 +144,10 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(24px,5vw,36px);font-we
     <div class="card">
       <div class="card-title">Timeline</div>
       <div class="timeline-grid" id="timelineGrid">
-        <div class="timeline-btn" data-v="ASAP (1–2 weeks)">🔥 ASAP<br><small>1–2 weeks</small></div>
-        <div class="timeline-btn" data-v="1 month">📅 1 month</div>
-        <div class="timeline-btn" data-v="2–3 months">🗓 2–3 months</div>
-        <div class="timeline-btn" data-v="Flexible">🌿 Flexible</div>
+        <div class="timeline-btn" role="button" tabindex="0" data-v="ASAP (1–2 weeks)">🔥 ASAP<br><small>1–2 weeks</small></div>
+        <div class="timeline-btn" role="button" tabindex="0" data-v="1 month">📅 1 month</div>
+        <div class="timeline-btn" role="button" tabindex="0" data-v="2–3 months">🗓 2–3 months</div>
+        <div class="timeline-btn" role="button" tabindex="0" data-v="Flexible">🌿 Flexible</div>
       </div>
       <input type="hidden" id="timelineValue">
     </div>
@@ -145,15 +155,15 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(24px,5vw,36px);font-we
     <div class="card">
       <div class="card-title">Tell me about your project</div>
       <div class="field">
-        <label>What problem are you trying to solve? *</label>
+        <label for="projectDesc">What problem are you trying to solve? *</label>
         <textarea id="projectDesc" placeholder="e.g. I need a booking system for my personal training business — clients book sessions, I see my calendar, they get email reminders." required></textarea>
       </div>
       <div class="field">
-        <label>Any existing website or inspiration links?</label>
+        <label for="inspiration">Any existing website or inspiration links?</label>
         <input type="text" id="inspiration" placeholder="https://... or describe your style">
       </div>
       <div class="field">
-        <label>Anything else I should know?</label>
+        <label for="extra">Anything else I should know?</label>
         <textarea id="extra" style="min-height:72px" placeholder="Deadlines, specific integrations, access needs, team size…"></textarea>
       </div>
     </div>
@@ -193,6 +203,8 @@ document.querySelectorAll('.timeline-btn').forEach(btn => {
     document.getElementById('timelineValue').value = btn.dataset.v;
   });
 });
+
+document.querySelectorAll('.budget-btn,.timeline-btn').forEach(b => b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); b.click(); } }));
 
 document.getElementById('onboardForm').addEventListener('submit', e => {
   e.preventDefault();

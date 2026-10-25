@@ -31,7 +31,14 @@ doc=f'''<!DOCTYPE html>
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://whetudigital.co.nz/">
 <meta property="og:locale" content="en_NZ">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://whetudigital.co.nz/assets/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Whetū Digital — Bespoke software, built properly. A faceted cyan and violet star on a dark cosmic background.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Whetū Digital — Bespoke software, built properly">
+<meta name="twitter:description" content="Websites, dashboards, portals and automations for NZ businesses. Fixed prices. You own the code.">
+<meta name="twitter:image" content="https://whetudigital.co.nz/assets/og.jpg">
 <link rel="icon" href="./favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="./manifest.json">
 <script type="application/ld+json">{ld}</script>
