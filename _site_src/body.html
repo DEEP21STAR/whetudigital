@@ -1,0 +1,327 @@
+<a class="skip" href="#main">Skip to content</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <linearGradient id="gArt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="oklch(84% .165 205)"/><stop offset="1" stop-color="oklch(68% .27 308)"/></linearGradient>
+</defs></svg>
+
+<div class="aurora" aria-hidden="true"><i class="a1"></i><i class="a2"></i><i class="a3"></i><i class="a4"></i></div>
+<canvas id="stars" aria-hidden="true"></canvas>
+<div class="vig" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="prog" aria-hidden="true"></div>
+<div class="cd" id="cd" aria-hidden="true"></div><div class="cr" id="cr" aria-hidden="true"></div>
+
+<!-- ═══ INTRO — the swinging Whetū star ═══ -->
+<div id="intro" role="presentation" aria-hidden="true">
+  <canvas class="i-stars" id="iStars"></canvas>
+  <div class="i-center">
+    <div class="i-logo" id="iLogo">
+      <div class="glow" id="iGlow"></div>
+      <div class="i-ring" id="iRing"></div>
+      <div class="swing" id="iSwing">{{STAR_I}}</div>
+    </div>
+    <div class="i-word" id="iWord" aria-hidden="true"></div>
+    <div class="i-tag" id="iTag"></div>
+    <div class="i-meta" id="iMeta">Aotearoa · New Zealand</div>
+  </div>
+  <button class="i-enter" id="iEnter" type="button">Enter</button>
+  <button class="i-skip" id="iSkip" type="button">Skip intro →</button>
+  <div class="i-bar"><i id="iBarFill"></i></div>
+</div>
+
+<!-- ═══ NAV ═══ -->
+<header class="nav" id="nav">
+  <a class="brand" href="#top" aria-label="Whetū Digital — back to top"><span class="bs">{{STAR_NAV}}</span><span>Whetū <em>Digital</em></span></a>
+  <nav class="links" aria-label="Primary">
+    <a class="l" href="#services">Services</a>
+    <a class="l" href="#work">Work</a>
+    <a class="l" href="#estimate">Estimate</a>
+    <a class="l" href="#process">Process</a>
+    <a class="l" href="#pricing">Pricing</a>
+    <button class="kbd" type="button" data-pal aria-label="Open command menu (Control K)"><span>Ctrl</span><span>K</span></button>
+    <button class="btn btn-g btn-s menu-b" type="button" data-pal>Menu</button>
+    <a class="btn btn-p btn-s magnetic" href="#estimate"><span class="cta-l">Start a project</span><span class="cta-s">Start</span> <span class="ar" aria-hidden="true">→</span></a>
+  </nav>
+</header>
+
+<main id="main">
+<!-- ═══ HERO ═══ -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <div class="copy">
+      <span class="chip"><i class="dot" aria-hidden="true"></i><span>Auckland <b id="nzTime" style="font-weight:500;color:var(--text)">—</b> · replies within 24h</span></span>
+      <h1 class="big"><span class="ln"><span>Bespoke software,</span></span><span class="ln"><span>built <em class="grad">properly.</em></span></span></h1>
+      <p class="lede">Websites, dashboards, portals and automations for New Zealand businesses. Fixed prices. You own every line of code. Live in weeks, not quarters.</p>
+      <div class="acts">
+        <a class="btn btn-p magnetic" href="#estimate">Get your price <span class="ar" aria-hidden="true">→</span></a>
+        <a class="btn btn-g magnetic" href="#work">See what we've built</a>
+      </div>
+      <div class="stats">
+        <div class="stat"><b data-count="799" data-pre="$">$799</b><span>Fixed from · NZD incl. GST</span></div>
+        <div class="stat"><b>5–7 days</b><span>First launch (Starter)</span></div>
+        <div class="stat"><b>100%</b><span>Yours — code, no lock-in</span></div>
+      </div>
+    </div>
+    <div class="hero-star" id="heroStar" aria-label="The Whetū star — our logo">
+      <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+      <div class="glow"></div>
+      <div class="stage" id="heroStage">
+        <div class="swing">{{STAR_HERO}}</div>
+        <div class="star-orbit" aria-hidden="true"><i></i><i></i><i></i></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="marq" aria-hidden="true"><div class="tr">
+  <span>Fixed prices</span><span>You own the code</span><span>Replies in 24 hours</span><span>NZD incl. GST</span><span>Built in Aotearoa</span><span>No lock-in</span><span>One star at a time</span>
+  <span>Fixed prices</span><span>You own the code</span><span>Replies in 24 hours</span><span>NZD incl. GST</span><span>Built in Aotearoa</span><span>No lock-in</span><span>One star at a time</span>
+</div></div>
+
+<!-- ═══ SERVICES ═══ -->
+<section id="services">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">What we build</span>
+      <h2 class="t">Seven things Kiwi businesses ask for. <em>Done properly.</em></h2>
+      <p class="lede">Each one is scoped, priced and shipped by the person who answers your email — not handed down a chain of account managers.</p>
+    </div>
+    <div class="bento">
+      <article class="tile t-web rv">
+        <span class="tag">Starter +</span>
+        <svg class="art" viewBox="0 0 300 160" fill="none" aria-hidden="true"><rect class="draw" style="--len:760" x="14" y="14" width="272" height="132" rx="10" stroke="url(#gArt)" stroke-width="1.6"/><path class="draw" style="--len:272" d="M14 40h272" stroke="url(#gArt)" stroke-width="1.2" opacity=".6"/><circle cx="30" cy="27" r="3" fill="oklch(84% .165 205)"/><circle cx="43" cy="27" r="3" fill="oklch(68% .27 308)"/><rect class="draw" style="--len:230" x="32" y="58" width="120" height="14" rx="3" stroke="url(#gArt)" stroke-width="1.4"/><path class="draw" style="--len:200" d="M32 88h150M32 102h110M32 116h130" stroke="url(#gArt)" stroke-width="1.2" opacity=".6"/><rect class="draw" style="--len:300" x="190" y="56" width="80" height="70" rx="6" stroke="url(#gArt)" stroke-width="1.4"/></svg>
+        <div><h3>Websites &amp; landing pages</h3><p>Fast, mobile-first and yours to host anywhere. One page or eight.</p></div>
+      </article>
+      <article class="tile t-dash rv" style="--d:.08s">
+        <span class="tag">Professional +</span>
+        <svg class="art" viewBox="0 0 400 240" fill="none" aria-hidden="true">
+          <g stroke="oklch(100% 0 0/.12)" stroke-width="1"><path d="M20 200h360M20 150h360M20 100h360M20 50h360"/></g>
+          <g fill="url(#gArt)"><rect class="bar" style="--i:0" x="40" y="130" width="28" height="70" rx="5" opacity=".9"/><rect class="bar" style="--i:1" x="86" y="100" width="28" height="100" rx="5" opacity=".9"/><rect class="bar" style="--i:2" x="132" y="116" width="28" height="84" rx="5" opacity=".9"/><rect class="bar" style="--i:3" x="178" y="70" width="28" height="130" rx="5" opacity=".9"/><rect class="bar" style="--i:4" x="224" y="88" width="28" height="112" rx="5" opacity=".9"/><rect class="bar" style="--i:5" x="270" y="46" width="28" height="154" rx="5"/><rect class="bar" style="--i:6" x="316" y="64" width="28" height="136" rx="5" opacity=".9"/></g>
+          <path class="draw" style="--len:520" d="M40 120C90 90 120 130 170 84S250 96 290 40S340 60 360 36" stroke="oklch(88% .21 160)" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="360" cy="36" r="5" fill="oklch(88% .21 160)"><animate attributeName="r" values="5;9;5" dur="2.2s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;.4;1" dur="2.2s" repeatCount="indefinite"/></circle>
+        </svg>
+        <div><h3>Business dashboards</h3><p>The whole business on one screen — sales, jobs, cash, whatever you check every morning. Built around your numbers, not a template.</p></div>
+      </article>
+      <article class="tile rv" style="--d:.12s">
+        <span class="tag">Professional +</span>
+        <svg class="art" viewBox="0 0 160 120" fill="none" aria-hidden="true"><rect class="draw" style="--len:420" x="10" y="14" width="140" height="96" rx="9" stroke="url(#gArt)" stroke-width="1.5"/><path class="draw" style="--len:140" d="M10 40h140" stroke="url(#gArt)" stroke-width="1.2"/><g fill="oklch(100% 0 0/.25)"><rect x="24" y="54" width="14" height="10" rx="2"/><rect x="48" y="54" width="14" height="10" rx="2"/><rect x="72" y="54" width="14" height="10" rx="2"/><rect x="96" y="54" width="14" height="10" rx="2"/><rect x="24" y="74" width="14" height="10" rx="2"/><rect x="72" y="74" width="14" height="10" rx="2"/></g><rect x="48" y="74" width="14" height="10" rx="2" fill="oklch(68% .27 308)"><animate attributeName="opacity" values="1;.35;1" dur="2s" repeatCount="indefinite"/></rect></svg>
+        <div><h3>Booking &amp; scheduling</h3><p>Customers pick a time. You get a clean diary.</p></div>
+      </article>
+      <article class="tile rv" style="--d:.16s">
+        <span class="tag">Professional +</span>
+        <svg class="art" viewBox="0 0 160 120" fill="none" aria-hidden="true"><circle class="draw" style="--len:140" cx="80" cy="42" r="22" stroke="url(#gArt)" stroke-width="1.6"/><path class="draw" style="--len:260" d="M30 108c0-24 22-38 50-38s50 14 50 38" stroke="url(#gArt)" stroke-width="1.6"/><rect x="66" y="30" width="28" height="22" rx="5" fill="oklch(100% 0 0/.08)" stroke="oklch(84% .165 205)" stroke-width="1.2"/><path d="M72 30v-6a8 8 0 0116 0v6" stroke="oklch(84% .165 205)" stroke-width="1.4"/></svg>
+        <div><h3>Client portals</h3><p>A private place for your clients to see, sign and pay.</p></div>
+      </article>
+      <article class="tile rv" style="--d:.2s">
+        <span class="tag">Professional +</span>
+        <svg class="art" viewBox="0 0 160 120" fill="none" aria-hidden="true"><rect class="draw" style="--len:300" x="14" y="16" width="132" height="22" rx="6" stroke="url(#gArt)" stroke-width="1.4"/><rect class="draw" style="--len:300" x="14" y="50" width="132" height="22" rx="6" stroke="url(#gArt)" stroke-width="1.4"/><rect x="14" y="84" width="64" height="22" rx="11" fill="url(#gArt)"/><path d="M118 61l6 6 12-14" stroke="oklch(88% .21 160)" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>
+        <div><h3>Forms &amp; CRM</h3><p>Leads land somewhere useful, not in an inbox graveyard.</p></div>
+      </article>
+      <article class="tile rv" style="--d:.24s">
+        <span class="tag">Enterprise</span>
+        <svg class="art" viewBox="0 0 160 120" fill="none" aria-hidden="true"><g stroke="url(#gArt)" stroke-width="1.6" stroke-linecap="round"><circle class="draw" style="--len:120" cx="36" cy="60" r="16"/><circle class="draw" style="--len:120" cx="124" cy="30" r="14"/><circle class="draw" style="--len:120" cx="124" cy="92" r="14"/><path class="draw" style="--len:120" d="M52 56L110 34M52 64l58 24"/></g><circle r="3.5" fill="oklch(88% .21 160)"><animateMotion dur="2.4s" repeatCount="indefinite" path="M52 56L110 34"/></circle><circle r="3.5" fill="oklch(84% .165 205)"><animateMotion dur="2.9s" repeatCount="indefinite" path="M52 64l58 24"/></circle></svg>
+        <div><h3>Automations</h3><p>Scripts and workflows that give you your evenings back.</p></div>
+      </article>
+      <article class="tile t-eco rv" style="--d:.28s">
+        <span class="tag">Enterprise</span>
+        <svg class="art" viewBox="0 0 300 130" fill="none" aria-hidden="true"><path class="draw" style="--len:400" d="M80 46h140l-12 62H92z" stroke="url(#gArt)" stroke-width="1.8" stroke-linejoin="round"/><path class="draw" style="--len:200" d="M110 46c0-18 12-28 40-28s40 10 40 28" stroke="url(#gArt)" stroke-width="1.8"/><circle cx="116" cy="118" r="6" fill="oklch(84% .165 205)"/><circle cx="196" cy="118" r="6" fill="oklch(68% .27 308)"/><g fill="oklch(88% .21 160)" opacity=".9"><circle cx="252" cy="30" r="3"><animate attributeName="cy" values="30;14;30" dur="3s" repeatCount="indefinite"/></circle><circle cx="268" cy="52" r="2"><animate attributeName="cy" values="52;38;52" dur="2.4s" repeatCount="indefinite"/></circle></g></svg>
+        <div><h3>E-commerce &amp; Shopify</h3><p>A shop that sells, with the back-office wired in.</p></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ WORK ═══ -->
+<section id="work">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">Proof we ship</span>
+      <h2 class="t">We build our own products first. <em>Then yours.</em></h2>
+      <p class="lede">Two are live today. The rest are in the lab — every one runs on the same craft we'd put into your project.</p>
+    </div>
+    <div class="work">
+      <a class="proj rv" href="https://deep21star.github.io/clarity/" target="_blank" rel="noopener">
+        <div class="frame"><div class="bar2"><i></i><i></i><i></i><u>deep21star.github.io/clarity</u></div><img src="./assets/clarity.webp" width="1280" height="800" loading="lazy" decoding="async" alt="Clarity welcome screen: 'Know what's actually free to spend', with four feature rows and a Get started button"></div>
+        <div class="meta"><div class="row"><h3>Clarity</h3><span class="st live">Live</span></div><p>A budget dashboard that answers one question: what can I actually spend right now, after every bill? Runs on your device — no bank login, nothing sent anywhere.</p><span class="go">Open Clarity <span class="ar" aria-hidden="true">→</span></span></div>
+      </a>
+      <a class="proj rv" style="--d:.1s" href="https://mimi.whetudigital.co.nz/" target="_blank" rel="noopener">
+        <div class="frame"><div class="bar2"><i></i><i></i><i></i><u>mimi.whetudigital.co.nz</u></div><img src="./assets/mimi.webp" width="1280" height="800" loading="lazy" decoding="async" alt="MIMI personal trainer dashboard sign-in: a PIN pad on a dark screen with magenta accents"></div>
+        <div class="meta"><div class="row"><h3>MIMI</h3><span class="st live">Live</span></div><p>A personal-trainer platform: client programs, a 47-exercise library with demo video and habit tracking. PIN-protected for clients — what you see is the real front door.</p><span class="go">Visit MIMI <span class="ar" aria-hidden="true">→</span></span></div>
+      </a>
+    </div>
+    <div class="lab-h rv">In the lab</div>
+    <div class="labrow rv">
+      <span class="pill"><i></i><b>ARCLINE</b><span>NZ electrical compliance · in build · early access on request</span></span>
+      <span class="pill"><i></i><b>STLRentals</b><span>Property &amp; rental management</span></span>
+      <span class="pill"><i></i><b>EventSpace</b><span>Marquee &amp; venue hire</span></span>
+      <span class="pill"><i></i><b>HYDRA</b><span>Repair-shop job management</span></span>
+      <span class="pill"><i></i><b>BULLRUN</b><span>Trading war room</span></span>
+      <span class="pill"><i></i><b>PLAYBOOK</b><span>Sports odds &amp; tipping</span></span>
+      <span class="pill"><i></i><b>VIGIL</b><span>Surveillance command</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ESTIMATOR ═══ -->
+<section id="estimate">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">Instant estimate</span>
+      <h2 class="t">Know the price <em>before you email.</em></h2>
+      <p class="lede">Tell us what you need. We'll show the published price that fits — no form, no waiting. Then send us the brief in one click.</p>
+    </div>
+    <div class="est">
+      <form class="panel rv" id="estForm" autocomplete="off" onsubmit="return false">
+        <div class="q"><h3><b>01</b> What do you need?</h3>
+          <div class="opts" role="group" aria-label="What do you need? Choose any">
+            <label class="opt"><input type="checkbox" name="need" value="web" checked><span>Website / landing page</span></label>
+            <label class="opt"><input type="checkbox" name="need" value="dash"><span>Business dashboard</span></label>
+            <label class="opt"><input type="checkbox" name="need" value="book"><span>Booking &amp; scheduling</span></label>
+            <label class="opt"><input type="checkbox" name="need" value="portal"><span>Client portal</span></label>
+            <label class="opt"><input type="checkbox" name="need" value="forms"><span>Forms &amp; CRM</span></label>
+            <label class="opt"><input type="checkbox" name="need" value="shop"><span>E-commerce / shop</span></label>
+            <label class="opt"><input type="checkbox" name="need" value="auto"><span>Automations</span></label>
+            <label class="opt"><input type="checkbox" name="need" value="unsure"><span>Not sure yet</span></label>
+          </div></div>
+        <div class="q"><h3><b>02</b> How big is it?</h3>
+          <div class="opts" role="radiogroup" aria-label="How big is it?">
+            <label class="opt"><input type="radio" name="size" value="1" checked><span>One page / simple</span></label>
+            <label class="opt"><input type="radio" name="size" value="2"><span>Up to ~8 pages</span></label>
+            <label class="opt"><input type="radio" name="size" value="3"><span>Multi-user or integrations</span></label>
+          </div></div>
+        <div class="q"><h3><b>03</b> How soon?</h3>
+          <div class="opts" role="radiogroup" aria-label="How soon?">
+            <label class="opt"><input type="radio" name="when" value="ASAP" checked><span>As soon as possible</span></label>
+            <label class="opt"><input type="radio" name="when" value="Within a month"><span>Within a month</span></label>
+            <label class="opt"><input type="radio" name="when" value="Flexible"><span>I'm flexible</span></label>
+          </div></div>
+      </form>
+      <aside class="panel receipt rv" style="--d:.1s" aria-live="polite" aria-label="Your estimate">
+        <div class="rc-k">Your estimate</div>
+        <div id="rcBody"></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PROCESS ═══ -->
+<section id="process">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">How it works</span>
+      <h2 class="t">From kōrero <em>to live.</em></h2>
+      <p class="lede">Four steps. You always know what happens next, what it costs and when you'll see it.</p>
+    </div>
+    <div class="steps rv" id="steps">
+      <div class="step"><h3>Kōrero</h3><p>A 30-minute chat about what you need. Free, no pitch deck.</p><span class="when">Day 0</span></div>
+      <div class="step"><h3>Mockup</h3><p>A sketch, a scope and a fixed price — back to you within 48 hours.</p><span class="when">Within 48 hours</span></div>
+      <div class="step"><h3>Build</h3><p>We build it in the open, with a demo at every milestone.</p><span class="when">2–4 weeks typically</span></div>
+      <div class="step"><h3>Ship</h3><p>It goes live. The source is yours. Optional retainer if you want it looked after.</p><span class="when">Launch day</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PRICING ═══ -->
+<section id="pricing">
+  <div class="wrap">
+    <div class="head rv" style="text-align:center;margin-inline:auto">
+      <span class="eyebrow">Pricing</span>
+      <h2 class="t">Simple. Honest. <em>Fixed.</em></h2>
+      <p class="lede" style="margin-inline:auto">No subscriptions. No hidden fees. All prices in NZD including GST — and you own everything we build.</p>
+    </div>
+    <div class="tiers">
+      <article class="tier rv">
+        <h3>Starter</h3><div class="pr">$799<small>one-off</small></div>
+        <p class="ds">For individuals and micro-businesses who need a professional presence fast.</p>
+        <ul><li>Single-page website or landing page</li><li>Mobile-optimised design</li><li>Contact form + email integration</li><li>Google Analytics setup</li><li>Free hosting (GitHub or Cloudflare Pages)</li><li>1 round of revisions</li><li>Delivered in 5–7 days</li><li class="no">Custom dashboard</li><li class="no">Ongoing support retainer</li></ul>
+        <a class="btn btn-g magnetic" href="#estimate">Start a project <span class="ar" aria-hidden="true">→</span></a>
+      </article>
+      <article class="tier rec rv" style="--d:.1s">
+        <span class="rb">Recommended</span>
+        <h3>Professional</h3><div class="pr">$2,400<small>one-off</small></div>
+        <p class="ds">A complete digital toolkit — website, dashboard, forms and automation.</p>
+        <ul><li>Multi-page website (up to 8 pages)</li><li>Custom business dashboard</li><li>Client portal or booking forms</li><li>Dark design system, animation + interactive UI</li><li>3 rounds of revisions</li><li>SEO, sitemap + robots.txt</li><li>Monthly retainer included</li><li>Delivered in 2–3 weeks</li></ul>
+        <a class="btn btn-p magnetic" href="#estimate">Start a project <span class="ar" aria-hidden="true">→</span></a>
+      </article>
+      <article class="tier rv" style="--d:.2s">
+        <h3>Enterprise</h3><div class="pr">Custom<small>quote</small></div>
+        <p class="ds">Full-stack solutions for larger teams — multi-user systems, integrations and ongoing partnerships.</p>
+        <ul><li>Everything in Professional</li><li>Multi-user / role-based access</li><li>API integrations (Supabase and more)</li><li>Shopify / e-commerce builds</li><li>Custom automations + scripts</li><li>Unlimited revisions</li><li>Priority delivery</li><li>Monthly retainer &amp; SLA</li></ul>
+        <a class="btn btn-g magnetic" href="mailto:hello@whetudigital.co.nz?subject=Enterprise%20quote">Get a quote <span class="ar" aria-hidden="true">→</span></a>
+      </article>
+    </div>
+    <p class="fine rv">50% deposit to start, 50% on delivery · Retainers from $150/month · <a href="./pricing.html">Full pricing details →</a></p>
+  </div>
+</section>
+
+<!-- ═══ STUDIO ═══ -->
+<section id="studio">
+  <div class="bgstar" aria-hidden="true"><svg viewBox="0 0 220 220" fill="none"><defs><linearGradient id="bgA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10d8ff"/><stop offset="1" stop-color="#c040ff"/></linearGradient></defs><g stroke="url(#bgA)" stroke-width="1.2"><polygon points="110,16 133,83 204,110 133,137 110,204 87,137 16,110 87,83"/><path d="M110 16V204M16 110H204M87 83L133 137M133 83L87 137"/><circle cx="110" cy="110" r="94"/></g></svg></div>
+  <div class="wrap studio">
+    <div class="rv">
+      <span class="eyebrow">The studio</span>
+      <h2 class="whetu" style="margin-top:22px">Whetū<small>whe-too · te reo Māori for "star"</small></h2>
+      <p class="lede" style="margin-top:26px">One tool. One client. One star at a time. Whetū Digital is a New Zealand studio that would rather build one thing properly than ten things fast.</p>
+      <div class="term" aria-label="What you receive: plain files you can host anywhere">
+        <div class="tb"><i></i><i></i><i></i></div>
+        <pre><span class="p">$</span> ls ./your-project
+<span class="cy">index.html  styles.css  app.js  README.md</span>
+<span class="c"># That's the whole thing. Host it anywhere.</span>
+<span class="g">✓ it's yours</span> <span class="caret"></span></pre>
+      </div>
+    </div>
+    <div class="promises">
+      <div class="pm rv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0"/></svg><h3>You own it</h3><p>100% of the source code, handed over. No lock-in, no ongoing fees unless you choose a retainer.</p></div>
+      <div class="pm rv" style="--d:.08s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg><h3>Fast by design</h3><p>Plain HTML, CSS and JavaScript — no frameworks or build chains. Quick to load, quick to ship, easy to maintain.</p></div>
+      <div class="pm rv" style="--d:.16s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><h3>Priced like a human</h3><p>Fixed prices in NZD including GST. 50% to start, 50% on delivery. No surprise change orders.</p></div>
+      <div class="pm rv" style="--d:.24s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-5.6-7-11a7 7 0 0114 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><h3>Built in Aotearoa</h3><p>Local, in your time zone, and a real reply within 24 hours.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FAQ ═══ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="head rv" style="text-align:center;margin-inline:auto">
+      <span class="eyebrow">Questions</span>
+      <h2 class="t">The usual <em>questions.</em></h2>
+    </div>
+    <div class="faq rv">
+      <div class="fq open"><button type="button" aria-expanded="true"><span>Do I really own the code?</span><i class="pl" aria-hidden="true"></i></button><div class="a"><div><p>Yes — 100%. Everything we build is yours. We deliver the source files and you can host them anywhere. No lock-in, and no ongoing fees unless you choose a retainer.</p></div></div></div>
+      <div class="fq"><button type="button" aria-expanded="false"><span>What's your tech stack?</span><i class="pl" aria-hidden="true"></i></button><div class="a"><div><p>Plain HTML, CSS and JavaScript — no React, no WordPress, no Webflow. It's fast, portable and easy to maintain. We use modern CSS and GSAP for animation, and everything runs in a browser with zero build chain.</p></div></div></div>
+      <div class="fq"><button type="button" aria-expanded="false"><span>How long does a project take?</span><i class="pl" aria-hidden="true"></i></button><div class="a"><div><p>Starter: 5–7 days. Professional: 2–3 weeks. Enterprise is scoped in the kōrero. We move quickly because we don't use frameworks that need build steps.</p></div></div></div>
+      <div class="fq"><button type="button" aria-expanded="false"><span>Do you offer payment plans?</span><i class="pl" aria-hidden="true"></i></button><div class="a"><div><p>Yes. The standard split is 50% to start and 50% on delivery. For Enterprise projects we can do milestone-based billing. All invoices are in NZD with GST.</p></div></div></div>
+      <div class="fq"><button type="button" aria-expanded="false"><span>Can you host and maintain my site?</span><i class="pl" aria-hidden="true"></i></button><div class="a"><div><p>We set you up on free hosting (Cloudflare Pages). For ongoing maintenance, content updates and new features we offer monthly retainers from $150/month — just ask during onboarding.</p></div></div></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="wrap cta">
+    <div class="bgstar" aria-hidden="true"><svg viewBox="0 0 220 220" fill="none"><defs><linearGradient id="bgB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10d8ff"/><stop offset="1" stop-color="#c040ff"/></linearGradient></defs><g stroke="url(#bgB)" stroke-width="1.2"><polygon points="110,16 133,83 204,110 133,137 110,204 87,137 16,110 87,83"/><path d="M110 16V204M16 110H204M87 83L133 137M133 83L87 137"/><circle cx="110" cy="110" r="94"/></g></svg></div>
+    <span class="eyebrow">Your turn</span>
+    <h2>Every business deserves<br>its own <span class="grad">star.</span></h2>
+    <div class="acts">
+      <a class="btn btn-p magnetic" href="#estimate">Get your price <span class="ar" aria-hidden="true">→</span></a>
+      <a class="btn btn-g magnetic" href="mailto:hello@whetudigital.co.nz">hello@whetudigital.co.nz</a>
+    </div>
+  </div>
+  <div class="fbig" id="fbig" aria-hidden="true">WHETŪ DIGITAL<span class="fill">WHETŪ DIGITAL</span></div>
+  <div class="wrap">
+    <div class="frow">
+      <div>© 2026 Whetū Digital · Aotearoa New Zealand<br><span style="font-size:.82rem">Digital tools for modern living · built with care.</span></div>
+      <nav aria-label="Footer"><a href="#services">Services</a><a href="#work">Work</a><a href="./pricing.html">Pricing</a><a href="./onboard.html">Client onboarding</a><a href="./shop.html">Shop</a></nav>
+      <button type="button" id="replay">↺ Replay intro</button>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══ COMMAND PALETTE ═══ -->
+<div class="pal" id="pal" role="dialog" aria-modal="true" aria-label="Command menu">
+  <div class="pal-b">
+    <input id="palQ" type="text" placeholder="Where to? Try “price”, “work”, “email”…" aria-label="Search commands" autocomplete="off">
+    <ul id="palL" role="listbox"></ul>
+    <div class="ft"><span>↑↓ move</span><span>↵ select</span><span>esc close</span></div>
+  </div>
+</div>
