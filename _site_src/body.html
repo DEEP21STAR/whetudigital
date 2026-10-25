@@ -37,6 +37,7 @@
     <a class="l" href="#estimate">Estimate</a>
     <a class="l" href="#process">Process</a>
     <a class="l" href="#pricing">Pricing</a>
+    <button class="mot" id="motBtn" type="button" aria-label="Change motion setting (Full, Calm or Still)"><span aria-hidden="true">◐</span><em id="motLbl">Full</em></button>
     <button class="kbd" type="button" data-pal aria-label="Open command menu (Control K)"><span>Ctrl</span><span>K</span></button>
     <button class="btn btn-g btn-s menu-b" type="button" data-pal>Menu</button>
     <a class="btn btn-p btn-s magnetic" href="#estimate"><span class="cta-l">Start a project</span><span class="cta-s">Start</span> <span class="ar" aria-hidden="true">→</span></a>
@@ -382,6 +383,11 @@
     </div>
   </div>
 </footer>
+
+<div class="toast" id="motToast" role="status" hidden>
+  <p><b>Calm mode is on</b> — your computer asks for reduced motion, so big movement is switched off. Want the full show: the swinging-star intro, the 3D star and the animated story?</p>
+  <div><button class="btn btn-p btn-s" id="motFull" type="button">Full motion</button><button class="btn btn-g btn-s" id="motKeep" type="button">Keep calm</button></div>
+</div>
 
 <!-- ═══ COMMAND PALETTE ═══ -->
 <div class="pal" id="pal" role="dialog" aria-modal="true" aria-label="Command menu">

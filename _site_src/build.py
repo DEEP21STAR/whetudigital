@@ -46,7 +46,11 @@ doc=f'''<!DOCTYPE html>
 /* before paint: JS flag, reduced motion, and whether the intro plays.
    Plays on first arrival (typed URL, search, social) and on reload; skipped for crawlers, when you navigate inside the site, or back/forward. ?intro=1 forces it, ?intro=0 skips it. */
 (function(){{var d=document.documentElement;d.className+=' js';
-var rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;if(rm)d.className+=' rm';
+var osr=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+var pref='';try{{pref=localStorage.getItem('wd_motion')||'';}}catch(e){{}}
+/* full = everything; calm = real intro + 3D star but no large movement (default when the OS asks for less motion); still = nothing moves */
+var mode=(pref==='full'||pref==='calm'||pref==='still')?pref:(osr?'calm':'full');
+var rm=(mode==='still');d.className+=' m-'+mode+(mode==='calm'?' calm':'')+(rm?' rm':'');
 var q=location.search,type='',ref=false;
 try{{var n=performance.getEntriesByType('navigation')[0];type=n?n.type:'';}}catch(e){{}}
 try{{ref=!!document.referrer&&new URL(document.referrer).origin===location.origin;}}catch(e){{}}
