@@ -53,7 +53,7 @@ if(play)d.className+=' intro-on';else d.className+=' ready quick';})();
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;overflow-x:clip;}
-body{font-family:var(--f-body);background:var(--ink);color:var(--text);font-size:1.0625rem;line-height:1.6;overflow-x:hidden;min-height:100vh;-webkit-font-smoothing:antialiased;}
+body{font-family:var(--f-body);background:var(--ink);color:var(--text);font-size:1.0625rem;line-height:1.6;overflow-x:clip;min-height:100vh;-webkit-font-smoothing:antialiased;}
 img,svg{display:block;max-width:100%;}
 a{color:inherit;text-decoration:none;}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;}
@@ -476,6 +476,110 @@ html.rm .bgstar{animation:none !important;}
 /* intro off → no entrance choreography, content is there at first paint */
 html.quick h1.big .ln>span,html.quick .hero .lede,html.quick .hero .acts,html.quick .hero .chip,html.quick .stats,html.quick h1.big .grad::after{transition:none !important;}
 
+/* ═══════════ ROUND 3 · 3D star canvas ═══════════ */
+.stage .gl{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity 1.2s ease;pointer-events:none;}
+.stage.gl-on .gl{opacity:1;}
+.stage.gl-on .swing{opacity:0;transition:opacity 1.2s ease;}
+
+/* ═══════════ ROUND 3 · pinned, scroll-scrubbed story ═══════════ */
+.story{position:relative;height:440vh;margin-top:clamp(10px,3vw,40px);}
+.story[hidden]{display:none;}
+html.story-on .steps{display:none;}
+.sticky{position:sticky;top:0;height:100svh;display:flex;align-items:center;overflow:hidden;}
+.sgrid{width:100%;display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(24px,5vw,84px);align-items:center;padding-top:34px;}
+.slist{list-style:none;position:relative;padding-left:36px;display:grid;gap:2px;}
+.slist::before{content:"";position:absolute;left:11px;top:10px;bottom:10px;width:2px;background:var(--line);}
+.slist::after{content:"";position:absolute;left:11px;top:10px;bottom:10px;width:2px;background:var(--grad);transform-origin:0 0;transform:scaleY(var(--p,0));box-shadow:0 0 14px var(--cyan);}
+.slist li{position:relative;padding:12px 0;opacity:.34;transition:opacity .5s,transform .7s var(--ease);}
+.slist li::before{content:"";position:absolute;left:-33px;top:26px;width:14px;height:14px;border-radius:50%;background:var(--ink);border:2px solid var(--line-2);transition:all .4s;z-index:1;}
+.slist li.on{opacity:1;transform:translateX(8px);}
+.slist li.on::before{background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 18px var(--cyan);}
+.slist li.done::before{background:var(--violet);border-color:var(--violet);}
+.slist li b{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.2em;color:var(--cyan);font-weight:500;}
+.slist li h3{font-family:var(--f-display);font-weight:800;font-size:clamp(1.9rem,2.8vw + .6rem,3.4rem);letter-spacing:-.03em;line-height:1;margin:6px 0 0;font-variation-settings:"opsz" 48,"wdth" 100;}
+.slist li p,.slist li .when{max-height:0;overflow:hidden;opacity:0;transition:max-height .7s var(--ease),opacity .5s,margin .5s;color:var(--text-2);}
+.slist li.on p{max-height:7em;opacity:1;margin-top:12px;max-width:34ch;}
+.slist li .when{display:block;font-family:var(--f-mono);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--violet);}
+.slist li.on .when{max-height:2em;opacity:1;margin-top:10px;}
+.sstage{position:relative;}
+.dev{border:1px solid var(--line-2);border-radius:20px;background:oklch(9% .03 285/.92);box-shadow:0 40px 120px oklch(0% 0 0/.6),0 0 90px oklch(68% .27 308/.18);overflow:hidden;aspect-ratio:16/10.4;display:flex;flex-direction:column;}
+.dbar{display:flex;align-items:center;gap:6px;padding:0 14px;height:34px;background:oklch(14% .035 285);border-bottom:1px solid var(--line);flex:none;}
+.dbar i{width:9px;height:9px;border-radius:50%;background:oklch(100% 0 0/.2);}
+.dbar u{text-decoration:none;margin-left:12px;font-family:var(--f-mono);font-size:.7rem;color:var(--text-2);flex:1;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dbar em{font-style:normal;font-family:var(--f-mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mint);border:1px solid oklch(88% .21 160/.4);padding:3px 9px;border-radius:99px;}
+.dview{position:relative;flex:1;min-height:0;}
+.scene{position:absolute;inset:0;padding:clamp(14px,2vw,28px);opacity:0;transition:opacity .6s var(--ease);pointer-events:none;}
+.story[data-step="0"] .s0,.story[data-step="1"] .s1,.story[data-step="2"] .s2,.story[data-step="3"] .s3{opacity:1;}
+.sprog{height:3px;border-radius:3px;background:var(--line);margin-top:18px;overflow:hidden;}
+.sprog i{display:block;height:100%;background:var(--grad);transform-origin:0 50%;transform:scaleX(var(--p,0));box-shadow:0 0 14px var(--cyan);}
+/* s0 chat */
+.bub{--r:clamp(0,calc((var(--p0,0) - var(--k)*.2 - .03)*9),1);max-width:80%;padding:10px 15px 11px;border-radius:16px;font-size:clamp(.74rem,.9vw + .2rem,.98rem);line-height:1.4;margin-bottom:11px;opacity:var(--r);transform:translateY(calc((1 - var(--r))*16px));}
+.bub span{display:block;font-family:var(--f-mono);font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;opacity:.65;margin-bottom:3px;}
+.bub.c{background:oklch(100% 0 0/.08);border-bottom-left-radius:4px;}
+.bub.w{margin-left:auto;background:var(--grad);color:oklch(12% .05 285);border-bottom-right-radius:4px;}
+/* s1 mockup */
+.wire{width:100%;height:100%;}
+.wl{stroke-dasharray:var(--len);stroke-dashoffset:calc(var(--len)*(1 - clamp(0,calc((var(--p1,0) - var(--a))*2.4),1)));}
+.stamp{--r:clamp(0,calc((var(--p1,0) - .55)*5),1);position:absolute;right:7%;bottom:9%;border:3px solid var(--mint);color:var(--mint);border-radius:12px;padding:8px 18px 10px;text-align:center;font-family:var(--f-mono);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;background:oklch(10% .04 285/.88);opacity:var(--r);transform:rotate(-8deg) scale(calc(1.8 - var(--r)*.8));box-shadow:0 0 30px oklch(88% .21 160/.25);}
+.stamp b{display:block;font-family:var(--f-display);font-size:clamp(1.3rem,2.2vw,2.2rem);letter-spacing:-.03em;line-height:1.1;color:var(--text);}
+.stamp small{opacity:.7;font-size:.52rem;}
+.clock{position:absolute;left:7%;bottom:9%;width:clamp(54px,7vw,84px);aspect-ratio:1;}
+.clock svg{position:absolute;inset:0;width:100%;height:100%;}
+.clock .cp{stroke-dasharray:113;stroke-dashoffset:calc(113*(1 - var(--p1,0)));}
+.clock span{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-mono);font-size:.78rem;}
+/* s2 build */
+.ui{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto minmax(0,1fr);gap:10px;height:calc(100% - 34px);}
+.uk{--r:clamp(0,calc((var(--p2,0) - var(--k)*.07)*8),1);background:oklch(100% 0 0/.06);border:1px solid var(--line);border-radius:12px;padding:10px 12px;opacity:var(--r);transform:translateY(calc((1 - var(--r))*14px));}
+.uk small{display:block;font-family:var(--f-mono);font-size:.54rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);}
+.uk b{font-family:var(--f-display);font-weight:800;font-size:clamp(1.1rem,2vw,1.9rem);letter-spacing:-.03em;}
+.uk b.g{color:var(--mint);}
+.uchart{grid-column:1/3;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;align-items:end;gap:8px;padding:12px;min-height:0;border:1px solid var(--line);border-radius:12px;background:oklch(100% 0 0/.035);}
+.uchart i{display:block;height:100%;border-radius:5px 5px 2px 2px;background:linear-gradient(var(--cyan),var(--violet));transform-origin:50% 100%;transform:scaleY(calc(var(--hv)*clamp(0,calc((var(--p2,0) - .1 - var(--k)*.045)*5),1)));}
+.ulist{display:grid;gap:8px;align-content:start;padding:12px;border:1px solid var(--line);border-radius:12px;background:oklch(100% 0 0/.035);}
+.ulist span{height:11px;border-radius:6px;background:oklch(100% 0 0/.14);width:calc(100% - var(--k)*16%);opacity:clamp(0,calc((var(--p2,0) - .3 - var(--k)*.08)*8),1);}
+.demos{position:absolute;left:clamp(14px,2vw,28px);right:clamp(14px,2vw,28px);bottom:clamp(8px,1.4vw,18px);display:flex;gap:8px;justify-content:flex-end;}
+.demos em{font-style:normal;font-family:var(--f-mono);font-size:.6rem;letter-spacing:.1em;color:var(--mint);border:1px solid oklch(88% .21 160/.4);background:oklch(10% .04 285/.85);border-radius:99px;padding:4px 10px;opacity:clamp(0,calc((var(--p2,0) - .3 - var(--k)*.26)*8),1);}
+/* s3 ship */
+.live{position:absolute;left:50%;top:14%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:800;font-size:clamp(1.6rem,3.4vw,3rem);letter-spacing:.1em;color:var(--mint);text-shadow:0 0 30px oklch(88% .21 160/.6);opacity:clamp(0,calc((var(--p3,0) - .05)*6),1);}
+.live i{width:.5em;height:.5em;border-radius:50%;background:var(--mint);box-shadow:0 0 0 0 oklch(88% .21 160/.7);animation:ping 2s ease-out infinite;}
+.burst{position:absolute;left:50%;top:48%;width:58%;transform:translate(-50%,-50%) scale(calc(.3 + var(--p3,0)*1.15));opacity:calc(1 - var(--p3,0)*.8);}
+.files{position:absolute;left:0;right:0;bottom:26%;display:flex;gap:12px;justify-content:center;}
+.files span{--r:clamp(0,calc((var(--p3,0) - .22 - var(--k)*.12)*6),1);font-family:var(--f-mono);font-size:clamp(.62rem,.9vw,.85rem);border:1px solid var(--line-2);background:oklch(14% .04 285/.9);border-radius:10px;padding:8px 14px;opacity:var(--r);transform:translateY(calc((1 - var(--r))*-46px)) rotate(calc((1 - var(--r))*(var(--k) - 1)*14deg));}
+.yours{position:absolute;left:0;right:0;bottom:7%;text-align:center;font-family:var(--f-display);font-weight:800;font-size:clamp(1.3rem,2.8vw,2.4rem);letter-spacing:-.03em;opacity:clamp(0,calc((var(--p3,0) - .6)*5),1);}
+.yours em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;}
+@media (max-width:860px){
+  .story{height:360vh;}
+  .sgrid{grid-template-columns:1fr;gap:18px;align-content:center;padding-top:60px;}
+  .slist{padding-left:0;}
+  .slist::before,.slist::after{display:none;}
+  .slist li{display:none;opacity:1;transform:none;padding:0;}
+  .slist li.on{display:block;transform:none;}
+  .slist li::before{display:none;}
+  .slist li h3{font-size:2rem;}
+  .dev{aspect-ratio:5/4.7;}
+  .bub{font-size:.76rem;padding:8px 12px 9px;margin-bottom:8px;}
+  .bub span{font-size:.52rem;}
+  .uk b{font-size:1.1rem;}
+}
+/* ═══════════ ROUND 3 · tile art keeps moving after the entrance ═══════════ */
+.tile.in .bar{animation:grow 1.2s var(--ease) forwards,bpulse 3.6s ease-in-out infinite;animation-delay:calc(var(--i)*.09s),calc(1.7s + var(--i)*.22s);}
+@keyframes bpulse{0%,100%{transform:scaleY(1);}50%{transform:scaleY(.82);}}
+.t-portal .art path:last-of-type{animation:shackle 4.2s ease-in-out infinite;transform-box:fill-box;}
+@keyframes shackle{0%,70%,100%{transform:translateY(0);}80%,90%{transform:translateY(-3px);}}
+.t-forms .art path:last-of-type{stroke-dasharray:34;animation:chk 3.6s ease-in-out infinite;}
+@keyframes chk{0%{stroke-dashoffset:34;}40%,85%{stroke-dashoffset:0;}100%{stroke-dashoffset:34;}}
+.t-eco .art circle:first-of-type{animation:cartb 2.6s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 50%;}
+@keyframes cartb{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
+html.rm .tile .art *{animation:none !important;}
+
+/* ═══════════ ROUND 3b · star-themed button hover ═══════════ */
+.btn-p{overflow:hidden;isolation:isolate;}
+.btn-p::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background:linear-gradient(110deg,transparent 32%,oklch(100% 0 0/.6) 50%,transparent 68%);transform:translateX(-130%);transition:transform .8s var(--ease);}
+.btn-p:hover::before{transform:translateX(130%);}
+.spark{position:fixed;left:0;top:0;pointer-events:none;z-index:9300;line-height:1;font-size:var(--s,12px);color:var(--c,#4fe3ff);text-shadow:0 0 10px currentColor;animation:spark .95s cubic-bezier(.16,1,.3,1) forwards;will-change:transform,opacity;}
+@keyframes spark{from{transform:translate(var(--x0),var(--y0)) scale(.3) rotate(0deg);opacity:1;}60%{opacity:1;}to{transform:translate(var(--x1),var(--y1)) scale(1.15) rotate(var(--r));opacity:0;}}
+html.rm .spark{display:none;}
+
 </style>
 </head>
 <body>
@@ -587,12 +691,12 @@ html.quick h1.big .ln>span,html.quick .hero .lede,html.quick .hero .acts,html.qu
         <svg class="art" viewBox="0 0 160 120" fill="none" aria-hidden="true"><rect class="draw" style="--len:420" x="10" y="14" width="140" height="96" rx="9" stroke="url(#gArt)" stroke-width="1.5"/><path class="draw" style="--len:140" d="M10 40h140" stroke="url(#gArt)" stroke-width="1.2"/><g fill="oklch(100% 0 0/.25)"><rect x="24" y="54" width="14" height="10" rx="2"/><rect x="48" y="54" width="14" height="10" rx="2"/><rect x="72" y="54" width="14" height="10" rx="2"/><rect x="96" y="54" width="14" height="10" rx="2"/><rect x="24" y="74" width="14" height="10" rx="2"/><rect x="72" y="74" width="14" height="10" rx="2"/></g><rect x="48" y="74" width="14" height="10" rx="2" fill="oklch(68% .27 308)"><animate attributeName="opacity" values="1;.35;1" dur="2s" repeatCount="indefinite"/></rect></svg>
         <div><h3>Booking &amp; scheduling</h3><p>Customers pick a time. You get a clean diary.</p></div>
       </article>
-      <article class="tile rv" style="--d:.16s">
+      <article class="tile t-portal rv" style="--d:.16s">
         <span class="tag">Professional +</span>
         <svg class="art" viewBox="0 0 160 120" fill="none" aria-hidden="true"><circle class="draw" style="--len:140" cx="80" cy="42" r="22" stroke="url(#gArt)" stroke-width="1.6"/><path class="draw" style="--len:260" d="M30 108c0-24 22-38 50-38s50 14 50 38" stroke="url(#gArt)" stroke-width="1.6"/><rect x="66" y="30" width="28" height="22" rx="5" fill="oklch(100% 0 0/.08)" stroke="oklch(84% .165 205)" stroke-width="1.2"/><path d="M72 30v-6a8 8 0 0116 0v6" stroke="oklch(84% .165 205)" stroke-width="1.4"/></svg>
         <div><h3>Client portals</h3><p>A private place for your clients to see, sign and pay.</p></div>
       </article>
-      <article class="tile rv" style="--d:.2s">
+      <article class="tile t-forms rv" style="--d:.2s">
         <span class="tag">Professional +</span>
         <svg class="art" viewBox="0 0 160 120" fill="none" aria-hidden="true"><rect class="draw" style="--len:300" x="14" y="16" width="132" height="22" rx="6" stroke="url(#gArt)" stroke-width="1.4"/><rect class="draw" style="--len:300" x="14" y="50" width="132" height="22" rx="6" stroke="url(#gArt)" stroke-width="1.4"/><rect x="14" y="84" width="64" height="22" rx="11" fill="url(#gArt)"/><path d="M118 61l6 6 12-14" stroke="oklch(88% .21 160)" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>
         <div><h3>Forms &amp; CRM</h3><p>Leads land somewhere useful, not in an inbox graveyard.</p></div>
@@ -684,14 +788,80 @@ html.quick h1.big .ln>span,html.quick .hero .lede,html.quick .hero .acts,html.qu
   </div>
 </section>
 
-<!-- ═══ PROCESS ═══ -->
-<section id="process">
+<!-- ═══ PROCESS · pinned scroll story ═══ -->
+<section id="process" class="proc">
   <div class="wrap">
     <div class="head rv">
       <span class="eyebrow">How it works</span>
       <h2 class="t">From kōrero <em>to live.</em></h2>
-      <p class="lede">Four steps. You always know what happens next, what it costs and when you'll see it.</p>
+      <p class="lede">Four steps. You always know what happens next, what it costs and when you'll see it. Keep scrolling — watch a project come to life.</p>
     </div>
+  </div>
+
+  <!-- pinned, scroll-scrubbed story (JS + motion only; the plain list below is the fallback) -->
+  <div class="story" id="story" data-step="0" hidden>
+    <div class="sticky">
+      <div class="wrap sgrid">
+        <ol class="slist" id="slist">
+          <li data-s="0" class="on"><b>01</b><h3>Kōrero</h3><p>A 30-minute chat about what you need. Free, no pitch deck.</p><span class="when">Day 0</span></li>
+          <li data-s="1"><b>02</b><h3>Mockup</h3><p>A sketch, a scope and a fixed price — back to you within 48 hours.</p><span class="when">Within 48 hours</span></li>
+          <li data-s="2"><b>03</b><h3>Build</h3><p>We build it in the open, with a demo at every milestone.</p><span class="when">2–4 weeks typically</span></li>
+          <li data-s="3"><b>04</b><h3>Ship</h3><p>It goes live. The source is yours. Optional retainer if you want it looked after.</p><span class="when">Launch day</span></li>
+        </ol>
+        <div class="sstage" aria-hidden="true">
+          <div class="dev">
+            <div class="dbar"><i></i><i></i><i></i><u id="surl">kōrero · 30 min</u><em id="sbadge">free</em></div>
+            <div class="dview">
+              <!-- 0 · kōrero: the chat -->
+              <div class="scene s0">
+                <div class="bub c" style="--k:0"><span>Client</span>We lose hours chasing jobs and invoices.</div>
+                <div class="bub w" style="--k:1"><span>Whetū</span>Kia ora! Walk me through a normal Tuesday.</div>
+                <div class="bub c" style="--k:2"><span>Client</span>Quotes in email, jobs on paper, invoices in Xero.</div>
+                <div class="bub w" style="--k:3"><span>Whetū</span>Got it. One dashboard. I'll sketch it by Thursday.</div>
+              </div>
+              <!-- 1 · mockup: wireframe + fixed price -->
+              <div class="scene s1">
+                <svg viewBox="0 0 400 250" fill="none" class="wire">
+                  <g stroke="url(#gArt)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <rect class="wl" style="--len:1100;--a:0" x="12" y="12" width="376" height="226" rx="12"/>
+                    <path class="wl" style="--len:376;--a:.08" d="M12 44h376"/>
+                    <rect class="wl" style="--len:420;--a:.14" x="28" y="62" width="104" height="58" rx="8"/>
+                    <rect class="wl" style="--len:420;--a:.2" x="148" y="62" width="104" height="58" rx="8"/>
+                    <rect class="wl" style="--len:420;--a:.26" x="268" y="62" width="104" height="58" rx="8"/>
+                    <rect class="wl" style="--len:700;--a:.34" x="28" y="136" width="224" height="88" rx="8"/>
+                    <rect class="wl" style="--len:420;--a:.42" x="268" y="136" width="104" height="88" rx="8"/>
+                  </g>
+                </svg>
+                <div class="stamp">Fixed price<b>$2,400</b><small>NZD incl. GST</small></div>
+                <div class="clock"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="18" stroke="oklch(100% 0 0/.15)" stroke-width="3" fill="none"/><circle class="cp" cx="22" cy="22" r="18" stroke="url(#gArt)" stroke-width="3" fill="none" stroke-linecap="round" transform="rotate(-90 22 22)"/></svg><span>48h</span></div>
+              </div>
+              <!-- 2 · build: the layout fills with real UI -->
+              <div class="scene s2">
+                <div class="ui">
+                  <div class="uk" style="--k:0"><small>Jobs this week</small><b>24</b></div>
+                  <div class="uk" style="--k:1"><small>Invoiced</small><b>$18.4k</b></div>
+                  <div class="uk" style="--k:2"><small>Overdue</small><b class="g">0</b></div>
+                  <div class="uchart"><i style="--k:0;--hv:.46"></i><i style="--k:1;--hv:.62"></i><i style="--k:2;--hv:.38"></i><i style="--k:3;--hv:.78"></i><i style="--k:4;--hv:.58"></i><i style="--k:5;--hv:.92"></i><i style="--k:6;--hv:.70"></i></div>
+                  <div class="ulist"><span style="--k:0"></span><span style="--k:1"></span><span style="--k:2"></span><span style="--k:3"></span></div>
+                </div>
+                <div class="demos"><em style="--k:0">Demo 1 ✓</em><em style="--k:1">Demo 2 ✓</em><em style="--k:2">Demo 3 ✓</em></div>
+              </div>
+              <!-- 3 · ship: live + files are yours -->
+              <div class="scene s3">
+                <div class="live"><i></i>LIVE</div>
+                <div class="burst"><svg viewBox="0 0 200 200"><g stroke="url(#gArt)" stroke-width="1.6" stroke-linecap="round"><path d="M100 10V40M100 160V190M10 100H40M160 100H190M36 36L58 58M142 142L164 164M164 36L142 58M58 142L36 164"/></g></svg></div>
+                <div class="files"><span style="--k:0">index.html</span><span style="--k:1">styles.css</span><span style="--k:2">app.js</span></div>
+                <div class="yours">Yours. <em>All of it.</em></div>
+              </div>
+            </div>
+          </div>
+          <div class="sprog"><i></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
     <div class="steps rv" id="steps">
       <div class="step"><h3>Kōrero</h3><p>A 30-minute chat about what you need. Free, no pitch deck.</p><span class="when">Day 0</span></div>
       <div class="step"><h3>Mockup</h3><p>A sketch, a scope and a fixed price — back to you within 48 hours.</p><span class="when">Within 48 hours</span></div>
@@ -905,7 +1075,7 @@ function runIntro(){
 function starParallax(){
   var st=$('#heroStage');if(!st||!FINE||RM)return;var rx=0,ry=0,tx=0,ty=0;
   window.addEventListener('pointermove',function(e){tx=(e.clientY/innerHeight-.5)*-14;ty=(e.clientX/innerWidth-.5)*18;},{passive:true});
-  (function f(){rx+=(tx-rx)*.07;ry+=(ty-ry)*.07;st.style.transform='rotateX('+rx.toFixed(2)+'deg) rotateY('+ry.toFixed(2)+'deg)';requestAnimationFrame(f);})();
+  (function f(){rx+=(tx-rx)*.07;ry+=(ty-ry)*.07;st.style.transform=st.classList.contains('gl-on')?'':'rotateX('+rx.toFixed(2)+'deg) rotateY('+ry.toFixed(2)+'deg)';requestAnimationFrame(f);})();
 }
 
 /* ── cursor, magnetic, tile spotlight ── */
@@ -915,6 +1085,20 @@ function cursor(){
   window.addEventListener('pointermove',function(e){if(!html.classList.contains('cur-on')){html.classList.add('cur-on');rx=e.clientX;ry=e.clientY;}x=e.clientX;y=e.clientY;cd.style.transform='translate('+x+'px,'+y+'px) translate(-50%,-50%)';var hot=e.target.closest&&e.target.closest('a,button,.tile,.proj,.opt,.pill,.fq');cr.classList.toggle('hot',!!hot);},{passive:true});
   document.addEventListener('mouseleave',function(){html.classList.remove('cur-on');});
   (function f(){rx+=(x-rx)*.16;ry+=(y-ry)*.16;cr.style.transform='translate('+rx+'px,'+ry+'px) translate(-50%,-50%)';requestAnimationFrame(f);})();
+}
+/* ── tiny stars burst from the pointer when a button is entered ── */
+function sparks(){
+  if(RM)return;var cols=['#4fe3ff','#b88bff','#ff6bf0','#ffffff'];
+  function burst(x,y){
+    for(var i=0;i<8;i++){var s=document.createElement('i');s.className='spark';s.textContent='✦';
+      var a=(i/8)*6.2832+Math.random()*.6,d=34+Math.random()*46;
+      s.style.setProperty('--x0',(x-6)+'px');s.style.setProperty('--y0',(y-6)+'px');
+      s.style.setProperty('--x1',(x-6+Math.cos(a)*d)+'px');s.style.setProperty('--y1',(y-6+Math.sin(a)*d)+'px');
+      s.style.setProperty('--r',((Math.random()<.5?-1:1)*(90+Math.random()*140))+'deg');
+      s.style.setProperty('--s',(9+Math.random()*10)+'px');s.style.setProperty('--c',cols[i%cols.length]);
+      s.addEventListener('animationend',function(){if(this.parentNode)this.parentNode.removeChild(this);});document.body.appendChild(s);}
+  }
+  $$('.btn-p,.btn-g').forEach(function(b){b.addEventListener('pointerenter',function(e){if(e.pointerType==='touch')return;burst(e.clientX,e.clientY);});});
 }
 function magnetic(){
   if(!FINE||RM)return;
@@ -990,7 +1174,7 @@ function estimate(){
   var mail='Hi Whetū Digital,\n\nHere\'s a quick brief:\n\n• I need: '+list+'\n• Size: '+['','One page / simple','Up to ~8 pages','Multi-user or integrations'][size]+'\n• Timing: '+when+'\n• Suggested tier: '+t.name+(t.price?' ('+money(t.price)+' incl. GST)':' (custom quote)')+'\n\nMy name:\nMy business:\nA line about the project:\n\nThanks!';
   $('#rcSend').href='mailto:'+EMAIL+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(mail);
   if(t.price&&lastPrice!==t.price){var n=$('#rcNum');countTo(n,t.price,700,'$',lastPrice);}
-  lastPrice=t.price;
+  lastPrice=t.price;window.dispatchEvent(new CustomEvent('whetu:tier',{detail:tier}));
 }
 function est(){var f=$('#estForm');if(!f)return;f.addEventListener('change',estimate);estimate();}
 
@@ -1034,10 +1218,99 @@ function palette(){
   });
 }
 
+/* ── hero star in real 3D: a faceted crystal, raw WebGL (no library). SVG star stays as the fallback. ── */
+var GL_TIER=0,GL_TIER_T=0;
+window.addEventListener('whetu:tier',function(e){GL_TIER=({1:0,2:.13,3:.3})[e.detail]||0;});
+function heroGL(){
+  var st=$('#heroStage');if(!st||RM)return;
+  var cv=document.createElement('canvas');cv.className='gl';cv.setAttribute('aria-hidden','true');
+  var gl=null;try{gl=cv.getContext('webgl',{antialias:true,alpha:true,premultipliedAlpha:true,powerPreference:'high-performance'});}catch(e){}
+  if(!gl)return;
+  function sh(type,src){var s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){throw new Error(gl.getShaderInfoLog(s));}return s;}
+  function prog(vs,fs){var p=gl.createProgram();gl.attachShader(p,sh(gl.VERTEX_SHADER,vs));gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(p));return p;}
+  var gem,flare;
+  try{
+    gem=prog('attribute vec3 aPos;attribute vec3 aNor;attribute float aT;uniform mat4 uModel;uniform mat4 uVP;varying vec3 vN;varying vec3 vP;varying float vT;void main(){vec4 w=uModel*vec4(aPos,1.);vN=mat3(uModel)*aNor;vP=w.xyz;vT=aT;gl_Position=uVP*w;}',
+      'precision mediump float;varying vec3 vN;varying vec3 vP;varying float vT;uniform vec3 uLight;uniform vec3 uEye;uniform float uT;uniform float uHue;'+
+      'vec3 pal(float t){t=clamp(t,0.,1.);vec3 c1=vec3(.04,.86,1.);vec3 c2=vec3(.3,.5,1.);vec3 c3=vec3(.6,.2,1.);vec3 c4=vec3(.95,.1,.92);return t<.33?mix(c1,c2,t/.33):(t<.66?mix(c2,c3,(t-.33)/.33):mix(c3,c4,(t-.66)/.34));}'+
+      'void main(){vec3 N=normalize(vN);vec3 V=normalize(uEye-vP);vec3 L=normalize(uLight-vP);float diff=max(dot(N,L),0.);float fres=pow(1.-max(dot(N,V),0.),2.2);vec3 H=normalize(L+V);float spec=pow(max(dot(N,H),0.),56.);'+
+      'float t=vT+uHue+.05*sin(uT*.7+vT*9.);vec3 base=pal(t);vec3 col=base*(.32+.95*diff)+vec3(.75,.92,1.)*spec*.95+pal(t+.28)*fres*1.15;col+=base*.3*pow(.5+.5*sin(uT*1.1+vT*14.),8.);gl_FragColor=vec4(col,1.);}');
+    flare=prog('attribute vec2 aQ;uniform mat4 uVP;uniform mat4 uModel;varying vec2 vQ;void main(){vQ=aQ;vec4 c=uModel*vec4(0.,0.,.36,1.);vec4 p=uVP*c;gl_Position=p+vec4(aQ*.34*p.w,0.,0.);}',
+      'precision mediump float;varying vec2 vQ;uniform float uT;void main(){float d=length(vQ);float a=smoothstep(1.,0.,d);float core=smoothstep(.35,0.,d);vec3 c=mix(vec3(.5,.35,1.),vec3(.85,1.,1.),core)*a*a*(.8+.2*sin(uT*2.6));gl_FragColor=vec4(c,a*a);}');
+  }catch(err){return;}
+  /* geometry: the logo's 8-point outline, lifted into a double pyramid (head-on it matches the flat star) */
+  var O=[[0,1],[-.245,.287],[-1,0],[-.245,-.287],[0,-1],[.245,-.287],[1,0],[.245,.287]],H=.34,pos=[],nor=[],tt=[];
+  function tri(a,b,c){var u=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],v=[c[0]-a[0],c[1]-a[1],c[2]-a[2]],n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]],l=Math.hypot(n[0],n[1],n[2])||1;n=[n[0]/l,n[1]/l,n[2]/l];
+    var cx=(a[0]+b[0]+c[0])/3,cy=(a[1]+b[1]+c[1])/3,t=Math.max(0,Math.min(1,.5+.3*cx-.5*cy));[a,b,c].forEach(function(p){pos.push(p[0],p[1],p[2]);nor.push(n[0],n[1],n[2]);tt.push(t);});}
+  for(var i=0;i<8;i++){var a=O[i],b=O[(i+1)%8];tri([a[0],a[1],0],[b[0],b[1],0],[0,0,H]);tri([b[0],b[1],0],[a[0],a[1],0],[0,0,-H]);}
+  function buf(arr){var b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(arr),gl.STATIC_DRAW);return b;}
+  var bP=buf(pos),bN=buf(nor),bT=buf(tt),bQ=buf([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),nV=pos.length/3;
+  var u=function(p,n){return gl.getUniformLocation(p,n);},lg={M:u(gem,'uModel'),VP:u(gem,'uVP'),L:u(gem,'uLight'),E:u(gem,'uEye'),T:u(gem,'uT'),Hue:u(gem,'uHue')},lf={M:u(flare,'uModel'),VP:u(flare,'uVP'),T:u(flare,'uT')};
+  var aP=gl.getAttribLocation(gem,'aPos'),aN=gl.getAttribLocation(gem,'aNor'),aT=gl.getAttribLocation(gem,'aT'),aQ=gl.getAttribLocation(flare,'aQ');
+  /* tiny matrix helpers */
+  function mul(a,b){var o=new Float32Array(16);for(var i=0;i<4;i++)for(var j=0;j<4;j++){var s=0;for(var k=0;k<4;k++)s+=a[k*4+j]*b[i*4+k];o[i*4+j]=s;}return o;}
+  function rotY(t){var c=Math.cos(t),s=Math.sin(t);return new Float32Array([c,0,-s,0,0,1,0,0,s,0,c,0,0,0,0,1]);}
+  function rotX(t){var c=Math.cos(t),s=Math.sin(t);return new Float32Array([1,0,0,0,0,c,s,0,0,-s,c,0,0,0,0,1]);}
+  function rotZ(t){var c=Math.cos(t),s=Math.sin(t);return new Float32Array([c,s,0,0,-s,c,0,0,0,0,1,0,0,0,0,1]);}
+  function persp(f,a,n,fa){var t=1/Math.tan(f/2),o=new Float32Array(16);o[0]=t/a;o[5]=t;o[10]=(fa+n)/(n-fa);o[11]=-1;o[14]=2*fa*n/(n-fa);return o;}
+  function trans(z){var o=new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,z,1]);return o;}
+  var EYE=4.3,proj=null,w=0,h=0,dpr=1,ptX=0,ptY=0,tx=0,ty=0,alive=true,vis=true,t0=0,hue=0,tStart=-1;
+  function size(){var r=st.getBoundingClientRect();dpr=Math.min(window.devicePixelRatio||1,1.75);w=cv.width=Math.max(2,Math.round(r.width*dpr));h=cv.height=Math.max(2,Math.round(r.height*dpr));gl.viewport(0,0,w,h);proj=persp(.56,w/h,.1,20);}
+  st.insertBefore(cv,st.firstChild);size();
+  if('ResizeObserver' in window)new ResizeObserver(size).observe(st);else window.addEventListener('resize',size);
+  if(FINE)window.addEventListener('pointermove',function(e){tx=(e.clientX/innerWidth-.5)*2;ty=(e.clientY/innerHeight-.5)*2;},{passive:true});
+  if('IntersectionObserver' in window)new IntersectionObserver(function(es){vis=es[0].isIntersecting;},{threshold:0}).observe(st);
+  document.addEventListener('visibilitychange',function(){vis=!document.hidden;});
+  cv.addEventListener('webglcontextlost',function(e){e.preventDefault();alive=false;st.classList.remove('gl-on');});
+  gl.enable(gl.DEPTH_TEST);gl.clearColor(0,0,0,0);
+  var first=true,lastTs=0,acc=0,cnt=0;
+  function frame(ts){
+    if(!alive)return;requestAnimationFrame(frame);if(!vis){lastTs=0;return;}
+    /* low-end guard: no GPU / software GL → hand the star back to the SVG */
+    if(lastTs){var d=ts-lastTs;if(d<250){acc+=d;cnt++;}if(cnt===50&&!window.__glForce&&acc/cnt>46){alive=false;st.classList.remove('gl-on');if(cv.parentNode)cv.parentNode.removeChild(cv);return;}}
+    lastTs=ts;
+    var t=ts*.001;if(tStart<0&&html.classList.contains('ready'))tStart=t;
+    var ramp=tStart<0?0:Math.min(1,(t-tStart)/2.2);ramp=ramp*ramp*(3-2*ramp);
+    ptX+=(tx-ptX)*.06;ptY+=(ty-ptY)*.06;hue+=(GL_TIER-hue)*.04;
+    var ry=(Math.sin(t*.85)*.46)*ramp+ptX*.38,rx=(Math.sin(t*.66+1.1)*.15+.1)*ramp-ptY*.26,rz=Math.sin(t*.5)*.05*ramp;
+    var model=mul(mul(rotY(ry),rotX(rx)),rotZ(rz)),vp=mul(proj,trans(-EYE));
+    gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.disable(gl.BLEND);gl.depthMask(true);gl.useProgram(gem);
+    gl.uniformMatrix4fv(lg.M,false,model);gl.uniformMatrix4fv(lg.VP,false,vp);
+    gl.uniform3f(lg.L,2.6*Math.cos(t*.5)+ptX*2.4,2.2+Math.sin(t*.4),3.4);gl.uniform3f(lg.E,0,0,EYE);gl.uniform1f(lg.T,t);gl.uniform1f(lg.Hue,hue);
+    gl.bindBuffer(gl.ARRAY_BUFFER,bP);gl.enableVertexAttribArray(aP);gl.vertexAttribPointer(aP,3,gl.FLOAT,false,0,0);
+    gl.bindBuffer(gl.ARRAY_BUFFER,bN);gl.enableVertexAttribArray(aN);gl.vertexAttribPointer(aN,3,gl.FLOAT,false,0,0);
+    gl.bindBuffer(gl.ARRAY_BUFFER,bT);gl.enableVertexAttribArray(aT);gl.vertexAttribPointer(aT,1,gl.FLOAT,false,0,0);
+    gl.drawArrays(gl.TRIANGLES,0,nV);
+    gl.disable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE);gl.useProgram(flare);
+    gl.uniformMatrix4fv(lf.M,false,model);gl.uniformMatrix4fv(lf.VP,false,vp);gl.uniform1f(lf.T,t);
+    gl.bindBuffer(gl.ARRAY_BUFFER,bQ);gl.enableVertexAttribArray(aQ);gl.vertexAttribPointer(aQ,2,gl.FLOAT,false,0,0);gl.drawArrays(gl.TRIANGLES,0,6);
+    gl.enable(gl.DEPTH_TEST);
+    if(first){first=false;st.classList.add('gl-on');}
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ── pinned story: scroll position scrubs the four scenes ── */
+function story(){
+  var s=$('#story');if(!s||RM)return;s.hidden=false;html.classList.add('story-on');
+  var items=$$('#slist li'),url=$('#surl'),badge=$('#sbadge');
+  var urls=['kōrero · 30 min','mockup · fixed price','build · live preview','yourbusiness.co.nz'],badges=['free','48h','demos','live'];
+  var cur=0,tgt=0,step=-1,raf=0;
+  function target(){var r=s.getBoundingClientRect(),tot=s.offsetHeight-innerHeight;tgt=clamp(-r.top/Math.max(tot,1),0,1);}
+  function apply(p){s.style.setProperty('--p',p.toFixed(4));for(var i=0;i<4;i++)s.style.setProperty('--p'+i,clamp(p*4-i,0,1).toFixed(4));
+    var st=Math.min(3,Math.floor(p*4+.0001));
+    if(st!==step){step=st;s.setAttribute('data-step',st);items.forEach(function(li,i){li.classList.toggle('on',i===st);li.classList.toggle('done',i<st);});url.textContent=urls[st];badge.textContent=badges[st];}}
+  function loop(){cur+=(tgt-cur)*.14;if(Math.abs(tgt-cur)<.0005)cur=tgt;apply(cur);raf=requestAnimationFrame(loop);}
+  if('IntersectionObserver' in window){new IntersectionObserver(function(es){if(es[0].isIntersecting){target();if(!raf)raf=requestAnimationFrame(loop);}else{cancelAnimationFrame(raf);raf=0;}},{rootMargin:'120px'}).observe(s);}
+  else{raf=requestAnimationFrame(loop);}
+  window.addEventListener('scroll',target,{passive:true});window.addEventListener('resize',target);target();apply(0);
+}
+
 function init(){
   nz();setInterval(nz,30000);
   field($('#stars'),RM?90:150,1);
-  starParallax();cursor();magnetic();words();scrolly();faq();est();palette();
+  starParallax();heroGL();cursor();magnetic();sparks();words();scrolly();story();faq();est();palette();
   var rp=$('#replay');if(rp)rp.addEventListener('click',function(){location.href=location.pathname+'?intro=1';});
   if(html.classList.contains('intro-on')){runIntro();}else{requestAnimationFrame(function(){requestAnimationFrame(readyUp);});}
 }

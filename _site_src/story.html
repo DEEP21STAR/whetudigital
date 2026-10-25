@@ -1,0 +1,81 @@
+<section id="process" class="proc">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">How it works</span>
+      <h2 class="t">From kōrero <em>to live.</em></h2>
+      <p class="lede">Four steps. You always know what happens next, what it costs and when you'll see it. Keep scrolling — watch a project come to life.</p>
+    </div>
+  </div>
+
+  <!-- pinned, scroll-scrubbed story (JS + motion only; the plain list below is the fallback) -->
+  <div class="story" id="story" data-step="0" hidden>
+    <div class="sticky">
+      <div class="wrap sgrid">
+        <ol class="slist" id="slist">
+          <li data-s="0" class="on"><b>01</b><h3>Kōrero</h3><p>A 30-minute chat about what you need. Free, no pitch deck.</p><span class="when">Day 0</span></li>
+          <li data-s="1"><b>02</b><h3>Mockup</h3><p>A sketch, a scope and a fixed price — back to you within 48 hours.</p><span class="when">Within 48 hours</span></li>
+          <li data-s="2"><b>03</b><h3>Build</h3><p>We build it in the open, with a demo at every milestone.</p><span class="when">2–4 weeks typically</span></li>
+          <li data-s="3"><b>04</b><h3>Ship</h3><p>It goes live. The source is yours. Optional retainer if you want it looked after.</p><span class="when">Launch day</span></li>
+        </ol>
+        <div class="sstage" aria-hidden="true">
+          <div class="dev">
+            <div class="dbar"><i></i><i></i><i></i><u id="surl">kōrero · 30 min</u><em id="sbadge">free</em></div>
+            <div class="dview">
+              <!-- 0 · kōrero: the chat -->
+              <div class="scene s0">
+                <div class="bub c" style="--k:0"><span>Client</span>We lose hours chasing jobs and invoices.</div>
+                <div class="bub w" style="--k:1"><span>Whetū</span>Kia ora! Walk me through a normal Tuesday.</div>
+                <div class="bub c" style="--k:2"><span>Client</span>Quotes in email, jobs on paper, invoices in Xero.</div>
+                <div class="bub w" style="--k:3"><span>Whetū</span>Got it. One dashboard. I'll sketch it by Thursday.</div>
+              </div>
+              <!-- 1 · mockup: wireframe + fixed price -->
+              <div class="scene s1">
+                <svg viewBox="0 0 400 250" fill="none" class="wire">
+                  <g stroke="url(#gArt)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <rect class="wl" style="--len:1100;--a:0" x="12" y="12" width="376" height="226" rx="12"/>
+                    <path class="wl" style="--len:376;--a:.08" d="M12 44h376"/>
+                    <rect class="wl" style="--len:420;--a:.14" x="28" y="62" width="104" height="58" rx="8"/>
+                    <rect class="wl" style="--len:420;--a:.2" x="148" y="62" width="104" height="58" rx="8"/>
+                    <rect class="wl" style="--len:420;--a:.26" x="268" y="62" width="104" height="58" rx="8"/>
+                    <rect class="wl" style="--len:700;--a:.34" x="28" y="136" width="224" height="88" rx="8"/>
+                    <rect class="wl" style="--len:420;--a:.42" x="268" y="136" width="104" height="88" rx="8"/>
+                  </g>
+                </svg>
+                <div class="stamp">Fixed price<b>$2,400</b><small>NZD incl. GST</small></div>
+                <div class="clock"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="18" stroke="oklch(100% 0 0/.15)" stroke-width="3" fill="none"/><circle class="cp" cx="22" cy="22" r="18" stroke="url(#gArt)" stroke-width="3" fill="none" stroke-linecap="round" transform="rotate(-90 22 22)"/></svg><span>48h</span></div>
+              </div>
+              <!-- 2 · build: the layout fills with real UI -->
+              <div class="scene s2">
+                <div class="ui">
+                  <div class="uk" style="--k:0"><small>Jobs this week</small><b>24</b></div>
+                  <div class="uk" style="--k:1"><small>Invoiced</small><b>$18.4k</b></div>
+                  <div class="uk" style="--k:2"><small>Overdue</small><b class="g">0</b></div>
+                  <div class="uchart"><i style="--k:0;--hv:.46"></i><i style="--k:1;--hv:.62"></i><i style="--k:2;--hv:.38"></i><i style="--k:3;--hv:.78"></i><i style="--k:4;--hv:.58"></i><i style="--k:5;--hv:.92"></i><i style="--k:6;--hv:.70"></i></div>
+                  <div class="ulist"><span style="--k:0"></span><span style="--k:1"></span><span style="--k:2"></span><span style="--k:3"></span></div>
+                </div>
+                <div class="demos"><em style="--k:0">Demo 1 ✓</em><em style="--k:1">Demo 2 ✓</em><em style="--k:2">Demo 3 ✓</em></div>
+              </div>
+              <!-- 3 · ship: live + files are yours -->
+              <div class="scene s3">
+                <div class="live"><i></i>LIVE</div>
+                <div class="burst"><svg viewBox="0 0 200 200"><g stroke="url(#gArt)" stroke-width="1.6" stroke-linecap="round"><path d="M100 10V40M100 160V190M10 100H40M160 100H190M36 36L58 58M142 142L164 164M164 36L142 58M58 142L36 164"/></g></svg></div>
+                <div class="files"><span style="--k:0">index.html</span><span style="--k:1">styles.css</span><span style="--k:2">app.js</span></div>
+                <div class="yours">Yours. <em>All of it.</em></div>
+              </div>
+            </div>
+          </div>
+          <div class="sprog"><i></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="steps rv" id="steps">
+      <div class="step"><h3>Kōrero</h3><p>A 30-minute chat about what you need. Free, no pitch deck.</p><span class="when">Day 0</span></div>
+      <div class="step"><h3>Mockup</h3><p>A sketch, a scope and a fixed price — back to you within 48 hours.</p><span class="when">Within 48 hours</span></div>
+      <div class="step"><h3>Build</h3><p>We build it in the open, with a demo at every milestone.</p><span class="when">2–4 weeks typically</span></div>
+      <div class="step"><h3>Ship</h3><p>It goes live. The source is yours. Optional retainer if you want it looked after.</p><span class="when">Launch day</span></div>
+    </div>
+  </div>
+</section>
